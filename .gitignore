@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env*
+
+# Next.js
+.next/
+out/
+
+# Project internals (gitignored per CLAUDE.md)
+planning/
+outputs/
+CLAUDE.md
+PHASES.md
+DESIGN.md
+
+# Misc
+.DS_Store
+*.log
