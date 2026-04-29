@@ -1,0 +1,39 @@
+{
+  "status": "success",
+  "data": {
+    "visaTypes": [
+      {
+        "name": "Visa Exemption (Tourist)",
+        "maxStay": "60 days (air) / 30 days (land)",
+        "canExtend": true,
+        "extensionDetails": "30-day extension at local immigration office, fee: 1,900 THB",
+        "fee": "Free",
+        "eligibility": "US passport holders"
+      },
+      {
+        "name": "Tourist Visa (TR)",
+        "maxStay": "60 days, extendable once for 30 days",
+        "canExtend": true,
+        "extensionDetails": "30-day extension, fee: 1,900 THB",
+        "fee": "~$40 USD",
+        "eligibility": "All nationalities"
+      }
+    ],
+    "defaultStayDuration": "60 days (air entry, as of November 2024)",
+    "extensionRules": "Visa exemption extendable once for 30 days at local immigration office.",
+    "fees": "Visa exemption: free. TR visa: ~$40. Extension: 1,900 THB.",
+    "applicationProcess": "Visa exemption: no application needed, granted on arrival. TR visa: apply at consulate before travel.",
+    "notes": [
+      "Land border entries limited to 2 per calendar year on visa exemption"
+    ]
+  },
+  "confidence": "high",
+  "gaps": [],
+  "sourceTier": 1,
+  "sourceUrls": [
+    "https://www.immigration.go.th/en/?page_id=1161",
+    "https://www.mfa.go.th/en/content/thailand-visa-exemption-60days"
+  ],
+  "verified": true,
+  "durationMs": 1240
+}

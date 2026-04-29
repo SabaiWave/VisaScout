@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "data": {
+    "recentReports": [
+      {
+        "summary": "60-day stamp consistently granted at Suvarnabhumi for US passport holders since Nov 2024.",
+        "date": "2025-01",
+        "sourceUrl": "https://www.reddit.com/r/ThailandTourism/comments/abc123",
+        "sentiment": "positive"
+      }
+    ],
+    "groundTruthNotes": [
+      "Return ticket increasingly checked at budget airline check-in counters.",
+      "Remote workers advised not to disclose work status at immigration."
+    ],
+    "enforcementReality": "Relaxed for air entry. Land crossings see more scrutiny for repeat entrants.",
+    "commonIssues": [
+      "No onward ticket — secondary screening",
+      "Repeated land crossings within one year flagged"
+    ]
+  },
+  "confidence": "medium",
+  "gaps": [],
+  "sourceTier": 4,
+  "sourceUrls": [
+    "https://www.reddit.com/r/ThailandTourism/comments/abc123",
+    "https://nomadlist.com/thailand"
+  ],
+  "verified": false,
+  "durationMs": 1100
+}
