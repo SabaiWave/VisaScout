@@ -1,0 +1,37 @@
+{
+  "status": "success",
+  "data": {
+    "limitsPerYear": "2 land border crossings per calendar year on visa exemption",
+    "crossingOptions": [
+      {
+        "name": "Padang Besar (Hat Yai → Padang Besar)",
+        "country": "Malaysia",
+        "notes": "Most popular crossing. Train available from Hat Yai. Smooth for US passport holders.",
+        "recommended": true
+      },
+      {
+        "name": "Sadao / Bukit Kayu Hitam",
+        "country": "Malaysia",
+        "notes": "Road crossing. Busy but functional.",
+        "recommended": true
+      }
+    ],
+    "enforcementPosture": "Moderate — officers have discretion. Repeat crossings within same year may trigger questioning.",
+    "recommendedCrossings": ["Padang Besar"],
+    "warnings": [
+      "Exceeding 2 land crossings per year may result in denial of entry",
+      "Always carry proof of funds and onward ticket for border runs"
+    ]
+  },
+  "confidence": "medium",
+  "gaps": [
+    "Exact enforcement posture at specific crossings is community-sourced only"
+  ],
+  "sourceTier": 2,
+  "sourceUrls": [
+    "https://www.immigration.go.th/en/?page_id=1161",
+    "https://www.reddit.com/r/ThailandTourism/comments/xyz"
+  ],
+  "verified": false,
+  "durationMs": 1050
+}
