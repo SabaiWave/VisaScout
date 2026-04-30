@@ -1,5 +1,9 @@
 # VisaScout
 
+[![CI](https://github.com/SabaiWave/VisaScout/actions/workflows/ci.yml/badge.svg)](https://github.com/SabaiWave/VisaScout/actions/workflows/ci.yml)
+
+**Live:** [visa-scout.vercel.app](https://visa-scout.vercel.app)
+
 Visa intelligence for digital nomads and long-stay travelers.
 
 Input your nationality, destination, and situation. Five parallel AI agents pull official immigration sources, recent policy changes, community intel, entry requirements, and border run rules. A conflict resolver reconciles contradictions by source authority. Synthesis outputs a structured visa brief with a recommended action, deadline, and per-claim confidence scores.
