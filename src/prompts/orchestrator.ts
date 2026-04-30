@@ -1,4 +1,4 @@
-import type { VisaInput } from '../types/index.js';
+import type { VisaInput } from '../types/index';
 
 export function buildOrchestratorPrompt(input: VisaInput): string {
   return `You are a visa intelligence orchestrator. A traveler has submitted the following input:

@@ -1,4 +1,4 @@
-import type { VisaRequest } from '../types/index.js';
+import type { VisaRequest } from '../types/index';
 
 export function buildOfficialPolicyPrompt(
   request: VisaRequest,

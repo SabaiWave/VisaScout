@@ -1,4 +1,4 @@
-import type { AgentResultEnvelope } from '../types/index.js';
+import type { AgentResultEnvelope } from '../types/index';
 
 export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): string {
   const summaries = {

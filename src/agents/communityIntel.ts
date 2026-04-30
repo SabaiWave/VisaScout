@@ -1,9 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { tavilySearch } from '../tools/tavily.js';
-import { buildCommunityIntelPrompt } from '../prompts/communityIntel.js';
-import { parseJSON } from '../lib/parseJSON.js';
-import { recordUsage } from '../lib/cost.js';
-import type { AgentResult, CommunityIntelOutput, VisaRequest } from '../types/index.js';
+import { tavilySearch } from '../tools/tavily';
+import { buildCommunityIntelPrompt } from '../prompts/communityIntel';
+import { parseJSON } from '../lib/parseJSON';
+import { recordUsage } from '../lib/cost';
+import type { AgentResult, CommunityIntelOutput, VisaRequest } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
 

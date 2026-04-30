@@ -1,14 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { buildSynthesisPrompt } from '../prompts/synthesis.js';
-import { parseJSON } from '../lib/parseJSON.js';
-import { recordUsage } from '../lib/cost.js';
+import { buildSynthesisPrompt } from '../prompts/synthesis';
+import { parseJSON } from '../lib/parseJSON';
+import { recordUsage } from '../lib/cost';
 import type {
   AgentResultEnvelope,
   ConflictReport,
   VisaBrief,
   BriefMetadata,
   AgentStatus,
-} from '../types/index.js';
+} from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -46,7 +46,7 @@ export async function synthesizeBrief(
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 8192,
+    max_tokens: 16000,
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -56,6 +56,10 @@ export async function synthesizeBrief(
     outputTokens: response.usage.output_tokens,
     tavilySearches: 0,
   });
+
+  if (response.stop_reason === 'max_tokens') {
+    throw new Error(`Synthesis output exceeded max_tokens (${response.usage.output_tokens} tokens). Brief was truncated and cannot be parsed. Try a shallower depth setting.`);
+  }
 
   const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
 
