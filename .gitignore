@@ -44,6 +44,6 @@ next-env.d.ts
 # VisaScout internal docs and outputs
 /outputs/
 /planning/
-CLAUDE.md
+CLAUDE*.md
 BLUEPRINT.md
 DESIGN.md
