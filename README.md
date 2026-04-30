@@ -1,5 +1,7 @@
 # VisaScout
 
+test comment
+
 [![CI](https://github.com/SabaiWave/VisaScout/actions/workflows/ci.yml/badge.svg)](https://github.com/SabaiWave/VisaScout/actions/workflows/ci.yml)
 
 **Live:** [visa-scout.vercel.app](https://visa-scout.vercel.app)
