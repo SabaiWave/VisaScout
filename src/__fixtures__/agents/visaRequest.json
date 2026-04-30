@@ -1,0 +1,12 @@
+{
+  "nationality": "American",
+  "destination": "Thailand",
+  "visaType": "tourist visa exemption",
+  "freeform": "Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company.",
+  "normalizedNationality": "United States",
+  "normalizedDestination": "Thailand",
+  "intendedDuration": "28 days",
+  "entryExitPattern": "single entry with one border run to Malaysia",
+  "incomeSource": "remote work for US company",
+  "parsedSummary": "A US passport holder plans to arrive in Thailand on March 15 for a 28-day stay under the visa exemption program, working remotely for a US employer. They plan one border run to Malaysia."
+}

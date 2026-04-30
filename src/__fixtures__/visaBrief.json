@@ -1,0 +1,140 @@
+{
+  "parsedSituation": "A US passport holder plans to arrive in Thailand on March 15 for a 28-day stay under the visa exemption program, working remotely for a US employer. They plan one border run to Malaysia.",
+  "visaOptions": [
+    {
+      "name": "Visa Exemption (Tourist)",
+      "suitability": "best",
+      "maxStay": "60 days (air) / 30 days (land)",
+      "summary": "Best fit for your 28-day stay. No application required — granted on arrival. Extendable once for 30 days at a local immigration office.",
+      "pros": ["No cost", "No pre-application", "60 days on air entry", "Extendable by 30 days"],
+      "cons": ["Land border runs capped at 2 per calendar year", "Onward ticket increasingly checked"]
+    },
+    {
+      "name": "Tourist Visa (TR)",
+      "suitability": "acceptable",
+      "maxStay": "60 days, extendable once for 30 days",
+      "summary": "Overkill for 28 days but useful if you plan multiple trips and want a visa in your passport for cleaner entry.",
+      "pros": ["Cleaner at immigration", "Fewer questions on entry"],
+      "cons": ["~$40 fee", "Must apply at consulate before travel", "No practical advantage over exemption for short stays"]
+    }
+  ],
+  "recommendedAction": {
+    "action": "Enter on Visa Exemption — no pre-application required.",
+    "deadline": "Book onward ticket before March 15 departure",
+    "rationale": "Your 28-day stay is well within the 60-day visa exemption allowance for US passport holders. One border run to Malaysia is within the 2-per-year land crossing limit. Carry proof of onward travel due to stricter checks at Suvarnabhumi since January 2025.",
+    "urgency": "low"
+  },
+  "entryRequirements": {
+    "documents": [
+      "Valid US passport (6+ months validity beyond intended stay)",
+      "Return or onward ticket",
+      "Proof of accommodation (first night minimum)",
+      "Proof of sufficient funds (20,000 THB per person, ~$550 USD)"
+    ],
+    "proofOfFunds": "20,000 THB per person (~$550 USD)",
+    "onwardTicket": true,
+    "health": [],
+    "notes": [
+      "No health insurance required as of 2025",
+      "Onward ticket enforcement inconsistent but increasing at budget airline counters"
+    ]
+  },
+  "borderRunAnalysis": {
+    "eligible": true,
+    "limitsPerYear": "2 land border crossings per calendar year on visa exemption",
+    "recommendedCrossings": ["Padang Besar (Hat Yai → Padang Besar, train available)"],
+    "enforcementPosture": "Moderate — officers have discretion. Repeat crossings within same year may trigger questioning.",
+    "warnings": [
+      "Exceeding 2 land crossings per year may result in denial of entry",
+      "Always carry proof of funds and onward ticket for border runs"
+    ]
+  },
+  "recentChanges": {
+    "hasChanges": true,
+    "items": [
+      "Thailand extended visa exemption from 30 to 60 days for US passport holders, effective November 11, 2024.",
+      "Stricter onward ticket checks at Suvarnabhumi reported since January 2025."
+    ],
+    "watchItems": [
+      "Onward ticket enforcement at Suvarnabhumi increasing — book before flying"
+    ]
+  },
+  "conflictReport": {
+    "confirmed": [
+      {
+        "topic": "Visa exemption duration",
+        "description": "60 days for air entry confirmed by Thai MFA and immigration portal.",
+        "sources": ["https://www.mfa.go.th/en/content/thailand-visa-exemption-60days", "https://www.immigration.go.th/en/?page_id=1161"]
+      },
+      {
+        "topic": "Proof of funds threshold",
+        "description": "20,000 THB per person confirmed on official immigration portal.",
+        "sources": ["https://www.immigration.go.th/en/?page_id=1161"]
+      }
+    ],
+    "contested": [
+      {
+        "topic": "Onward ticket enforcement",
+        "description": "Officially required but inconsistently enforced. Community reports suggest increasing scrutiny at Suvarnabhumi since early 2025.",
+        "sources": ["https://www.immigration.go.th/en/?page_id=1161", "https://www.reddit.com/r/ThailandTourism/comments/abc123"],
+        "resolution": "Carry onward ticket to avoid secondary screening. Tier 1 official requirement stands."
+      }
+    ],
+    "unverified": [],
+    "overallConfidence": "high"
+  },
+  "confidenceScore": {
+    "overall": "high",
+    "perSection": {
+      "visaOptions": "high",
+      "entryRequirements": "high",
+      "borderRunAnalysis": "medium",
+      "recentChanges": "high"
+    },
+    "sourceCitations": [
+      {
+        "claim": "60-day visa exemption for US passport holders",
+        "url": "https://www.mfa.go.th/en/content/thailand-visa-exemption-60days",
+        "tier": 1,
+        "publishedDate": "2024-11-11"
+      },
+      {
+        "claim": "20,000 THB proof of funds requirement",
+        "url": "https://www.immigration.go.th/en/?page_id=1161",
+        "tier": 1
+      },
+      {
+        "claim": "Land border crossing limit: 2 per year",
+        "url": "https://www.immigration.go.th/en/?page_id=1161",
+        "tier": 1
+      }
+    ]
+  },
+  "contingency": {
+    "deniedEntrySteps": [
+      "Remain calm and ask the officer for the specific reason in writing",
+      "Contact the US Embassy in Bangkok: +66-2-205-4000",
+      "Do not re-attempt entry at the same crossing on the same day"
+    ],
+    "overstayScenario": "Overstaying in Thailand incurs a 500 THB/day fine, capped at 20,000 THB. Overstay exceeding 90 days results in a 1-year ban; over 1 year, a 3-year ban. Turn yourself in at immigration before departure to minimize consequences.",
+    "emergencyContacts": [
+      "US Embassy Bangkok: +66-2-205-4000",
+      "Thai Immigration Bureau: 1178"
+    ]
+  },
+  "disclaimer": "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.",
+  "metadata": {
+    "agentStatuses": [
+      { "agent": "OfficialPolicy",    "status": "success", "confidence": "high",   "sourceTier": 1, "durationMs": 1240 },
+      { "agent": "RecentChanges",     "status": "success", "confidence": "high",   "sourceTier": 1, "durationMs": 980  },
+      { "agent": "CommunityIntel",    "status": "success", "confidence": "medium", "sourceTier": 4, "durationMs": 1100 },
+      { "agent": "EntryRequirements", "status": "success", "confidence": "high",   "sourceTier": 1, "durationMs": 870  },
+      { "agent": "BorderRun",         "status": "success", "confidence": "medium", "sourceTier": 2, "durationMs": 1050 }
+    ],
+    "totalDurationMs": 4800,
+    "model": "claude-sonnet-4-6",
+    "generatedAt": "2026-04-30T00:00:00.000Z",
+    "degraded": false,
+    "depth": "standard"
+  }
+}

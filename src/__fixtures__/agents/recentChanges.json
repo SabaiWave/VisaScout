@@ -1,0 +1,26 @@
+{
+  "status": "success",
+  "data": {
+    "changes": [
+      {
+        "description": "Thailand extended visa exemption from 30 to 60 days for US passport holders effective November 11, 2024.",
+        "effectiveDate": "2024-11-11",
+        "sourceUrl": "https://www.mfa.go.th/en/content/thailand-visa-exemption-60days",
+        "sourceTier": 1
+      }
+    ],
+    "enforcementShifts": [
+      "Stricter onward ticket checks at Suvarnabhumi reported since January 2025."
+    ],
+    "newRequirements": [],
+    "lastChecked": "2026-04-29"
+  },
+  "confidence": "high",
+  "gaps": [],
+  "sourceTier": 1,
+  "sourceUrls": [
+    "https://www.mfa.go.th/en/content/thailand-visa-exemption-60days"
+  ],
+  "verified": true,
+  "durationMs": 980
+}

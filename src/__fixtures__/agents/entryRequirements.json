@@ -1,0 +1,26 @@
+{
+  "status": "success",
+  "data": {
+    "requiredDocuments": [
+      "Valid US passport (6+ months validity)",
+      "Return or onward ticket",
+      "Proof of accommodation (first night minimum)",
+      "Proof of sufficient funds (20,000 THB per person)"
+    ],
+    "proofOfFundsThreshold": "20,000 THB per person (~$550 USD)",
+    "onwardTicketRequired": true,
+    "onwardTicketNotes": "Officially required. Inconsistently enforced but increasing at Suvarnabhumi for budget airline passengers.",
+    "healthRequirements": [],
+    "additionalNotes": [
+      "No health insurance required as of 2025"
+    ]
+  },
+  "confidence": "high",
+  "gaps": [],
+  "sourceTier": 1,
+  "sourceUrls": [
+    "https://www.immigration.go.th/en/?page_id=1161"
+  ],
+  "verified": true,
+  "durationMs": 870
+}
