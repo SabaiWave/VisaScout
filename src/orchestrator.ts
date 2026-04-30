@@ -1,12 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { buildOrchestratorPrompt } from './prompts/orchestrator.js';
-import { parseJSON } from './lib/parseJSON.js';
-import { recordUsage } from './lib/cost.js';
-import { officialPolicyAgent } from './agents/officialPolicy.js';
-import { recentChangesAgent } from './agents/recentChanges.js';
-import { communityIntelAgent } from './agents/communityIntel.js';
-import { entryRequirementsAgent } from './agents/entryRequirements.js';
-import { borderRunAgent } from './agents/borderRun.js';
+import { buildOrchestratorPrompt } from './prompts/orchestrator';
+import { parseJSON } from './lib/parseJSON';
+import { recordUsage } from './lib/cost';
+import { log } from './lib/logger';
+import { officialPolicyAgent } from './agents/officialPolicy';
+import { recentChangesAgent } from './agents/recentChanges';
+import { communityIntelAgent } from './agents/communityIntel';
+import { entryRequirementsAgent } from './agents/entryRequirements';
+import { borderRunAgent } from './agents/borderRun';
 import type {
   VisaInput,
   VisaRequest,
@@ -17,7 +18,12 @@ import type {
   CommunityIntelOutput,
   EntryRequirementsOutput,
   BorderRunOutput,
-} from './types/index.js';
+} from './types/index';
+
+export type AgentStatusEvent =
+  | { agent: string; status: 'running' }
+  | { agent: string; status: 'complete'; confidence: string; sourceTier: number; durationMs: number }
+  | { agent: string; status: 'failed'; error?: string };
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -33,7 +39,8 @@ export async function runOrchestrator(
   input: VisaInput,
   client: Anthropic,
   depth: 'quick' | 'standard' | 'deep' = 'standard',
-  onParsed?: (request: VisaRequest) => void
+  onParsed?: (request: VisaRequest) => void,
+  onAgentStatus?: (event: AgentStatusEvent) => void
 ): Promise<AgentResultEnvelope> {
   const sanitizedInput: VisaInput = {
     ...input,
@@ -60,6 +67,23 @@ export async function runOrchestrator(
 
   onParsed?.(visaRequest);
 
+  async function runWithStatus<T>(
+    name: string,
+    fn: () => Promise<AgentResult<T>>
+  ): Promise<AgentResult<T>> {
+    onAgentStatus?.({ agent: name, status: 'running' });
+    log.info('agent start', { agent: name });
+    const result = await fn();
+    if (result.status === 'success') {
+      onAgentStatus?.({ agent: name, status: 'complete', confidence: result.confidence, sourceTier: result.sourceTier, durationMs: result.durationMs });
+      log.info('agent complete', { agent: name, durationMs: result.durationMs, confidence: result.confidence, sourceTier: result.sourceTier });
+    } else {
+      onAgentStatus?.({ agent: name, status: 'failed', error: result.error });
+      log.error('agent failed', { agent: name, error: result.error });
+    }
+    return result;
+  }
+
   const [
     officialPolicyResult,
     recentChangesResult,
@@ -67,11 +91,11 @@ export async function runOrchestrator(
     entryRequirementsResult,
     borderRunResult,
   ] = await Promise.allSettled([
-    officialPolicyAgent(visaRequest, client, depth),
-    recentChangesAgent(visaRequest, client, depth),
-    communityIntelAgent(visaRequest, client, depth),
-    entryRequirementsAgent(visaRequest, client, depth),
-    borderRunAgent(visaRequest, client, depth),
+    runWithStatus('officialPolicy', () => officialPolicyAgent(visaRequest, client, depth)),
+    runWithStatus('recentChanges', () => recentChangesAgent(visaRequest, client, depth)),
+    runWithStatus('communityIntel', () => communityIntelAgent(visaRequest, client, depth)),
+    runWithStatus('entryRequirements', () => entryRequirementsAgent(visaRequest, client, depth)),
+    runWithStatus('borderRun', () => borderRunAgent(visaRequest, client, depth)),
   ]);
 
   function unwrap<T>(

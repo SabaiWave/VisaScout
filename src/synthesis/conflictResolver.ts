@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { buildConflictResolverPrompt } from '../prompts/conflictResolver.js';
-import { parseJSON } from '../lib/parseJSON.js';
-import { recordUsage } from '../lib/cost.js';
-import type { AgentResultEnvelope, ConflictReport } from '../types/index.js';
+import { buildConflictResolverPrompt } from '../prompts/conflictResolver';
+import { parseJSON } from '../lib/parseJSON';
+import { recordUsage } from '../lib/cost';
+import type { AgentResultEnvelope, ConflictReport } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
 

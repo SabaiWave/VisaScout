@@ -1,4 +1,4 @@
-import type { AgentResultEnvelope, ConflictReport } from '../types/index.js';
+import type { AgentResultEnvelope, ConflictReport } from '../types/index';
 
 export function buildSynthesisPrompt(
   envelope: AgentResultEnvelope,
@@ -18,33 +18,35 @@ Entry/exit pattern: ${envelope.visaRequest.entryExitPattern || 'unknown'}
 Income source: ${envelope.visaRequest.incomeSource || 'unknown'}
 
 CONFLICT REPORT:
-${JSON.stringify(conflictReport, null, 2)}
+${JSON.stringify(conflictReport)}
 
 OFFICIAL POLICY (${envelope.officialPolicy.status}):
-${envelope.officialPolicy.status === 'success' ? JSON.stringify(envelope.officialPolicy.data, null, 2) : 'FAILED'}
+${envelope.officialPolicy.status === 'success' ? JSON.stringify(envelope.officialPolicy.data) : 'FAILED'}
 
 RECENT CHANGES (${envelope.recentChanges.status}):
-${envelope.recentChanges.status === 'success' ? JSON.stringify(envelope.recentChanges.data, null, 2) : 'FAILED'}
+${envelope.recentChanges.status === 'success' ? JSON.stringify(envelope.recentChanges.data) : 'FAILED'}
 
 COMMUNITY INTEL (${envelope.communityIntel.status}):
-${envelope.communityIntel.status === 'success' ? JSON.stringify(envelope.communityIntel.data, null, 2) : 'FAILED'}
+${envelope.communityIntel.status === 'success' ? JSON.stringify(envelope.communityIntel.data) : 'FAILED'}
 
 ENTRY REQUIREMENTS (${envelope.entryRequirements.status}):
-${envelope.entryRequirements.status === 'success' ? JSON.stringify(envelope.entryRequirements.data, null, 2) : 'FAILED'}
+${envelope.entryRequirements.status === 'success' ? JSON.stringify(envelope.entryRequirements.data) : 'FAILED'}
 
 BORDER RUN (${envelope.borderRun.status}):
-${envelope.borderRun.status === 'success' ? JSON.stringify(envelope.borderRun.data, null, 2) : 'FAILED'}
+${envelope.borderRun.status === 'success' ? JSON.stringify(envelope.borderRun.data) : 'FAILED'}
 
 ${degradedContext ? `DATA GAPS (from failed agents):\n${degradedContext}` : ''}
 
 SYNTHESIS RULES:
+- Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
 - Recommended action must be specific, actionable, and include a deadline if applicable
-- Visa options ranked by fit for THIS traveler's specific situation
+- Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
 - Confidence scores must be honest — do not uniformly set to "high"
-- Every claim in source citations must link to its actual source URL
-- If an agent failed, include the specific gap message in the brief
+- Source citations: maximum 8, only the most authoritative per claim. Prefer Tier 1-2.
+- If an agent failed, include the specific gap message in the relevant section notes
 - Contingency must address both denied entry AND overstay scenarios
 - Disclaimer MUST be included exactly as: "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice."
+- Do NOT include a conflictReport field — it is provided separately
 
 Return ONLY valid JSON (no markdown fences):
 {
@@ -62,7 +64,7 @@ Return ONLY valid JSON (no markdown fences):
   "recommendedAction": {
     "action": "<specific action the traveler should take>",
     "deadline": "<deadline if applicable, null otherwise>",
-    "rationale": "<why this is recommended>",
+    "rationale": "<1-2 sentences why>",
     "urgency": "<high|medium|low>"
   },
   "entryRequirements": {
@@ -76,7 +78,7 @@ Return ONLY valid JSON (no markdown fences):
     "eligible": <true|false>,
     "limitsPerYear": "<limit or null>",
     "recommendedCrossings": ["<crossing>"],
-    "enforcementPosture": "<assessment>",
+    "enforcementPosture": "<1-2 sentence assessment>",
     "warnings": ["<warning>"]
   },
   "recentChanges": {
@@ -84,7 +86,6 @@ Return ONLY valid JSON (no markdown fences):
     "items": ["<change description>"],
     "watchItems": ["<item to monitor>"]
   },
-  "conflictReport": <the conflict report object passed in>,
   "confidenceScore": {
     "overall": "<high|medium|low>",
     "perSection": {

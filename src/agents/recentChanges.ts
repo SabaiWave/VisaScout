@@ -1,10 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { tavilySearch } from '../tools/tavily.js';
-import { buildRecentChangesPrompt } from '../prompts/recentChanges.js';
-import { parseJSON } from '../lib/parseJSON.js';
-import { highestTier } from '../lib/sourceTier.js';
-import { recordUsage } from '../lib/cost.js';
-import type { AgentResult, RecentChangesOutput, VisaRequest } from '../types/index.js';
+import { tavilySearch } from '../tools/tavily';
+import { buildRecentChangesPrompt } from '../prompts/recentChanges';
+import { parseJSON } from '../lib/parseJSON';
+import { highestTier } from '../lib/sourceTier';
+import { recordUsage } from '../lib/cost';
+import type { AgentResult, RecentChangesOutput, VisaRequest } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
 
