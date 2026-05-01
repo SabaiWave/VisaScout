@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Bash(DRY_RUN=true npm test)"
     ]
   }
 }
