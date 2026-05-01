@@ -43,5 +43,8 @@ Return ONLY valid JSON (no markdown fences):
 }
 
 Set verified=false if no Tier 1 government sources were found.
-Set confidence=low if relying on Tier 3-4 sources only.`;
+Confidence calibration (be decisive — do not default to low):
+- high: core visa rules (stay duration, eligibility, fees) confirmed by Tier 1 sources with specific values
+- medium: Tier 1 source found but key details (exact fees, specific stay length) unconfirmed; OR primary source is Tier 2
+- low: NO Tier 1-2 source found, relying entirely on aggregators or community (Tier 3-4 only)`;
 }
