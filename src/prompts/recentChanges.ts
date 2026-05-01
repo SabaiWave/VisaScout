@@ -39,5 +39,10 @@ Return ONLY valid JSON (no markdown fences):
   "verified": <true|false>
 }
 
-Set verified=false if no Tier 1-2 sources confirmed the changes.`;
+Set verified=false if no Tier 1-2 sources confirmed the changes.
+Confidence calibration (be decisive — do not default to low):
+- high: policy changes confirmed by Tier 1 official sources (government announcements, official press releases with dates)
+- medium: Tier 2 sources OR reputable aggregators clearly attributing an official announcement; confirmed via multiple Tier 3 sources
+- low: Tier 4 only (community reports, forums) with no aggregator or official confirmation; OR no recent changes found from any source`;
+
 }
