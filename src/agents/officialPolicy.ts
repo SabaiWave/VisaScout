@@ -16,15 +16,27 @@ export async function officialPolicyAgent(
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
 
+  // Country-specific Tier 1 official immigration domains
+  const officialDomains: Record<string, string[]> = {
+    Thailand:    ['immigration.go.th', 'mfa.go.th', 'thaigov.go.th', 'consular.go.th'],
+    Vietnam:     ['immigration.gov.vn', 'evisa.gov.vn', 'xuatnhapcanh.gov.vn', 'mofa.gov.vn'],
+    Indonesia:   ['imigrasi.go.id', 'kemlu.go.id', 'evisa.imigrasi.go.id'],
+    Malaysia:    ['imi.gov.my', 'kln.gov.my', 'motac.gov.my'],
+    Philippines: ['immigration.gov.ph', 'dfa.gov.ph', 'evisa.gov.ph'],
+    Cambodia:    ['evisa.gov.kh', 'mfaic.gov.kh', 'immigration.gov.kh'],
+    Singapore:   ['ica.gov.sg', 'mfa.gov.sg', 'mom.gov.sg'],
+    Laos:        ['laoevisa.gov.la', 'mofa.gov.la', 'immigration.gov.la'],
+    Myanmar:     ['evisa.moip.gov.mm', 'mofa.gov.mm', 'mip.gov.mm'],
+    Brunei:      ['immigration.gov.bn', 'mfa.gov.bn'],
+  };
+  const destDomains = officialDomains[request.normalizedDestination] ?? ['.gov'];
+
   try {
     const results = await tavilySearch(
       `${request.normalizedDestination} visa ${request.normalizedNationality} official immigration rules requirements 2024 2025`,
       {
         maxResults,
-        domainBias: [
-          '.gov', '.go.th', '.go.vn', '.gov.sg', '.gov.ph', '.gov.my',
-          'immigration.go.th', 'evisa.gov.vn', 'immigration.gov',
-        ],
+        domainBias: destDomains,
       }
     );
 

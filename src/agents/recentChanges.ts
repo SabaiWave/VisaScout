@@ -16,14 +16,37 @@ export async function recentChangesAgent(
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
 
+  // Destination-specific Tier 1 official domains for recent-changes searches
+  const officialDomains: Record<string, string[]> = {
+    Thailand:    ['immigration.go.th', 'mfa.go.th', 'thailand.prd.go.th', 'thaigov.go.th'],
+    Vietnam:     ['immigration.gov.vn', 'evisa.gov.vn', 'mofa.gov.vn'],
+    Indonesia:   ['imigrasi.go.id', 'kemlu.go.id'],
+    Malaysia:    ['imi.gov.my', 'kln.gov.my'],
+    Philippines: ['immigration.gov.ph', 'dfa.gov.ph'],
+    Cambodia:    ['evisa.gov.kh', 'mfaic.gov.kh'],
+    Singapore:   ['ica.gov.sg', 'mfa.gov.sg'],
+    Laos:        ['laoevisa.gov.la', 'mofa.gov.la'],
+    Myanmar:     ['evisa.moip.gov.mm', 'mofa.gov.mm'],
+    Brunei:      ['immigration.gov.bn', 'mfa.gov.bn'],
+  };
+  const destDomains = officialDomains[request.normalizedDestination] ?? [];
+
   try {
-    const results = await tavilySearch(
-      `${request.normalizedDestination} visa policy changes ${request.normalizedNationality} 2025 new rules enforcement`,
-      {
-        maxResults,
-        days: 90,
-      }
-    );
+    // Two parallel searches: recent news (Tier 3+) and official government sources (Tier 1)
+    const [newsResults, officialResults] = await Promise.all([
+      tavilySearch(
+        `${request.normalizedDestination} visa policy changes ${request.normalizedNationality} 2025 new rules enforcement announcement`,
+        { maxResults: maxResults - 1, days: 90 }
+      ),
+      destDomains.length
+        ? tavilySearch(
+            `${request.normalizedDestination} visa immigration policy update announcement 2024 2025`,
+            { maxResults: 3, domainBias: destDomains }
+          )
+        : Promise.resolve([]),
+    ]);
+
+    const results = [...officialResults, ...newsResults];
 
     const sourceUrls = results.map((r) => r.url);
     const sourceTier = highestTier(sourceUrls);
@@ -44,7 +67,7 @@ export async function recentChangesAgent(
       agent: 'recentChanges',
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
-      tavilySearches: 1,
+      tavilySearches: destDomains.length ? 2 : 1,
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';
