@@ -4,7 +4,8 @@ import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
-import type { VisaInput } from '@/src/types/index';
+import { saveBrief } from '@/src/lib/saveBrief';
+import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
 
@@ -85,11 +86,12 @@ export async function POST(req: Request) {
 
         log.info('pipeline start', { destination, depth: resolvedDepth });
 
+        let capturedVisaRequest: VisaRequest | null = null;
         const envelope = await runOrchestrator(
           input,
           client,
           resolvedDepth,
-          (visaRequest) => { send({ type: 'parsed', data: visaRequest }); },
+          (visaRequest) => { capturedVisaRequest = visaRequest; send({ type: 'parsed', data: visaRequest }); },
           (event) => { send({ type: 'status', ...event }); }
         );
 
@@ -97,9 +99,19 @@ export async function POST(req: Request) {
         send({ type: 'conflict', data: conflictReport });
 
         const brief = await synthesizeBrief(envelope, conflictReport, client, resolvedDepth, startTime);
-        send({ type: 'complete', brief });
 
-        log.info('pipeline complete', { destination, depth: resolvedDepth, durationMs: Date.now() - startTime, degraded: brief.metadata.degraded });
+        let briefId: string | undefined;
+        if (capturedVisaRequest) {
+          try {
+            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth });
+          } catch (saveErr) {
+            log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+          }
+        }
+
+        send({ type: 'complete', brief, briefId });
+
+        log.info('pipeline complete', { destination, depth: resolvedDepth, durationMs: Date.now() - startTime, degraded: brief.metadata.degraded, briefId });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Pipeline failed';
         log.error('pipeline error', { error: message, destination, depth: resolvedDepth });
