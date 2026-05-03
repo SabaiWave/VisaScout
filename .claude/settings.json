@@ -4,7 +4,11 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(xargs sed *)",
-      "Bash(DRY_RUN=true npm test)"
+      "Bash(DRY_RUN=true npm test)",
+      "Bash(npx supabase *)"
+    ],
+    "additionalDirectories": [
+      "/Users/alexphilayvanh/code/sbw/visascout/app/brief"
     ]
   }
 }
