@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { supabase } from '@/src/lib/supabase';
+import { getSupabase } from '@/src/lib/supabase';
 import BriefRenderer from '@/app/components/BriefRenderer';
 import BriefActions from '@/app/components/BriefActions';
 import type { VisaBrief } from '@/src/types/index';
@@ -17,7 +17,7 @@ interface BriefRow {
 export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('briefs')
     .select('id, created_at, nationality, destination, depth, brief_markdown')
     .eq('id', id)

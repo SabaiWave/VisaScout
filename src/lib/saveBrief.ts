@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getSupabase } from './supabase';
 import type { VisaBrief, VisaRequest } from '../types/index';
 
 export interface SaveBriefInput {
@@ -9,7 +9,7 @@ export interface SaveBriefInput {
 }
 
 export async function saveBrief({ visaRequest, brief, depth, userId }: SaveBriefInput): Promise<string> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('briefs')
     .insert({
       nationality: visaRequest.normalizedNationality,
