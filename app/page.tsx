@@ -108,6 +108,8 @@ export default function Home() {
   const [parsedSituation, setParsedSituation] = useState<VisaRequest | null>(null);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
   const [brief, setBrief] = useState<VisaBrief | null>(null);
+  const [briefId, setBriefId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isGenerating = phase === 'generating';
@@ -118,6 +120,8 @@ export default function Home() {
     setAgentStatuses([]);
     setParsedSituation(null);
     setBrief(null);
+    setBriefId(null);
+    setCopied(false);
     setError(null);
 
     try {
@@ -163,6 +167,7 @@ export default function Home() {
             }
             case 'complete':
               setBrief(data.brief as VisaBrief);
+              if (data.briefId) setBriefId(data.briefId as string);
               setPhase('complete');
               break;
             case 'error':
@@ -179,9 +184,23 @@ export default function Home() {
   function handleReset() {
     setPhase('idle');
     setBrief(null);
+    setBriefId(null);
+    setCopied(false);
     setParsedSituation(null);
     setAgentStatuses([]);
     setError(null);
+  }
+
+  async function handleCopyLink() {
+    if (!briefId) return;
+    const url = `${window.location.origin}/brief/${briefId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore clipboard error
+    }
   }
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
@@ -364,7 +383,24 @@ export default function Home() {
             {brief && (
               <div>
                 <BriefRenderer brief={brief} />
-                <div className="flex gap-3 mt-8 max-w-[760px] mx-auto">
+
+                {/* Shareable link (only shown when persisted) */}
+                {briefId && (
+                  <div className="mt-6 bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-0.5">Shareable link</p>
+                      <p className="text-sm text-gray-600 font-mono truncate">{`/brief/${briefId}`}</p>
+                    </div>
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-white transition-colors"
+                    >
+                      {copied ? '✓ Copied' : 'Copy link'}
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex gap-3 mt-4 max-w-[760px] mx-auto">
                   <button
                     onClick={() => window.print()}
                     className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors"
