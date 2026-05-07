@@ -101,14 +101,10 @@ export async function POST(req: Request) {
         const brief = await synthesizeBrief(envelope, conflictReport, client, resolvedDepth, startTime);
 
         let briefId: string | undefined;
-        console.log('[debug] capturedVisaRequest set:', !!capturedVisaRequest);
         if (capturedVisaRequest) {
           try {
-            console.log('[debug] calling saveBrief');
             briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth });
-            console.log('[debug] saveBrief returned briefId:', briefId);
           } catch (saveErr) {
-            console.error('[debug] saveBrief threw:', saveErr instanceof Error ? saveErr.message : String(saveErr));
             log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
         }
