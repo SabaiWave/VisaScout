@@ -7,13 +7,21 @@ export const runtime = 'nodejs';
 // Returns 503 + ok:false when required keys are missing — triggers BetterStack alert.
 export async function GET() {
   const keys = {
-    anthropic: !!process.env.ANTHROPIC_API_KEY,
-    tavily:    !!process.env.TAVILY_API_KEY,
-    sentry:    !!process.env.SENTRY_DSN,
+    // Core
+    anthropic:   !!process.env.ANTHROPIC_API_KEY,
+    tavily:      !!process.env.TAVILY_API_KEY,
+    // Observability
+    sentry:      !!process.env.SENTRY_DSN,
     betterstack: !!process.env.BETTERSTACK_SOURCE_TOKEN,
+    // Auth (Phase 5)
+    clerk:       !!process.env.CLERK_SECRET_KEY && !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    // Database (Phase 4)
+    supabase:    !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    // Payments (Phase 6)
+    stripe:      !!process.env.STRIPE_SECRET_KEY && !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   };
 
-  const ok = keys.anthropic && keys.tavily;
+  const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;
 
   const body = {
     ok,
