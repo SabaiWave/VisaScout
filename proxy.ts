@@ -5,6 +5,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/brief/(.*)',
+  '/api/webhooks/(.*)',   // Stripe webhooks — no auth headers
+  '/api/brief/poll',     // Brief status polling — UUID is the access token
 ]);
 
 const isApiRoute = createRouteMatcher(['/api/(.*)']);

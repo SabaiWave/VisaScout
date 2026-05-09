@@ -14,27 +14,56 @@ function logStartup() {
   const isDev = env === 'development';
 
   const checks = {
+    // Core — required
     ANTHROPIC_API_KEY: !!process.env.ANTHROPIC_API_KEY,
     TAVILY_API_KEY: !!process.env.TAVILY_API_KEY,
+    // Observability
     SENTRY_DSN: !!process.env.SENTRY_DSN,
     BETTERSTACK_SOURCE_TOKEN: !!process.env.BETTERSTACK_SOURCE_TOKEN,
+    // Auth (Phase 5+)
+    CLERK_SECRET_KEY: !!process.env.CLERK_SECRET_KEY,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    // Database (Phase 4+)
+    SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    // Payments (Phase 6+)
+    STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: !!process.env.STRIPE_WEBHOOK_SECRET,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   };
 
   const missing = Object.entries(checks)
     .filter(([, v]) => !v)
     .map(([k]) => k);
 
+  const required = ['ANTHROPIC_API_KEY', 'TAVILY_API_KEY'];
+
   // Use plain console.log for startup — structured logging isn't set up yet at this point
   if (isDev) {
-    console.log('\n─────────────────────────────────────────');
+    const fmt = (key: keyof typeof checks, label: string, isRequired = false) =>
+      `  ${label.padEnd(38)}${checks[key] ? '✓ set' : isRequired ? '✗ MISSING — app will not work' : '– not configured'}`;
+
+    console.log('\n─────────────────────────────────────────────────────');
     console.log(`  VisaScout  [${env.toUpperCase()}]`);
-    console.log('─────────────────────────────────────────');
-    console.log(`  ANTHROPIC_API_KEY      ${checks.ANTHROPIC_API_KEY ? '✓ set' : '✗ MISSING — app will not work'}`);
-    console.log(`  TAVILY_API_KEY         ${checks.TAVILY_API_KEY ? '✓ set' : '✗ MISSING — app will not work'}`);
-    console.log(`  SENTRY_DSN             ${checks.SENTRY_DSN ? '✓ set' : '– not configured'}`);
-    console.log(`  BETTERSTACK_TOKEN      ${checks.BETTERSTACK_SOURCE_TOKEN ? '✓ set' : '– not configured'}`);
-    console.log(`  DRY_RUN                ${process.env.DRY_RUN === 'true' ? 'true — fixture data, zero API cost' : 'false — real API calls'}`);
-    console.log('─────────────────────────────────────────\n');
+    console.log('─────────────────────────────────────────────────────');
+    console.log(fmt('ANTHROPIC_API_KEY',                'ANTHROPIC_API_KEY',                true));
+    console.log(fmt('TAVILY_API_KEY',                   'TAVILY_API_KEY',                   true));
+    console.log('  ·');
+    console.log(fmt('SENTRY_DSN',                       'SENTRY_DSN'));
+    console.log(fmt('BETTERSTACK_SOURCE_TOKEN',         'BETTERSTACK_SOURCE_TOKEN'));
+    console.log('  ·');
+    console.log(fmt('CLERK_SECRET_KEY',                 'CLERK_SECRET_KEY'));
+    console.log(fmt('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY','NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY'));
+    console.log('  ·');
+    console.log(fmt('SUPABASE_ANON_KEY',                'SUPABASE_ANON_KEY'));
+    console.log(fmt('SUPABASE_SERVICE_ROLE_KEY',        'SUPABASE_SERVICE_ROLE_KEY'));
+    console.log('  ·');
+    console.log(fmt('STRIPE_SECRET_KEY',                'STRIPE_SECRET_KEY'));
+    console.log(fmt('STRIPE_WEBHOOK_SECRET',            'STRIPE_WEBHOOK_SECRET'));
+    console.log(fmt('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY','NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'));
+    console.log('  ·');
+    console.log(`  ${'DRY_RUN'.padEnd(38)}${process.env.DRY_RUN === 'true' ? 'true — fixture data, zero API cost' : 'false — real API calls'}`);
+    console.log('─────────────────────────────────────────────────────\n');
   } else {
     // Production: structured JSON so it shows up cleanly in Vercel logs
     console.log(JSON.stringify({
@@ -46,7 +75,7 @@ function logStartup() {
     }));
   }
 
-  if (missing.includes('ANTHROPIC_API_KEY') || missing.includes('TAVILY_API_KEY')) {
+  if (missing.some(k => required.includes(k))) {
     console.error('ERROR: Required API keys are not set. See .env.example for setup instructions.');
   }
 }
