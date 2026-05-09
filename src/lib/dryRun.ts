@@ -20,7 +20,7 @@ const AGENT_SEQUENCE: Array<{
   { agent: 'borderRun',         delayAfterRunning: 950,  confidence: 'medium', sourceTier: 2, durationMs: 1050 },
 ];
 
-export async function runDryPipeline(send: (data: unknown) => void): Promise<void> {
+export async function runDryPipeline(send: (data: unknown) => void): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
   // Step 1: emit parsed situation
   await delay(400);
   send({ type: 'parsed', data: visaRequestFixture as VisaRequest });
@@ -50,7 +50,7 @@ export async function runDryPipeline(send: (data: unknown) => void): Promise<voi
   const brief = visaBriefFixture as unknown as VisaBrief;
   send({ type: 'conflict', data: brief.conflictReport as ConflictReport });
 
-  // Step 5: synthesis complete
+  // Step 5: return fixtures — caller sends complete event with briefId after saving
   await delay(800);
-  send({ type: 'complete', brief });
+  return { brief, visaRequest: visaRequestFixture as VisaRequest };
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth, SignInButton } from '@clerk/nextjs';
 import BriefRenderer from './components/BriefRenderer';
-import type { VisaBrief, ConflictReport, VisaRequest } from '@/src/types/index';
+import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
 
 // ─── Static data ───────────────────────────────────────────────────────────
@@ -96,9 +97,45 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   );
 }
 
+// ─── Sign-in prompt ────────────────────────────────────────────────────────
+
+function SignInPrompt() {
+  return (
+    <div className="max-w-[560px] mx-auto text-center py-20">
+      <div className="mb-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#e8eef5] mb-4">
+          <svg className="w-8 h-8 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
+          Sign in to generate briefs
+        </h1>
+        <p className="text-gray-500 text-sm leading-relaxed max-w-sm mx-auto">
+          VisaScout uses official immigration sources and AI agents to build you a personalised visa intelligence brief.
+        </p>
+      </div>
+      <SignInButton mode="modal">
+        <button className="px-6 py-3 rounded-lg font-semibold text-white text-sm transition-colors"
+                style={{ background: 'var(--color-navy)' }}>
+          Sign in to get started
+        </button>
+      </SignInButton>
+      <p className="mt-4 text-xs text-gray-400">
+        No account?{' '}
+        <a href="/sign-up" className="text-[#1e3a5f] font-medium hover:underline">
+          Create one free
+        </a>
+      </p>
+    </div>
+  );
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const { isSignedIn, isLoaded } = useAuth();
+
   const [phase, setPhase] = useState<Phase>('idle');
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
@@ -205,218 +242,222 @@ export default function Home() {
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Nav */}
-      <nav className="border-b border-gray-200 px-6 py-4">
-        <div className="max-w-[1120px] mx-auto flex items-center justify-between">
-          <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
-            VisaScout
-          </span>
-          <span className="text-xs text-gray-400">{clientConfig.tagline}</span>
-        </div>
-      </nav>
-
       <main className="max-w-[1120px] mx-auto px-6 py-12">
-        {/* ── Section 1: Input Form ── */}
-        {(phase === 'idle' || phase === 'error') && (
-          <div className="max-w-[560px] mx-auto">
-            <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
-              Generate your visa brief
-            </h1>
-            <p className="text-gray-500 mb-8 text-sm">
-              Official sources. Contradictions flagged. Confidence scored.
-            </p>
-
-            {error && (
-              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Nationality */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="nationality">
-                  Your Nationality
-                </label>
-                <select
-                  id="nationality"
-                  value={nationality}
-                  onChange={e => setNationality(e.target.value)}
-                  required
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
-                >
-                  <option value="">Select nationality…</option>
-                  {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-              </div>
-
-              {/* Destination */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="destination">
-                  Destination
-                </label>
-                <select
-                  id="destination"
-                  value={destination}
-                  onChange={e => { setDestination(e.target.value); setVisaType(''); }}
-                  required
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
-                >
-                  <option value="">Select destination…</option>
-                  {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-
-              {/* Visa Type — optional */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="visaType">
-                  Current Visa Type
-                  <span className="ml-1.5 text-xs font-normal text-gray-400">optional</span>
-                </label>
-                <select
-                  id="visaType"
-                  value={visaType}
-                  onChange={e => setVisaType(e.target.value)}
-                  disabled={!destination}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 disabled:opacity-50"
-                >
-                  <option value="">{destination ? 'Select visa type…' : 'Select destination first'}</option>
-                  {visaTypeOptions.map(v => <option key={v} value={v}>{v}</option>)}
-                </select>
-              </div>
-
-              {/* Freeform */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="freeform">
-                  Describe your situation
-                </label>
-                <textarea
-                  id="freeform"
-                  value={freeform}
-                  onChange={e => setFreeform(e.target.value)}
-                  required
-                  rows={4}
-                  maxLength={2000}
-                  placeholder="e.g. Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company."
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 resize-vertical leading-relaxed"
-                />
-                <p className="text-xs text-gray-400 mt-1 text-right">{freeform.length}/2000</p>
-              </div>
-
-              {/* Depth selector */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Research Depth</label>
-                <div className="flex bg-gray-100 rounded-full p-1 gap-1">
-                  {(['quick', 'standard', 'deep'] as const).map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDepth(d)}
-                      className={`flex-1 py-1.5 text-sm rounded-full font-medium transition-all ${
-                        depth === d
-                          ? 'bg-[#1e3a5f] text-white font-semibold shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {d.charAt(0).toUpperCase() + d.slice(1)}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-1.5">
-                  {depth === 'quick' && 'Fast results · 3 sources per agent'}
-                  {depth === 'standard' && 'Balanced · 5 sources per agent'}
-                  {depth === 'deep' && 'Thorough · 8 sources per agent · slower'}
+        {!isSignedIn ? (
+          <SignInPrompt />
+        ) : (
+          <>
+            {/* ── Section 1: Input Form ── */}
+            {(phase === 'idle' || phase === 'error') && (
+              <div className="max-w-[560px] mx-auto">
+                <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
+                  Generate your visa brief
+                </h1>
+                <p className="text-gray-500 mb-8 text-sm">
+                  Official sources. Contradictions flagged. Confidence scored.
                 </p>
-              </div>
 
-              {/* Submit */}
-              <button
-                type="submit"
-                className="w-full py-3 rounded-lg font-semibold text-white text-base transition-colors"
-                style={{ background: 'var(--color-navy)' }}
-              >
-                Generate Brief
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* ── Section 2: Parsed Confirmation ── */}
-        {parsedSituation && (phase === 'generating' || phase === 'complete') && (
-          <div className="max-w-[760px] mx-auto mb-6">
-            <div className="bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-1">We understood</p>
-              <p className="text-sm text-gray-700 leading-relaxed">{parsedSituation.parsedSummary}</p>
-            </div>
-          </div>
-        )}
-
-        {/* ── Section 3: Agent Progress + Output ── */}
-        {(phase === 'generating' || phase === 'complete') && (
-          <div className="max-w-[760px] mx-auto">
-            {/* Agent progress */}
-            {agentStatuses.length > 0 && (
-              <div className="mb-8">
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Agent Status</p>
-                  {agentStatuses.map(entry => (
-                    <AgentRow key={entry.agent} entry={entry} />
-                  ))}
-                  {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
-                    <p className="text-xs text-gray-400 mt-2 text-center">Resolving conflicts and synthesizing brief…</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Generating spinner (before agents start) */}
-            {isGenerating && agentStatuses.length === 0 && (
-              <div className="text-center py-12 text-gray-400 text-sm">
-                <div className="inline-block w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin mb-3" />
-                <p>Parsing your situation…</p>
-              </div>
-            )}
-
-            {/* Brief output */}
-            {brief && (
-              <div>
-                <BriefRenderer brief={brief} />
-
-                {/* Shareable link (only shown when persisted) */}
-                {briefId && (
-                  <div className="mt-6 bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3 flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-0.5">Shareable link</p>
-                      <p className="text-sm text-gray-600 font-mono truncate">{`/brief/${briefId}`}</p>
-                    </div>
-                    <button
-                      onClick={handleCopyLink}
-                      className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-white transition-colors"
-                    >
-                      {copied ? '✓ Copied' : 'Copy link'}
-                    </button>
+                {error && (
+                  <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+                    {error}
                   </div>
                 )}
 
-                <div className="flex gap-3 mt-4 max-w-[760px] mx-auto">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Nationality */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="nationality">
+                      Your Nationality
+                    </label>
+                    <select
+                      id="nationality"
+                      value={nationality}
+                      onChange={e => setNationality(e.target.value)}
+                      required
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
+                    >
+                      <option value="">Select nationality…</option>
+                      {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Destination */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="destination">
+                      Destination
+                    </label>
+                    <select
+                      id="destination"
+                      value={destination}
+                      onChange={e => { setDestination(e.target.value); setVisaType(''); }}
+                      required
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
+                    >
+                      <option value="">Select destination…</option>
+                      {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Visa Type — optional */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="visaType">
+                      Current Visa Type
+                      <span className="ml-1.5 text-xs font-normal text-gray-400">optional</span>
+                    </label>
+                    <select
+                      id="visaType"
+                      value={visaType}
+                      onChange={e => setVisaType(e.target.value)}
+                      disabled={!destination}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 disabled:opacity-50"
+                    >
+                      <option value="">{destination ? 'Select visa type…' : 'Select destination first'}</option>
+                      {visaTypeOptions.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Freeform */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="freeform">
+                      Describe your situation
+                    </label>
+                    <textarea
+                      id="freeform"
+                      value={freeform}
+                      onChange={e => setFreeform(e.target.value)}
+                      required
+                      rows={4}
+                      maxLength={2000}
+                      placeholder="e.g. Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company."
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 resize-vertical leading-relaxed"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 text-right">{freeform.length}/2000</p>
+                  </div>
+
+                  {/* Depth selector */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Research Depth</label>
+                    <div className="flex bg-gray-100 rounded-full p-1 gap-1">
+                      {(['quick', 'standard', 'deep'] as const).map(d => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setDepth(d)}
+                          className={`flex-1 py-1.5 text-sm rounded-full font-medium transition-all ${
+                            depth === d
+                              ? 'bg-[#1e3a5f] text-white font-semibold shadow-sm'
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                        >
+                          {d.charAt(0).toUpperCase() + d.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1.5">
+                      {depth === 'quick' && 'Fast results · 3 sources per agent'}
+                      {depth === 'standard' && 'Balanced · 5 sources per agent'}
+                      {depth === 'deep' && 'Thorough · 8 sources per agent · slower'}
+                    </p>
+                  </div>
+
+                  {/* Submit */}
                   <button
-                    onClick={() => window.print()}
-                    className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors"
+                    type="submit"
+                    className="w-full py-3 rounded-lg font-semibold text-white text-base transition-colors"
+                    style={{ background: 'var(--color-navy)' }}
                   >
-                    Download PDF
+                    Generate Brief
                   </button>
-                  <button
-                    onClick={handleReset}
-                    className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    New Brief
-                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* ── Section 2: Parsed Confirmation ── */}
+            {parsedSituation && (phase === 'generating' || phase === 'complete') && (
+              <div className="max-w-[760px] mx-auto mb-6">
+                <div className="bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-1">We understood</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{parsedSituation.parsedSummary}</p>
                 </div>
               </div>
             )}
-          </div>
+
+            {/* ── Section 3: Agent Progress + Output ── */}
+            {(phase === 'generating' || phase === 'complete') && (
+              <div className="max-w-[760px] mx-auto">
+                {/* Agent progress */}
+                {agentStatuses.length > 0 && (
+                  <div className="mb-8">
+                    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Agent Status</p>
+                      {agentStatuses.map(entry => (
+                        <AgentRow key={entry.agent} entry={entry} />
+                      ))}
+                      {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
+                        <p className="text-xs text-gray-400 mt-2 text-center">Resolving conflicts and synthesizing brief…</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Generating spinner (before agents start) */}
+                {isGenerating && agentStatuses.length === 0 && (
+                  <div className="text-center py-12 text-gray-400 text-sm">
+                    <div className="inline-block w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin mb-3" />
+                    <p>Parsing your situation…</p>
+                  </div>
+                )}
+
+                {/* Brief output */}
+                {brief && (
+                  <div>
+                    <BriefRenderer brief={brief} />
+
+                    {/* Shareable link (only shown when persisted) */}
+                    {briefId && (
+                      <div className="mt-6 bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-0.5">Shareable link</p>
+                          <p className="text-sm text-gray-600 font-mono truncate">{`/brief/${briefId}`}</p>
+                        </div>
+                        <button
+                          onClick={handleCopyLink}
+                          className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-white transition-colors"
+                        >
+                          {copied ? '✓ Copied' : 'Copy link'}
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 mt-4 max-w-[760px] mx-auto">
+                      <button
+                        onClick={() => window.print()}
+                        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors"
+                      >
+                        Download PDF
+                      </button>
+                      <button
+                        onClick={handleReset}
+                        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        New Brief
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
