@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/brief/(.*)',
   '/api/webhooks/(.*)',   // Stripe webhooks — no auth headers
   '/api/brief/poll',     // Brief status polling — UUID is the access token
+  '/api/debug/(.*)',     // Debug endpoints — protected by DEBUG_ALLOWED env var inside the route
 ]);
 
 const isApiRoute = createRouteMatcher(['/api/(.*)']);
