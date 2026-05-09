@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
+import { useSearchParams } from 'next/navigation';
 import BriefRenderer from './components/BriefRenderer';
 import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
@@ -49,7 +50,7 @@ type AgentStatusEntry = {
   error?: string;
 };
 
-type Phase = 'idle' | 'generating' | 'complete' | 'error';
+type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
 
 const AGENT_DISPLAY: Record<string, string> = {
   officialPolicy:    'Official Policy',
@@ -133,8 +134,9 @@ function SignInPrompt() {
 
 // ─── Main page ─────────────────────────────────────────────────────────────
 
-export default function Home() {
+function HomeContent() {
   const { isSignedIn, isLoaded } = useAuth();
+  const searchParams = useSearchParams();
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [nationality, setNationality] = useState('');
@@ -150,10 +152,16 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const isGenerating = phase === 'generating';
+  const wasCancelled = searchParams.get('cancelled') === 'true';
+
+  useEffect(() => {
+    if (wasCancelled) {
+      setError('Payment was cancelled. Your brief was not generated.');
+    }
+  }, [wasCancelled]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPhase('generating');
     setAgentStatuses([]);
     setParsedSituation(null);
     setBrief(null);
@@ -161,6 +169,31 @@ export default function Home() {
     setCopied(false);
     setError(null);
 
+    // Standard/Deep: redirect to Stripe Checkout
+    if (depth === 'standard' || depth === 'deep') {
+      setPhase('redirecting');
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
+        });
+        if (!res.ok) {
+          const err = await res.json() as { error?: string };
+          throw new Error(err.error ?? 'Failed to start checkout');
+        }
+        const { checkoutUrl } = await res.json() as { checkoutUrl: string };
+        window.location.href = checkoutUrl;
+        return;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.');
+        setPhase('error');
+        return;
+      }
+    }
+
+    // Quick: SSE flow (free)
+    setPhase('generating');
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
@@ -258,7 +291,7 @@ export default function Home() {
         ) : (
           <>
             {/* ── Section 1: Input Form ── */}
-            {(phase === 'idle' || phase === 'error') && (
+            {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
               <div className="max-w-[560px] mx-auto">
                 <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
                   Generate your visa brief
@@ -359,24 +392,32 @@ export default function Home() {
                               : 'text-gray-500 hover:text-gray-700'
                           }`}
                         >
-                          {d.charAt(0).toUpperCase() + d.slice(1)}
+                          {d === 'quick' ? 'Quick' : d === 'standard' ? 'Standard' : 'Deep'}
                         </button>
                       ))}
                     </div>
                     <p className="text-xs text-gray-400 mt-1.5">
-                      {depth === 'quick' && 'Fast results · 3 sources per agent'}
-                      {depth === 'standard' && 'Balanced · 5 sources per agent'}
-                      {depth === 'deep' && 'Thorough · 8 sources per agent · slower'}
+                      {depth === 'quick' && 'Free · Fast results · 3 sources per agent'}
+                      {depth === 'standard' && '$2.99 · Balanced · 5 sources per agent'}
+                      {depth === 'deep' && '$5.99 · Thorough · 8 sources per agent · slower'}
                     </p>
                   </div>
 
                   {/* Submit */}
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-lg font-semibold text-white text-base transition-colors"
+                    disabled={phase === 'redirecting'}
+                    className="w-full py-3 rounded-lg font-semibold text-white text-base transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: 'var(--color-navy)' }}
                   >
-                    Generate Brief
+                    {phase === 'redirecting'
+                      ? 'Redirecting to checkout…'
+                      : depth === 'quick'
+                        ? 'Generate Brief — Free'
+                        : depth === 'standard'
+                          ? 'Generate Brief — $2.99'
+                          : 'Generate Brief — $5.99'
+                    }
                   </button>
                 </form>
               </div>
@@ -461,5 +502,19 @@ export default function Home() {
         )}
       </main>
     </div>
+  );
+}
+
+const LoadingSpinner = () => (
+  <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin" />
+  </div>
+);
+
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <HomeContent />
+    </Suspense>
   );
 }
