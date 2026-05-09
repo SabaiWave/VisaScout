@@ -45,13 +45,19 @@ export async function POST(req: Request) {
 
   const { data: briefRow, error: fetchError } = await getSupabase()
     .from('briefs')
-    .select('nationality, destination, visa_type, freeform_input, depth')
+    .select('nationality, destination, visa_type, freeform_input, depth, payment_status')
     .eq('id', briefId)
     .single();
 
   if (fetchError || !briefRow) {
     log.error('stripe webhook: brief not found', { briefId, error: fetchError?.message });
     return new Response('Brief not found', { status: 404 });
+  }
+
+  // Idempotency guard — Stripe retries if we don't respond within 30s (pipeline takes 150–240s)
+  if (briefRow.payment_status === 'paid') {
+    log.info('stripe webhook: already processed, skipping', { briefId });
+    return new Response('ok', { status: 200 });
   }
 
   log.info('stripe webhook: running pipeline', { briefId, destination: briefRow.destination, depth: briefRow.depth });
