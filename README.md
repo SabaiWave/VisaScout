@@ -125,9 +125,9 @@ Copy `.env.example` to `.env.local` and fill in values. Never commit `.env.local
 - **AI:** Anthropic Claude (`claude-sonnet-4-6`)
 - **Search:** Tavily API
 - **Styling:** Tailwind CSS
-- **Auth:** Clerk (Phase 5)
-- **Database:** Supabase (Phase 4)
-- **Payments:** Stripe (Phase 6)
+- **Auth:** Clerk
+- **Database:** Supabase
+- **Payments:** Stripe
 - **Deployment:** Vercel
 
 ---

@@ -6,8 +6,8 @@ const config: Config = {
   roots: ['<rootDir>/src/__tests__'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleNameMapper: {
-    // Strip .js extensions from imports so ts-jest can resolve .ts files
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   transform: {
     '^.+\\.tsx?$': [
