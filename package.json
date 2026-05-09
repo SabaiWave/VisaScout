@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
+    "@clerk/nextjs": "^7.3.3",
     "@logtail/next": "^0.3.1",
     "@sentry/nextjs": "^10.51.0",
     "@supabase/supabase-js": "^2.105.1",

@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
@@ -33,6 +34,14 @@ function sseEvent(data: unknown): string {
 }
 
 export async function POST(req: Request) {
+  const { userId } = await auth();
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
 
   if (!checkRateLimit(ip)) {
@@ -75,8 +84,17 @@ export async function POST(req: Request) {
       try {
         if (DRY_RUN) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth });
-          await runDryPipeline(send);
-          log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth });
+          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send);
+
+          let dryBriefId: string | undefined;
+          try {
+            dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId });
+          } catch (saveErr) {
+            log.error('saveBrief failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+          }
+
+          send({ type: 'complete', brief: dryBrief, briefId: dryBriefId });
+          log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth, briefId: dryBriefId });
           return;
         }
 
@@ -103,7 +121,7 @@ export async function POST(req: Request) {
         let briefId: string | undefined;
         if (capturedVisaRequest) {
           try {
-            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth });
+            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId });
           } catch (saveErr) {
             log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }

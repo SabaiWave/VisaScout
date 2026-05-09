@@ -6,9 +6,6 @@
       "Bash(xargs sed *)",
       "Bash(DRY_RUN=true npm test)",
       "Bash(npx supabase *)"
-    ],
-    "additionalDirectories": [
-      "/Users/dev/code/sbw/visascout/app/brief"
     ]
   }
 }
