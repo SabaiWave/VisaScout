@@ -5,7 +5,8 @@
       "Bash(git commit -m ' *)",
       "Bash(xargs sed *)",
       "Bash(DRY_RUN=true npm test)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "Bash(claude mcp *)"
     ]
   }
 }
