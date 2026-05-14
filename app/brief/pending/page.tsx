@@ -68,8 +68,8 @@ function PendingContent() {
           <p className="text-gray-500 text-sm mb-6 leading-relaxed">
             Your payment was received. Your brief may still be generating — try refreshing in a few minutes,
             or contact support at{' '}
-            <a href="mailto:support@visascout.com" className="text-[#1e3a5f] underline">
-              support@visascout.com
+            <a href="mailto:support@visascout.io" className="text-[#1e3a5f] underline">
+              support@visascout.io
             </a>{' '}
             with reference: <span className="font-mono text-xs">{briefId}</span>
           </p>
@@ -97,8 +97,8 @@ function PendingContent() {
           <p className="text-gray-500 text-sm mb-6 leading-relaxed">
             Your payment was received, but the pipeline encountered an error. We will refund your payment.
             Contact{' '}
-            <a href="mailto:support@visascout.com" className="text-[#1e3a5f] underline">
-              support@visascout.com
+            <a href="mailto:support@visascout.io" className="text-[#1e3a5f] underline">
+              support@visascout.io
             </a>{' '}
             with reference: <span className="font-mono text-xs">{briefId}</span>
           </p>
