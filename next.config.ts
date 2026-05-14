@@ -14,6 +14,9 @@ if (process.env.VERCEL === '1') {
     'STRIPE_SECRET_KEY',
     'STRIPE_WEBHOOK_SECRET',
     'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY',
+    // Phase 7 — domain + email
+    'RESEND_API_KEY',
+    'NEXT_PUBLIC_APP_URL',
   ];
   const missing = required.filter(k => !process.env[k]);
   if (missing.length > 0) {

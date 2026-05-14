@@ -19,6 +19,9 @@ export async function GET() {
     supabase:    !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     // Payments (Phase 6)
     stripe:      !!process.env.STRIPE_SECRET_KEY && !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    // Domain + email (Phase 7)
+    resend:      !!process.env.RESEND_API_KEY,
+    appUrl:      !!process.env.NEXT_PUBLIC_APP_URL,
   };
 
   const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;
