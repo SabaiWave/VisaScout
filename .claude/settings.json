@@ -6,7 +6,10 @@
       "Bash(xargs sed *)",
       "Bash(DRY_RUN=true npm test)",
       "Bash(npx supabase *)",
-      "Bash(claude mcp *)"
+      "Bash(claude mcp *)",
+      "Skill(start)",
+      "Skill(start:*)",
+      "Bash(echo \"Exit: $?\")"
     ]
   }
 }

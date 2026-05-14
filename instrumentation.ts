@@ -30,6 +30,9 @@ function logStartup() {
     STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: !!process.env.STRIPE_WEBHOOK_SECRET,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    // Domain + email (Phase 7+)
+    RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+    NEXT_PUBLIC_APP_URL: !!process.env.NEXT_PUBLIC_APP_URL,
   };
 
   const missing = Object.entries(checks)
@@ -61,6 +64,9 @@ function logStartup() {
     console.log(fmt('STRIPE_SECRET_KEY',                'STRIPE_SECRET_KEY'));
     console.log(fmt('STRIPE_WEBHOOK_SECRET',            'STRIPE_WEBHOOK_SECRET'));
     console.log(fmt('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY','NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'));
+    console.log('  ·');
+    console.log(fmt('RESEND_API_KEY',                   'RESEND_API_KEY'));
+    console.log(fmt('NEXT_PUBLIC_APP_URL',              'NEXT_PUBLIC_APP_URL'));
     console.log('  ·');
     console.log(`  ${'DRY_RUN'.padEnd(38)}${process.env.DRY_RUN === 'true' ? 'true — fixture data, zero API cost' : 'false — real API calls'}`);
     console.log('─────────────────────────────────────────────────────\n');
