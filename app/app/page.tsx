@@ -191,6 +191,19 @@ function SignInPrompt() {
   );
 }
 
+// ─── Field error ───────────────────────────────────────────────────────────
+
+function FieldError() {
+  return (
+    <p
+      className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
+      style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}
+    >
+      <span>▸</span> Required
+    </p>
+  );
+}
+
 // ─── Input styles ──────────────────────────────────────────────────────────
 
 const INPUT_STYLE: React.CSSProperties = {
@@ -233,6 +246,7 @@ function AppContent() {
   const [briefId, setBriefId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const isGenerating = phase === 'generating';
   const wasCancelled = searchParams.get('cancelled') === 'true';
@@ -304,6 +318,8 @@ function AppContent() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitted(true);
+    if (!nationality || !destination || !freeform) return;
     setAgentStatuses([]);
     setParsedSituation(null);
     setBrief(null);
@@ -360,6 +376,7 @@ function AppContent() {
     setParsedSituation(null);
     setAgentStatuses([]);
     setError(null);
+    setSubmitted(false);
   }
 
   async function handleCopyLink() {
@@ -433,39 +450,39 @@ function AppContent() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div>
-                  <label style={LABEL_STYLE} htmlFor="nationality">Your Nationality</label>
+                  <label style={LABEL_STYLE} htmlFor="nationality">Your Nationality <span style={{ color: 'var(--color-error)' }}>*</span></label>
                   <select
                     id="nationality"
                     value={nationality}
                     onChange={e => setNationality(e.target.value)}
-                    required
-                    style={INPUT_STYLE}
+                    style={{ ...INPUT_STYLE, border: `1px solid ${submitted && !nationality ? 'var(--color-error)' : 'var(--color-border)'}` }}
                   >
                     <option value="">Select nationality…</option>
                     {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
+                  {submitted && !nationality && <FieldError />}
                 </div>
 
                 <div>
-                  <label style={LABEL_STYLE} htmlFor="destination">Destination</label>
+                  <label style={LABEL_STYLE} htmlFor="destination">Destination <span style={{ color: 'var(--color-error)' }}>*</span></label>
                   <select
                     id="destination"
                     value={destination}
                     onChange={e => { setDestination(e.target.value); setVisaType(''); }}
-                    required
-                    style={INPUT_STYLE}
+                    style={{ ...INPUT_STYLE, border: `1px solid ${submitted && !destination ? 'var(--color-error)' : 'var(--color-border)'}` }}
                   >
                     <option value="">Select destination…</option>
                     {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
+                  {submitted && !destination && <FieldError />}
                 </div>
 
                 <div>
                   <label style={LABEL_STYLE} htmlFor="visaType">
                     Current Visa Type
-                    <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>optional</span>
+                    <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(optional)</span>
                   </label>
                   <select
                     id="visaType"
@@ -480,20 +497,20 @@ function AppContent() {
                 </div>
 
                 <div>
-                  <label style={LABEL_STYLE} htmlFor="freeform">Describe your situation</label>
+                  <label style={LABEL_STYLE} htmlFor="freeform">Describe your situation <span style={{ color: 'var(--color-error)' }}>*</span></label>
                   <textarea
                     id="freeform"
                     value={freeform}
                     onChange={e => setFreeform(e.target.value)}
-                    required
                     rows={4}
                     maxLength={2000}
                     placeholder="e.g. Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company."
-                    style={{ ...INPUT_STYLE, resize: 'vertical', lineHeight: 1.75, minHeight: 100 }}
+                    style={{ ...INPUT_STYLE, resize: 'vertical', lineHeight: 1.75, minHeight: 100, border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : 'var(--color-border)'}` }}
                   />
                   <p className="text-xs mt-1 text-right" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                     {freeform.length}/2000
                   </p>
+                  {submitted && !freeform && <FieldError />}
                 </div>
 
                 {/* Depth selector */}
