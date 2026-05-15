@@ -96,6 +96,25 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+/* Light theme override for PDF generation */
+.pdf-print-container {
+  --color-bg-base:          #ffffff;
+  --color-bg-elevated:      #f9fafb;
+  --color-bg-overlay:       #f3f4f6;
+  --color-bg-subtle:        #f3f4f6;
+  --color-border:           #e5e7eb;
+  --color-border-muted:     #f3f4f6;
+  --color-border-strong:    #d1d5db;
+  --color-text-primary:     #111827;
+  --color-text-secondary:   #374151;
+  --color-text-tertiary:    #6b7280;
+  --color-secondary:        #4f46e5;
+  --color-secondary-light:  #6366f1;
+  --color-secondary-subtle: #eef2ff;
+  --color-amber-subtle:     #fffbeb;
+  background: #ffffff;
+}
+
 /* Agent row pulse animation */
 @keyframes pulse-ring {
   0%   { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3); }

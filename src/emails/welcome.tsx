@@ -19,38 +19,31 @@ export default function WelcomeEmail({ appUrl }: WelcomeEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Your visa intelligence tool is ready.</Preview>
+      <Preview>Your first brief is on us — no credit card required.</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
-          <Heading style={styles.wordmark}>VisaScout</Heading>
-
-          <Heading style={styles.heading}>Welcome aboard.</Heading>
-
-          <Text style={styles.text}>
-            VisaScout gives you cited, confidence-scored visa intelligence for
-            any nationality entering Southeast Asia — official sources ranked by
-            tier, contradictions flagged automatically.
+          <Text style={styles.wordmark}>
+            <span style={{ color: '#6366F1' }}>{'// '}</span>VisaScout
           </Text>
 
+          <Heading style={styles.heading}>You&apos;re in.</Heading>
+
           <Text style={styles.text}>
-            Your first Quick brief is free. No credit card required.
+            Your first brief is on us. Pick a nationality, pick a destination,
+            and we&apos;ll handle the rest — official sources, recent enforcement
+            changes, and community intel in one place.
           </Text>
 
           <Section style={styles.btnSection}>
             <Button href={appUrl} style={styles.btn}>
-              Generate your first brief →
+              GENERATE YOUR FIRST BRIEF →
             </Button>
           </Section>
 
           <Hr style={styles.divider} />
 
-          <Text style={styles.disclaimer}>
-            VisaScout aggregates publicly available information. Verify all visa
-            requirements with official sources before travel. Not legal advice.
-          </Text>
-
           <Text style={styles.footer}>
-            © Sabai Wave LLC · {appUrl}
+            © VisaScout · visascout.io
           </Text>
         </Container>
       </Body>
@@ -60,63 +53,62 @@ export default function WelcomeEmail({ appUrl }: WelcomeEmailProps) {
 
 const styles = {
   body: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#0A0A0A',
     fontFamily: "'IBM Plex Sans', Helvetica, Arial, sans-serif",
   },
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#111118',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid #2D2D3D',
     margin: '40px auto',
     padding: '40px',
     maxWidth: '560px',
   },
   wordmark: {
-    color: '#1e3a5f',
-    fontSize: '20px',
+    color: '#F4F4F5',
+    fontSize: '14px',
     fontWeight: '700',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase' as const,
     margin: '0 0 32px',
-    fontFamily: "'DM Sans', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   heading: {
-    color: '#1e3a5f',
-    fontSize: '24px',
+    color: '#F4F4F5',
+    fontSize: '28px',
     fontWeight: '700',
     margin: '0 0 16px',
-    fontFamily: "'DM Sans', Helvetica, Arial, sans-serif",
+    fontFamily: "'IBM Plex Sans', Helvetica, Arial, sans-serif",
   },
   text: {
-    color: '#374151',
-    fontSize: '16px',
+    color: '#A1A1AA',
+    fontSize: '15px',
     lineHeight: '1.75',
     margin: '0 0 16px',
   },
   btnSection: {
-    margin: '24px 0',
+    margin: '28px 0',
   },
   btn: {
-    backgroundColor: '#1e3a5f',
-    borderRadius: '8px',
+    backgroundColor: '#6366F1',
+    borderRadius: '6px',
     color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: '600',
+    fontSize: '12px',
+    fontWeight: '700',
+    letterSpacing: '0.1em',
     padding: '12px 24px',
     textDecoration: 'none',
     display: 'inline-block',
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   divider: {
-    borderColor: '#e5e7eb',
-    margin: '32px 0 24px',
-  },
-  disclaimer: {
-    color: '#6b7280',
-    fontSize: '13px',
-    lineHeight: '1.5',
-    margin: '0 0 12px',
+    borderColor: '#2D2D3D',
+    margin: '32px 0 20px',
   },
   footer: {
-    color: '#9ca3af',
+    color: '#52525B',
     fontSize: '12px',
     margin: '0',
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
 };

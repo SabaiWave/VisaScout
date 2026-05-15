@@ -1,17 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSupabase } from '@/src/lib/supabase';
-import BriefRenderer from '@/app/components/BriefRenderer';
 import BriefActions from '@/app/components/BriefActions';
-import type { VisaBrief } from '@/src/types/index';
-
 interface BriefRow {
   id: string;
   created_at: string;
   nationality: string;
   destination: string;
   depth: string;
-  brief_markdown: string;
 }
 
 export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,19 +15,13 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
 
   const { data, error } = await getSupabase()
     .from('briefs')
-    .select('id, created_at, nationality, destination, depth, brief_markdown')
+    .select('id, created_at, nationality, destination, depth')
     .eq('id', id)
     .single();
 
   if (error || !data) notFound();
 
   const row = data as BriefRow;
-  let brief: VisaBrief;
-  try {
-    brief = JSON.parse(row.brief_markdown) as VisaBrief;
-  } catch {
-    notFound();
-  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
   const shareUrl = `${appUrl}/brief/${row.id}`;
@@ -75,8 +65,6 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
               {row.depth.toUpperCase()} DEPTH · {new Date(row.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-
-          <BriefRenderer brief={brief} />
 
           <BriefActions url={shareUrl} />
         </div>
