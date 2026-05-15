@@ -6,7 +6,7 @@ export const clientConfig = {
   logoUrl: '/logo.svg',
   disclaimerText:
     'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.',
-  supportEmail: 'support@visascout.io',
+  supportEmail: 'hello@visascout.io',
   supportedDestinations: [
     'Thailand',
     'Vietnam',
