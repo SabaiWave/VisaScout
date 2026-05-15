@@ -5,12 +5,15 @@ import { useState } from 'react';
 
 function ConfidenceBadge({ level }: { level: 'high' | 'medium' | 'low' }) {
   const styles = {
-    high:   'bg-green-100 text-green-700',
-    medium: 'bg-amber-100 text-amber-700',
-    low:    'bg-red-100 text-red-700',
+    high:   { background: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
+    medium: { background: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
+    low:    { background: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[level]}`}>
+    <span
+      className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold tracking-wider"
+      style={{ ...styles[level], fontFamily: 'var(--font-mono)' }}
+    >
       {level.toUpperCase()}
     </span>
   );
@@ -20,47 +23,110 @@ function TierLabel({ tier }: { tier: 1 | 2 | 3 | 4 }) {
   const isTop = tier <= 1;
   return (
     <span
-      className={`font-mono text-xs px-2 py-0.5 rounded ${
-        isTop ? 'bg-[#e8eef5] text-[#1e3a5f] font-medium' : 'bg-gray-100 text-gray-500'
-      }`}
+      className="font-mono text-xs px-2 py-0.5 rounded flex-shrink-0"
+      style={{
+        background: isTop ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
+        color: isTop ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
+        fontWeight: isTop ? 600 : 400,
+      }}
     >
       Tier {tier}
     </span>
   );
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function Label({ children, color, size = 'xs' }: { children: React.ReactNode; color?: string; size?: 'xs' | 'xl' }) {
   return (
-    <h3
-      className="text-xl font-bold mb-4 pb-3 border-b border-gray-200"
-      style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}
+    <p
+      className={`text-${size} font-bold uppercase tracking-wider mb-1`}
+      style={{ color: color ?? 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
     >
       {children}
-    </h3>
+    </p>
+  );
+}
+
+function WarningBox({ header, items, headerSize = 'xs' }: { header: string; items: string[]; headerSize?: 'xs' | 'xl' }) {
+  return (
+    <div className="rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>
+      <Label color="#f59e0b" size={headerSize}>{header}</Label>
+      {items.map((w, i) => (
+        <p key={i} className="text-sm flex items-start gap-2" style={{ color: '#f59e0b' }}>
+          <span className="flex-shrink-0">⚠</span><span>{w}</span>
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <h3
+        className="text-xl font-bold mb-3"
+        style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
+      >
+        <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
+        {children}
+      </h3>
+      <div className="mb-4 h-px" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }} />
+    </>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="brief-section rounded-xl p-6 border"
+      style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.05)' }}
+    >
+      {children}
+    </div>
   );
 }
 
 function VisaOptionCard({ option }: { option: VisaOption }) {
-  const suitabilityStyle = {
-    best:       'border-green-400 bg-green-50',
-    good:       'border-blue-300 bg-blue-50',
-    acceptable: 'border-gray-300 bg-gray-50',
-  };
+  const borderColor = {
+    best:       '#22c55e',
+    good:       'var(--color-secondary)',
+    acceptable: 'var(--color-border-strong)',
+  }[option.suitability];
+  const bg = {
+    best:       'rgba(34,197,94,0.06)',
+    good:       'rgba(99,102,241,0.06)',
+    acceptable: 'var(--color-bg-base)',
+  }[option.suitability];
+
   return (
-    <div className={`rounded-lg border-l-4 p-4 mb-3 ${suitabilityStyle[option.suitability]}`}>
+    <div
+      className="rounded-lg border-l-4 p-4 mb-3"
+      style={{ background: bg, borderTop: `1px solid var(--color-border)`, borderRight: `1px solid var(--color-border)`, borderBottom: `1px solid var(--color-border)`, borderLeft: `4px solid ${borderColor}` }}
+    >
       <div className="flex items-center justify-between mb-1">
-        <span className="font-semibold text-gray-900">{option.name}</span>
-        <span className="text-xs text-gray-500 font-mono">Max stay: {option.maxStay}</span>
+        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
+        <span className="text-xs font-mono" style={{ color: 'var(--color-text-tertiary)' }}>Max stay: {option.maxStay}</span>
       </div>
-      <p className="text-sm text-gray-700 mb-2">{option.summary}</p>
-      {option.pros.length > 0 && (
-        <ul className="text-xs text-green-700 mb-1">
-          {option.pros.map((p, i) => <li key={i}>+ {p}</li>)}
-        </ul>
-      )}
-      {option.cons.length > 0 && (
-        <ul className="text-xs text-red-600">
-          {option.cons.map((c, i) => <li key={i}>− {c}</li>)}
+      <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{option.summary}</p>
+      {(option.pros.length > 0 || option.cons.length > 0) && (
+        <ul className="text-sm space-y-1.5 mt-2">
+          {option.pros.map((p, i) => (
+            <li key={`pro-${i}`} className="flex items-start gap-2">
+              <span
+                className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5"
+                style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontFamily: 'var(--font-mono)' }}
+              >Pro</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{p}</span>
+            </li>
+          ))}
+          {option.cons.map((c, i) => (
+            <li key={`con-${i}`} className="flex items-start gap-2">
+              <span
+                className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontFamily: 'var(--font-mono)' }}
+              >Con</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{c}</span>
+            </li>
+          ))}
         </ul>
       )}
     </div>
@@ -71,51 +137,57 @@ function ConflictSection({ report }: { report: ConflictReport }) {
   const [open, setOpen] = useState(false);
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left"
+        style={{ background: 'var(--color-bg-elevated)' }}
       >
-        <span className="font-semibold text-gray-700 text-sm">
-          Conflict Report — {total} item{total !== 1 ? 's' : ''}
+        <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
+          <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Conflict Report — {total} item{total !== 1 ? 's' : ''}
           {report.contested.length > 0 && (
-            <span className="ml-2 text-amber-600">({report.contested.length} contested)</span>
+            <span className="ml-2 text-sm" style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
           )}
         </span>
-        <span className="text-gray-400 text-sm">{open ? '▲' : '▼'}</span>
+        <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
           {report.confirmed.length > 0 && (
             <div>
-              <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">Confirmed</p>
+              <Label color="#22c55e">Confirmed</Label>
               {report.confirmed.map((item, i) => (
                 <div key={i} className="mb-2 text-sm">
-                  <span className="font-medium text-gray-900">{item.topic}</span>
-                  <p className="text-gray-600">{item.description}</p>
+                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
                 </div>
               ))}
             </div>
           )}
           {report.contested.length > 0 && (
             <div>
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-2">Contested</p>
+              <Label color="#f59e0b">Contested</Label>
               {report.contested.map((item, i) => (
-                <div key={i} className="mb-2 text-sm border-l-2 border-amber-400 pl-3">
-                  <span className="font-medium text-gray-900">{item.topic}</span>
-                  <p className="text-gray-600">{item.description}</p>
-                  {item.resolution && <p className="text-amber-700 text-xs mt-1">Resolution: {item.resolution}</p>}
+                <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: '#f59e0b' }}>
+                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
+                  {item.resolution && (
+                    <div className="mt-2">
+                      <Label color="#f59e0b">Resolution</Label>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
           {report.unverified.length > 0 && (
             <div>
-              <p className="text-xs font-bold text-red-600 uppercase tracking-wide mb-2">Unverified</p>
+              <Label color="#ef4444">Unverified</Label>
               {report.unverified.map((item, i) => (
                 <div key={i} className="mb-2 text-sm">
-                  <span className="font-medium text-gray-900">{item.topic}</span>
-                  <p className="text-gray-600">{item.description}</p>
+                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
                 </div>
               ))}
             </div>
@@ -131,127 +203,117 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
 
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
-      {/* Disclaimer — always visible */}
-      <div className="bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-start gap-3 text-sm text-amber-900">
-        <span className="flex-shrink-0 mt-0.5">⚠</span>
-        <span>{brief.disclaimer}</span>
-      </div>
-
       {/* Recommended Action */}
-      <div className="border-l-4 border-amber-400 bg-amber-50 rounded-r-lg px-5 py-4">
-        <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Recommended Action</p>
-        <p className="text-lg font-bold text-gray-900 mb-1">{brief.recommendedAction.action}</p>
+      <div
+        className="border-l-4 rounded-r-lg px-5 py-4"
+        style={{
+          background: 'rgba(245,158,11,0.06)',
+          borderTop: '1px solid rgba(245,158,11,0.2)',
+          borderRight: '1px solid rgba(245,158,11,0.2)',
+          borderBottom: '1px solid rgba(245,158,11,0.2)',
+          borderLeft: '4px solid var(--color-amber)',
+          boxShadow: '0 0 20px rgba(245,158,11,0.08)',
+        }}
+      >
+        <Label color="var(--color-amber)" size="xl">Recommended Action</Label>
+        <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
         {brief.recommendedAction.deadline && (
-          <p className="text-sm font-semibold text-red-600">Deadline: {brief.recommendedAction.deadline}</p>
+          <p className="text-sm font-semibold" style={{ color: '#ef4444' }}>Deadline: {brief.recommendedAction.deadline}</p>
         )}
-        <p className="text-sm text-gray-700 mt-2">{brief.recommendedAction.rationale}</p>
+        <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
         <div className="mt-2">
           <ConfidenceBadge level={brief.confidenceScore.overall} />
-          <span className="ml-2 text-xs text-gray-500">overall confidence</span>
+          <span className="ml-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>Overall Confidence</span>
         </div>
       </div>
 
-      {/* Parsed Situation */}
-      <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <SectionHeading>Parsed Situation</SectionHeading>
-        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{brief.parsedSituation}</p>
-      </div>
-
       {/* Visa Options */}
-      <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+      <SectionCard>
         <SectionHeading>Visa Options</SectionHeading>
         {brief.visaOptions.map((opt, i) => <VisaOptionCard key={i} option={opt} />)}
-      </div>
+      </SectionCard>
 
       {/* Entry Requirements */}
-      <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+      <SectionCard>
         <SectionHeading>Entry Requirements</SectionHeading>
         {brief.entryRequirements.documents.length > 0 && (
           <div className="mb-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Required Documents</p>
-            <ul className="text-sm text-gray-700 space-y-1">
+            <Label>Required Documents</Label>
+            <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
               {brief.entryRequirements.documents.map((d, i) => <li key={i}>• {d}</li>)}
             </ul>
           </div>
         )}
         {brief.entryRequirements.proofOfFunds && (
           <div className="mb-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Proof of Funds</p>
-            <p className="text-sm text-gray-700">{brief.entryRequirements.proofOfFunds}</p>
+            <Label>Proof of Funds</Label>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{brief.entryRequirements.proofOfFunds}</p>
           </div>
         )}
         <div className="mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Onward Ticket</p>
-          <p className="text-sm text-gray-700">{brief.entryRequirements.onwardTicket ? 'Required' : 'Not required'}</p>
+          <Label>Onward Ticket</Label>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{brief.entryRequirements.onwardTicket ? 'Required' : 'Not required'}</p>
         </div>
         {brief.entryRequirements.notes.length > 0 && (
-          <ul className="text-xs text-gray-500 space-y-1">
+          <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
             {brief.entryRequirements.notes.map((n, i) => <li key={i}>• {n}</li>)}
           </ul>
         )}
-      </div>
+      </SectionCard>
 
       {/* Border Run Analysis */}
-      <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+      <SectionCard>
         <SectionHeading>Border Run Analysis</SectionHeading>
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Eligible</p>
-            <p className="text-gray-700">{brief.borderRunAnalysis.eligible ? 'Yes' : 'No'}</p>
+            <Label>Eligible</Label>
+            <p style={{ color: 'var(--color-text-secondary)' }}>{brief.borderRunAnalysis.eligible ? 'Yes' : 'No'}</p>
           </div>
           {brief.borderRunAnalysis.limitsPerYear && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Annual Limit</p>
-              <p className="text-gray-700">{brief.borderRunAnalysis.limitsPerYear}</p>
+              <Label>Annual Limit</Label>
+              <p style={{ color: 'var(--color-text-secondary)' }}>{brief.borderRunAnalysis.limitsPerYear}</p>
             </div>
           )}
         </div>
         <div className="mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Enforcement Posture</p>
-          <p className="text-sm text-gray-700">{brief.borderRunAnalysis.enforcementPosture}</p>
+          <Label>Enforcement Posture</Label>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{brief.borderRunAnalysis.enforcementPosture}</p>
         </div>
         {brief.borderRunAnalysis.warnings.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            {brief.borderRunAnalysis.warnings.map((w, i) => (
-              <p key={i} className="text-xs text-amber-800">⚠ {w}</p>
-            ))}
-          </div>
+          <WarningBox header="Warnings" items={brief.borderRunAnalysis.warnings} />
         )}
-      </div>
+      </SectionCard>
 
       {/* Recent Changes */}
       {brief.recentChanges.hasChanges && (
-        <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <SectionCard>
           <SectionHeading>Recent Changes & Watch Items</SectionHeading>
-          <ul className="text-sm text-gray-700 space-y-2 mb-4">
+          <ul className="text-sm space-y-2 mb-4" style={{ color: 'var(--color-text-secondary)' }}>
             {brief.recentChanges.items.map((item, i) => <li key={i}>• {item}</li>)}
           </ul>
           {brief.recentChanges.watchItems.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Watch Items</p>
-              {brief.recentChanges.watchItems.map((w, i) => (
-                <p key={i} className="text-xs text-amber-800">⚠ {w}</p>
-              ))}
-            </div>
+            <WarningBox header="Watch Items" items={brief.recentChanges.watchItems} />
           )}
-        </div>
+        </SectionCard>
       )}
 
       {/* Source Citations */}
       {brief.confidenceScore.sourceCitations.length > 0 && (
-        <div className="brief-section bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <SectionCard>
           <SectionHeading>Source Citations</SectionHeading>
           <ul className="space-y-2">
             {brief.confidenceScore.sourceCitations.map((cite, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <TierLabel tier={cite.tier} />
                 <div>
-                  <p className="text-gray-700">{cite.claim}</p>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>{cite.claim}</p>
                   <a
                     href={cite.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-xs text-blue-600 hover:underline break-all"
+                    className="font-mono text-xs hover:underline break-all"
+                    style={{ color: 'var(--color-secondary-light)' }}
                   >
                     {cite.url}
                   </a>
@@ -259,7 +321,7 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
               </li>
             ))}
           </ul>
-        </div>
+        </SectionCard>
       )}
 
       {/* Conflict Report */}
@@ -267,33 +329,34 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
         <ConflictSection report={brief.conflictReport} />
       </div>
 
-      {/* Contingency — collapsible */}
-      <div className="brief-section border border-gray-200 rounded-lg overflow-hidden">
+      {/* Contingency */}
+      <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
         <button
           onClick={() => setContingencyOpen(!contingencyOpen)}
-          className="w-full flex items-center justify-between px-5 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+          className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left"
+          style={{ background: 'var(--color-bg-elevated)' }}
         >
-          <span className="font-semibold text-gray-700 text-sm">Contingency Planning</span>
-          <span className="text-gray-400 text-sm">{contingencyOpen ? '▲' : '▼'}</span>
+          <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}><span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Contingency Planning</span>
+          <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{contingencyOpen ? '▲' : '▼'}</span>
         </button>
         {contingencyOpen && (
-          <div className="px-5 py-4 space-y-4 text-sm">
+          <div className="px-5 py-4 space-y-4 text-sm" style={{ background: 'var(--color-bg-base)' }}>
             {brief.contingency.deniedEntrySteps.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">If Denied Entry</p>
-                <ul className="text-gray-700 space-y-1">
+                <Label>If Denied Entry</Label>
+                <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
                   {brief.contingency.deniedEntrySteps.map((s, i) => <li key={i}>• {s}</li>)}
                 </ul>
               </div>
             )}
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Overstay Scenario</p>
-              <p className="text-gray-700">{brief.contingency.overstayScenario}</p>
+              <Label>Overstay Scenario</Label>
+              <p style={{ color: 'var(--color-text-secondary)' }}>{brief.contingency.overstayScenario}</p>
             </div>
             {brief.contingency.emergencyContacts.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Emergency Contacts</p>
-                <ul className="text-gray-700 space-y-1">
+                <Label>Emergency Contacts</Label>
+                <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
                   {brief.contingency.emergencyContacts.map((c, i) => <li key={i}>• {c}</li>)}
                 </ul>
               </div>
@@ -303,10 +366,11 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
       </div>
 
       {/* Metadata */}
-      <div className="text-xs text-gray-400 font-mono text-center pb-4">
+      <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
         Generated {new Date(brief.metadata.generatedAt).toLocaleString()} · {brief.metadata.model} · {brief.metadata.depth} depth
-        {brief.metadata.degraded && <span className="ml-2 text-amber-600">· degraded output</span>}
+        {brief.metadata.degraded && <span className="ml-2" style={{ color: '#f59e0b' }}>· degraded output</span>}
       </div>
+
     </div>
   );
 }

@@ -13,7 +13,14 @@ export function HeaderAuth() {
 
   return (
     <SignInButton mode="modal">
-      <button className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors">
+      <button
+        className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
+        style={{
+          borderColor: 'var(--color-border-strong)',
+          color: 'var(--color-text-primary)',
+          background: 'transparent',
+        }}
+      >
         Sign in
       </button>
     </SignInButton>

@@ -1,520 +1,537 @@
-'use client';
+import Link from 'next/link';
+import { LandingNav } from './components/LandingNav';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useAuth, SignInButton } from '@clerk/nextjs';
-import { useSearchParams } from 'next/navigation';
-import BriefRenderer from './components/BriefRenderer';
-import type { VisaBrief, VisaRequest } from '@/src/types/index';
-import { clientConfig } from '@/config/client';
+// ─── Shared ────────────────────────────────────────────────────────────────
 
-// ─── Static data ───────────────────────────────────────────────────────────
+function SectionHeading({ children, subtitle }: { children: React.ReactNode; subtitle?: string }) {
+  return (
+    <div className="mb-12">
+      <h2
+        className="text-3xl font-bold mb-3"
+        style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
+      >
+        <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
+        {children}
+      </h2>
+      <div
+        className="mb-4 h-px"
+        style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
+      />
+      {subtitle && (
+        <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
 
-const DESTINATIONS = clientConfig.supportedDestinations;
+// ─── Hero ──────────────────────────────────────────────────────────────────
 
-const VISA_TYPES: Record<string, string[]> = {
-  Thailand: ['Visa Exemption', 'Tourist Visa (TR)', 'Thailand Elite Visa', 'Non-Immigrant Visa', 'Long-Term Resident (LTR) Visa', 'Education Visa'],
-  Vietnam: ['E-Visa', 'Visa on Arrival', 'Tourist Visa', 'Business Visa', 'Temporary Residence Card', 'Work Permit'],
-  Indonesia: ['Visa on Arrival', 'Social/Cultural Visa (B211)', 'Business Visa', 'KITAS (Limited Stay Permit)', 'Retirement Visa', 'Digital Nomad Visa'],
-  Malaysia: ['Visa Free Entry', 'eNTRI', 'Social Visit Pass', 'MM2H (Long-Term Residency)', 'Employment Pass', 'Business Visa'],
-  Philippines: ['Visa Free', 'Tourist Visa', 'Special Resident Retiree\'s Visa (SRRV)', 'Business Visa', '13A Permanent Resident'],
-  Cambodia: ['Visa on Arrival', 'e-Visa', 'Tourist Visa (T)', 'Business Visa (E)', 'Ordinary Visa (EG)', 'Retirement Visa'],
-  Laos: ['Visa on Arrival', 'e-Visa', 'Tourist Visa', 'Business Visa', 'Multiple Entry Visa'],
-  Myanmar: ['e-Visa', 'Visa on Arrival', 'Tourist Visa', 'Business Visa', 'Social Visa'],
-  Singapore: ['Visa Free', 'Social Visit Pass', 'Employment Pass', 'Dependant\'s Pass', 'Long-Term Visit Pass'],
-  Brunei: ['Visa Free', 'Tourist Visa', 'Business Visa', 'Social Visit Pass'],
-};
+function Hero() {
+  return (
+    <section
+      className="px-6 pt-24 pb-20 text-center"
+      style={{ background: 'var(--color-bg-base)' }}
+    >
+      <div className="max-w-[860px] mx-auto">
+        {/* Eyebrow */}
+        <div
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold mb-8 uppercase tracking-widest"
+          style={{
+            background: 'var(--color-secondary-subtle)',
+            color: 'var(--color-secondary-light)',
+            fontFamily: 'var(--font-mono)',
+            border: '1px solid rgba(99,102,241,0.2)',
+          }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-secondary)' }} />
+          Multi-Agent Visa Intelligence · SEA
+        </div>
 
-const NATIONALITIES = [
-  'Afghan', 'Albanian', 'Algerian', 'American', 'Andorran', 'Angolan', 'Argentine', 'Armenian', 'Australian', 'Austrian',
-  'Azerbaijani', 'Bahamian', 'Bahraini', 'Bangladeshi', 'Belarusian', 'Belgian', 'Belizean', 'Bolivian', 'Bosnian', 'Brazilian',
-  'British', 'Bulgarian', 'Cambodian', 'Canadian', 'Chilean', 'Chinese', 'Colombian', 'Costa Rican', 'Croatian', 'Cuban',
-  'Czech', 'Danish', 'Dominican', 'Dutch', 'Ecuadorian', 'Egyptian', 'Emirati', 'Estonian', 'Ethiopian', 'Filipino',
-  'Finnish', 'French', 'Georgian', 'German', 'Ghanaian', 'Greek', 'Guatemalan', 'Honduran', 'Hungarian', 'Indian',
-  'Indonesian', 'Iranian', 'Iraqi', 'Irish', 'Israeli', 'Italian', 'Jamaican', 'Japanese', 'Jordanian', 'Kazakhstani',
-  'Kenyan', 'Korean', 'Kuwaiti', 'Kyrgyzstani', 'Lao', 'Latvian', 'Lebanese', 'Lithuanian', 'Luxembourgish', 'Malaysian',
-  'Maldivian', 'Mexican', 'Moldovan', 'Mongolian', 'Moroccan', 'Mozambican', 'Myanmar', 'Namibian', 'Nepali', 'New Zealander',
-  'Nigerian', 'Norwegian', 'Omani', 'Pakistani', 'Panamanian', 'Paraguayan', 'Peruvian', 'Polish', 'Portuguese', 'Qatari',
-  'Romanian', 'Russian', 'Saudi', 'Senegalese', 'Serbian', 'Singaporean', 'Slovak', 'Slovenian', 'South African', 'Spanish',
-  'Sri Lankan', 'Swedish', 'Swiss', 'Taiwanese', 'Tajikistani', 'Thai', 'Tunisian', 'Turkish', 'Ugandan', 'Ukrainian',
-  'Uruguayan', 'Uzbekistani', 'Venezuelan', 'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean',
+        {/* H1 */}
+        <h1
+          className="text-5xl sm:text-6xl font-bold leading-tight mb-6"
+          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-body)' }}
+        >
+          Stop guessing. Know exactly where you stand.
+        </h1>
+
+        {/* Subhead */}
+        <p
+          className="text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          Official policy + recent enforcement changes + real traveler experience — synthesized
+          into one structured brief. Every claim sourced. Every recommendation confidence-scored.
+        </p>
+
+        {/* CTA */}
+        <div className="flex justify-center mb-8">
+          <Link
+            href="/app"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-colors"
+            style={{ background: 'var(--color-amber)', color: '#0A0A0A', fontFamily: 'var(--font-mono)' }}
+          >
+            Get your free brief
+          </Link>
+        </div>
+
+        {/* Metrics strip */}
+        <div
+          className="inline-flex items-center gap-6 px-6 py-3 rounded-lg border"
+          style={{
+            background: 'var(--color-bg-elevated)',
+            borderColor: 'var(--color-border)',
+            fontFamily: 'var(--font-mono)',
+          }}
+        >
+          {[
+            { value: '5', label: 'Agents' },
+            { value: '10', label: 'Countries' },
+            { value: 'T1–T4', label: 'Source tiers' },
+            { value: 'Per report', label: 'No subscription' },
+          ].map((m, i) => (
+            <div key={m.label} className="flex items-center gap-6">
+              {i > 0 && (
+                <div className="w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
+              )}
+              <div className="text-center">
+                <div className="text-sm font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
+                <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Features ──────────────────────────────────────────────────────────────
+
+const FEATURES = [
+  {
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    tag: 'Tier 1 Sources',
+    title: 'Official Policy, Verified',
+    body: 'Government immigration portals, embassy sites, and official advisories — pulled fresh and tagged by source tier. No outdated travel blogs.',
+  },
+  {
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    tag: 'Last 90 Days',
+    title: 'Recent Enforcement Reality',
+    body: 'Rules on paper vs. what border officers are actually doing. Community intelligence from Reddit, Nomad List, and expat forums — reconciled against official sources.',
+  },
+  {
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+    tag: 'Per Claim',
+    title: 'Confidence Scores + Citations',
+    body: 'Every claim sourced and confidence-scored. High confidence = two+ Tier 1 sources agree. Contested claims flagged explicitly. Nothing hidden.',
+  },
 ];
 
-// ─── Types ─────────────────────────────────────────────────────────────────
-
-type AgentStatusEntry = {
-  agent: string;
-  status: 'running' | 'complete' | 'failed';
-  confidence?: string;
-  sourceTier?: number;
-  durationMs?: number;
-  error?: string;
-};
-
-type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
-
-const AGENT_DISPLAY: Record<string, string> = {
-  officialPolicy:    'Official Policy',
-  recentChanges:     'Recent Changes',
-  communityIntel:    'Community Intel',
-  entryRequirements: 'Entry Requirements',
-  borderRun:         'Border Run',
-};
-
-// ─── Sub-components ────────────────────────────────────────────────────────
-
-function AgentRow({ entry }: { entry: AgentStatusEntry }) {
-  const statusStyle = {
-    running:  'border-[#2d5282] bg-[#f0f4f9]',
-    complete: 'border-gray-200 bg-white',
-    failed:   'border-red-200 bg-red-50',
-  };
-  const icon = { running: '⟳', complete: '✓', failed: '✕' };
-  const iconStyle = { running: 'text-[#1e3a5f] animate-spin', complete: 'text-green-600', failed: 'text-red-500' };
-  const confidenceColors: Record<string, string> = { high: 'bg-green-100 text-green-700', medium: 'bg-amber-100 text-amber-700', low: 'bg-red-100 text-red-700' };
-
+function Features() {
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border mb-1.5 transition-all ${statusStyle[entry.status]}`}
-         style={{ animation: entry.status === 'running' ? 'pulse-ring 1.5s ease infinite' : undefined }}>
-      <span className={`text-base ${iconStyle[entry.status]}`}>{icon[entry.status]}</span>
-      <span className="text-sm font-semibold text-gray-900 flex-1">
-        {AGENT_DISPLAY[entry.agent] ?? entry.agent}
-      </span>
-      {entry.status === 'running' && <span className="text-xs text-[#1e3a5f]">analyzing…</span>}
-      {entry.status === 'complete' && entry.confidence && (
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${confidenceColors[entry.confidence] ?? ''}`}>
-          {entry.confidence}
-        </span>
-      )}
-      {entry.status === 'complete' && entry.sourceTier && (
-        <span className={`font-mono text-xs px-2 py-0.5 rounded ${entry.sourceTier === 1 ? 'bg-[#e8eef5] text-[#1e3a5f] font-medium' : 'bg-gray-100 text-gray-500'}`}>
-          T{entry.sourceTier}
-        </span>
-      )}
-      {entry.status === 'complete' && entry.durationMs !== undefined && (
-        <span className="font-mono text-xs text-gray-400">{entry.durationMs}ms</span>
-      )}
-      {entry.status === 'failed' && <span className="text-xs text-red-500">failed</span>}
-    </div>
-  );
-}
+    <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
+      <div className="max-w-[1120px] mx-auto">
+        <SectionHeading subtitle="Five parallel intelligence agents. One structured brief. Contradictions resolved, not hidden.">
+          Intelligence Engine
+        </SectionHeading>
 
-// ─── Sign-in prompt ────────────────────────────────────────────────────────
-
-function SignInPrompt() {
-  return (
-    <div className="max-w-[560px] mx-auto text-center py-20">
-      <div className="mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#e8eef5] mb-4">
-          <svg className="w-8 h-8 text-[#1e3a5f]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
-          Sign in to generate briefs
-        </h1>
-        <p className="text-gray-500 text-sm leading-relaxed max-w-sm mx-auto">
-          VisaScout uses official immigration sources and AI agents to build you a personalised visa intelligence brief.
-        </p>
-      </div>
-      <SignInButton mode="modal">
-        <button className="px-6 py-3 rounded-lg font-semibold text-white text-sm transition-colors"
-                style={{ background: 'var(--color-navy)' }}>
-          Sign in to get started
-        </button>
-      </SignInButton>
-      <p className="mt-4 text-xs text-gray-400">
-        No account?{' '}
-        <a href="/sign-up" className="text-[#1e3a5f] font-medium hover:underline">
-          Create one free
-        </a>
-      </p>
-    </div>
-  );
-}
-
-// ─── Main page ─────────────────────────────────────────────────────────────
-
-function HomeContent() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const searchParams = useSearchParams();
-
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [nationality, setNationality] = useState('');
-  const [destination, setDestination] = useState('');
-  const [visaType, setVisaType] = useState('');
-  const [freeform, setFreeform] = useState('');
-  const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>('standard');
-  const [parsedSituation, setParsedSituation] = useState<VisaRequest | null>(null);
-  const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
-  const [brief, setBrief] = useState<VisaBrief | null>(null);
-  const [briefId, setBriefId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const isGenerating = phase === 'generating';
-  const wasCancelled = searchParams.get('cancelled') === 'true';
-
-  useEffect(() => {
-    if (wasCancelled) {
-      setError('Payment was cancelled. Your brief was not generated.');
-    }
-  }, [wasCancelled]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setAgentStatuses([]);
-    setParsedSituation(null);
-    setBrief(null);
-    setBriefId(null);
-    setCopied(false);
-    setError(null);
-
-    // Standard/Deep: redirect to Stripe Checkout
-    if (depth === 'standard' || depth === 'deep') {
-      setPhase('redirecting');
-      try {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
-        });
-        if (!res.ok) {
-          const err = await res.json() as { error?: string };
-          throw new Error(err.error ?? 'Failed to start checkout');
-        }
-        const { checkoutUrl } = await res.json() as { checkoutUrl: string };
-        window.location.href = checkoutUrl;
-        return;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.');
-        setPhase('error');
-        return;
-      }
-    }
-
-    // Quick: SSE flow (free)
-    setPhase('generating');
-    try {
-      const response = await fetch('/api/brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
-      });
-
-      if (!response.ok) {
-        const err = await response.json() as { error?: string };
-        throw new Error(err.error ?? 'Request failed');
-      }
-
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split('\n\n');
-        buffer = parts.pop() ?? '';
-
-        for (const part of parts) {
-          const line = part.trim();
-          if (!line.startsWith('data: ')) continue;
-          let data: Record<string, unknown>;
-          try { data = JSON.parse(line.slice(6)) as Record<string, unknown>; } catch { continue; }
-
-          switch (data.type) {
-            case 'parsed':
-              setParsedSituation(data.data as VisaRequest);
-              break;
-            case 'status': {
-              const entry = data as AgentStatusEntry;
-              setAgentStatuses(prev => {
-                const idx = prev.findIndex(a => a.agent === entry.agent);
-                return idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
-              });
-              break;
-            }
-            case 'complete':
-              setBrief(data.brief as VisaBrief);
-              if (data.briefId) setBriefId(data.briefId as string);
-              setPhase('complete');
-              break;
-            case 'error':
-              throw new Error(data.message as string);
-          }
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-      setPhase('error');
-    }
-  }
-
-  function handleReset() {
-    setPhase('idle');
-    setBrief(null);
-    setBriefId(null);
-    setCopied(false);
-    setParsedSituation(null);
-    setAgentStatuses([]);
-    setError(null);
-  }
-
-  async function handleCopyLink() {
-    if (!briefId) return;
-    const url = `${window.location.origin}/brief/${briefId}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore clipboard error
-    }
-  }
-
-  const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white">
-      <main className="max-w-[1120px] mx-auto px-6 py-12">
-        {!isSignedIn ? (
-          <SignInPrompt />
-        ) : (
-          <>
-            {/* ── Section 1: Input Form ── */}
-            {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
-              <div className="max-w-[560px] mx-auto">
-                <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
-                  Generate your visa brief
-                </h1>
-                <p className="text-gray-500 mb-8 text-sm">
-                  Official sources. Contradictions flagged. Confidence scored.
-                </p>
-
-                {error && (
-                  <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Nationality */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="nationality">
-                      Your Nationality
-                    </label>
-                    <select
-                      id="nationality"
-                      value={nationality}
-                      onChange={e => setNationality(e.target.value)}
-                      required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
-                    >
-                      <option value="">Select nationality…</option>
-                      {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Destination */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="destination">
-                      Destination
-                    </label>
-                    <select
-                      id="destination"
-                      value={destination}
-                      onChange={e => { setDestination(e.target.value); setVisaType(''); }}
-                      required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10"
-                    >
-                      <option value="">Select destination…</option>
-                      {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Visa Type — optional */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="visaType">
-                      Current Visa Type
-                      <span className="ml-1.5 text-xs font-normal text-gray-400">optional</span>
-                    </label>
-                    <select
-                      id="visaType"
-                      value={visaType}
-                      onChange={e => setVisaType(e.target.value)}
-                      disabled={!destination}
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 disabled:opacity-50"
-                    >
-                      <option value="">{destination ? 'Select visa type…' : 'Select destination first'}</option>
-                      {visaTypeOptions.map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                  </div>
-
-                  {/* Freeform */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5" htmlFor="freeform">
-                      Describe your situation
-                    </label>
-                    <textarea
-                      id="freeform"
-                      value={freeform}
-                      onChange={e => setFreeform(e.target.value)}
-                      required
-                      rows={4}
-                      maxLength={2000}
-                      placeholder="e.g. Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company."
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/10 resize-vertical leading-relaxed"
-                    />
-                    <p className="text-xs text-gray-400 mt-1 text-right">{freeform.length}/2000</p>
-                  </div>
-
-                  {/* Depth selector */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Research Depth</label>
-                    <div className="flex bg-gray-100 rounded-full p-1 gap-1">
-                      {(['quick', 'standard', 'deep'] as const).map(d => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => setDepth(d)}
-                          className={`flex-1 py-1.5 text-sm rounded-full font-medium transition-all ${
-                            depth === d
-                              ? 'bg-[#1e3a5f] text-white font-semibold shadow-sm'
-                              : 'text-gray-500 hover:text-gray-700'
-                          }`}
-                        >
-                          {d === 'quick' ? 'Quick' : d === 'standard' ? 'Standard' : 'Deep'}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1.5">
-                      {depth === 'quick' && 'Free · Fast results · 3 sources per agent'}
-                      {depth === 'standard' && '$2.99 · Balanced · 5 sources per agent'}
-                      {depth === 'deep' && '$5.99 · Thorough · 8 sources per agent · slower'}
-                    </p>
-                  </div>
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    disabled={phase === 'redirecting'}
-                    className="w-full py-3 rounded-lg font-semibold text-white text-base transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{ background: 'var(--color-navy)' }}
-                  >
-                    {phase === 'redirecting'
-                      ? 'Redirecting to checkout…'
-                      : depth === 'quick'
-                        ? 'Generate Brief — Free'
-                        : depth === 'standard'
-                          ? 'Generate Brief — $2.99'
-                          : 'Generate Brief — $5.99'
-                    }
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* ── Section 2: Parsed Confirmation ── */}
-            {parsedSituation && (phase === 'generating' || phase === 'complete') && (
-              <div className="max-w-[760px] mx-auto mb-6">
-                <div className="bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-1">We understood</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{parsedSituation.parsedSummary}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {FEATURES.map(f => (
+            <div
+              key={f.title}
+              className="brief-section p-6 rounded-xl border"
+              style={{
+                background: 'var(--color-bg-base)',
+                borderColor: 'var(--color-border)',
+                borderLeft: '3px solid var(--color-secondary)',
+                boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+              }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  style={{ background: 'var(--color-secondary-subtle)', color: 'var(--color-secondary-light)' }}
+                >
+                  {f.icon}
                 </div>
+                <span
+                  className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                  style={{
+                    background: 'var(--color-secondary-subtle)',
+                    color: 'var(--color-secondary-light)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {f.tag}
+                </span>
               </div>
-            )}
-
-            {/* ── Section 3: Agent Progress + Output ── */}
-            {(phase === 'generating' || phase === 'complete') && (
-              <div className="max-w-[760px] mx-auto">
-                {/* Agent progress */}
-                {agentStatuses.length > 0 && (
-                  <div className="mb-8">
-                    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Agent Status</p>
-                      {agentStatuses.map(entry => (
-                        <AgentRow key={entry.agent} entry={entry} />
-                      ))}
-                      {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
-                        <p className="text-xs text-gray-400 mt-2 text-center">Resolving conflicts and synthesizing brief…</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Generating spinner (before agents start) */}
-                {isGenerating && agentStatuses.length === 0 && (
-                  <div className="text-center py-12 text-gray-400 text-sm">
-                    <div className="inline-block w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin mb-3" />
-                    <p>Parsing your situation…</p>
-                  </div>
-                )}
-
-                {/* Brief output */}
-                {brief && (
-                  <div>
-                    <BriefRenderer brief={brief} />
-
-                    {/* Shareable link (only shown when persisted) */}
-                    {briefId && (
-                      <div className="mt-6 bg-[#f0f4f9] border border-[#c3d3e8] rounded-lg px-4 py-3 flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f] mb-0.5">Shareable link</p>
-                          <p className="text-sm text-gray-600 font-mono truncate">{`/brief/${briefId}`}</p>
-                        </div>
-                        <button
-                          onClick={handleCopyLink}
-                          className="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-white transition-colors"
-                        >
-                          {copied ? '✓ Copied' : 'Copy link'}
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 mt-4 max-w-[760px] mx-auto">
-                      <button
-                        onClick={() => window.print()}
-                        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors"
-                      >
-                        Download PDF
-                      </button>
-                      <button
-                        onClick={handleReset}
-                        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        New Brief
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </main>
-    </div>
+              <h3
+                className="text-sm font-bold mb-2 uppercase tracking-wider"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              >
+                {f.title}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                {f.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
-const LoadingSpinner = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin" />
-  </div>
-);
+// ─── Pipeline ──────────────────────────────────────────────────────────────
 
-export default function Home() {
+const AGENTS = [
+  { name: 'Official Policy', tier: 'T1', color: 'var(--color-secondary)' },
+  { name: 'Recent Changes', tier: 'T1–T2', color: 'var(--color-secondary)' },
+  { name: 'Community Intel', tier: 'T4', color: 'var(--color-secondary)' },
+  { name: 'Entry Requirements', tier: 'T1', color: 'var(--color-secondary)' },
+  { name: 'Border Run', tier: 'T1–T4', color: 'var(--color-secondary)' },
+];
+
+function Pipeline() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <HomeContent />
-    </Suspense>
+    <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
+      <div className="max-w-[1120px] mx-auto">
+        <SectionHeading subtitle="Every brief runs five agents in parallel. Results reconciled by a conflict resolver before synthesis.">
+          How It Works
+        </SectionHeading>
+
+        {/* Agent pipeline */}
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-6">
+          {AGENTS.map((agent, i) => (
+            <div key={agent.name} className="relative">
+              <div
+                className="brief-section p-4 rounded-lg border flex flex-col gap-2"
+                style={{
+                  background: 'var(--color-bg-elevated)',
+                  borderColor: 'var(--color-border)',
+                  borderLeft: '3px solid var(--color-secondary)',
+                  boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+                }}
+              >
+                <div
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  Agent {String(i + 1).padStart(2, '0')}
+                </div>
+                <div
+                  className="text-xs font-bold"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  {agent.name}
+                </div>
+                <span
+                  className="text-xs px-1.5 py-0.5 rounded w-fit"
+                  style={{
+                    background: 'var(--color-secondary-subtle)',
+                    color: 'var(--color-secondary-light)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {agent.tier}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
+// ─── Destinations ──────────────────────────────────────────────────────────
+
+const DESTINATIONS = [
+  'Thailand', 'Vietnam', 'Indonesia', 'Malaysia', 'Philippines',
+  'Cambodia', 'Singapore', 'Laos', 'Myanmar', 'Brunei',
+];
+
+function Destinations() {
+  return (
+    <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
+      <div className="max-w-[1120px] mx-auto">
+        <div className="flex items-start justify-between mb-12">
+          <div className="flex-1">
+            <h2
+              className="text-3xl font-bold mb-3"
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
+            >
+              <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
+              Coverage Matrix
+            </h2>
+            <div
+              className="mb-4 h-px"
+              style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
+            />
+            <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
+              Top 5–6 visa types per country. Unsupported types flagged — never guessed.
+            </p>
+          </div>
+          <span
+            className="hidden sm:flex items-center gap-2 ml-8 text-xs px-3 py-1.5 rounded font-bold uppercase tracking-widest"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              color: '#22c55e',
+              background: 'rgba(34,197,94,0.1)',
+              border: '1px solid rgba(34,197,94,0.2)',
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
+            Live
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {DESTINATIONS.map(name => (
+            <div
+              key={name}
+              className="brief-section p-4 rounded-lg border flex flex-col gap-2"
+              style={{
+                background: 'var(--color-bg-base)',
+                borderColor: 'var(--color-border)',
+                boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+              }}
+            >
+              <span
+                className="text-xs font-bold uppercase tracking-wider"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              >
+                {name}
+              </span>
+              <span
+                className="text-xs font-bold px-2 py-0.5 rounded inline-flex items-center gap-1 w-fit uppercase tracking-wider"
+                style={{
+                  background: 'rgba(34,197,94,0.12)',
+                  color: '#22c55e',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
+                Ready
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pricing ───────────────────────────────────────────────────────────────
+
+const PLANS = [
+  {
+    name: 'Quick',
+    tag: 'Free',
+    price: '$0',
+    priceNote: 'No credit card',
+    description: 'Full pipeline, all 5 agents, 3 sources each. Good for a fast overview.',
+    features: ['All 5 agents', '3 sources per agent', 'Visa brief', 'Shareable link'],
+    cta: 'Start free',
+    href: '/app',
+    highlight: false,
+  },
+  {
+    name: 'Standard',
+    tag: 'Popular',
+    price: '$5.99',
+    priceNote: 'Per report',
+    description: 'More sources, richer analysis, full conflict report, PDF download.',
+    features: ['All 5 agents', '5 sources per agent', 'Richer conflict analysis', 'PDF download', 'Shareable link'],
+    cta: 'Get Standard',
+    href: '/app',
+    highlight: true,
+  },
+  {
+    name: 'Deep',
+    tag: 'Max Intel',
+    price: '$11.99',
+    priceNote: 'Per report',
+    description: 'Everything in Standard, plus maximum sources and full border run analysis.',
+    features: ['Everything in Standard', '8 sources per agent', 'Extended community search', 'Full border run analysis', 'Conflict deep-dive'],
+    cta: 'Get Deep',
+    href: '/app',
+    highlight: false,
+  },
+];
+
+function Pricing() {
+  return (
+    <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
+      <div className="max-w-[1120px] mx-auto">
+        <SectionHeading subtitle="Less than a visa agency consultation. Far less than an overstay fine.">
+          Mission Parameters
+        </SectionHeading>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {PLANS.map(plan => (
+            <div
+              key={plan.name}
+              className="brief-section p-6 rounded-xl border flex flex-col"
+              style={{
+                background: 'var(--color-bg-elevated)',
+                borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
+                borderLeft: plan.highlight ? '3px solid var(--color-secondary)' : '3px solid var(--color-border)',
+                boxShadow: plan.highlight ? '0 0 24px rgba(99,102,241,0.12)' : '0 0 20px rgba(99,102,241,0.05)',
+              }}
+            >
+              {/* Plan header */}
+              <div className="flex items-center justify-between mb-4">
+                <span
+                  className="text-sm font-bold uppercase tracking-widest"
+                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  {plan.name}
+                </span>
+                <span
+                  className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                  style={{
+                    background: plan.highlight ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
+                    color: plan.highlight ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {plan.tag}
+                </span>
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-2 mb-1">
+                <span
+                  className="text-3xl font-bold"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  {plan.price}
+                </span>
+                <span
+                  className="text-sm"
+                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  {plan.priceNote}
+                </span>
+              </div>
+              <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                {plan.description}
+              </p>
+
+              {/* Features */}
+              <ul className="space-y-2 mb-8 flex-1">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    <svg className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-success)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <Link
+                href={plan.href}
+                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                style={{
+                  background: plan.highlight ? 'var(--color-secondary)' : 'transparent',
+                  color: plan.highlight ? '#fff' : 'var(--color-text-primary)',
+                  border: plan.highlight ? 'none' : '1px solid var(--color-border-strong)',
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                {plan.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────
+
+function Footer() {
+  return (
+    <footer
+      className="border-t px-6 py-12"
+      style={{ background: 'var(--color-bg-subtle)', borderColor: 'var(--color-border-muted)' }}
+    >
+      <div className="max-w-[1120px] mx-auto">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+          <div>
+            <span
+              className="text-base font-bold block mb-1 uppercase tracking-widest"
+              style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+            >
+              VisaScout
+            </span>
+            <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Visa intelligence for digital nomads.
+            </span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+              Terms
+            </Link>
+            <Link href="/contact" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+              Contact
+            </Link>
+          </div>
+        </div>
+
+        <div className="border-t pt-6" style={{ borderColor: 'var(--color-border-muted)' }}>
+          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
+            ⚠ This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
+          </p>
+          <p
+            className="text-xs"
+            style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
+          >
+            © {new Date().getFullYear()} VisaScout · All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────
+
+export default function LandingPage() {
+  return (
+    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+      <LandingNav />
+      <Hero />
+      <Features />
+      <Pipeline />
+      <Destinations />
+      <Pricing />
+      <Footer />
+    </div>
   );
 }

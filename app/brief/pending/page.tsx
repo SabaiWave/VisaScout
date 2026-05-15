@@ -3,8 +3,19 @@
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-const MAX_WAIT_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_WAIT_MS = 10 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
+
+const MONO: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
+
+const PAGE: React.CSSProperties = {
+  background: 'var(--color-bg-base)',
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 1.5rem',
+};
 
 function PendingContent() {
   const router = useRouter();
@@ -49,33 +60,38 @@ function PendingContent() {
 
   if (!briefId) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500 text-sm">No brief ID found.</p>
+      <div style={PAGE}>
+        <p className="text-sm" style={{ color: 'var(--color-text-tertiary)', ...MONO }}>No brief ID found.</p>
       </div>
     );
   }
 
   if (timedOut) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div style={PAGE}>
         <div className="max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 mb-5">
-            <span className="text-amber-600 text-2xl">⏱</span>
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 mb-5"
+            style={{ background: 'rgba(245,158,11,0.1)', borderRadius: '4px' }}
+          >
+            <span style={{ color: 'var(--color-warning)', fontSize: '1.5rem' }}>⏱</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-            This is taking longer than expected
+          <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)', ...MONO }}>
+            Taking longer than expected
           </h1>
-          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             Your payment was received. Your brief may still be generating — try refreshing in a few minutes,
             or contact support at{' '}
-            <a href="mailto:support@visascout.io" className="text-[#1e3a5f] underline">
+            <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
               support@visascout.io
             </a>{' '}
-            with reference: <span className="font-mono text-xs">{briefId}</span>
+            with reference:{' '}
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>
           </p>
           <button
             onClick={() => router.push('/')}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider border transition-colors"
+            style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', borderRadius: '4px', ...MONO }}
           >
             Back to home
           </button>
@@ -86,25 +102,30 @@ function PendingContent() {
 
   if (pipelineError) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div style={PAGE}>
         <div className="max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mb-5">
-            <span className="text-red-600 text-2xl">✕</span>
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 mb-5"
+            style={{ background: 'rgba(239,68,68,0.1)', borderRadius: '4px' }}
+          >
+            <span style={{ color: 'var(--color-error)', fontSize: '1.5rem' }}>✕</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)', ...MONO }}>
             Brief generation failed
           </h1>
-          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+          <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             Your payment was received, but the pipeline encountered an error. We will refund your payment.
             Contact{' '}
-            <a href="mailto:support@visascout.io" className="text-[#1e3a5f] underline">
+            <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
               support@visascout.io
             </a>{' '}
-            with reference: <span className="font-mono text-xs">{briefId}</span>
+            with reference:{' '}
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>
           </p>
           <button
             onClick={() => router.push('/')}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider border transition-colors"
+            style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', borderRadius: '4px', ...MONO }}
           >
             Back to home
           </button>
@@ -114,26 +135,38 @@ function PendingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6">
+    <div style={PAGE}>
       <div className="max-w-sm text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#e8eef5] mb-5">
-          <div className="w-6 h-6 border-2 border-[#c3d3e8] border-t-[#1e3a5f] rounded-full animate-spin" />
+        <div
+          className="inline-flex items-center justify-center w-14 h-14 mb-5"
+          style={{ background: 'var(--color-bg-elevated)', borderRadius: '4px' }}
+        >
+          <div
+            className="w-6 h-6 rounded-full animate-spin"
+            style={{
+              border: '2px solid var(--color-border-strong)',
+              borderTopColor: 'var(--color-secondary)',
+            }}
+          />
         </div>
-        <h1 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-navy)' }}>
+        <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)', ...MONO }}>
           Generating your brief
         </h1>
-        <p className="text-gray-500 text-sm leading-relaxed mb-1">
+        <p className="text-sm leading-relaxed mb-1" style={{ color: 'var(--color-text-secondary)' }}>
           Payment confirmed. Our agents are researching your situation now.
         </p>
-        <p className="text-xs text-gray-400">This takes 2–4 minutes. Don&apos;t close this tab.</p>
+        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>This takes 2–4 minutes. Don&apos;t close this tab.</p>
       </div>
     </div>
   );
 }
 
 const PendingSpinner = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-gray-200 border-t-[#1e3a5f] rounded-full animate-spin" />
+  <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      className="w-6 h-6 rounded-full animate-spin"
+      style={{ border: '2px solid var(--color-border-strong)', borderTopColor: 'var(--color-secondary)' }}
+    />
   </div>
 );
 
