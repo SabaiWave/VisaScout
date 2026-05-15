@@ -2,21 +2,68 @@
 
 :root {
   /* Primary */
-  --color-navy:        #1e3a5f;
-  --color-navy-dark:   #152d4a;
-  --color-navy-light:  #2d5282;
+  --color-primary: #FFFFFF;
 
-  /* Accent — urgency only */
-  --color-amber:       #f59e0b;
-  --color-amber-light: #fef3c7;
-  --color-amber-dark:  #d97706;
+  /* Secondary — indigo, all interactive elements */
+  --color-secondary:        #6366F1;
+  --color-secondary-dark:   #4f46e5;
+  --color-secondary-light:  #818cf8;
+  --color-secondary-subtle: #1e1e3a;
+
+  /* Tertiary — purple, AI/ML features only */
+  --color-tertiary:         #A855F7;
+  --color-tertiary-dark:    #9333ea;
+  --color-tertiary-subtle:  #1e1028;
+
+  /* Neutral — base background */
+  --color-neutral: #0A0A0A;
+
+  /* Dark surface system */
+  --color-bg-base:     #0A0A0A;
+  --color-bg-elevated: #111118;
+  --color-bg-overlay:  #1a1a24;
+  --color-bg-subtle:   #16161f;
+
+  /* Borders */
+  --color-border:        #1e1e2e;
+  --color-border-muted:  #161622;
+  --color-border-strong: #2a2a3d;
+
+  /* Navy — brand identity only (wordmark) */
+  --color-navy:       #1e3a5f;
+  --color-navy-light: #2d5282;
+
+  /* Amber — urgency only */
+  --color-amber:        #f59e0b;
+  --color-amber-light:  #fef3c7;
+  --color-amber-dark:   #d97706;
+  --color-amber-subtle: #2a1f00;
 
   /* Confidence */
-  --color-confidence-high:   #16a34a;
+  --color-confidence-high:   #22c55e;
   --color-confidence-medium: #f59e0b;
-  --color-confidence-low:    #dc2626;
+  --color-confidence-low:    #ef4444;
 
-  /* Neutrals */
+  /* Status */
+  --color-status-ready:     #22c55e;
+  --color-status-progress:  #6366F1;
+  --color-status-attention: #ef4444;
+  --color-status-new:       #f59e0b;
+  --color-status-congested: #A855F7;
+
+  /* Text */
+  --color-text-primary:   #FFFFFF;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary:  #64748b;
+
+  /* Semantic */
+  --color-error:      #ef4444;
+  --color-success:    #22c55e;
+  --color-warning:    #f59e0b;
+  --color-focus-ring: #6366F1;
+
+  /* Legacy light mode (PDF output only) */
+  --color-white:    #ffffff;
   --color-gray-50:  #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
@@ -25,23 +72,35 @@
   --color-gray-700: #374151;
   --color-gray-900: #111827;
 
-  /* Semantic */
-  --color-error:      #dc2626;
-  --color-success:    #16a34a;
-  --color-border:     #e5e7eb;
-  --color-focus-ring: #1e3a5f;
+  /* Shadows */
+  --shadow-sm:     0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md:     0 4px 6px rgba(0,0,0,0.5);
+  --shadow-lg:     0 10px 15px rgba(0,0,0,0.6);
+  --shadow-indigo: 0 0 0 3px rgba(99, 102, 241, 0.2);
+
+  /* Radius */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-full: 9999px;
+
+  /* Max widths */
+  --max-width-form:  560px;
+  --max-width-brief: 760px;
+  --max-width-page:  1120px;
 }
 
 body {
-  background: white;
-  color: var(--color-gray-900);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
-/* Agent row pulse animation for running state */
+/* Agent row pulse animation */
 @keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0.25); }
-  70%  { box-shadow: 0 0 0 6px rgba(30, 58, 95, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(30, 58, 95, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3); }
+  70%  { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
 }
 
 /* Brief section fade-in */
@@ -52,4 +111,106 @@ body {
 
 .brief-section {
   animation: fade-up 300ms ease forwards;
+}
+.brief-section:nth-child(1) { animation-delay: 0ms; }
+.brief-section:nth-child(2) { animation-delay: 60ms; }
+.brief-section:nth-child(3) { animation-delay: 120ms; }
+.brief-section:nth-child(4) { animation-delay: 180ms; }
+.brief-section:nth-child(5) { animation-delay: 240ms; }
+
+/* Global transitions */
+* { transition-duration: 150ms; transition-timing-function: ease; }
+
+/* Clerk UI — force readable text across all surfaces on dark theme */
+[class*="cl-"] {
+  --cl-color-text: #F4F4F5 !important;
+}
+
+/* Nuclear: strip opacity dimming from ALL Clerk surfaces */
+.cl-card, .cl-card *,
+.cl-modalContent, .cl-modalContent *,
+.cl-modal, .cl-modal *,
+.cl-userButtonPopoverCard, .cl-userButtonPopoverCard *,
+[class*="cl-userProfile"], [class*="cl-userProfile"] *,
+[class*="cl-navbar"], [class*="cl-navbar"] * {
+  opacity: 1 !important;
+}
+
+/* Navbar header text specifically */
+[class*="cl-navbar"] {
+  color: #F4F4F5;
+}
+[class*="cl-navbar"] * {
+  color: #F4F4F5 !important;
+}
+.cl-profilePage, .cl-userProfile-root {
+  color: #F4F4F5;
+}
+
+/* Sidebar nav items */
+.cl-navbarButton, .cl-navbarButton * {
+  color: #A1A1AA !important;
+  opacity: 1 !important;
+}
+/* Sidebar nav hover — subtle indigo tint, NOT dark */
+.cl-navbarButton:hover, .cl-navbarButton:hover * {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+  color: #F4F4F5 !important;
+}
+
+/* Close button */
+.cl-closeButton, .cl-modalCloseButton {
+  color: #A1A1AA !important;
+  opacity: 1 !important;
+}
+.cl-closeButton:hover, .cl-modalCloseButton:hover {
+  color: #F4F4F5 !important;
+  opacity: 1 !important;
+}
+
+/* Profile section text */
+.cl-profileSectionTitle, .cl-profileSectionTitle * {
+  color: #F4F4F5 !important;
+  opacity: 1 !important;
+}
+.cl-profileSectionContent, .cl-profileSectionContent * {
+  color: #A1A1AA !important;
+  opacity: 1 !important;
+}
+
+/* Device list */
+.cl-activeDevice, .cl-activeDevice * {
+  color: #A1A1AA !important;
+  opacity: 1 !important;
+}
+.cl-activeDevice [data-device-name], .cl-activeDevice strong {
+  color: #F4F4F5 !important;
+}
+
+/* UserButton popover action items */
+.cl-userButtonPopoverActionButton, .cl-userButtonPopoverActionButton * {
+  color: #F4F4F5 !important;
+  opacity: 1 !important;
+}
+.cl-userButtonPopoverActionButton:hover {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+}
+
+/* Brief action buttons */
+.btn-brief-primary:hover   { background: var(--color-secondary-light) !important; }
+.btn-brief-secondary:hover { background: rgba(255, 255, 255, 0.06) !important; }
+.btn-brief-ghost:hover     { background: rgba(255, 255, 255, 0.04) !important; color: var(--color-text-primary) !important; }
+
+/* HUD card hover glow */
+.brief-section {
+  transition: box-shadow 200ms ease;
+}
+.brief-section:hover {
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
 }
