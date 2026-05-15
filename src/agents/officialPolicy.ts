@@ -15,6 +15,7 @@ export async function officialPolicyAgent(
 ): Promise<AgentResult<OfficialPolicyOutput>> {
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
+  const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
 
   // Country-specific Tier 1 official immigration domains
   const officialDomains: Record<string, string[]> = {
@@ -51,7 +52,7 @@ export async function officialPolicyAgent(
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 4096,
+      max_tokens: agentMaxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
 

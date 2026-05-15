@@ -1,11 +1,13 @@
 import { getSupabase } from './supabase';
 import type { VisaBrief, VisaRequest } from '../types/index';
+import type { ReportCost } from './cost';
 
 export interface SaveBriefInput {
   visaRequest: VisaRequest;
   brief: VisaBrief;
   depth: 'quick' | 'standard' | 'deep';
   userId?: string;
+  cost?: ReportCost;
 }
 
 export interface ShellBriefInput {
@@ -43,6 +45,7 @@ export interface UpdateBriefContentInput {
   brief: VisaBrief;
   stripeSessionId: string;
   paymentStatus: 'paid' | 'error';
+  cost?: ReportCost;
 }
 
 export async function updateBriefWithContent(input: UpdateBriefContentInput): Promise<void> {
@@ -57,13 +60,19 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
       degraded: input.brief.metadata.degraded,
       stripe_session_id: input.stripeSessionId,
       payment_status: input.paymentStatus,
+      ...(input.cost && {
+        total_tokens_input:  input.cost.totalInputTokens,
+        total_tokens_output: input.cost.totalOutputTokens,
+        tavily_searches:     input.cost.totalTavilySearches,
+        estimated_cost_usd:  input.cost.estimatedCostUsd,
+      }),
     })
     .eq('id', input.briefId);
 
   if (error) throw new Error(`Failed to update brief: ${error.message}`);
 }
 
-export async function saveBrief({ visaRequest, brief, depth, userId }: SaveBriefInput): Promise<string> {
+export async function saveBrief({ visaRequest, brief, depth, userId, cost }: SaveBriefInput): Promise<string> {
   const { data, error } = await getSupabase()
     .from('briefs')
     .insert({
@@ -79,6 +88,12 @@ export async function saveBrief({ visaRequest, brief, depth, userId }: SaveBrief
       degraded: brief.metadata.degraded,
       depth,
       user_id: userId ?? null,
+      ...(cost && {
+        total_tokens_input:  cost.totalInputTokens,
+        total_tokens_output: cost.totalOutputTokens,
+        tavily_searches:     cost.totalTavilySearches,
+        estimated_cost_usd:  cost.estimatedCostUsd,
+      }),
     })
     .select('id')
     .single();
