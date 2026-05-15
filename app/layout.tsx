@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://visascout.io';
 
 export const metadata: Metadata = {
   title: 'VisaScout — Visa intelligence for digital nomads',
