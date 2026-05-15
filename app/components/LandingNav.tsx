@@ -27,7 +27,7 @@ export function LandingNav() {
             <>
               <Link
                 href="/app"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-colors"
+                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
               >
                 Generate Brief
@@ -38,14 +38,14 @@ export function LandingNav() {
             <>
               <Link
                 href="/sign-in"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-colors"
+                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
                 style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
               >
                 Sign in
               </Link>
               <Link
                 href="/sign-up"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-colors"
+                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
               >
                 Get Started

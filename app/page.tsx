@@ -45,7 +45,7 @@ function Hero() {
             border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-secondary)' }} />
+          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: '#22c55e' }} />
           Multi-Agent Visa Intelligence · SEA
         </div>
 
@@ -70,7 +70,7 @@ function Hero() {
         <div className="flex justify-center mb-8">
           <Link
             href="/app"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-colors"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
             style={{ background: 'var(--color-amber)', color: '#0A0A0A', fontFamily: 'var(--font-mono)' }}
           >
             Get your free brief
@@ -97,8 +97,8 @@ function Hero() {
                 <div className="w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
               )}
               <div className="text-center">
-                <div className="text-sm font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
-                <div className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
+                <div className="text-lg font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
+                <div className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
               </div>
             </div>
           ))}
@@ -230,13 +230,13 @@ function Pipeline() {
                 }}
               >
                 <div
-                  className="text-xs font-bold uppercase tracking-wider"
+                  className="text-sm font-bold uppercase tracking-wider"
                   style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
                 >
                   Agent {String(i + 1).padStart(2, '0')}
                 </div>
                 <div
-                  className="text-xs font-bold"
+                  className="text-sm font-bold"
                   style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
                 >
                   {agent.name}
@@ -315,7 +315,7 @@ function Destinations() {
               }}
             >
               <span
-                className="text-xs font-bold uppercase tracking-wider"
+                className="text-sm font-bold uppercase tracking-wider"
                 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
               >
                 {name}
@@ -451,7 +451,7 @@ function Pricing() {
               {/* CTA */}
               <Link
                 href={plan.href}
-                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{
                   background: plan.highlight ? 'var(--color-secondary)' : 'transparent',
                   color: plan.highlight ? '#fff' : 'var(--color-text-primary)',
