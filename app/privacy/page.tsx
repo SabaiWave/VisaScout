@@ -102,12 +102,11 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>11. Contact</h2>
             <p>
-              Privacy questions:{' '}
-              <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-                hello@visascout.io
-              </a>
-              <br />
-              Sabai Wave LLC
+              Privacy questions?{' '}
+              <Link href="/contact" style={{ color: 'var(--color-secondary-light)' }}>
+                Contact us
+              </Link>
+              .
             </p>
           </section>
         </div>
