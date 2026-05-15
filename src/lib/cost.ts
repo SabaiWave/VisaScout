@@ -5,6 +5,13 @@ export interface AgentUsage {
   tavilySearches: number;
 }
 
+export interface ReportCost {
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalTavilySearches: number;
+  estimatedCostUsd: number;
+}
+
 const usageLog: AgentUsage[] = [];
 
 // claude-sonnet-4-6 pricing (per 1M tokens)
@@ -27,6 +34,18 @@ export function estimateCost(usage: AgentUsage): number {
   const outputCost = (usage.outputTokens / 1_000_000) * OUTPUT_COST_PER_M;
   const tavilyCost = usage.tavilySearches * TAVILY_COST_PER_SEARCH;
   return inputCost + outputCost + tavilyCost;
+}
+
+export function calculateReportCost(usages: AgentUsage[]): ReportCost {
+  const totalInputTokens = usages.reduce((sum, u) => sum + u.inputTokens, 0);
+  const totalOutputTokens = usages.reduce((sum, u) => sum + u.outputTokens, 0);
+  const totalTavilySearches = usages.reduce((sum, u) => sum + u.tavilySearches, 0);
+  const estimatedCostUsd = usages.reduce((sum, u) => sum + estimateCost(u), 0);
+  return { totalInputTokens, totalOutputTokens, totalTavilySearches, estimatedCostUsd };
+}
+
+export function getUsageLog(): AgentUsage[] {
+  return [...usageLog];
 }
 
 export function printCostSummary(): void {

@@ -10,7 +10,8 @@
       "Skill(start)",
       "Skill(start:*)",
       "Bash(echo \"Exit: $?\")",
-      "Bash(xargs cat -n)"
+      "Bash(xargs cat -n)",
+      "Bash(supabase --version)"
     ]
   }
 }

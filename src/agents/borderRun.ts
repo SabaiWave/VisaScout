@@ -15,6 +15,7 @@ export async function borderRunAgent(
 ): Promise<AgentResult<BorderRunOutput>> {
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
+  const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
 
   try {
     const [officialResults, communityResults] = await Promise.all([
@@ -46,7 +47,7 @@ export async function borderRunAgent(
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 3000,
+      max_tokens: agentMaxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
 

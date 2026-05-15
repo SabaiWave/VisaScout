@@ -6,28 +6,13 @@ import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
 import { saveBrief } from '@/src/lib/saveBrief';
+import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse } from '@/src/lib/freeTier';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
-
-// In-memory rate limiter — sufficient for local dev/MVP; upgrade to Upstash for production
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60 * 60 * 1000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
-}
 
 function sseEvent(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
@@ -43,13 +28,6 @@ export async function POST(req: Request) {
   }
 
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
-
-  if (!checkRateLimit(ip)) {
-    return new Response(JSON.stringify({ error: 'Rate limit exceeded. Try again in an hour.' }), {
-      status: 429,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
 
   let body: unknown;
   try {
@@ -74,6 +52,24 @@ export async function POST(req: Request) {
   const resolvedDepth = validDepths.includes(depth as 'quick' | 'standard' | 'deep')
     ? (depth as 'quick' | 'standard' | 'deep')
     : 'standard';
+
+  // Free tier daily cap — enforced per userId via Supabase (not IP; resets on cold start)
+  if (resolvedDepth === 'quick' && !DRY_RUN) {
+    try {
+      const cap = await checkFreeTierCap(userId);
+      if (!cap.allowed) {
+        await logIpAbuse(ip, userId, 'free_tier_daily_cap_exceeded').catch(() => {});
+        return new Response(
+          JSON.stringify({ error: 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (capErr) {
+      log.error('free tier cap check failed — allowing request', { error: capErr instanceof Error ? capErr.message : String(capErr) });
+    }
+  }
+
+  resetUsage();
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -117,19 +113,33 @@ export async function POST(req: Request) {
         send({ type: 'conflict', data: conflictReport });
 
         const brief = await synthesizeBrief(envelope, conflictReport, client, resolvedDepth, startTime);
+        const cost = calculateReportCost(getUsageLog());
 
         let briefId: string | undefined;
         if (capturedVisaRequest) {
           try {
-            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId });
+            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId, cost });
           } catch (saveErr) {
             log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
         }
 
+        // Increment free tier counter after successful brief
+        if (resolvedDepth === 'quick') {
+          incrementFreeTierCount(userId).catch((err) => {
+            log.error('free tier count increment failed', { error: err instanceof Error ? err.message : String(err) });
+          });
+        }
+
         send({ type: 'complete', brief, briefId });
 
-        log.info('pipeline complete', { destination, depth: resolvedDepth, durationMs: Date.now() - startTime, degraded: brief.metadata.degraded, briefId });
+        log.info('pipeline complete', {
+          destination, depth: resolvedDepth,
+          durationMs: Date.now() - startTime,
+          degraded: brief.metadata.degraded,
+          briefId,
+          estimatedCostUsd: cost.estimatedCostUsd.toFixed(4),
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Pipeline failed';
         log.error('pipeline error', { error: message, destination, depth: resolvedDepth });
