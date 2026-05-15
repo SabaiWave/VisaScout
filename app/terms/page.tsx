@@ -102,10 +102,11 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>12. Contact</h2>
             <p>
-              Questions about these Terms:{' '}
-              <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-                hello@visascout.io
-              </a>
+              Questions about these Terms?{' '}
+              <Link href="/contact" style={{ color: 'var(--color-secondary-light)' }}>
+                Contact us
+              </Link>
+              .
             </p>
           </section>
         </div>
