@@ -6,7 +6,9 @@
 |---|---|
 | `src/__tests__/lib/sourceTier.test.ts` | `classifySourceTier()` and `highestTier()` — tier assignment for .gov, .go.th, iata.org, visahq.com, reddit.com, and unknown domains |
 | `src/__tests__/lib/parseJSON.test.ts` | `parseJSON()` — strips ` ```json ``` ` and ` ``` ``` ` fences from LLM responses, passes clean JSON unchanged, handles edge cases |
-| `src/__tests__/lib/cost.test.ts` | `estimateCost()`, `recordUsage()`, `printCostSummary()`, `resetUsage()` — token cost tracking for claude-sonnet-4-6 and Tavily searches |
+| `src/__tests__/lib/cost.test.ts` | `estimateCost()`, `recordUsage()`, `printCostSummary()`, `resetUsage()`, `calculateReportCost()`, `getUsageLog()` — token cost tracking, report cost aggregation, log snapshot isolation |
+| `src/__tests__/lib/freeTier.test.ts` | `checkFreeTierCap()`, `incrementFreeTierCount()`, `logIpAbuse()` — userId daily limit (1 Quick/day), RPC increment, IP abuse log insert |
+| `src/__tests__/api/webhooks/stripe.test.ts` | Stripe webhook queue flow — signature validation, idempotency guard, job insert into brief_jobs, duplicate-key handling, 200-immediately response |
 | `src/__tests__/synthesis/conflictResolver.test.ts` | `resolveConflicts()` — Tier 1 beats Tier 4, contested flagging, unverified output, all-agents-failed fallback, invalid JSON graceful fallback |
 | `src/__tests__/agents/officialPolicy.test.ts` | `runOfficialPolicyAgent()` — success path with fixture data, required output fields, failure-never-throws, official domain bias |
 | `src/__tests__/agents/recentChanges.test.ts` | `runRecentChangesAgent()` — success path, 90-day date filter, required output fields, failure-never-throws |

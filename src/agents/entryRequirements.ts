@@ -15,6 +15,7 @@ export async function entryRequirementsAgent(
 ): Promise<AgentResult<EntryRequirementsOutput>> {
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
+  const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
 
   try {
     const results = await tavilySearch(
@@ -39,7 +40,7 @@ export async function entryRequirementsAgent(
 
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 3000,
+      max_tokens: agentMaxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
 

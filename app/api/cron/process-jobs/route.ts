@@ -1,4 +1,3 @@
-import { waitUntil } from '@vercel/functions';
 import Anthropic from '@anthropic-ai/sdk';
 import { getSupabase } from '@/src/lib/supabase';
 import { runOrchestrator } from '@/src/orchestrator';
@@ -11,21 +10,66 @@ import { log } from '@/src/lib/logger';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
+// Generous timeout — deep pipeline can take 200–240s
 export const maxDuration = 300;
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
-async function runPipeline(jobId: string, briefId: string) {
+export async function GET(req: Request) {
+  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
+  // In local dev CRON_SECRET is not set, so skip the check
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret) {
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  // Pick up one pending job at a time — claim it atomically
+  const { data: jobs, error: fetchError } = await getSupabase()
+    .from('brief_jobs')
+    .select('id, brief_id')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+    .limit(1);
+
+  if (fetchError) {
+    log.error('cron: failed to fetch pending jobs', { error: fetchError.message });
+    return Response.json({ error: fetchError.message }, { status: 500 });
+  }
+
+  if (!jobs || jobs.length === 0) {
+    return Response.json({ ok: true, processed: 0 });
+  }
+
+  const job = jobs[0] as { id: string; brief_id: string };
+
+  // Claim the job — if another cron invocation already claimed it, skip
+  const { data: claimed, error: claimError } = await getSupabase()
+    .from('brief_jobs')
+    .update({ status: 'processing', started_at: new Date().toISOString() })
+    .eq('id', job.id)
+    .eq('status', 'pending')  // Only claim if still pending
+    .select('id');
+
+  if (claimError || !claimed || claimed.length === 0) {
+    log.info('cron: job already claimed, skipping', { jobId: job.id });
+    return Response.json({ ok: true, processed: 0 });
+  }
+
   const { data: briefRow, error: briefFetchError } = await getSupabase()
     .from('briefs')
     .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id')
-    .eq('id', briefId)
+    .eq('id', job.brief_id)
     .single();
 
   if (briefFetchError || !briefRow) {
-    await failJob(jobId, briefId, 'Brief not found');
-    return;
+    await failJob(job.id, job.brief_id, 'Brief not found');
+    return Response.json({ ok: false, error: 'Brief not found' }, { status: 404 });
   }
+
+  log.info('cron: processing job', { jobId: job.id, briefId: job.brief_id, destination: briefRow.destination });
 
   resetUsage();
 
@@ -57,7 +101,7 @@ async function runPipeline(jobId: string, briefId: string) {
     const cost = calculateReportCost(getUsageLog());
 
     await updateBriefWithContent({
-      briefId,
+      briefId: job.brief_id,
       visaRequest: visaRequest!,
       brief,
       stripeSessionId: briefRow.stripe_session_id ?? '',
@@ -68,13 +112,16 @@ async function runPipeline(jobId: string, briefId: string) {
     await getSupabase()
       .from('brief_jobs')
       .update({ status: 'done', completed_at: new Date().toISOString() })
-      .eq('id', jobId);
+      .eq('id', job.id);
 
-    log.info('poll: job complete', { jobId, briefId, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
+    log.info('cron: job complete', { jobId: job.id, briefId: job.brief_id, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
+    return Response.json({ ok: true, processed: 1, briefId: job.brief_id });
+
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    log.error('poll: job failed', { jobId, briefId, error: message });
-    await failJob(jobId, briefId, message);
+    log.error('cron: job failed', { jobId: job.id, briefId: job.brief_id, error: message });
+    await failJob(job.id, job.brief_id, message);
+    return Response.json({ ok: false, error: message }, { status: 500 });
   }
 }
 
@@ -89,58 +136,4 @@ async function failJob(jobId: string, briefId: string, error: string): Promise<v
       .update({ payment_status: 'error' })
       .eq('id', briefId),
   ]);
-}
-
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const briefId = searchParams.get('brief_id');
-
-  if (!briefId) {
-    return new Response(JSON.stringify({ error: 'brief_id is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const { data, error } = await getSupabase()
-    .from('briefs')
-    .select('id, payment_status')
-    .eq('id', briefId)
-    .single();
-
-  if (error || !data) {
-    return new Response(JSON.stringify({ status: 'not_found' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  // First poll after payment — claim the job and fire pipeline in background
-  if (data.payment_status === 'queued') {
-    const { data: job } = await getSupabase()
-      .from('brief_jobs')
-      .select('id')
-      .eq('brief_id', briefId)
-      .eq('status', 'pending')
-      .single();
-
-    if (job) {
-      const { data: claimed } = await getSupabase()
-        .from('brief_jobs')
-        .update({ status: 'processing', started_at: new Date().toISOString() })
-        .eq('id', job.id)
-        .eq('status', 'pending')
-        .select('id');
-
-      if (claimed && claimed.length > 0) {
-        log.info('poll: claimed job, firing pipeline', { jobId: job.id, briefId });
-        waitUntil(runPipeline(job.id, briefId));
-      }
-    }
-  }
-
-  return new Response(JSON.stringify({ status: data.payment_status, briefId: data.id }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }

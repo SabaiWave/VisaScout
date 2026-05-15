@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const MAX_WAIT_MS = 10 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
+const MIN_DISPLAY_MS = 6000;
 
 const MONO: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
@@ -40,7 +41,10 @@ function PendingContent() {
         const data = await res.json() as { status: string; briefId?: string };
 
         if (data.status === 'paid') {
-          router.replace(`/brief/${briefId}`);
+          const isDryRun = process.env.NEXT_PUBLIC_DRY_RUN === 'true';
+          const elapsed = Date.now() - startTime.current;
+          const delay = isDryRun ? 0 : Math.max(0, MIN_DISPLAY_MS - elapsed);
+          setTimeout(() => router.replace(`/brief/${briefId}`), delay);
           return;
         }
         if (data.status === 'error') {
