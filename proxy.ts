@@ -1,21 +1,14 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/terms',
-  '/privacy',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/brief/(.*)',
-  '/api/webhooks/(.*)',   // Stripe webhooks — no auth headers
-  '/api/brief/poll',     // Brief status polling — UUID is the access token
-  '/api/debug/(.*)',     // Debug endpoints — protected by DEBUG_ALLOWED env var inside the route
+const isProtectedRoute = createRouteMatcher([
+  '/app(.*)',
+  '/api/brief(.*)',
 ]);
 
 const isApiRoute = createRouteMatcher(['/api/(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req)) return;
+  if (!isProtectedRoute(req)) return;
 
   const { userId } = await auth();
 
@@ -26,7 +19,6 @@ export default clerkMiddleware(async (auth, req) => {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    // Page routes — redirect to sign-in
     await auth.protect();
   }
 });
