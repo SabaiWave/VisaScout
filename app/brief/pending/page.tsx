@@ -82,8 +82,8 @@ function PendingContent() {
           <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             Your payment was received. Your brief may still be generating — try refreshing in a few minutes,
             or contact support at{' '}
-            <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-              support@visascout.io
+            <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
+              hello@visascout.io
             </a>{' '}
             with reference:{' '}
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>
@@ -116,8 +116,8 @@ function PendingContent() {
           <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             Your payment was received, but the pipeline encountered an error. We will refund your payment.
             Contact{' '}
-            <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-              support@visascout.io
+            <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
+              hello@visascout.io
             </a>{' '}
             with reference:{' '}
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>

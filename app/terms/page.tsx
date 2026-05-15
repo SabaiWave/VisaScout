@@ -66,7 +66,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>5. Payment and Refunds</h2>
-            <p>Paid reports are charged per report at the time of generation. Refunds are not available once a report has been generated. If a technical error prevents delivery, contact support@visascout.io for resolution.</p>
+            <p>Paid reports are charged per report at the time of generation. Refunds are not available once a report has been generated. If a technical error prevents delivery, reach out via our <a href="/contact" style={{ color: 'var(--color-secondary-light)' }}>contact form</a> for resolution.</p>
           </section>
 
           <section>
@@ -103,8 +103,8 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>12. Contact</h2>
             <p>
               Questions about these Terms:{' '}
-              <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-                support@visascout.io
+              <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
+                hello@visascout.io
               </a>
             </p>
           </section>

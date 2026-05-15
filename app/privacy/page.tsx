@@ -76,7 +76,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>6. Your Rights</h2>
-            <p>You may request deletion of your account and associated data at any time by emailing support@visascout.io. We will process deletion requests within 30 days. Note that anonymized aggregate usage data may be retained for service improvement.</p>
+            <p>You may request deletion of your account and associated data at any time via our <a href="/contact" style={{ color: 'var(--color-secondary-light)' }}>contact form</a>. We will process deletion requests within 30 days. Note that anonymized aggregate usage data may be retained for service improvement.</p>
           </section>
 
           <section>
@@ -103,8 +103,8 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>11. Contact</h2>
             <p>
               Privacy questions:{' '}
-              <a href="mailto:support@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
-                support@visascout.io
+              <a href="mailto:hello@visascout.io" style={{ color: 'var(--color-secondary-light)' }}>
+                hello@visascout.io
               </a>
               <br />
               Sabai Wave LLC
