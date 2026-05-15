@@ -133,8 +133,9 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
   );
 }
 
-function ConflictSection({ report }: { report: ConflictReport }) {
+function ConflictSection({ report, forPrint = false }: { report: ConflictReport; forPrint?: boolean }) {
   const [open, setOpen] = useState(false);
+  const showContent = forPrint || open;
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
   return (
     <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
@@ -151,7 +152,7 @@ function ConflictSection({ report }: { report: ConflictReport }) {
         </span>
         <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
       </button>
-      {open && (
+      {showContent && (
         <div className="px-5 py-4 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
           {report.confirmed.length > 0 && (
             <div>
@@ -198,8 +199,9 @@ function ConflictSection({ report }: { report: ConflictReport }) {
   );
 }
 
-export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
+export default function BriefRenderer({ brief, forPrint = false }: { brief: VisaBrief; forPrint?: boolean }) {
   const [contingencyOpen, setContingencyOpen] = useState(false);
+  const showContingency = forPrint || contingencyOpen;
 
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
@@ -326,7 +328,7 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
 
       {/* Conflict Report */}
       <div className="brief-section">
-        <ConflictSection report={brief.conflictReport} />
+        <ConflictSection report={brief.conflictReport} forPrint={forPrint} />
       </div>
 
       {/* Contingency */}
@@ -339,7 +341,7 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
           <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}><span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Contingency Planning</span>
           <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{contingencyOpen ? '▲' : '▼'}</span>
         </button>
-        {contingencyOpen && (
+        {showContingency && (
           <div className="px-5 py-4 space-y-4 text-sm" style={{ background: 'var(--color-bg-base)' }}>
             {brief.contingency.deniedEntrySteps.length > 0 && (
               <div>
@@ -367,7 +369,7 @@ export default function BriefRenderer({ brief }: { brief: VisaBrief }) {
 
       {/* Metadata */}
       <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
-        Generated {new Date(brief.metadata.generatedAt).toLocaleString()} · {brief.metadata.model} · {brief.metadata.depth} depth
+        Generated {new Date(brief.metadata.generatedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' })} UTC · {brief.metadata.depth} depth
         {brief.metadata.degraded && <span className="ml-2" style={{ color: '#f59e0b' }}>· degraded output</span>}
       </div>
 

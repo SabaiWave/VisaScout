@@ -243,43 +243,13 @@ function AppContent() {
     }
   }, [wasCancelled]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setAgentStatuses([]);
-    setParsedSituation(null);
-    setBrief(null);
-    setBriefId(null);
-    setCopied(false);
-    setError(null);
-
-    if (depth === 'standard' || depth === 'deep') {
-      setPhase('redirecting');
-      try {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
-        });
-        if (!res.ok) {
-          const err = await res.json() as { error?: string };
-          throw new Error(err.error ?? 'Failed to start checkout');
-        }
-        const { checkoutUrl } = await res.json() as { checkoutUrl: string };
-        window.location.href = checkoutUrl;
-        return;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.');
-        setPhase('error');
-        return;
-      }
-    }
-
+  async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
+        body: JSON.stringify(params),
       });
 
       if (!response.ok) {
@@ -332,6 +302,56 @@ function AppContent() {
     }
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setAgentStatuses([]);
+    setParsedSituation(null);
+    setBrief(null);
+    setBriefId(null);
+    setCopied(false);
+    setError(null);
+
+    if (depth === 'standard' || depth === 'deep') {
+      setPhase('redirecting');
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
+        });
+        if (!res.ok) {
+          const err = await res.json() as { error?: string };
+          throw new Error(err.error ?? 'Failed to start checkout');
+        }
+        const { checkoutUrl } = await res.json() as { checkoutUrl: string };
+        window.location.href = checkoutUrl;
+        return;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.');
+        setPhase('error');
+        return;
+      }
+    }
+
+    await runBriefStream({ nationality, destination, visaType: visaType || undefined, freeform, depth });
+  }
+
+  async function handleFreeBrief() {
+    setAgentStatuses([]);
+    setParsedSituation(null);
+    setBrief(null);
+    setBriefId(null);
+    setCopied(false);
+    setError(null);
+    await runBriefStream({
+      nationality: 'American',
+      destination: 'Thailand',
+      visaType: 'Visa Exemption',
+      freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
+      depth: 'quick',
+    });
+  }
+
   function handleReset() {
     setPhase('idle');
     setBrief(null);
@@ -352,6 +372,10 @@ function AppContent() {
     } catch {
       // ignore clipboard error
     }
+  }
+
+  function handleDownloadPdf() {
+    window.print();
   }
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
@@ -384,9 +408,21 @@ function AppContent() {
                 Generate Brief
               </h1>
               <div className="mb-4 h-px" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }} />
-              <p className="text-sm mb-8" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
+
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  type="button"
+                  onClick={handleFreeBrief}
+                  disabled={isGenerating}
+                  className="w-full mb-8 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors disabled:opacity-60"
+                  style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-secondary)', background: 'var(--color-bg-elevated)', fontFamily: 'var(--font-mono)' }}
+                >
+                  Try a Free Brief — USA → Thailand, Visa Exemption
+                </button>
+              )}
 
               {error && (
                 <div
@@ -493,8 +529,8 @@ function AppContent() {
                 <button
                   type="submit"
                   disabled={phase === 'redirecting'}
-                  className="w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-colors"
-                  style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)', opacity: phase === 'redirecting' ? 0.6 : 1, cursor: phase === 'redirecting' ? 'not-allowed' : 'pointer' }}
+                  className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-opacity ${phase === 'redirecting' ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
+                  style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
                 >
                   {phase === 'redirecting'
                     ? 'Redirecting to checkout…'
@@ -516,10 +552,10 @@ function AppContent() {
                 style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
               >
                 <p
-                  className="text-xl font-bold uppercase tracking-wider mb-1"
+                  className="text-xl font-bold tracking-wider mb-1"
                   style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}
                 >
-                  We understood
+                  We Understood
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {parsedSituation.parsedSummary}
@@ -538,7 +574,7 @@ function AppContent() {
                     style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.06)' }}
                   >
                     <p
-                      className="text-xl font-bold uppercase tracking-wider mb-3"
+                      className="text-xl font-bold tracking-wider mb-3"
                       style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
                     >
                       Agent Status
@@ -547,7 +583,7 @@ function AppContent() {
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
                     {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
-                      <p className="text-xs mt-2 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
+                      <p className="text-xs mt-2 text-center" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                         Resolving conflicts and synthesizing brief…
                       </p>
                     )}
@@ -567,7 +603,9 @@ function AppContent() {
 
               {brief && (
                 <div>
-                  <BriefRenderer brief={brief} />
+                  <div id="brief-content">
+                    <BriefRenderer brief={brief} forPrint={false} />
+                  </div>
 
                   <div className="flex justify-center gap-4 mt-8">
                     {briefId && (
@@ -580,8 +618,8 @@ function AppContent() {
                       </button>
                     )}
                     <button
-                      onClick={() => window.print()}
-                      className="btn-brief-secondary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors"
+                      onClick={handleDownloadPdf}
+                      className="btn-brief-secondary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-opacity"
                       style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', background: 'transparent', fontFamily: 'var(--font-mono)' }}
                     >
                       Download PDF

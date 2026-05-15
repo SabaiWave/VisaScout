@@ -70,7 +70,7 @@ function Hero() {
         <div className="flex justify-center mb-8">
           <Link
             href="/app"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-colors"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
             style={{ background: 'var(--color-amber)', color: '#0A0A0A', fontFamily: 'var(--font-mono)' }}
           >
             Get your free brief
@@ -451,7 +451,7 @@ function Pricing() {
               {/* CTA */}
               <Link
                 href={plan.href}
-                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{
                   background: plan.highlight ? 'var(--color-secondary)' : 'transparent',
                   color: plan.highlight ? '#fff' : 'var(--color-text-primary)',
