@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     await getResend().emails.send({
       from: 'VisaScout <hello@visascout.io>',
-      to: 'support@visascout.io',
+      to: 'sabaiwave.inbox@gmail.com',
       replyTo: email,
       subject: `[Contact] ${name}`,
       text: `From: ${name} <${email}>\n\n${message}`,
