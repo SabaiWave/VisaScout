@@ -44,7 +44,7 @@ export function LandingNav() {
                 Sign in
               </Link>
               <Link
-                href="/app"
+                href="/sign-up"
                 className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-colors"
                 style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
               >
