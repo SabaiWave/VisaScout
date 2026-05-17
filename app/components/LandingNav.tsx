@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { VisaScoutUserButton } from './VisaScoutUserButton';
+import { Wordmark } from './ui/Wordmark';
+import { NavLink } from './ui/NavLink';
+import { Button } from './ui/Button';
 
 const ADMIN_EMAIL = 'admin@sabaiwave.com';
 
@@ -18,13 +21,7 @@ export function LandingNav() {
       style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
     >
       <div className="max-w-[1120px] mx-auto flex items-center justify-between">
-        <Link
-          href="/"
-          className="text-base font-bold uppercase tracking-widest"
-          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-        >
-          <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
-        </Link>
+        <Wordmark />
 
         <div className="flex items-center gap-3">
           {!isLoaded ? (
@@ -32,46 +29,20 @@ export function LandingNav() {
           ) : isSignedIn ? (
             <>
               {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  Admin
-                </Link>
+                <NavLink href="/admin">Admin</NavLink>
               )}
-              <Link
-                href="/dashboard"
-                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
-                style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
-              >
-                My Briefs
-              </Link>
-              <Link
-                href="/app"
-                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
-                style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-              >
-                Generate Brief
-              </Link>
+              <NavLink href="/dashboard">My Briefs</NavLink>
+              <Button asChild>
+                <Link href="/app">Generate Brief</Link>
+              </Button>
               <VisaScoutUserButton />
             </>
           ) : (
             <>
-              <Link
-                href="/sign-in"
-                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
-                style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/sign-up"
-                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
-                style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-              >
-                Get Started
-              </Link>
+              <NavLink href="/sign-in">Sign in</NavLink>
+              <Button asChild>
+                <Link href="/sign-up">Get Started</Link>
+              </Button>
             </>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { VisaScoutUserButton } from './VisaScoutUserButton';
+import { Button } from '@/app/components/ui/Button';
 
 export function HeaderAuth() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -14,16 +15,7 @@ export function HeaderAuth() {
 
   return (
     <SignInButton mode="modal">
-      <button
-        className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-        style={{
-          borderColor: 'var(--color-border-strong)',
-          color: 'var(--color-text-primary)',
-          background: 'transparent',
-        }}
-      >
-        Sign in
-      </button>
+      <Button variant="secondary">Sign in</Button>
     </SignInButton>
   );
 }

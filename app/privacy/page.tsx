@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Wordmark } from '@/app/components/ui/Wordmark';
+import { NavLink } from '@/app/components/ui/NavLink';
+import { FooterLink } from '@/app/components/ui/FooterLink';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — VisaScout',
@@ -15,20 +18,8 @@ export default function PrivacyPage() {
         style={{ borderColor: 'var(--color-border-muted)' }}
       >
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-base font-bold uppercase tracking-widest no-underline"
-            style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-          >
-            <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-bold px-4 py-2 rounded uppercase tracking-wider transition-colors"
-            style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-          >
-            ← Home
-          </Link>
+          <Wordmark />
+          <NavLink href="/">Home</NavLink>
         </div>
       </nav>
 
@@ -117,9 +108,9 @@ export default function PrivacyPage() {
         style={{ borderColor: 'var(--color-border-muted)' }}
       >
         <div className="flex justify-center gap-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-          <Link href="/" className="transition-colors" style={{ color: 'var(--color-text-tertiary)' }}>Home</Link>
-          <Link href="/terms" className="transition-colors" style={{ color: 'var(--color-text-tertiary)' }}>Terms</Link>
-          <Link href="/contact" className="transition-colors" style={{ color: 'var(--color-text-tertiary)' }}>Contact</Link>
+          <FooterLink href="/">Home</FooterLink>
+          <FooterLink href="/terms">Terms</FooterLink>
+          <FooterLink href="/contact">Contact</FooterLink>
         </div>
       </footer>
     </div>

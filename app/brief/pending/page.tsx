@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/app/components/ui/Button';
 
 const MAX_WAIT_MS = 10 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
@@ -92,13 +93,9 @@ function PendingContent() {
             with reference:{' '}
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>
           </p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider border transition-colors"
-            style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', borderRadius: '4px', ...MONO }}
-          >
+          <Button variant="secondary" onClick={() => router.push('/')}>
             Back to home
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -126,13 +123,9 @@ function PendingContent() {
             with reference:{' '}
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{briefId}</span>
           </p>
-          <button
-            onClick={() => router.push('/')}
-            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider border transition-colors"
-            style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', borderRadius: '4px', ...MONO }}
-          >
+          <Button variant="secondary" onClick={() => router.push('/')}>
             Back to home
-          </button>
+          </Button>
         </div>
       </div>
     );

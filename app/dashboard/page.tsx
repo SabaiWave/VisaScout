@@ -5,6 +5,11 @@ import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
 import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 import { getSupabase } from '@/src/lib/supabase';
+import { Wordmark } from '@/app/components/ui/Wordmark';
+import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
+import { Button } from '@/app/components/ui/Button';
+import { NavLink } from '@/app/components/ui/NavLink';
 
 const PAGE_SIZE = 10;
 
@@ -34,55 +39,6 @@ async function getUserBriefs(userId: string, page: number): Promise<{ briefs: Br
   return { briefs: (data ?? []) as BriefRow[], total: count ?? 0 };
 }
 
-function DepthBadge({ depth }: { depth: string }) {
-  const colors: Record<string, { bg: string; color: string }> = {
-    quick:    { bg: 'rgba(99,102,241,0.12)',  color: '#818cf8' },
-    standard: { bg: 'rgba(168,85,247,0.12)',  color: '#c084fc' },
-    deep:     { bg: 'rgba(245,158,11,0.12)',  color: '#fbbf24' },
-  };
-  const style = colors[depth] ?? colors.quick;
-  return (
-    <span style={{
-      fontFamily: 'var(--font-mono)',
-      fontSize: '0.7rem',
-      fontWeight: 700,
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.05em',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      background: style.bg,
-      color: style.color,
-    }}>
-      {depth}
-    </span>
-  );
-}
-
-function ConfidenceBadge({ confidence }: { confidence: string | null }) {
-  if (!confidence) return null;
-  const map: Record<string, { bg: string; color: string }> = {
-    high:   { bg: 'rgba(34,197,94,0.12)',   color: '#22c55e' },
-    medium: { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
-    low:    { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444' },
-  };
-  const style = map[confidence] ?? map.low;
-  return (
-    <span style={{
-      fontFamily: 'var(--font-mono)',
-      fontSize: '0.7rem',
-      fontWeight: 700,
-      textTransform: 'uppercase' as const,
-      letterSpacing: '0.05em',
-      padding: '2px 8px',
-      borderRadius: '4px',
-      background: style.bg,
-      color: style.color,
-    }}>
-      CONF · {confidence.toUpperCase()}
-    </span>
-  );
-}
-
 function EmptyState() {
   return (
     <div style={{
@@ -101,13 +57,9 @@ function EmptyState() {
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: 0 }}>
         No briefs saved yet.
       </p>
-      <Link
-        href="/app"
-        className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
-        style={{ fontFamily: 'var(--font-mono)', background: 'var(--color-secondary)', color: '#fff', textDecoration: 'none' }}
-      >
-        + New Brief
-      </Link>
+      <Button asChild>
+        <Link href="/app">+ New Brief</Link>
+      </Button>
     </div>
   );
 }
@@ -145,20 +97,7 @@ export default async function DashboardPage({
           gap: '0.25rem',
         }}
       >
-        <Link
-          href="/"
-          className="text-base font-bold uppercase tracking-widest"
-          style={{
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--color-text-primary)',
-            textDecoration: 'none',
-            marginBottom: '1.5rem',
-            display: 'block',
-            padding: '0 0.5rem',
-          }}
-        >
-          <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
-        </Link>
+        <Wordmark className="block px-2 mb-6" />
 
         <Link
           href="/dashboard"
@@ -197,9 +136,7 @@ export default async function DashboardPage({
             borderBottom: '1px solid var(--color-border-muted)',
           }}
         >
-          <Link href="/" className="text-base font-bold uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', textDecoration: 'none' }}>
-            <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
-          </Link>
+          <Wordmark />
           <VisaScoutUserButton />
         </nav>
 
@@ -211,42 +148,19 @@ export default async function DashboardPage({
             borderBottom: '1px solid var(--color-border-muted)',
           }}
         >
-          <Link href="/" className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
-            Home
-          </Link>
-          <Link href="/contact" className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
-            Contact
-          </Link>
+          <NavLink href="/">Home</NavLink>
+          <NavLink href="/contact">Contact</NavLink>
         </div>
 
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '2rem 1.5rem' }}>
           {/* Page header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-secondary)', fontWeight: 700 }}>//</span>
-                <h1 style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: 'var(--color-text-primary)',
-                  margin: 0,
-                }}>
-                  MY BRIEFS
-                </h1>
-              </div>
-              <div style={{ height: '1px', background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)', marginBottom: '0.5rem' }} />
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Your saved visa intelligence briefs
-              </p>
-            </div>
-            <Link
-              href="/app"
-              className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
-              style={{ fontFamily: 'var(--font-mono)', background: 'var(--color-secondary)', color: '#fff', textDecoration: 'none', whiteSpace: 'nowrap' }}
-            >
-              + New Brief
-            </Link>
+            <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
+              MY BRIEFS
+            </SectionHeading>
+            <Button asChild style={{ whiteSpace: 'nowrap' }}>
+              <Link href="/app">+ New Brief</Link>
+            </Button>
           </div>
 
           {briefs.length === 0 ? (
@@ -292,8 +206,10 @@ export default async function DashboardPage({
                       </p>
 
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-                        <DepthBadge depth={brief.depth} />
-                        <ConfidenceBadge confidence={brief.overall_confidence} />
+                        <DepthBadge depth={brief.depth as 'quick' | 'standard' | 'deep'} />
+                        {brief.overall_confidence && (
+                          <ConfidenceBadge level={brief.overall_confidence as 'high' | 'medium' | 'low'} />
+                        )}
                         {brief.degraded && (
                           <span style={{
                             fontFamily: 'var(--font-mono)',

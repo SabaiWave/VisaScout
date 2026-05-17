@@ -1,7 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import { Button } from '@/app/components/ui/Button';
+import { Wordmark } from '@/app/components/ui/Wordmark';
+import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { NavLink } from '@/app/components/ui/NavLink';
+import { FooterLink } from '@/app/components/ui/FooterLink';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -45,36 +49,13 @@ export default function ContactPage() {
         style={{ borderColor: 'var(--color-border-muted)' }}
       >
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-base font-bold uppercase tracking-widest no-underline"
-            style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-          >
-            <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-bold px-4 py-2 rounded uppercase tracking-wider transition-colors"
-            style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-          >
-            ← Home
-          </Link>
+          <Wordmark />
+          <NavLink href="/">Home</NavLink>
         </div>
       </nav>
 
       <main className="max-w-[560px] mx-auto px-6 py-16">
-        {/* Heading */}
-        <h1
-          className="text-3xl font-bold mb-3"
-          style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-        >
-          <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
-          Contact
-        </h1>
-        <div
-          className="mb-8 h-px"
-          style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
-        />
+        <SectionHeading as="h1" className="mb-8">Contact</SectionHeading>
         <p className="text-sm mb-10 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
           Questions, bugs, feedback, or partnership inquiries — send a message and we'll get back to you as soon as possible.
         </p>
@@ -115,13 +96,12 @@ export default function ContactPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full px-4 py-3 rounded text-base outline-none transition-all"
+                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-body)',
-                  borderRadius: '4px',
                 }}
                 onFocus={e => {
                   e.currentTarget.style.borderColor = 'var(--color-secondary)';
@@ -150,13 +130,12 @@ export default function ContactPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded text-base outline-none transition-all"
+                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-body)',
-                  borderRadius: '4px',
                 }}
                 onFocus={e => {
                   e.currentTarget.style.borderColor = 'var(--color-secondary)';
@@ -185,14 +164,13 @@ export default function ContactPage() {
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder="How can we help?"
-                className="w-full px-4 py-3 rounded text-base outline-none transition-all resize-vertical"
+                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all resize-vertical"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-body)',
                   lineHeight: 1.75,
-                  borderRadius: '4px',
                   minHeight: '140px',
                 }}
                 onFocus={e => {
@@ -209,7 +187,7 @@ export default function ContactPage() {
             {/* Error */}
             {status === 'error' && (
               <div
-                className="px-4 py-3 rounded border"
+                className="px-4 py-3 rounded-lg border"
                 style={{
                   background: 'rgba(239,68,68,0.08)',
                   borderColor: 'rgba(239,68,68,0.25)',
@@ -222,21 +200,14 @@ export default function ContactPage() {
             )}
 
             {/* Submit */}
-            <button
+            <Button
               type="submit"
               disabled={status === 'submitting'}
-              className="w-full py-3 px-6 rounded text-sm font-bold uppercase tracking-wider transition-colors"
-              style={{
-                background: status === 'submitting' ? 'rgba(99,102,241,0.5)' : 'var(--color-secondary)',
-                color: '#fff',
-                fontFamily: 'var(--font-mono)',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: status === 'submitting' ? 'not-allowed' : 'pointer',
-              }}
+              className="w-full py-3"
+              style={status === 'submitting' ? { background: 'rgba(99,102,241,0.5)' } : undefined}
             >
               {status === 'submitting' ? 'Sending...' : 'Send message'}
-            </button>
+            </Button>
           </form>
         )}
       </main>
@@ -246,9 +217,9 @@ export default function ContactPage() {
         style={{ borderColor: 'var(--color-border-muted)' }}
       >
         <div className="flex justify-center gap-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-          <Link href="/" className="transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>Home</Link>
-          <Link href="/privacy" className="transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>Privacy</Link>
-          <Link href="/terms" className="transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>Terms</Link>
+          <FooterLink href="/">Home</FooterLink>
+          <FooterLink href="/privacy">Privacy</FooterLink>
+          <FooterLink href="/terms">Terms</FooterLink>
         </div>
       </footer>
     </div>

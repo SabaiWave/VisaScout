@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/next';
+import { ClerkFontFix } from '@/app/components/ClerkFontFix';
 import './globals.css';
 
 const inter = Inter({
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         variables: {
           colorPrimary: '#6366F1',
           colorBackground: '#111118',
+          fontFamily: "'Inter', system-ui, sans-serif",
           colorInputBackground: '#1C1C27',
           colorInputText: '#F4F4F5',
           colorText: '#F4F4F5',
@@ -151,6 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
         >
           {children}
+          <ClerkFontFix />
           <Analytics />
         </body>
       </html>

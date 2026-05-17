@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation';
 import { currentUser, clerkClient } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminEmail } from '@/src/lib/adminAccess';
+import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { Wordmark } from '@/app/components/ui/Wordmark';
+import { NavLink } from '@/app/components/ui/NavLink';
 
 async function getAdminMetrics() {
   const supabase = getSupabase();
@@ -116,15 +119,22 @@ export default async function AdminPage() {
   const recentUsers = recentSignupsResult.data ?? [];
 
   return (
-    <main style={{ background: 'var(--color-bg-base)', minHeight: '100vh', padding: '2rem', fontFamily: 'var(--font-body)' }}>
+    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+      <nav
+        className="sticky top-0 z-50 border-b px-6 py-4"
+        style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
+      >
+        <div className="max-w-[1000px] mx-auto flex items-center justify-between">
+          <Wordmark />
+          <NavLink href="/">Home</NavLink>
+        </div>
+      </nav>
+
+    <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
-          // ADMIN
-        </p>
-        <h1 style={{ color: 'var(--color-text-primary)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          VisaScout — Operations Dashboard
-        </h1>
-        <div style={{ height: '1px', background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)', marginBottom: '2rem' }} />
+        <SectionHeading size="md" as="h1" className="mb-8">
+          Operations Dashboard
+        </SectionHeading>
 
         {/* Summary row — users + revenue */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
@@ -304,6 +314,7 @@ export default async function AdminPage() {
         </Section>
       </div>
     </main>
+    </div>
   );
 }
 

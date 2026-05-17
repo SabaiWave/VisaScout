@@ -7,6 +7,8 @@ import BriefRenderer from '@/app/components/BriefRenderer';
 import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
+import { Button } from '@/app/components/ui/Button';
+import { SectionHeading } from '@/app/components/ui/SectionHeading';
 
 // ─── Static data ───────────────────────────────────────────────────────────
 
@@ -191,12 +193,7 @@ function SignInPrompt() {
         </p>
       </div>
       <SignInButton mode="modal">
-        <button
-          className="px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-colors"
-          style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
-        >
-          Sign in to get started
-        </button>
+        <Button>Sign in to get started</Button>
       </SignInButton>
       <p className="mt-4 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
         No account?{' '}
@@ -446,28 +443,21 @@ function AppContent() {
           {/* ── Form ── */}
           {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
             <div className="max-w-[560px] mx-auto">
-              <h1
-                className="text-3xl font-bold mb-3"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-              >
-                <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
-                Generate Brief
-              </h1>
-              <div className="mb-4 h-px" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }} />
+              <SectionHeading as="h1" className="mb-4">Generate Brief</SectionHeading>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
 
               {process.env.NODE_ENV === 'development' && (
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   onClick={handleFreeBrief}
                   disabled={isGenerating}
-                  className="w-full mb-8 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors disabled:opacity-60"
-                  style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-secondary)', background: 'var(--color-bg-elevated)', fontFamily: 'var(--font-mono)' }}
+                  className="w-full mb-8 py-2.5"
                 >
                   Try a Free Brief — USA → Thailand, Visa Exemption
-                </button>
+                </Button>
               )}
 
               {error && (
@@ -572,11 +562,10 @@ function AppContent() {
                   </p>
                 </div>
 
-                <button
+                <Button
                   type="submit"
                   disabled={phase === 'redirecting'}
-                  className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-opacity ${phase === 'redirecting' ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
-                  style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
+                  className="w-full py-3"
                 >
                   {phase === 'redirecting'
                     ? 'Redirecting to checkout…'
@@ -585,7 +574,7 @@ function AppContent() {
                       : depth === 'standard'
                         ? `Generate Brief — $${(PRICES.standard.amount / 100).toFixed(2)}`
                         : `Generate Brief — $${(PRICES.deep.amount / 100).toFixed(2)}`}
-                </button>
+                </Button>
               </form>
             </div>
           )}
@@ -650,28 +639,20 @@ function AppContent() {
 
                   <div className="flex justify-center gap-4 mt-8">
                     {briefId && (
-                      <button
+                      <Button
                         onClick={handleCopyLink}
-                        className="btn-brief-primary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors"
-                        style={{ background: copied ? 'var(--color-secondary-dark)' : 'var(--color-secondary)', borderColor: 'var(--color-secondary)', color: '#ffffff', fontFamily: 'var(--font-mono)' }}
+                        className="px-8 py-3"
+                        style={copied ? { background: 'var(--color-secondary-dark)' } : undefined}
                       >
                         {copied ? '✓ Copied' : 'Share'}
-                      </button>
+                      </Button>
                     )}
-                    <button
-                      onClick={handleDownloadPdf}
-                      className="btn-brief-secondary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-opacity"
-                      style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', background: 'transparent', fontFamily: 'var(--font-mono)' }}
-                    >
+                    <Button variant="secondary" onClick={handleDownloadPdf} className="px-8 py-3">
                       Download PDF
-                    </button>
-                    <button
-                      onClick={handleReset}
-                      className="btn-brief-ghost px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors"
-                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', background: 'transparent', fontFamily: 'var(--font-mono)' }}
-                    >
+                    </Button>
+                    <Button variant="ghost" onClick={handleReset} className="px-8 py-3">
                       New Brief
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="mt-6 rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>
