@@ -255,7 +255,7 @@ export default async function AdminPage() {
               </thead>
               <tbody>
                 {outliers.slice(0, 20).map((b, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: '#f59e0b' }}>
+                  <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-amber)' }}>
                     <td style={{ padding: '0.6rem 0.75rem' }}>{b.destination}</td>
                     <td style={{ padding: '0.6rem 0.75rem', textTransform: 'capitalize' }}>{b.depth}</td>
                     <td style={{ padding: '0.6rem 0.75rem' }}>${(b.estimated_cost_usd ?? 0).toFixed(4)}</td>
@@ -272,7 +272,7 @@ export default async function AdminPage() {
           <Section title="BACKGROUND JOBS">
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
               {pendingJobs.length > 0 && (
-                <p style={{ color: '#f59e0b', marginBottom: '0.5rem' }}>
+                <p style={{ color: 'var(--color-amber)', marginBottom: '0.5rem' }}>
                   ⚠ {pendingJobs.length} job(s) pending / processing
                 </p>
               )}

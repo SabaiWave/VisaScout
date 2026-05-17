@@ -70,7 +70,7 @@ export default function ContactPage() {
           >
             <p
               className="text-sm font-bold uppercase tracking-wider mb-1"
-              style={{ color: '#22c55e', fontFamily: 'var(--font-mono)' }}
+              style={{ color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}
             >
               Message sent
             </p>

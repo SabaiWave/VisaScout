@@ -49,6 +49,8 @@ BLUEPRINT.md
 DESIGN.md
 GTM.md
 STRATEGY.md
+theme_refactor.md
+light_theme.md
 
 # Claude Code — machine-specific settings (absolute paths, personal allowlists)
 .claude/settings.local.json

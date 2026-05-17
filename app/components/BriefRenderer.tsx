@@ -18,10 +18,10 @@ function Label({ children, color, size = 'xs' }: { children: React.ReactNode; co
 
 function WarningBox({ header, items, headerSize = 'xs' }: { header: string; items: string[]; headerSize?: 'xs' | 'xl' }) {
   return (
-    <div className="rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>
-      <Label color="#f59e0b" size={headerSize}>{header}</Label>
+    <div className="rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: 'var(--shadow-amber)' }}>
+      <Label color="var(--color-amber)" size={headerSize}>{header}</Label>
       {items.map((w, i) => (
-        <p key={i} className="text-sm flex items-start gap-2" style={{ color: '#f59e0b' }}>
+        <p key={i} className="text-sm flex items-start gap-2" style={{ color: 'var(--color-amber)' }}>
           <span className="flex-shrink-0">⚠</span><span>{w}</span>
         </p>
       ))}
@@ -33,7 +33,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="brief-section rounded-xl p-6 border"
-      style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.05)' }}
+      style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
     >
       {children}
     </div>
@@ -42,7 +42,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 
 function VisaOptionCard({ option }: { option: VisaOption }) {
   const borderColor = {
-    best:       '#22c55e',
+    best:       'var(--color-success)',
     good:       'var(--color-secondary)',
     acceptable: 'var(--color-border-strong)',
   }[option.suitability];
@@ -68,7 +68,7 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
             <li key={`pro-${i}`} className="flex items-start gap-2">
               <span
                 className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5"
-                style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontFamily: 'var(--font-mono)' }}
+                style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}
               >Pro</span>
               <span style={{ color: 'var(--color-text-secondary)' }}>{p}</span>
             </li>
@@ -77,7 +77,7 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
             <li key={`con-${i}`} className="flex items-start gap-2">
               <span
                 className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5"
-                style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontFamily: 'var(--font-mono)' }}
+                style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}
               >Con</span>
               <span style={{ color: 'var(--color-text-secondary)' }}>{c}</span>
             </li>
@@ -111,7 +111,7 @@ function ConflictSection({ report, forPrint = false }: { report: ConflictReport;
         <div className="px-5 py-4 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
           {report.confirmed.length > 0 && (
             <div>
-              <Label color="#22c55e">Confirmed</Label>
+              <Label color="var(--color-success)">Confirmed</Label>
               {report.confirmed.map((item, i) => (
                 <div key={i} className="mb-2 text-sm">
                   <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
@@ -122,14 +122,14 @@ function ConflictSection({ report, forPrint = false }: { report: ConflictReport;
           )}
           {report.contested.length > 0 && (
             <div>
-              <Label color="#f59e0b">Contested</Label>
+              <Label color="var(--color-amber)">Contested</Label>
               {report.contested.map((item, i) => (
-                <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: '#f59e0b' }}>
+                <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: 'var(--color-amber)' }}>
                   <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
                   <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
                   {item.resolution && (
                     <div className="mt-2">
-                      <Label color="#f59e0b">Resolution</Label>
+                      <Label color="var(--color-amber)">Resolution</Label>
                       <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
                     </div>
                   )}
@@ -139,7 +139,7 @@ function ConflictSection({ report, forPrint = false }: { report: ConflictReport;
           )}
           {report.unverified.length > 0 && (
             <div>
-              <Label color="#ef4444">Unverified</Label>
+              <Label color="var(--color-error)">Unverified</Label>
               {report.unverified.map((item, i) => (
                 <div key={i} className="mb-2 text-sm">
                   <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
@@ -175,7 +175,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
         <Label color="var(--color-amber)" size="xl">Recommended Action</Label>
         <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
         {brief.recommendedAction.deadline && (
-          <p className="text-sm font-semibold" style={{ color: '#ef4444' }}>Deadline: {brief.recommendedAction.deadline}</p>
+          <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
         )}
         <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
         <div className="mt-2">
@@ -325,7 +325,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
       {/* Metadata */}
       <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
         Generated {new Date(brief.metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })} · {new Date(brief.metadata.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC · {brief.metadata.depth} depth
-        {brief.metadata.degraded && <span className="ml-2" style={{ color: '#f59e0b' }}>· degraded output</span>}
+        {brief.metadata.degraded && <span className="ml-2" style={{ color: 'var(--color-amber)' }}>· degraded output</span>}
       </div>
 
     </div>

@@ -80,14 +80,14 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
     queued:   'var(--color-border-muted)',
     running:  'var(--color-secondary)',
     complete: 'var(--color-border)',
-    failed:   '#3d1515',
+    failed:   'var(--color-error-border)',
   }[entry.status];
 
   const bg = {
     queued:   'transparent',
     running:  'var(--color-secondary-subtle)',
     complete: 'var(--color-bg-elevated)',
-    failed:   '#1a0a0a',
+    failed:   'var(--color-error-bg)',
   }[entry.status];
 
   const leftBorder = {
@@ -98,9 +98,9 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   }[entry.status];
 
   const confidenceStyle: Record<string, { bg: string; color: string }> = {
-    high:   { bg: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
-    medium: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    low:    { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
+    high:   { bg: 'rgba(34,197,94,0.15)',  color: 'var(--color-confidence-high)' },
+    medium: { bg: 'rgba(245,158,11,0.15)', color: 'var(--color-confidence-medium)' },
+    low:    { bg: 'rgba(239,68,68,0.15)',  color: 'var(--color-confidence-low)' },
   };
 
   return (
@@ -547,7 +547,7 @@ function AppContent() {
                         className="flex-1 py-1.5 text-xs rounded-full font-bold uppercase tracking-wider transition-all"
                         style={{
                           background: depth === d ? 'var(--color-secondary)' : 'transparent',
-                          color: depth === d ? '#fff' : 'var(--color-text-tertiary)',
+                          color: depth === d ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
                           fontFamily: 'var(--font-mono)',
                         }}
                       >
@@ -656,8 +656,8 @@ function AppContent() {
                   </div>
 
                   <div className="mt-6 rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>
-                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#f59e0b', fontFamily: 'var(--font-mono)' }}>Disclaimer</p>
-                    <p className="text-sm flex items-start gap-2" style={{ color: '#f59e0b' }}>
+                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>Disclaimer</p>
+                    <p className="text-sm flex items-start gap-2" style={{ color: 'var(--color-amber)' }}>
                       <span className="flex-shrink-0">⚠</span><span>{brief.disclaimer}</span>
                     </p>
                   </div>
