@@ -23,7 +23,7 @@ export async function GET() {
     resend:      !!process.env.RESEND_API_KEY,
     appUrl:      !!process.env.NEXT_PUBLIC_APP_URL,
     // Admin (Phase 10)
-    adminEmail:  !!process.env.ADMIN_EMAIL,
+    adminUserId: !!process.env.ADMIN_USER_ID,
   };
 
   const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;

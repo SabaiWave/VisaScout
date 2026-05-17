@@ -1,38 +1,33 @@
-import { isAdminEmail } from '@/src/lib/adminAccess';
+import { isAdminUser } from '@/src/lib/adminAccess';
 
-describe('isAdminEmail', () => {
-  const original = process.env.ADMIN_EMAIL;
+describe('isAdminUser', () => {
+  const original = process.env.ADMIN_USER_ID;
 
   afterEach(() => {
     if (original === undefined) {
-      delete process.env.ADMIN_EMAIL;
+      delete process.env.ADMIN_USER_ID;
     } else {
-      process.env.ADMIN_EMAIL = original;
+      process.env.ADMIN_USER_ID = original;
     }
   });
 
-  it('returns false when ADMIN_EMAIL not set', () => {
-    delete process.env.ADMIN_EMAIL;
-    expect(isAdminEmail('admin@example.com')).toBe(false);
+  it('returns false when ADMIN_USER_ID not set', () => {
+    delete process.env.ADMIN_USER_ID;
+    expect(isAdminUser('user_abc123')).toBe(false);
   });
 
-  it('returns true for matching email', () => {
-    process.env.ADMIN_EMAIL = 'admin@example.com';
-    expect(isAdminEmail('admin@example.com')).toBe(true);
+  it('returns true for matching user ID', () => {
+    process.env.ADMIN_USER_ID = 'user_abc123';
+    expect(isAdminUser('user_abc123')).toBe(true);
   });
 
-  it('returns false for non-matching email', () => {
-    process.env.ADMIN_EMAIL = 'admin@example.com';
-    expect(isAdminEmail('other@example.com')).toBe(false);
+  it('returns false for non-matching user ID', () => {
+    process.env.ADMIN_USER_ID = 'user_abc123';
+    expect(isAdminUser('user_xyz789')).toBe(false);
   });
 
-  it('is case-sensitive', () => {
-    process.env.ADMIN_EMAIL = 'Admin@example.com';
-    expect(isAdminEmail('admin@example.com')).toBe(false);
-  });
-
-  it('returns false for empty string when ADMIN_EMAIL set', () => {
-    process.env.ADMIN_EMAIL = 'admin@example.com';
-    expect(isAdminEmail('')).toBe(false);
+  it('returns false for empty string when ADMIN_USER_ID set', () => {
+    process.env.ADMIN_USER_ID = 'user_abc123';
+    expect(isAdminUser('')).toBe(false);
   });
 });

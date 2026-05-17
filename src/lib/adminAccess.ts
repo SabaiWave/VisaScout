@@ -1,5 +1,5 @@
-export function isAdminEmail(userEmail: string): boolean {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail) return false;
-  return userEmail === adminEmail;
+export function isAdminUser(userId: string): boolean {
+  const adminUserId = process.env.ADMIN_USER_ID;
+  if (!adminUserId) return false;
+  return userId === adminUserId;
 }
