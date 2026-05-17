@@ -20,17 +20,17 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'font-bold uppercase tracking-wider rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase tracking-wider rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   secondary:
-    'font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   ghost:
-    'font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
 };
 
 const variantStyles: Record<Variant, CSSProperties> = {
   primary: {
     background: 'var(--color-secondary)',
-    color: '#fff',
+    color: '#ffffff',
     fontFamily: 'var(--font-mono)',
   },
   secondary: {

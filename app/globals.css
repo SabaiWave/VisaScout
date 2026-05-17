@@ -62,6 +62,15 @@
   --color-warning:    #f59e0b;
   --color-focus-ring: #6366F1;
 
+  /* Error surface — agent failed state */
+  --color-error-bg:     #1a0a0a;  /* Background of failed agent row */
+  --color-error-border: #3d1515;  /* Border of failed agent row */
+
+  /* Depth badge colors */
+  --color-depth-quick:    #818cf8;  /* Indigo-light — quick depth badge */
+  --color-depth-standard: #c084fc;  /* Light purple — standard depth badge */
+  --color-depth-deep:     #fbbf24;  /* Golden amber — deep depth badge */
+
   /* Legacy light mode (PDF output only) */
   --color-white:    #ffffff;
   --color-gray-50:  #f9fafb;
@@ -77,6 +86,9 @@
   --shadow-md:     0 4px 6px rgba(0,0,0,0.5);
   --shadow-lg:     0 10px 15px rgba(0,0,0,0.6);
   --shadow-indigo: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  --shadow-card:       0 0 24px rgba(99,102,241,0.12);
+  --shadow-card-hover: 0 0 0 1px rgba(99,102,241,0.25), 0 0 32px rgba(99,102,241,0.22);
+  --shadow-amber:      0 0 16px rgba(245,158,11,0.06);
 
   /* Radius */
   --radius-sm:   4px;
@@ -88,6 +100,108 @@
   --max-width-form:  560px;
   --max-width-brief: 760px;
   --max-width-page:  1120px;
+}
+
+/* ─── Light mode overrides — OBSIDIAN PAPER ─────────────────────────────────
+   Activated by next-themes setting data-theme="light" on <html>.
+   html[data-theme="light"] has specificity (0,1,1) — beats :root (0,1,0).
+   Only tokens that differ from dark mode are listed here. */
+html[data-theme="light"] {
+  /* Primary content */
+  --color-primary:           #0A0A0A;
+
+  /* Indigo — slightly deeper for light mode contrast */
+  --color-secondary:         #4f46e5;
+  --color-secondary-dark:    #3730a3;
+  --color-secondary-light:   #6366f1;
+  --color-secondary-subtle:  #eef2ff;
+
+  /* Purple — AI features only */
+  --color-tertiary:          #9333ea;
+  --color-tertiary-dark:     #7e22ce;
+  --color-tertiary-subtle:   #faf5ff;
+
+  /* Neutral base */
+  --color-neutral:           #F9F9FB;
+
+  /* Surfaces — off-white, never pure white for page base */
+  --color-bg-base:           #F9F9FB;
+  --color-bg-elevated:       #FFFFFF;
+  --color-bg-overlay:        #F3F4F6;
+  --color-bg-subtle:         #F1F1F4;
+
+  /* Borders */
+  --color-border:            #E5E7EB;
+  --color-border-muted:      #F3F4F6;
+  --color-border-strong:     #D1D5DB;
+
+  /* Text */
+  --color-text-primary:      #0A0A0A;
+  --color-text-secondary:    #4B5563;
+  --color-text-tertiary:     #9CA3AF;
+
+  /* Status — ink style: darker for text on light backgrounds */
+  --color-status-ready:      #166534;
+  --color-status-progress:   #3730a3;
+  --color-status-attention:  #991b1b;
+  --color-status-new:        #92400e;
+  --color-status-congested:  #6b21a8;
+
+  /* Confidence — ink style */
+  --color-confidence-high:   #166534;
+  --color-confidence-medium: #92400e;
+  --color-confidence-low:    #991b1b;
+
+  /* Preserved from dark mode — still correct on light */
+  --color-amber-subtle:      #fffbeb;
+  --color-error-bg:          #fef2f2;
+  --color-error-border:      #fca5a5;
+
+  /* Shadows — crisp depth instead of neon glow */
+  --shadow-card:             0 4px 12px rgba(99, 102, 241, 0.04);
+  --shadow-card-hover:       0 4px 16px rgba(99, 102, 241, 0.08), 0 0 0 1px rgba(99,102,241,0.12);
+  --shadow-amber:            0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+/* Light mode — replace neon hover glows with crisp shadows */
+/* (hover values come from --shadow-card-hover token override in html[data-theme="light"] block) */
+
+/* Light mode — Clerk nuclear text override (beats the dark-mode forced white) */
+html[data-theme="light"] .cl-card, html[data-theme="light"] .cl-card *,
+html[data-theme="light"] .cl-modalContent, html[data-theme="light"] .cl-modalContent *,
+html[data-theme="light"] .cl-modal, html[data-theme="light"] .cl-modal *,
+html[data-theme="light"] [class*="cl-userProfile"], html[data-theme="light"] [class*="cl-userProfile"] *,
+html[data-theme="light"] [class*="cl-navbar"], html[data-theme="light"] [class*="cl-navbar"] *,
+html[data-theme="light"] .cl-userButtonPopoverCard, html[data-theme="light"] .cl-userButtonPopoverCard * {
+  color: #0A0A0A !important;
+}
+html[data-theme="light"] .cl-navbarButton,
+html[data-theme="light"] .cl-navbarButton *,
+html[data-theme="light"] .cl-closeButton,
+html[data-theme="light"] .cl-modalCloseButton,
+html[data-theme="light"] .cl-profileSectionContent,
+html[data-theme="light"] .cl-profileSectionContent *,
+html[data-theme="light"] .cl-activeDevice,
+html[data-theme="light"] .cl-activeDevice *,
+html[data-theme="light"] .cl-userButtonPopoverCard [class*="SecondaryIdentifier"],
+html[data-theme="light"] .cl-userButtonPopoverCard [class*="secondaryIdentifier"] {
+  color: #4B5563 !important;
+}
+html[data-theme="light"] .cl-navbarButton:hover,
+html[data-theme="light"] .cl-navbarButton:hover * {
+  color: #0A0A0A !important;
+  background-color: rgba(79, 70, 229, 0.08) !important;
+}
+html[data-theme="light"] .cl-activeDevice [data-device-name],
+html[data-theme="light"] .cl-activeDevice strong,
+html[data-theme="light"] .cl-profileSectionTitle,
+html[data-theme="light"] .cl-profileSectionTitle * {
+  color: #0A0A0A !important;
+}
+
+/* Light mode — SectionHeading gradient: visible line on light backgrounds */
+html[data-theme="light"] .section-heading-line {
+  background: linear-gradient(to right, rgba(229,231,235,1), transparent);
 }
 
 body {
@@ -248,7 +362,7 @@ body {
   transition: box-shadow 200ms ease;
 }
 .brief-section:hover {
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
+  box-shadow: var(--shadow-card-hover) !important;
 }
 
 /* Pricing card hover — overrides inline boxShadow */
@@ -256,20 +370,20 @@ body {
   transition: box-shadow 200ms ease, border-color 200ms ease;
 }
 .pricing-card:hover {
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.25), 0 0 32px rgba(99,102,241,0.15) !important;
+  box-shadow: var(--shadow-card-hover) !important;
 }
 .pricing-card-highlight:hover {
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.25) !important;
+  box-shadow: var(--shadow-card-hover) !important;
 }
 
 /* Dashboard brief cards */
 .visa-track-card {
   transition: border-color 150ms ease, box-shadow 150ms ease;
-  box-shadow: 0 0 20px rgba(99,102,241,0.05);
+  box-shadow: var(--shadow-card);
 }
 .visa-track-card:hover {
   border-color: rgba(99,102,241,0.3) !important;
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
+  box-shadow: var(--shadow-card-hover) !important;
 }
 
 /* Sidebar nav items */
