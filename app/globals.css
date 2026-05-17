@@ -233,3 +233,24 @@ body {
 .brief-section:hover {
   box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
 }
+
+/* Dashboard brief cards */
+.visa-track-card {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 0 20px rgba(99,102,241,0.05);
+}
+.visa-track-card:hover {
+  border-color: rgba(99,102,241,0.3) !important;
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
+}
+
+/* Sidebar nav items */
+.dash-nav-item:hover {
+  background: var(--color-bg-overlay) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* New Research button */
+.btn-new-research:hover {
+  background: var(--color-secondary-dark) !important;
+}

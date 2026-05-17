@@ -16,6 +16,7 @@
 | `src/__tests__/agents/entryRequirements.test.ts` | `runEntryRequirementsAgent()` — success path with fixture data, required output fields, failure-never-throws |
 | `src/__tests__/agents/borderRun.test.ts` | `runBorderRunAgent()` — success path, dual Tavily search (official + community), required output fields, failure-never-throws |
 | `src/__tests__/pipeline.test.ts` | Full pipeline integration — all 5 agents resolve, ConflictReport produced, VisaBrief with all required sections, degraded scenario (one agent fails → brief still produced, metadata.degraded=true) |
+| `src/__tests__/lib/adminAccess.test.ts` | `isAdminEmail()` — returns false when ADMIN_EMAIL unset, true for exact match, false for non-match and case mismatch |
 
 ## Running Tests
 
