@@ -1,10 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth, UserButton } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
+import { VisaScoutUserButton } from './VisaScoutUserButton';
+
+const ADMIN_EMAIL = 'admin@sabaiwave.com';
 
 export function LandingNav() {
   const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
+
+  const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
 
   return (
     <nav
@@ -14,7 +20,7 @@ export function LandingNav() {
       <div className="max-w-[1120px] mx-auto flex items-center justify-between">
         <Link
           href="/"
-          className="text-sm font-bold uppercase tracking-widest"
+          className="text-base font-bold uppercase tracking-widest"
           style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
         >
           <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
@@ -25,27 +31,43 @@ export function LandingNav() {
             <div className="w-8 h-8" />
           ) : isSignedIn ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
+                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
+                >
+                  Admin
+                </Link>
+              )}
+              <Link
+                href="/dashboard"
+                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
+                style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
+              >
+                My Briefs
+              </Link>
               <Link
                 href="/app"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
+                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
               >
                 Generate Brief
               </Link>
-              <UserButton />
+              <VisaScoutUserButton />
             </>
           ) : (
             <>
               <Link
                 href="/sign-in"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
+                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70"
                 style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}
               >
                 Sign in
               </Link>
               <Link
                 href="/sign-up"
-                className="text-xs font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
+                className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
                 style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
               >
                 Get Started

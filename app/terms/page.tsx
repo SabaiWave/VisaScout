@@ -17,14 +17,14 @@ export default function TermsPage() {
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="text-sm font-bold uppercase tracking-widest no-underline"
+            className="text-base font-bold uppercase tracking-widest no-underline"
             style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
           >
             <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
           </Link>
           <Link
             href="/"
-            className="text-xs font-bold px-4 py-2 rounded uppercase tracking-wider transition-colors"
+            className="text-sm font-bold px-4 py-2 rounded uppercase tracking-wider transition-colors"
             style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
           >
             ← Home

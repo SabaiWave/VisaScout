@@ -44,12 +44,21 @@ const NATIONALITIES = [
 
 type AgentStatusEntry = {
   agent: string;
-  status: 'running' | 'complete' | 'failed';
+  status: 'queued' | 'running' | 'complete' | 'failed';
   confidence?: string;
   sourceTier?: number;
   durationMs?: number;
   error?: string;
 };
+
+const INITIAL_AGENT_STATUSES: AgentStatusEntry[] = [
+  { agent: 'officialPolicy',    status: 'running' },
+  { agent: 'recentChanges',     status: 'running' },
+  { agent: 'communityIntel',    status: 'running' },
+  { agent: 'entryRequirements', status: 'running' },
+  { agent: 'borderRun',         status: 'running' },
+  { agent: 'conflictResolver',  status: 'queued' },
+];
 
 type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
 
@@ -59,24 +68,28 @@ const AGENT_DISPLAY: Record<string, string> = {
   communityIntel:    'Community Intel',
   entryRequirements: 'Entry Requirements',
   borderRun:         'Border Run',
+  conflictResolver:  'Conflict Resolver',
 };
 
 // ─── Agent row ─────────────────────────────────────────────────────────────
 
 function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   const borderColor = {
+    queued:   'var(--color-border-muted)',
     running:  'var(--color-secondary)',
     complete: 'var(--color-border)',
     failed:   '#3d1515',
   }[entry.status];
 
   const bg = {
+    queued:   'transparent',
     running:  'var(--color-secondary-subtle)',
     complete: 'var(--color-bg-elevated)',
     failed:   '#1a0a0a',
   }[entry.status];
 
   const leftBorder = {
+    queued:   'var(--color-border-muted)',
     running:  'var(--color-secondary)',
     complete: 'var(--color-secondary)',
     failed:   'var(--color-error)',
@@ -100,18 +113,22 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         animation: entry.status === 'running' ? 'pulse-ring 1.5s ease infinite' : undefined,
       }}
     >
+      {entry.status === 'queued' ? (
+        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: 'var(--color-border-strong)' }} />
+      ) : entry.status === 'running' ? (
+        <span className="w-2 h-2 rounded-full animate-pulse inline-block flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
+      ) : (
+        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)' }} />
+      )}
       <span
-        className="text-base"
-        style={{
-          color: entry.status === 'running' ? 'var(--color-secondary)' : entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)',
-          animation: entry.status === 'running' ? 'spin 1s linear infinite' : undefined,
-        }}
+        className="text-sm font-bold flex-1"
+        style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
       >
-        {entry.status === 'running' ? '⟳' : entry.status === 'complete' ? '✓' : '✕'}
-      </span>
-      <span className="text-sm font-bold flex-1" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
         {AGENT_DISPLAY[entry.agent] ?? entry.agent}
       </span>
+      {entry.status === 'queued' && (
+        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
+      )}
       {entry.status === 'running' && (
         <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
       )}
@@ -296,13 +313,25 @@ function AppContent() {
               const entry = data as AgentStatusEntry;
               setAgentStatuses(prev => {
                 const idx = prev.findIndex(a => a.agent === entry.agent);
-                return idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                const updated = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                const fiveAgents = updated.filter(a => a.agent !== 'conflictResolver');
+                const allDone = fiveAgents.length === 5 && fiveAgents.every(a => a.status !== 'running' && a.status !== 'queued');
+                const resolver = updated.find(a => a.agent === 'conflictResolver');
+                if (allDone && resolver?.status === 'queued') {
+                  return updated.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a);
+                }
+                return updated;
               });
               break;
             }
             case 'complete':
               setBrief(data.brief as VisaBrief);
               if (data.briefId) setBriefId(data.briefId as string);
+              setAgentStatuses(prev => {
+                const idx = prev.findIndex(a => a.agent === 'conflictResolver');
+                const completed = { agent: 'conflictResolver', status: 'complete' as const };
+                return idx >= 0 ? prev.map((a, i) => i === idx ? completed : a) : [...prev, completed];
+              });
               setPhase('complete');
               break;
             case 'error':
@@ -320,7 +349,7 @@ function AppContent() {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
-    setAgentStatuses([]);
+    setAgentStatuses(INITIAL_AGENT_STATUSES);
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -353,7 +382,7 @@ function AppContent() {
   }
 
   async function handleFreeBrief() {
-    setAgentStatuses([]);
+    setAgentStatuses(INITIAL_AGENT_STATUSES);
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -599,11 +628,6 @@ function AppContent() {
                     {agentStatuses.map(entry => (
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
-                    {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
-                      <p className="text-xs mt-2 text-center" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        Resolving conflicts and synthesizing brief…
-                      </p>
-                    )}
                   </div>
                 </div>
               )}

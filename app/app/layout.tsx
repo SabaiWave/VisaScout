@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-[1120px] mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="text-sm font-bold uppercase tracking-widest no-underline"
+            className="text-base font-bold uppercase tracking-widest no-underline"
             style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
           >
             <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout

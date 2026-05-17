@@ -369,7 +369,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
 
       {/* Metadata */}
       <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
-        Generated {new Date(brief.metadata.generatedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' })} UTC · {brief.metadata.depth} depth
+        Generated {new Date(brief.metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })} · {new Date(brief.metadata.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC · {brief.metadata.depth} depth
         {brief.metadata.degraded && <span className="ml-2" style={{ color: '#f59e0b' }}>· degraded output</span>}
       </div>
 

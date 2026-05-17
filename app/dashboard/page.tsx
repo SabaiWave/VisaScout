@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { UserButton } from '@clerk/nextjs';
+import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
+import { SidebarAccount } from './SidebarAccount';
+import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 import { getSupabase } from '@/src/lib/supabase';
 
 const PAGE_SIZE = 10;
@@ -76,7 +78,7 @@ function ConfidenceBadge({ confidence }: { confidence: string | null }) {
       background: style.bg,
       color: style.color,
     }}>
-      {confidence}
+      CONF · {confidence.toUpperCase()}
     </span>
   );
 }
@@ -97,26 +99,14 @@ function EmptyState() {
         <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
       </svg>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: 0 }}>
-        No research saved yet.
+        No briefs saved yet.
       </p>
       <Link
-        href="/"
-        className="btn-new-research"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.4rem',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.875rem',
-          fontWeight: 600,
-          color: 'white',
-          textDecoration: 'none',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          background: 'var(--color-secondary)',
-        }}
+        href="/app"
+        className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
+        style={{ fontFamily: 'var(--font-mono)', background: 'var(--color-secondary)', color: '#fff', textDecoration: 'none' }}
       >
-        + New Research →
+        + New Brief
       </Link>
     </div>
   );
@@ -136,8 +126,6 @@ export default async function DashboardPage({
   const { briefs, total } = await getUserBriefs(user.id, page);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const email = user.emailAddresses[0]?.emailAddress ?? '';
-
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-base)' }}>
       {/* Sidebar — desktop only */}
@@ -146,47 +134,30 @@ export default async function DashboardPage({
         style={{
           width: '240px',
           flexShrink: 0,
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          overflowY: 'auto',
           background: 'var(--color-bg-subtle)',
           borderRight: '1px solid var(--color-border-muted)',
           flexDirection: 'column',
-          padding: '1.5rem 1rem',
+          padding: '2rem 1rem 1.5rem',
           gap: '0.25rem',
         }}
       >
         <Link
           href="/"
+          className="text-base font-bold uppercase tracking-widest"
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: '1rem',
-            fontWeight: 700,
-            color: 'var(--color-navy)',
+            color: 'var(--color-text-primary)',
             textDecoration: 'none',
             marginBottom: '1.5rem',
             display: 'block',
-            padding: '0.25rem 0.5rem',
+            padding: '0 0.5rem',
           }}
         >
-          VisaScout
-        </Link>
-
-        <Link
-          href="/"
-          className="dash-nav-item"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            color: 'var(--color-text-secondary)',
-            textDecoration: 'none',
-            fontFamily: 'var(--font-body)',
-          }}
-        >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>◎</span>
-          Explore
+          <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
         </Link>
 
         <Link
@@ -197,59 +168,56 @@ export default async function DashboardPage({
             gap: '10px',
             padding: '8px 12px',
             borderRadius: '8px',
-            fontSize: '0.875rem',
+            fontSize: '0.8rem',
             fontWeight: 600,
             color: 'var(--color-secondary-light)',
             background: 'var(--color-secondary-subtle)',
             textDecoration: 'none',
-            fontFamily: 'var(--font-body)',
+            fontFamily: 'var(--font-mono)',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
           }}
         >
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>≡</span>
-          Saved
+          <Archive size={14} />
+          History
         </Link>
 
         <div style={{ flex: 1 }} />
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0.75rem',
-          borderTop: '1px solid var(--color-border-muted)',
-        }}>
-          <UserButton />
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.65rem',
-            color: 'var(--color-text-tertiary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
-            {email}
-          </span>
-        </div>
+        <SidebarAccount />
       </aside>
 
       {/* Main content */}
       <main style={{ flex: 1, overflowY: 'auto' }}>
-        {/* Mobile top nav */}
+        {/* Mobile top nav — wordmark + UserButton (sidebar hidden on mobile) */}
         <nav
-          className="lg:hidden"
+          className="flex lg:hidden items-center justify-between"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             padding: '1rem 1.5rem',
             borderBottom: '1px solid var(--color-border-muted)',
           }}
         >
-          <Link href="/" style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--color-navy)', textDecoration: 'none' }}>
-            VisaScout
+          <Link href="/" className="text-base font-bold uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', textDecoration: 'none' }}>
+            <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
           </Link>
-          <UserButton />
+          <VisaScoutUserButton />
         </nav>
+
+        {/* Desktop top bar — utility nav (Resend pattern) */}
+        <div
+          className="hidden lg:flex items-center justify-end gap-1 px-4"
+          style={{
+            height: '52px',
+            borderBottom: '1px solid var(--color-border-muted)',
+          }}
+        >
+          <Link href="/" className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
+            Home
+          </Link>
+          <Link href="/contact" className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-70" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)', textDecoration: 'none' }}>
+            Contact
+          </Link>
+        </div>
 
         <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '2rem 1.5rem' }}>
           {/* Page header */}
@@ -264,33 +232,20 @@ export default async function DashboardPage({
                   color: 'var(--color-text-primary)',
                   margin: 0,
                 }}>
-                  SAVED VISA RESEARCH
+                  MY BRIEFS
                 </h1>
               </div>
               <div style={{ height: '1px', background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)', marginBottom: '0.5rem' }} />
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Monitor and manage your active immigration tracks
+                Your saved visa intelligence briefs
               </p>
             </div>
             <Link
-              href="/"
-              className="btn-new-research"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'white',
-                textDecoration: 'none',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                background: 'var(--color-secondary)',
-                whiteSpace: 'nowrap',
-              }}
+              href="/app"
+              className="text-sm font-bold px-4 py-2 rounded-lg uppercase tracking-wider transition-opacity hover:opacity-80"
+              style={{ fontFamily: 'var(--font-mono)', background: 'var(--color-secondary)', color: '#fff', textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
-              + New Research
+              + New Brief
             </Link>
           </div>
 
@@ -358,11 +313,11 @@ export default async function DashboardPage({
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
-                          {new Date(brief.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric', month: 'short', day: 'numeric',
-                          })}
+                          {new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+                          {' · '}
+                          {new Date(brief.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC
                         </span>
-                        <span style={{ color: 'var(--color-secondary)', fontSize: '0.85rem' }}>→</span>
+                        <ArrowRight size={15} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
                       </div>
                     </div>
                   </Link>
@@ -374,36 +329,34 @@ export default async function DashboardPage({
                   {page > 1 && (
                     <Link
                       href={`/dashboard?page=${page - 1}`}
+                      className="dash-pagination-btn inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg border"
                       style={{
                         fontFamily: 'var(--font-mono)',
-                        fontSize: '0.8rem',
                         color: 'var(--color-text-secondary)',
                         textDecoration: 'none',
-                        padding: '6px 12px',
-                        border: '1px solid var(--color-border-strong)',
-                        borderRadius: '6px',
+                        borderColor: 'var(--color-border-strong)',
                       }}
                     >
-                      ← Prev
+                      <ArrowLeft size={13} />
+                      Prev
                     </Link>
                   )}
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
                     {page} / {totalPages}
                   </span>
                   {page < totalPages && (
                     <Link
                       href={`/dashboard?page=${page + 1}`}
+                      className="dash-pagination-btn inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg border"
                       style={{
                         fontFamily: 'var(--font-mono)',
-                        fontSize: '0.8rem',
                         color: 'var(--color-text-secondary)',
                         textDecoration: 'none',
-                        padding: '6px 12px',
-                        border: '1px solid var(--color-border-strong)',
-                        borderRadius: '6px',
+                        borderColor: 'var(--color-border-strong)',
                       }}
                     >
-                      Next →
+                      Next
+                      <ArrowRight size={13} />
                     </Link>
                   )}
                 </div>

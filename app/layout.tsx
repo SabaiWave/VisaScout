@@ -95,13 +95,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           otpCodeFieldInput: { backgroundColor: '#1C1C27', borderColor: '#2D2D3D', color: '#F4F4F5' },
 
           // ── UserButton popover ──
-          userButtonPopoverCard: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
+          userButtonPopoverCard: { backgroundColor: '#111118', borderColor: '#2D2D3D', boxShadow: '0 10px 24px rgba(0,0,0,0.7)' },
+          userButtonPopoverMain: { backgroundColor: '#111118' },
+          userButtonPopoverActions: { backgroundColor: '#111118' },
           userButtonPopoverActionButton: { color: '#F4F4F5' },
           userButtonPopoverActionButtonText: { color: '#F4F4F5' },
           userButtonPopoverActionButtonIcon: { color: '#A1A1AA' },
+          userButtonPopoverCustomItemButton: { color: '#F4F4F5' },
+          userButtonPopoverCustomItemButtonText: { color: '#F4F4F5' },
+          userButtonPopoverCustomItemButtonIcon: { color: '#A1A1AA' },
           userPreviewMainIdentifier: { color: '#F4F4F5' },
           userPreviewSecondaryIdentifier: { color: '#A1A1AA' },
-          userButtonPopoverFooter: { borderColor: '#2D2D3D' },
+          userButtonPopoverFooter: { borderColor: '#2D2D3D', backgroundColor: '#111118' },
 
           // ── UserProfile modal (Manage Account) ──
           card: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
