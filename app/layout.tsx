@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/next';
+import { ClerkFontFix } from '@/app/components/ClerkFontFix';
 import './globals.css';
 
 const inter = Inter({
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         variables: {
           colorPrimary: '#6366F1',
           colorBackground: '#111118',
+          fontFamily: "'Inter', system-ui, sans-serif",
           colorInputBackground: '#1C1C27',
           colorInputText: '#F4F4F5',
           colorText: '#F4F4F5',
@@ -95,13 +97,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           otpCodeFieldInput: { backgroundColor: '#1C1C27', borderColor: '#2D2D3D', color: '#F4F4F5' },
 
           // ── UserButton popover ──
-          userButtonPopoverCard: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
+          userButtonPopoverCard: { backgroundColor: '#111118', borderColor: '#2D2D3D', boxShadow: '0 10px 24px rgba(0,0,0,0.7)' },
+          userButtonPopoverMain: { backgroundColor: '#111118' },
+          userButtonPopoverActions: { backgroundColor: '#111118' },
           userButtonPopoverActionButton: { color: '#F4F4F5' },
           userButtonPopoverActionButtonText: { color: '#F4F4F5' },
           userButtonPopoverActionButtonIcon: { color: '#A1A1AA' },
+          userButtonPopoverCustomItemButton: { color: '#F4F4F5' },
+          userButtonPopoverCustomItemButtonText: { color: '#F4F4F5' },
+          userButtonPopoverCustomItemButtonIcon: { color: '#A1A1AA' },
           userPreviewMainIdentifier: { color: '#F4F4F5' },
           userPreviewSecondaryIdentifier: { color: '#A1A1AA' },
-          userButtonPopoverFooter: { borderColor: '#2D2D3D' },
+          userButtonPopoverFooter: { borderColor: '#2D2D3D', backgroundColor: '#111118' },
 
           // ── UserProfile modal (Manage Account) ──
           card: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
@@ -146,6 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
         >
           {children}
+          <ClerkFontFix />
           <Analytics />
         </body>
       </html>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { Button } from '@/app/components/ui/Button';
 
 export default function Error({
   error,
@@ -37,20 +39,10 @@ export default function Error({
         An unexpected error occurred. The team has been notified. Try again or return to the home page.
       </p>
       <div className="flex gap-3">
-        <button
-          onClick={reset}
-          className="px-6 py-3 rounded text-xs font-bold uppercase tracking-wider transition-colors"
-          style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-        >
-          Try again
-        </button>
-        <a
-          href="/"
-          className="px-6 py-3 rounded text-xs font-bold uppercase tracking-wider border transition-colors"
-          style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-        >
-          Back to home
-        </a>
+        <Button onClick={reset}>Try again</Button>
+        <Button variant="secondary" asChild>
+          <Link href="/">Back to home</Link>
+        </Button>
       </div>
     </div>
   );

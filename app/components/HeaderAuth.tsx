@@ -1,6 +1,8 @@
 'use client';
 
-import { useAuth, SignInButton, UserButton } from '@clerk/nextjs';
+import { useAuth, SignInButton } from '@clerk/nextjs';
+import { VisaScoutUserButton } from './VisaScoutUserButton';
+import { Button } from '@/app/components/ui/Button';
 
 export function HeaderAuth() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -8,21 +10,12 @@ export function HeaderAuth() {
   if (!isLoaded) return <div className="w-8 h-8" />;
 
   if (isSignedIn) {
-    return <UserButton />;
+    return <VisaScoutUserButton />;
   }
 
   return (
     <SignInButton mode="modal">
-      <button
-        className="text-sm font-semibold px-4 py-2 rounded-lg border transition-colors"
-        style={{
-          borderColor: 'var(--color-border-strong)',
-          color: 'var(--color-text-primary)',
-          background: 'transparent',
-        }}
-      >
-        Sign in
-      </button>
+      <Button variant="secondary">Sign in</Button>
     </SignInButton>
   );
 }

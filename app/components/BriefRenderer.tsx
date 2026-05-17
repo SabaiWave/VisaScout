@@ -2,38 +2,8 @@
 
 import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
 import { useState } from 'react';
-
-function ConfidenceBadge({ level }: { level: 'high' | 'medium' | 'low' }) {
-  const styles = {
-    high:   { background: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
-    medium: { background: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    low:    { background: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
-  };
-  return (
-    <span
-      className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold tracking-wider"
-      style={{ ...styles[level], fontFamily: 'var(--font-mono)' }}
-    >
-      {level.toUpperCase()}
-    </span>
-  );
-}
-
-function TierLabel({ tier }: { tier: 1 | 2 | 3 | 4 }) {
-  const isTop = tier <= 1;
-  return (
-    <span
-      className="font-mono text-xs px-2 py-0.5 rounded flex-shrink-0"
-      style={{
-        background: isTop ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
-        color: isTop ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
-        fontWeight: isTop ? 600 : 400,
-      }}
-    >
-      Tier {tier}
-    </span>
-  );
-}
+import { ConfidenceBadge, TierLabel } from './ui/Badge';
+import { SectionHeading } from './ui/SectionHeading';
 
 function Label({ children, color, size = 'xs' }: { children: React.ReactNode; color?: string; size?: 'xs' | 'xl' }) {
   return (
@@ -56,21 +26,6 @@ function WarningBox({ header, items, headerSize = 'xs' }: { header: string; item
         </p>
       ))}
     </div>
-  );
-}
-
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <h3
-        className="text-xl font-bold mb-3"
-        style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-      >
-        <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
-        {children}
-      </h3>
-      <div className="mb-4 h-px" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }} />
-    </>
   );
 }
 
@@ -231,13 +186,13 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
 
       {/* Visa Options */}
       <SectionCard>
-        <SectionHeading>Visa Options</SectionHeading>
+        <SectionHeading size="sm" as="h3">Visa Options</SectionHeading>
         {brief.visaOptions.map((opt, i) => <VisaOptionCard key={i} option={opt} />)}
       </SectionCard>
 
       {/* Entry Requirements */}
       <SectionCard>
-        <SectionHeading>Entry Requirements</SectionHeading>
+        <SectionHeading size="sm" as="h3">Entry Requirements</SectionHeading>
         {brief.entryRequirements.documents.length > 0 && (
           <div className="mb-3">
             <Label>Required Documents</Label>
@@ -265,7 +220,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
 
       {/* Border Run Analysis */}
       <SectionCard>
-        <SectionHeading>Border Run Analysis</SectionHeading>
+        <SectionHeading size="sm" as="h3">Border Run Analysis</SectionHeading>
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div>
             <Label>Eligible</Label>
@@ -290,7 +245,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
       {/* Recent Changes */}
       {brief.recentChanges.hasChanges && (
         <SectionCard>
-          <SectionHeading>Recent Changes & Watch Items</SectionHeading>
+          <SectionHeading size="sm" as="h3">Recent Changes & Watch Items</SectionHeading>
           <ul className="text-sm space-y-2 mb-4" style={{ color: 'var(--color-text-secondary)' }}>
             {brief.recentChanges.items.map((item, i) => <li key={i}>• {item}</li>)}
           </ul>
@@ -303,7 +258,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
       {/* Source Citations */}
       {brief.confidenceScore.sourceCitations.length > 0 && (
         <SectionCard>
-          <SectionHeading>Source Citations</SectionHeading>
+          <SectionHeading size="sm" as="h3">Source Citations</SectionHeading>
           <ul className="space-y-2">
             {brief.confidenceScore.sourceCitations.map((cite, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
@@ -369,7 +324,7 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
 
       {/* Metadata */}
       <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
-        Generated {new Date(brief.metadata.generatedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' })} UTC · {brief.metadata.depth} depth
+        Generated {new Date(brief.metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })} · {new Date(brief.metadata.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC · {brief.metadata.depth} depth
         {brief.metadata.degraded && <span className="ml-2" style={{ color: '#f59e0b' }}>· degraded output</span>}
       </div>
 

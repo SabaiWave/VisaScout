@@ -1,30 +1,9 @@
 import Link from 'next/link';
 import { LandingNav } from './components/LandingNav';
-
-// ─── Shared ────────────────────────────────────────────────────────────────
-
-function SectionHeading({ children, subtitle }: { children: React.ReactNode; subtitle?: string }) {
-  return (
-    <div className="mb-12">
-      <h2
-        className="text-3xl font-bold mb-3"
-        style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-      >
-        <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
-        {children}
-      </h2>
-      <div
-        className="mb-4 h-px"
-        style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
-      />
-      {subtitle && (
-        <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
+import { SectionHeading } from './components/ui/SectionHeading';
+import { Wordmark } from './components/ui/Wordmark';
+import { FooterLink } from './components/ui/FooterLink';
+import { Button } from './components/ui/Button';
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 
@@ -68,13 +47,9 @@ function Hero() {
 
         {/* CTA */}
         <div className="flex justify-center mb-8">
-          <Link
-            href="/app"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-lg text-base font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
-            style={{ background: 'var(--color-amber)', color: '#0A0A0A', fontFamily: 'var(--font-mono)' }}
-          >
-            Get your free brief
-          </Link>
+          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: '#0A0A0A' }}>
+            <Link href="/app">Get your free brief</Link>
+          </Button>
         </div>
 
         {/* Metrics strip */}
@@ -147,7 +122,7 @@ function Features() {
   return (
     <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading subtitle="Five parallel intelligence agents. One structured brief. Contradictions resolved, not hidden.">
+        <SectionHeading className="mb-12" subtitle="Five parallel intelligence agents. One structured brief. Contradictions resolved, not hidden.">
           Intelligence Engine
         </SectionHeading>
 
@@ -212,7 +187,7 @@ function Pipeline() {
   return (
     <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading subtitle="Every brief runs five agents in parallel. Results reconciled by a conflict resolver before synthesis.">
+        <SectionHeading className="mb-12" subtitle="Every brief runs five agents in parallel. Results reconciled by a conflict resolver before synthesis.">
           How It Works
         </SectionHeading>
 
@@ -236,7 +211,7 @@ function Pipeline() {
                   Agent {String(i + 1).padStart(2, '0')}
                 </div>
                 <div
-                  className="text-sm font-bold"
+                  className="text-base font-bold"
                   style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
                 >
                   {agent.name}
@@ -272,36 +247,12 @@ function Destinations() {
   return (
     <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <div className="flex items-start justify-between mb-12">
-          <div className="flex-1">
-            <h2
-              className="text-3xl font-bold mb-3"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-            >
-              <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
-              Coverage Matrix
-            </h2>
-            <div
-              className="mb-4 h-px"
-              style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
-            />
-            <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
-              Top 5–6 visa types per country. Unsupported types flagged — never guessed.
-            </p>
-          </div>
-          <span
-            className="hidden sm:flex items-center gap-2 ml-8 text-xs px-3 py-1.5 rounded font-bold uppercase tracking-widest"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              color: '#22c55e',
-              background: 'rgba(34,197,94,0.1)',
-              border: '1px solid rgba(34,197,94,0.2)',
-            }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
-            Live
-          </span>
-        </div>
+        <SectionHeading
+          subtitle="Top 5–6 visa types per country. Unsupported types flagged — never guessed."
+          className="mb-12"
+        >
+          Coverage Matrix
+        </SectionHeading>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {DESTINATIONS.map(name => (
@@ -315,21 +266,14 @@ function Destinations() {
               }}
             >
               <span
-                className="text-sm font-bold uppercase tracking-wider"
+                className="text-base font-bold uppercase tracking-wider"
                 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
               >
                 {name}
               </span>
-              <span
-                className="text-xs font-bold px-2 py-0.5 rounded inline-flex items-center gap-1 w-fit uppercase tracking-wider"
-                style={{
-                  background: 'rgba(34,197,94,0.12)',
-                  color: '#22c55e',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
-                Ready
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: '#22c55e' }} />
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#22c55e', fontFamily: 'var(--font-mono)' }}>Ready</span>
               </span>
             </div>
           ))}
@@ -381,7 +325,7 @@ function Pricing() {
   return (
     <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading subtitle="Less than a visa agency consultation. Far less than an overstay fine.">
+        <SectionHeading className="mb-12" subtitle="Less than a visa agency consultation. Far less than an overstay fine.">
           Mission Parameters
         </SectionHeading>
 
@@ -389,7 +333,7 @@ function Pricing() {
           {PLANS.map(plan => (
             <div
               key={plan.name}
-              className="brief-section p-6 rounded-xl border flex flex-col"
+              className={`brief-section p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
               style={{
                 background: 'var(--color-bg-elevated)',
                 borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
@@ -449,18 +393,9 @@ function Pricing() {
               </ul>
 
               {/* CTA */}
-              <Link
-                href={plan.href}
-                className="block text-center py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
-                style={{
-                  background: plan.highlight ? 'var(--color-secondary)' : 'transparent',
-                  color: plan.highlight ? '#fff' : 'var(--color-text-primary)',
-                  border: plan.highlight ? 'none' : '1px solid var(--color-border-strong)',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                {plan.cta}
-              </Link>
+              <Button asChild variant={plan.highlight ? 'primary' : 'secondary'} className="w-full">
+                <Link href={plan.href}>{plan.cta}</Link>
+              </Button>
             </div>
           ))}
         </div>
@@ -474,37 +409,26 @@ function Pricing() {
 function Footer() {
   return (
     <footer
-      className="border-t px-6 py-12"
+      className="border-t px-6 py-8"
       style={{ background: 'var(--color-bg-subtle)', borderColor: 'var(--color-border-muted)' }}
     >
       <div className="max-w-[1120px] mx-auto">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-4">
           <div>
-            <span
-              className="text-base font-bold block mb-1 uppercase tracking-widest"
-              style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-            >
-              VisaScout
-            </span>
+            <Wordmark className="block mb-1" />
             <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
               Visa intelligence for digital nomads.
             </span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-              Privacy
-            </Link>
-            <Link href="/terms" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-              Terms
-            </Link>
-            <Link href="/contact" className="text-sm transition-colors" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-              Contact
-            </Link>
+            <FooterLink href="/privacy">Privacy</FooterLink>
+            <FooterLink href="/terms">Terms</FooterLink>
+            <FooterLink href="/contact">Contact</FooterLink>
           </div>
         </div>
 
-        <div className="border-t pt-6" style={{ borderColor: 'var(--color-border-muted)' }}>
+        <div className="border-t pt-4" style={{ borderColor: 'var(--color-border-muted)' }}>
           <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
             ⚠ This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
           </p>

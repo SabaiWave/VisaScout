@@ -140,9 +140,21 @@ body {
 /* Global transitions */
 * { transition-duration: 150ms; transition-timing-function: ease; }
 
-/* Clerk UI — force readable text across all surfaces on dark theme */
+/* Clerk UI — nuclear font + text override across ALL surfaces (covers renamed classes in any Clerk version) */
+/* Use var(--font-body) not 'Inter' — next/font loads Inter under a mangled internal name; var() is the only reliable reference */
 [class*="cl-"] {
   --cl-color-text: #F4F4F5 !important;
+  font-family: var(--font-body), system-ui, sans-serif !important;
+}
+
+/* Belt-and-suspenders: specific selectors for Clerk surfaces */
+.cl-card, .cl-card *,
+.cl-modalContent, .cl-modalContent *,
+.cl-modal, .cl-modal *,
+[class*="cl-userProfile"], [class*="cl-userProfile"] *,
+[class*="cl-navbar"], [class*="cl-navbar"] *,
+.cl-userButtonPopoverCard, .cl-userButtonPopoverCard * {
+  font-family: var(--font-body), system-ui, sans-serif !important;
 }
 
 /* Nuclear: strip opacity dimming from ALL Clerk surfaces */
@@ -206,12 +218,21 @@ body {
   color: #F4F4F5 !important;
 }
 
-/* UserButton popover action items */
-.cl-userButtonPopoverActionButton, .cl-userButtonPopoverActionButton * {
+/* UserButton popover — nuclear: covers built-in + custom UserButton.Link items */
+.cl-userButtonPopoverCard,
+.cl-userButtonPopoverCard * {
   color: #F4F4F5 !important;
   opacity: 1 !important;
 }
-.cl-userButtonPopoverActionButton:hover {
+/* Secondary text (email identifier) */
+.cl-userButtonPopoverCard [class*="SecondaryIdentifier"],
+.cl-userButtonPopoverCard [class*="secondaryIdentifier"] {
+  color: #94a3b8 !important;
+}
+/* Hover on any clickable row */
+.cl-userButtonPopoverCard button:hover,
+.cl-userButtonPopoverCard a:hover,
+.cl-userButtonPopoverCard li:hover {
   background-color: rgba(99, 102, 241, 0.12) !important;
 }
 
@@ -221,10 +242,6 @@ body {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
 }
 
-/* Brief action buttons */
-.btn-brief-primary:hover   { background: var(--color-secondary-light) !important; }
-.btn-brief-secondary:hover { background: rgba(255, 255, 255, 0.06) !important; }
-.btn-brief-ghost:hover     { background: rgba(255, 255, 255, 0.04) !important; color: var(--color-text-primary) !important; }
 
 /* HUD card hover glow */
 .brief-section {
@@ -232,6 +249,17 @@ body {
 }
 .brief-section:hover {
   box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 0 24px rgba(99,102,241,0.08);
+}
+
+/* Pricing card hover — overrides inline boxShadow */
+.pricing-card {
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+.pricing-card:hover {
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.25), 0 0 32px rgba(99,102,241,0.15) !important;
+}
+.pricing-card-highlight:hover {
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.25) !important;
 }
 
 /* Dashboard brief cards */
@@ -250,7 +278,11 @@ body {
   color: var(--color-text-primary) !important;
 }
 
-/* New Research button */
-.btn-new-research:hover {
-  background: var(--color-secondary-dark) !important;
+/* Dashboard pagination buttons */
+.dash-pagination-btn {
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.dash-pagination-btn:hover {
+  border-color: rgba(99,102,241,0.4) !important;
+  color: var(--color-text-primary) !important;
 }
