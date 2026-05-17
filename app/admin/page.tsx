@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { currentUser, clerkClient } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
-import { isAdminEmail } from '@/src/lib/adminAccess';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { NavLink } from '@/app/components/ui/NavLink';
@@ -79,10 +79,9 @@ async function getAdminMetrics() {
 }
 
 export default async function AdminPage() {
-  const user = await currentUser();
+  const { userId } = await auth();
 
-  const userEmail = user?.emailAddresses[0]?.emailAddress ?? '';
-  if (!user || !isAdminEmail(userEmail)) {
+  if (!userId || !isAdminUser(userId)) {
     redirect('/');
   }
 

@@ -34,7 +34,7 @@ function logStartup() {
     RESEND_API_KEY: !!process.env.RESEND_API_KEY,
     NEXT_PUBLIC_APP_URL: !!process.env.NEXT_PUBLIC_APP_URL,
     // Admin (Phase 10+)
-    ADMIN_EMAIL: !!process.env.ADMIN_EMAIL,
+    ADMIN_USER_ID: !!process.env.ADMIN_USER_ID,
   };
 
   const missing = Object.entries(checks)
@@ -70,7 +70,7 @@ function logStartup() {
     console.log(fmt('RESEND_API_KEY',                   'RESEND_API_KEY'));
     console.log(fmt('NEXT_PUBLIC_APP_URL',              'NEXT_PUBLIC_APP_URL'));
     console.log('  ·');
-    console.log(fmt('ADMIN_EMAIL',                      'ADMIN_EMAIL'));
+    console.log(fmt('ADMIN_USER_ID',                    'ADMIN_USER_ID'));
     console.log(`  ${'DRY_RUN'.padEnd(38)}${process.env.DRY_RUN === 'true' ? 'true — fixture data, zero API cost' : 'false — real API calls'}`);
     console.log('─────────────────────────────────────────────────────\n');
   } else {
