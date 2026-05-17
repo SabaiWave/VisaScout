@@ -7,6 +7,8 @@ import BriefRenderer from '@/app/components/BriefRenderer';
 import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
+import { Button } from '@/app/components/ui/Button';
+import { SectionHeading } from '@/app/components/ui/SectionHeading';
 
 // ─── Static data ───────────────────────────────────────────────────────────
 
@@ -44,12 +46,21 @@ const NATIONALITIES = [
 
 type AgentStatusEntry = {
   agent: string;
-  status: 'running' | 'complete' | 'failed';
+  status: 'queued' | 'running' | 'complete' | 'failed';
   confidence?: string;
   sourceTier?: number;
   durationMs?: number;
   error?: string;
 };
+
+const INITIAL_AGENT_STATUSES: AgentStatusEntry[] = [
+  { agent: 'officialPolicy',    status: 'running' },
+  { agent: 'recentChanges',     status: 'running' },
+  { agent: 'communityIntel',    status: 'running' },
+  { agent: 'entryRequirements', status: 'running' },
+  { agent: 'borderRun',         status: 'running' },
+  { agent: 'conflictResolver',  status: 'queued' },
+];
 
 type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
 
@@ -59,24 +70,28 @@ const AGENT_DISPLAY: Record<string, string> = {
   communityIntel:    'Community Intel',
   entryRequirements: 'Entry Requirements',
   borderRun:         'Border Run',
+  conflictResolver:  'Conflict Resolver',
 };
 
 // ─── Agent row ─────────────────────────────────────────────────────────────
 
 function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   const borderColor = {
+    queued:   'var(--color-border-muted)',
     running:  'var(--color-secondary)',
     complete: 'var(--color-border)',
     failed:   '#3d1515',
   }[entry.status];
 
   const bg = {
+    queued:   'transparent',
     running:  'var(--color-secondary-subtle)',
     complete: 'var(--color-bg-elevated)',
     failed:   '#1a0a0a',
   }[entry.status];
 
   const leftBorder = {
+    queued:   'var(--color-border-muted)',
     running:  'var(--color-secondary)',
     complete: 'var(--color-secondary)',
     failed:   'var(--color-error)',
@@ -100,18 +115,22 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         animation: entry.status === 'running' ? 'pulse-ring 1.5s ease infinite' : undefined,
       }}
     >
+      {entry.status === 'queued' ? (
+        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: 'var(--color-border-strong)' }} />
+      ) : entry.status === 'running' ? (
+        <span className="w-2 h-2 rounded-full animate-pulse inline-block flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
+      ) : (
+        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)' }} />
+      )}
       <span
-        className="text-base"
-        style={{
-          color: entry.status === 'running' ? 'var(--color-secondary)' : entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)',
-          animation: entry.status === 'running' ? 'spin 1s linear infinite' : undefined,
-        }}
+        className="text-sm font-bold flex-1"
+        style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
       >
-        {entry.status === 'running' ? '⟳' : entry.status === 'complete' ? '✓' : '✕'}
-      </span>
-      <span className="text-sm font-bold flex-1" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
         {AGENT_DISPLAY[entry.agent] ?? entry.agent}
       </span>
+      {entry.status === 'queued' && (
+        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
+      )}
       {entry.status === 'running' && (
         <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
       )}
@@ -174,12 +193,7 @@ function SignInPrompt() {
         </p>
       </div>
       <SignInButton mode="modal">
-        <button
-          className="px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-colors"
-          style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
-        >
-          Sign in to get started
-        </button>
+        <Button>Sign in to get started</Button>
       </SignInButton>
       <p className="mt-4 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
         No account?{' '}
@@ -296,13 +310,25 @@ function AppContent() {
               const entry = data as AgentStatusEntry;
               setAgentStatuses(prev => {
                 const idx = prev.findIndex(a => a.agent === entry.agent);
-                return idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                const updated = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                const fiveAgents = updated.filter(a => a.agent !== 'conflictResolver');
+                const allDone = fiveAgents.length === 5 && fiveAgents.every(a => a.status !== 'running' && a.status !== 'queued');
+                const resolver = updated.find(a => a.agent === 'conflictResolver');
+                if (allDone && resolver?.status === 'queued') {
+                  return updated.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a);
+                }
+                return updated;
               });
               break;
             }
             case 'complete':
               setBrief(data.brief as VisaBrief);
               if (data.briefId) setBriefId(data.briefId as string);
+              setAgentStatuses(prev => {
+                const idx = prev.findIndex(a => a.agent === 'conflictResolver');
+                const completed = { agent: 'conflictResolver', status: 'complete' as const };
+                return idx >= 0 ? prev.map((a, i) => i === idx ? completed : a) : [...prev, completed];
+              });
               setPhase('complete');
               break;
             case 'error':
@@ -320,7 +346,7 @@ function AppContent() {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
-    setAgentStatuses([]);
+    setAgentStatuses(INITIAL_AGENT_STATUSES);
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -353,7 +379,7 @@ function AppContent() {
   }
 
   async function handleFreeBrief() {
-    setAgentStatuses([]);
+    setAgentStatuses(INITIAL_AGENT_STATUSES);
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -417,28 +443,21 @@ function AppContent() {
           {/* ── Form ── */}
           {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
             <div className="max-w-[560px] mx-auto">
-              <h1
-                className="text-3xl font-bold mb-3"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-              >
-                <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
-                Generate Brief
-              </h1>
-              <div className="mb-4 h-px" style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }} />
+              <SectionHeading as="h1" className="mb-4">Generate Brief</SectionHeading>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
 
               {process.env.NODE_ENV === 'development' && (
-                <button
+                <Button
+                  variant="secondary"
                   type="button"
                   onClick={handleFreeBrief}
                   disabled={isGenerating}
-                  className="w-full mb-8 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors disabled:opacity-60"
-                  style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-secondary)', background: 'var(--color-bg-elevated)', fontFamily: 'var(--font-mono)' }}
+                  className="w-full mb-8 py-2.5"
                 >
                   Try a Free Brief — USA → Thailand, Visa Exemption
-                </button>
+                </Button>
               )}
 
               {error && (
@@ -543,11 +562,10 @@ function AppContent() {
                   </p>
                 </div>
 
-                <button
+                <Button
                   type="submit"
                   disabled={phase === 'redirecting'}
-                  className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-wider text-white transition-opacity ${phase === 'redirecting' ? 'opacity-60 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
-                  style={{ background: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
+                  className="w-full py-3"
                 >
                   {phase === 'redirecting'
                     ? 'Redirecting to checkout…'
@@ -556,7 +574,7 @@ function AppContent() {
                       : depth === 'standard'
                         ? `Generate Brief — $${(PRICES.standard.amount / 100).toFixed(2)}`
                         : `Generate Brief — $${(PRICES.deep.amount / 100).toFixed(2)}`}
-                </button>
+                </Button>
               </form>
             </div>
           )}
@@ -599,11 +617,6 @@ function AppContent() {
                     {agentStatuses.map(entry => (
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
-                    {isGenerating && agentStatuses.every(a => a.status !== 'running') && agentStatuses.length === 5 && (
-                      <p className="text-xs mt-2 text-center" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        Resolving conflicts and synthesizing brief…
-                      </p>
-                    )}
                   </div>
                 </div>
               )}
@@ -626,28 +639,20 @@ function AppContent() {
 
                   <div className="flex justify-center gap-4 mt-8">
                     {briefId && (
-                      <button
+                      <Button
                         onClick={handleCopyLink}
-                        className="btn-brief-primary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors"
-                        style={{ background: copied ? 'var(--color-secondary-dark)' : 'var(--color-secondary)', borderColor: 'var(--color-secondary)', color: '#ffffff', fontFamily: 'var(--font-mono)' }}
+                        className="px-8 py-3"
+                        style={copied ? { background: 'var(--color-secondary-dark)' } : undefined}
                       >
                         {copied ? '✓ Copied' : 'Share'}
-                      </button>
+                      </Button>
                     )}
-                    <button
-                      onClick={handleDownloadPdf}
-                      className="btn-brief-secondary px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-opacity"
-                      style={{ borderColor: 'var(--color-border-strong)', color: 'var(--color-text-primary)', background: 'transparent', fontFamily: 'var(--font-mono)' }}
-                    >
+                    <Button variant="secondary" onClick={handleDownloadPdf} className="px-8 py-3">
                       Download PDF
-                    </button>
-                    <button
-                      onClick={handleReset}
-                      className="btn-brief-ghost px-8 py-3 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors"
-                      style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', background: 'transparent', fontFamily: 'var(--font-mono)' }}
-                    >
+                    </Button>
+                    <Button variant="ghost" onClick={handleReset} className="px-8 py-3">
                       New Brief
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="mt-6 rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>

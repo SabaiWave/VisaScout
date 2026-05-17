@@ -17,6 +17,8 @@ if (process.env.VERCEL === '1') {
     // Phase 7 — domain + email
     'RESEND_API_KEY',
     'NEXT_PUBLIC_APP_URL',
+    // Phase 10 — admin dashboard
+    'ADMIN_EMAIL',
   ];
   const missing = required.filter(k => !process.env[k]);
   if (missing.length > 0) {

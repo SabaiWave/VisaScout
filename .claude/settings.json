@@ -11,7 +11,10 @@
       "Skill(start:*)",
       "Bash(echo \"Exit: $?\")",
       "Bash(xargs cat -n)",
-      "Bash(supabase --version)"
+      "Bash(supabase --version)",
+      "Skill(caveman)",
+      "Skill(caveman:*)",
+      "Bash(git rm *)"
     ]
   }
 }

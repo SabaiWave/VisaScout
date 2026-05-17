@@ -22,6 +22,8 @@ export async function GET() {
     // Domain + email (Phase 7)
     resend:      !!process.env.RESEND_API_KEY,
     appUrl:      !!process.env.NEXT_PUBLIC_APP_URL,
+    // Admin (Phase 10)
+    adminEmail:  !!process.env.ADMIN_EMAIL,
   };
 
   const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;

@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
+import { Button } from '@/app/components/ui/Button';
 
 export default function BriefActions({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
@@ -17,24 +19,15 @@ export default function BriefActions({ url }: { url: string }) {
 
   return (
     <div className="flex gap-3 mt-8">
-      <button
-        onClick={() => window.print()}
-        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-[#1e3a5f] text-[#1e3a5f] hover:bg-gray-50 transition-colors"
-      >
+      <Button variant="secondary" onClick={() => window.print()}>
         Download PDF
-      </button>
-      <button
-        onClick={handleCopy}
-        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-      >
+      </Button>
+      <Button variant="secondary" onClick={handleCopy}>
         {copied ? '✓ Copied' : 'Copy link'}
-      </button>
-      <a
-        href="/"
-        className="px-5 py-2.5 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-      >
-        New Brief
-      </a>
+      </Button>
+      <Button variant="ghost" asChild>
+        <Link href="/">New Brief</Link>
+      </Button>
     </div>
   );
 }

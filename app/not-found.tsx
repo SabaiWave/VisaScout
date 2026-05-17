@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Button } from '@/app/components/ui/Button';
 
 export default function NotFound() {
   return (
@@ -22,15 +23,11 @@ export default function NotFound() {
         className="text-base mb-8 max-w-sm"
         style={{ color: 'var(--color-text-secondary)' }}
       >
-        This page doesn't exist. If you followed a link, it may have moved or expired.
+        This page doesn&apos;t exist. If you followed a link, it may have moved or expired.
       </p>
-      <Link
-        href="/"
-        className="px-6 py-3 rounded text-xs font-bold uppercase tracking-wider transition-colors"
-        style={{ background: 'var(--color-secondary)', color: '#fff', fontFamily: 'var(--font-mono)' }}
-      >
-        Back to home
-      </Link>
+      <Button asChild>
+        <Link href="/">Back to home</Link>
+      </Button>
     </div>
   );
 }

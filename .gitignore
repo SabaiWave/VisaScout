@@ -52,3 +52,7 @@ STRATEGY.md
 
 # Claude Code — machine-specific settings (absolute paths, personal allowlists)
 .claude/settings.local.json
+# Claude Code skills — third-party tooling, not app code
+.claude/skills/
+.claude/skills/**/__pycache__/
+
