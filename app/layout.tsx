@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
-import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/next';
 import { ClerkFontFix } from '@/app/components/ClerkFontFix';
+import { ThemeProvider } from '@/app/components/ThemeProvider';
+import { ClerkThemeProvider } from '@/app/components/ClerkThemeProvider';
 import './globals.css';
 
 const inter = Inter({
@@ -64,99 +64,23 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: dark,
-        variables: {
-          colorPrimary: '#6366F1',
-          colorBackground: '#111118',
-          fontFamily: "'Inter', system-ui, sans-serif",
-          colorInputBackground: '#1C1C27',
-          colorInputText: '#F4F4F5',
-          colorText: '#F4F4F5',
-          colorTextSecondary: '#A1A1AA',
-          colorTextOnPrimaryBackground: '#ffffff',
-          borderRadius: '0.5rem',
-        },
-        elements: {
-          // ── Sign-in / Sign-up modal ──
-          headerTitle: { color: '#F4F4F5' },
-          headerSubtitle: { color: '#A1A1AA' },
-          formFieldLabel: { color: '#A1A1AA' },
-          formFieldHintText: { color: '#71717A' },
-          formFieldInput: { backgroundColor: '#1C1C27', borderColor: '#2D2D3D', color: '#F4F4F5' },
-          dividerText: { color: '#71717A' },
-          dividerLine: { backgroundColor: '#2D2D3D' },
-          socialButtonsBlockButton: { backgroundColor: '#1C1C27', borderColor: '#2D2D3D', color: '#F4F4F5' },
-          socialButtonsBlockButtonText: { color: '#F4F4F5' },
-          footerActionText: { color: '#D4D4D8' },
-          footerActionLink: { color: '#818CF8' },
-          footer: { color: '#71717A' },
-          identityPreviewText: { color: '#F4F4F5' },
-          identityPreviewEditButtonIcon: { color: '#A1A1AA' },
-          otpCodeFieldInput: { backgroundColor: '#1C1C27', borderColor: '#2D2D3D', color: '#F4F4F5' },
-
-          // ── UserButton popover ──
-          userButtonPopoverCard: { backgroundColor: '#111118', borderColor: '#2D2D3D', boxShadow: '0 10px 24px rgba(0,0,0,0.7)' },
-          userButtonPopoverMain: { backgroundColor: '#111118' },
-          userButtonPopoverActions: { backgroundColor: '#111118' },
-          userButtonPopoverActionButton: { color: '#F4F4F5' },
-          userButtonPopoverActionButtonText: { color: '#F4F4F5' },
-          userButtonPopoverActionButtonIcon: { color: '#A1A1AA' },
-          userButtonPopoverCustomItemButton: { color: '#F4F4F5' },
-          userButtonPopoverCustomItemButtonText: { color: '#F4F4F5' },
-          userButtonPopoverCustomItemButtonIcon: { color: '#A1A1AA' },
-          userPreviewMainIdentifier: { color: '#F4F4F5' },
-          userPreviewSecondaryIdentifier: { color: '#A1A1AA' },
-          userButtonPopoverFooter: { borderColor: '#2D2D3D', backgroundColor: '#111118' },
-
-          // ── UserProfile modal (Manage Account) ──
-          card: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
-          navbar: { backgroundColor: '#0A0A0A', borderColor: '#2D2D3D' },
-          navbarHeader: { color: '#F4F4F5', opacity: 1 },
-          navbarButton: { color: '#A1A1AA' },
-          navbarButtonIcon: { color: '#A1A1AA' },
-          pageScrollBox: { backgroundColor: '#111118' },
-          profileSectionTitle: { color: '#F4F4F5', borderColor: '#2D2D3D' },
-          profileSectionSubtitle: { color: '#A1A1AA' },
-          profileSectionContent: { color: '#F4F4F5' },
-          profileSectionPrimaryButton: { color: '#6366F1' },
-          profileSectionItem: { borderColor: '#2D2D3D' },
-          accordionTriggerButton: { color: '#F4F4F5' },
-          badge: { color: '#F4F4F5', backgroundColor: '#1C1C27' },
-          badgePrimary: { backgroundColor: '#1C1C27', color: '#A1A1AA' },
-          tableHead: { color: '#A1A1AA' },
-          paginationButton: { color: '#A1A1AA' },
-          paginationButtonIcon: { color: '#A1A1AA' },
-          activeDeviceIcon: { color: '#A1A1AA', filter: 'invert(1) brightness(0.6)' },
-          activeDevice: { borderColor: '#2D2D3D', color: '#F4F4F5' },
-          activeDeviceListItem: { borderColor: '#2D2D3D', color: '#F4F4F5' },
-          activeDeviceBrowser: { color: '#A1A1AA' },
-          activeDeviceIpAddress: { color: '#A1A1AA' },
-          activeDeviceLastActive: { color: '#71717A' },
-          // ── Broad text catch-all for manage account ──
-          pageHeader: { color: '#F4F4F5' },
-          pageHeaderTitle: { color: '#F4F4F5' },
-          pageHeaderSubtitle: { color: '#A1A1AA' },
-          profileSectionTitleText: { color: '#F4F4F5' },
-          formattedDate: { color: '#A1A1AA' },
-          identityPreviewEditButton: { color: '#6366F1' },
-        },
-      }}
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <html
-        lang="en"
-        className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      <body
+        className="min-h-full flex flex-col"
+        style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
       >
-        <body
-          className="min-h-full flex flex-col"
-          style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
-        >
-          {children}
-          <ClerkFontFix />
-          <Analytics />
-        </body>
-      </html>
-    </ClerkProvider>
+        <ThemeProvider attribute="data-theme" defaultTheme="dark">
+          <ClerkThemeProvider>
+            {children}
+            <ClerkFontFix />
+          </ClerkThemeProvider>
+        </ThemeProvider>
+        <Analytics />
+      </body>
+    </html>
   );
 }

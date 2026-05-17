@@ -24,7 +24,7 @@ function Hero() {
             border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: '#22c55e' }} />
+          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-success)' }} />
           Multi-Agent Visa Intelligence · SEA
         </div>
 
@@ -47,7 +47,7 @@ function Hero() {
 
         {/* CTA */}
         <div className="flex justify-center mb-8">
-          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: '#0A0A0A' }}>
+          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
             <Link href="/app">Get your free brief</Link>
           </Button>
         </div>
@@ -135,7 +135,7 @@ function Features() {
                 background: 'var(--color-bg-base)',
                 borderColor: 'var(--color-border)',
                 borderLeft: '3px solid var(--color-secondary)',
-                boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+                boxShadow: 'var(--shadow-card)',
               }}
             >
               <div className="flex items-start justify-between mb-4">
@@ -201,7 +201,7 @@ function Pipeline() {
                   background: 'var(--color-bg-elevated)',
                   borderColor: 'var(--color-border)',
                   borderLeft: '3px solid var(--color-secondary)',
-                  boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+                  boxShadow: 'var(--shadow-card)',
                 }}
               >
                 <div
@@ -262,7 +262,7 @@ function Destinations() {
               style={{
                 background: 'var(--color-bg-base)',
                 borderColor: 'var(--color-border)',
-                boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+                boxShadow: 'var(--shadow-card)',
               }}
             >
               <span
@@ -272,8 +272,8 @@ function Destinations() {
                 {name}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: '#22c55e' }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#22c55e', fontFamily: 'var(--font-mono)' }}>Ready</span>
+                <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-success)' }} />
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}>Ready</span>
               </span>
             </div>
           ))}
@@ -338,7 +338,7 @@ function Pricing() {
                 background: 'var(--color-bg-elevated)',
                 borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
                 borderLeft: plan.highlight ? '3px solid var(--color-secondary)' : '3px solid var(--color-border)',
-                boxShadow: plan.highlight ? '0 0 24px rgba(99,102,241,0.12)' : '0 0 20px rgba(99,102,241,0.05)',
+                boxShadow: plan.highlight ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
               }}
             >
               {/* Plan header */}

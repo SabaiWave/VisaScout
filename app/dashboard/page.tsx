@@ -50,7 +50,7 @@ function EmptyState() {
       gap: '1rem',
       textAlign: 'center',
     }}>
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
         <circle cx="12" cy="12" r="10"/>
         <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
       </svg>
@@ -220,7 +220,7 @@ export default async function DashboardPage({
                             padding: '2px 8px',
                             borderRadius: '4px',
                             background: 'rgba(245,158,11,0.12)',
-                            color: '#f59e0b',
+                            color: 'var(--color-amber)',
                           }}>
                             DEGRADED
                           </span>

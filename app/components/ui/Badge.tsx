@@ -14,9 +14,9 @@ const badgeBase: React.CSSProperties = {
 // ─── Confidence ──────────────────────────────────────────────────────────────
 
 const confidenceMap = {
-  high:   { background: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
-  medium: { background: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-  low:    { background: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
+  high:   { background: 'rgba(34,197,94,0.15)',  color: 'var(--color-confidence-high)' },
+  medium: { background: 'rgba(245,158,11,0.15)', color: 'var(--color-confidence-medium)' },
+  low:    { background: 'rgba(239,68,68,0.15)',  color: 'var(--color-confidence-low)' },
 } as const;
 
 export function ConfidenceBadge({
@@ -36,9 +36,9 @@ export function ConfidenceBadge({
 // ─── Depth ───────────────────────────────────────────────────────────────────
 
 const depthMap = {
-  quick:    { background: 'rgba(99,102,241,0.12)',  color: '#818cf8' },
-  standard: { background: 'rgba(168,85,247,0.12)',  color: '#c084fc' },
-  deep:     { background: 'rgba(245,158,11,0.12)',  color: '#fbbf24' },
+  quick:    { background: 'rgba(99,102,241,0.12)',  color: 'var(--color-depth-quick)' },
+  standard: { background: 'rgba(168,85,247,0.12)',  color: 'var(--color-depth-standard)' },
+  deep:     { background: 'rgba(245,158,11,0.12)',  color: 'var(--color-depth-deep)' },
 } as const;
 
 export function DepthBadge({ depth }: { depth: 'quick' | 'standard' | 'deep' }) {
