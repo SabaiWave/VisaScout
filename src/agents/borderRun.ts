@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import * as Sentry from '@sentry/nextjs';
 import { tavilySearch } from '../tools/tavily';
 import { buildBorderRunPrompt } from '../prompts/borderRun';
 import { parseJSON } from '../lib/parseJSON';
@@ -84,6 +85,7 @@ export async function borderRunAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
+    Sentry.captureException(err, { tags: { agent: 'borderRun', destination: request.normalizedDestination } });
     return {
       status: 'failed',
       data: null,

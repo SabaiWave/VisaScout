@@ -2,6 +2,7 @@ import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { render } from '@react-email/render';
 import { getResend, FROM_ADDRESS } from '@/src/lib/email';
+import { trackEvent } from '@/src/lib/analytics';
 import WelcomeEmail from '@/src/emails/welcome';
 
 export async function POST(req: Request) {
@@ -34,6 +35,11 @@ export async function POST(req: Request) {
   if (event.type === 'user.created') {
     const emailAddresses = event.data.email_addresses as Array<{ email_address: string }> | undefined;
     const email = emailAddresses?.[0]?.email_address;
+
+    await trackEvent('user.signup', {
+      userId: event.data.id as string,
+      email: email ?? null,
+    });
 
     if (email) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';

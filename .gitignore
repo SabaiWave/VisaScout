@@ -51,6 +51,8 @@ GTM.md
 STRATEGY.md
 theme_refactor.md
 light_theme.md
+observability-logging.md
+logging.md
 
 # Claude Code — machine-specific settings (absolute paths, personal allowlists)
 .claude/settings.local.json
