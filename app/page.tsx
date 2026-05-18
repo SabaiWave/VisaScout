@@ -38,7 +38,7 @@ function Hero() {
         {/* H1 */}
         <h1
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
-          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-body)' }}
+          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
         >
           Stop guessing. Know exactly where you stand.
         </h1>
