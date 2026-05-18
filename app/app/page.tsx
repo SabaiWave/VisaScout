@@ -137,10 +137,10 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
       {/* Badges — wrap on narrow screens */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {entry.status === 'queued' && (
-          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
         )}
         {entry.status === 'running' && (
-          <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
         )}
         {entry.status === 'complete' && entry.confidence && (() => {
           const s = confidenceStyle[entry.confidence];
@@ -173,7 +173,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
           </span>
         )}
         {entry.status === 'failed' && (
-          <span className="text-xs" style={{ color: 'var(--color-error)' }}>failed</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>failed</span>
         )}
       </div>
     </div>
