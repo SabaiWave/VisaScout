@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import BriefRenderer from '@/app/components/BriefRenderer';
@@ -9,6 +9,7 @@ import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
 // ─── Static data ───────────────────────────────────────────────────────────
 
@@ -105,7 +106,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg border mb-1.5"
+      className="flex flex-wrap items-center gap-2 px-3 sm:px-4 py-3 rounded-lg border mb-1.5"
       style={{
         borderTop: `1px solid ${borderColor}`,
         borderRight: `1px solid ${borderColor}`,
@@ -115,58 +116,64 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         animation: entry.status === 'running' ? 'pulse-ring 1.5s ease infinite' : undefined,
       }}
     >
-      {entry.status === 'queued' ? (
-        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: 'var(--color-border-strong)' }} />
-      ) : entry.status === 'running' ? (
-        <span className="w-2 h-2 rounded-full animate-pulse inline-block flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
-      ) : (
-        <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)' }} />
-      )}
-      <span
-        className="text-sm font-bold flex-1"
-        style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-      >
-        {AGENT_DISPLAY[entry.agent] ?? entry.agent}
-      </span>
-      {entry.status === 'queued' && (
-        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
-      )}
-      {entry.status === 'running' && (
-        <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
-      )}
-      {entry.status === 'complete' && entry.confidence && (() => {
-        const s = confidenceStyle[entry.confidence];
-        return (
-          <span
-            className="text-xs font-bold px-2 py-0.5 rounded"
-            style={{ background: s?.bg, color: s?.color, fontFamily: 'var(--font-mono)' }}
-          >
-            {entry.confidence}
-          </span>
-        );
-      })()}
-      {entry.status === 'complete' && entry.sourceTier && (
+      {/* Status dot + agent name — always on same line */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {entry.status === 'queued' ? (
+          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: 'var(--color-border-strong)' }} />
+        ) : entry.status === 'running' ? (
+          <span className="w-2 h-2 rounded-full animate-pulse inline-block flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
+        ) : (
+          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)' }} />
+        )}
         <span
-          className="text-xs px-2 py-0.5 rounded"
-          style={{
-            fontFamily: 'var(--font-mono)',
-            background: entry.sourceTier === 1 ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
-            color: entry.sourceTier === 1 ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
-            border: `1px solid ${entry.sourceTier === 1 ? 'rgba(99,102,241,0.3)' : 'var(--color-border)'}`,
-            fontWeight: entry.sourceTier === 1 ? 500 : 400,
-          }}
+          className="text-sm font-bold truncate"
+          style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
         >
-          T{entry.sourceTier}
+          {AGENT_DISPLAY[entry.agent] ?? entry.agent}
         </span>
-      )}
-      {entry.status === 'complete' && entry.durationMs !== undefined && (
-        <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
-          {entry.durationMs}ms
-        </span>
-      )}
-      {entry.status === 'failed' && (
-        <span className="text-xs" style={{ color: 'var(--color-error)' }}>failed</span>
-      )}
+      </div>
+      {/* Badges — wrap on narrow screens */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {entry.status === 'queued' && (
+          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
+        )}
+        {entry.status === 'running' && (
+          <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
+        )}
+        {entry.status === 'complete' && entry.confidence && (() => {
+          const s = confidenceStyle[entry.confidence];
+          return (
+            <span
+              className="text-xs font-bold px-2 py-0.5 rounded"
+              style={{ background: s?.bg, color: s?.color, fontFamily: 'var(--font-mono)' }}
+            >
+              {entry.confidence}
+            </span>
+          );
+        })()}
+        {entry.status === 'complete' && entry.sourceTier && (
+          <span
+            className="text-xs px-2 py-0.5 rounded"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              background: entry.sourceTier === 1 ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
+              color: entry.sourceTier === 1 ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
+              border: `1px solid ${entry.sourceTier === 1 ? 'rgba(99,102,241,0.3)' : 'var(--color-border)'}`,
+              fontWeight: entry.sourceTier === 1 ? 500 : 400,
+            }}
+          >
+            T{entry.sourceTier}
+          </span>
+        )}
+        {entry.status === 'complete' && entry.durationMs !== undefined && (
+          <span className="text-xs hidden sm:inline" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+            {entry.durationMs}ms
+          </span>
+        )}
+        {entry.status === 'failed' && (
+          <span className="text-xs" style={{ color: 'var(--color-error)' }}>failed</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -225,7 +232,7 @@ const INPUT_STYLE: React.CSSProperties = {
   border: '1px solid var(--color-border-strong)',
   borderRadius: 'var(--radius-md)',
   padding: '10px 14px',
-  fontSize: '0.875rem',
+  fontSize: '1rem',
   color: 'var(--color-text-primary)',
   background: 'var(--color-bg-elevated)',
   outline: 'none',
@@ -253,23 +260,22 @@ function AppContent() {
   const [destination, setDestination] = useState('');
   const [visaType, setVisaType] = useState('');
   const [freeform, setFreeform] = useState('');
-  const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>('standard');
+  const depthParam = searchParams.get('depth');
+  const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>(
+    depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard'
+  );
   const [parsedSituation, setParsedSituation] = useState<VisaRequest | null>(null);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const wasCancelled = searchParams.get('cancelled') === 'true';
+  const [error, setError] = useState<string | null>(
+    wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
+  );
   const [submitted, setSubmitted] = useState(false);
 
   const isGenerating = phase === 'generating';
-  const wasCancelled = searchParams.get('cancelled') === 'true';
-
-  useEffect(() => {
-    if (wasCancelled) {
-      setError('Payment was cancelled. Your brief was not generated.');
-    }
-  }, [wasCancelled]);
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
@@ -456,7 +462,7 @@ function AppContent() {
                   disabled={isGenerating}
                   className="w-full mb-8 py-2.5"
                 >
-                  Try a Free Brief — USA → Thailand, Visa Exemption
+                  Dev Mode: Generate a Free Brief — USA → Thailand, Visa Exemption
                 </Button>
               )}
 
@@ -472,29 +478,27 @@ function AppContent() {
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div>
                   <label style={LABEL_STYLE} htmlFor="nationality">Your Nationality <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                  <select
+                  <SearchableCombobox
                     id="nationality"
+                    options={NATIONALITIES}
                     value={nationality}
-                    onChange={e => setNationality(e.target.value)}
-                    style={{ ...INPUT_STYLE, border: `1px solid ${submitted && !nationality ? 'var(--color-error)' : 'var(--color-border)'}` }}
-                  >
-                    <option value="">Select nationality…</option>
-                    {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
-                  </select>
+                    onChange={setNationality}
+                    placeholder="Select nationality…"
+                    hasError={submitted && !nationality}
+                  />
                   {submitted && !nationality && <FieldError />}
                 </div>
 
                 <div>
                   <label style={LABEL_STYLE} htmlFor="destination">Destination <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                  <select
+                  <SearchableCombobox
                     id="destination"
+                    options={DESTINATIONS}
                     value={destination}
-                    onChange={e => { setDestination(e.target.value); setVisaType(''); }}
-                    style={{ ...INPUT_STYLE, border: `1px solid ${submitted && !destination ? 'var(--color-error)' : 'var(--color-border)'}` }}
-                  >
-                    <option value="">Select destination…</option>
-                    {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                    onChange={v => { setDestination(v); setVisaType(''); }}
+                    placeholder="Select destination…"
+                    hasError={submitted && !destination}
+                  />
                   {submitted && !destination && <FieldError />}
                 </div>
 
@@ -503,16 +507,14 @@ function AppContent() {
                     Current Visa Type
                     <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(optional)</span>
                   </label>
-                  <select
+                  <SearchableCombobox
                     id="visaType"
+                    options={visaTypeOptions}
                     value={visaType}
-                    onChange={e => setVisaType(e.target.value)}
+                    onChange={setVisaType}
+                    placeholder={destination ? 'Select visa type…' : 'Select destination first'}
                     disabled={!destination}
-                    style={{ ...INPUT_STYLE, opacity: !destination ? 0.5 : 1 }}
-                  >
-                    <option value="">{destination ? 'Select visa type…' : 'Select destination first'}</option>
-                    {visaTypeOptions.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
+                  />
                 </div>
 
                 <div>
@@ -547,7 +549,7 @@ function AppContent() {
                         className="flex-1 py-1.5 text-xs rounded-full font-bold uppercase tracking-wider transition-all"
                         style={{
                           background: depth === d ? 'var(--color-secondary)' : 'transparent',
-                          color: depth === d ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
+                          color: depth === d ? '#ffffff' : 'var(--color-text-tertiary)',
                           fontFamily: 'var(--font-mono)',
                         }}
                       >

@@ -129,14 +129,14 @@ export default async function AdminPage() {
         </div>
       </nav>
 
-    <main style={{ padding: '2rem', fontFamily: 'var(--font-body)' }}>
+    <main className="px-4 sm:px-8 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <SectionHeading size="md" as="h1" className="mb-8">
           Operations Dashboard
         </SectionHeading>
 
         {/* Summary row — users + revenue */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
           {[
             { label: 'TOTAL USERS',    value: userCount },
             { label: 'PAID USERS',     value: subscriberCount },
@@ -161,7 +161,7 @@ export default async function AdminPage() {
         </div>
 
         {/* Free tier usage row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'FREE TIER TODAY',     value: freeTierToday },
             { label: 'FREE TIER THIS WEEK', value: freeTierWeek },
@@ -189,54 +189,58 @@ export default async function AdminPage() {
           {recentUsers.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No users yet.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-              <thead>
-                <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                  {['Email', 'Signed Up'].map(h => (
-                    <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recentUsers.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>
-                      {u.emailAddresses[0]?.emailAddress ?? '—'}
-                    </td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>
-                      {new Date(u.createdAt).toLocaleString()}
-                    </td>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '400px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['Email', 'Signed Up'].map(h => (
+                      <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recentUsers.map((u) => (
+                    <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>
+                        {u.emailAddresses[0]?.emailAddress ?? '—'}
+                      </td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+                        {new Date(u.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Section>
 
         {/* Cost by depth */}
         <Section title="REPORTS BY DEPTH">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                {['Depth', 'Reports', 'Avg Cost', 'Baseline'].map(h => (
-                  <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {byDepth.map(({ depth, count, avgCost: ac }) => {
-                const baseline = depth === 'quick' ? '$0.23' : depth === 'standard' ? '$0.36' : '$0.65';
-                return (
-                  <tr key={depth} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
-                    <td style={{ padding: '0.6rem 0.75rem', textTransform: 'capitalize' }}>{depth}</td>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>{count}</td>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>{ac > 0 ? `$${ac.toFixed(4)}` : '—'}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{baseline}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: '360px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                  {['Depth', 'Reports', 'Avg Cost', 'Baseline'].map(h => (
+                    <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {byDepth.map(({ depth, count, avgCost: ac }) => {
+                  const baseline = depth === 'quick' ? '$0.23' : depth === 'standard' ? '$0.36' : '$0.65';
+                  return (
+                    <tr key={depth} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
+                      <td style={{ padding: '0.6rem 0.75rem', textTransform: 'capitalize' }}>{depth}</td>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>{count}</td>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>{ac > 0 ? `$${ac.toFixed(4)}` : '—'}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{baseline}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', marginTop: '0.75rem', marginBottom: 0 }}>
             TIER 1 COVERAGE: {tier1Coverage}% · OUTLIER REPORTS ({">"} 2× avg): {outliers.length}
           </p>
@@ -245,25 +249,27 @@ export default async function AdminPage() {
         {/* Outlier reports */}
         {outliers.length > 0 && (
           <Section title="OUTLIER REPORTS (>2× AVG COST)">
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-              <thead>
-                <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                  {['Destination', 'Depth', 'Cost', 'Date'].map(h => (
-                    <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {outliers.slice(0, 20).map((b, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-amber)' }}>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>{b.destination}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', textTransform: 'capitalize' }}>{b.depth}</td>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>${(b.estimated_cost_usd ?? 0).toFixed(4)}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{new Date(b.created_at).toLocaleDateString()}</td>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '360px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['Destination', 'Depth', 'Cost', 'Date'].map(h => (
+                      <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {outliers.slice(0, 20).map((b, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-amber)' }}>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>{b.destination}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', textTransform: 'capitalize' }}>{b.depth}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', whiteSpace: 'nowrap' }}>${(b.estimated_cost_usd ?? 0).toFixed(4)}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>{new Date(b.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </Section>
         )}
 
@@ -290,25 +296,27 @@ export default async function AdminPage() {
           {ipLogs.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No flagged IPs.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
-              <thead>
-                <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                  {['IP', 'User ID', 'Reason', 'Date'].map(h => (
-                    <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ipLogs.map((entry, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>{entry.ip}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{entry.user_id ?? '—'}</td>
-                    <td style={{ padding: '0.6rem 0.75rem' }}>{entry.reason ?? '—'}</td>
-                    <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{new Date(entry.created_at).toLocaleString()}</td>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['IP', 'User ID', 'Reason', 'Date'].map(h => (
+                      <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ipLogs.map((entry, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--color-border-muted)', color: 'var(--color-text-secondary)' }}>
+                      <td style={{ padding: '0.6rem 0.75rem', whiteSpace: 'nowrap' }}>{entry.ip}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)' }}>{entry.user_id ?? '—'}</td>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>{entry.reason ?? '—'}</td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>{new Date(entry.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Section>
       </div>

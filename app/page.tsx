@@ -30,7 +30,7 @@ function Hero() {
 
         {/* H1 */}
         <h1
-          className="text-5xl sm:text-6xl font-bold leading-tight mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
           style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-body)' }}
         >
           Stop guessing. Know exactly where you stand.
@@ -38,7 +38,7 @@ function Hero() {
 
         {/* Subhead */}
         <p
-          className="text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           Official policy + recent enforcement changes + real traveler experience — synthesized
@@ -48,13 +48,13 @@ function Hero() {
         {/* CTA */}
         <div className="flex justify-center mb-8">
           <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
-            <Link href="/app">Get your free brief</Link>
+            <Link href="/app?depth=quick">Get your free brief</Link>
           </Button>
         </div>
 
         {/* Metrics strip */}
         <div
-          className="inline-flex items-center gap-6 px-6 py-3 rounded-lg border"
+          className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 px-4 sm:px-6 py-3 rounded-lg border"
           style={{
             background: 'var(--color-bg-elevated)',
             borderColor: 'var(--color-border)',
@@ -67,13 +67,13 @@ function Hero() {
             { value: 'T1–T4', label: 'Source tiers' },
             { value: 'Per report', label: 'No subscription' },
           ].map((m, i) => (
-            <div key={m.label} className="flex items-center gap-6">
+            <div key={m.label} className="flex items-center gap-3 sm:gap-6">
               {i > 0 && (
-                <div className="w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
+                <div className="hidden sm:block w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
               )}
               <div className="text-center">
-                <div className="text-lg font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
-                <div className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
+                <div className="text-base sm:text-lg font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
+                <div className="text-xs sm:text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
               </div>
             </div>
           ))}
@@ -120,7 +120,7 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
+    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
         <SectionHeading className="mb-12" subtitle="Five parallel intelligence agents. One structured brief. Contradictions resolved, not hidden.">
           Intelligence Engine
@@ -185,7 +185,7 @@ const AGENTS = [
 
 function Pipeline() {
   return (
-    <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
+    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
         <SectionHeading className="mb-12" subtitle="Every brief runs five agents in parallel. Results reconciled by a conflict resolver before synthesis.">
           How It Works
@@ -245,7 +245,7 @@ const DESTINATIONS = [
 
 function Destinations() {
   return (
-    <section className="px-6 py-20" style={{ background: 'var(--color-bg-elevated)' }}>
+    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
         <SectionHeading
           subtitle="Top 5–6 visa types per country. Unsupported types flagged — never guessed."
@@ -294,7 +294,7 @@ const PLANS = [
     description: 'Full pipeline, all 5 agents, 3 sources each. Good for a fast overview.',
     features: ['All 5 agents', '3 sources per agent', 'Visa brief', 'Shareable link'],
     cta: 'Start free',
-    href: '/app',
+    href: '/app?depth=quick',
     highlight: false,
   },
   {
@@ -305,7 +305,7 @@ const PLANS = [
     description: 'More sources, richer analysis, full conflict report, PDF download.',
     features: ['All 5 agents', '5 sources per agent', 'Richer conflict analysis', 'PDF download', 'Shareable link'],
     cta: 'Get Standard',
-    href: '/app',
+    href: '/app?depth=standard',
     highlight: true,
   },
   {
@@ -316,14 +316,14 @@ const PLANS = [
     description: 'Everything in Standard, plus maximum sources and full border run analysis.',
     features: ['Everything in Standard', '8 sources per agent', 'Extended community search', 'Full border run analysis', 'Conflict deep-dive'],
     cta: 'Get Deep',
-    href: '/app',
+    href: '/app?depth=deep',
     highlight: false,
   },
 ];
 
 function Pricing() {
   return (
-    <section className="px-6 py-20" style={{ background: 'var(--color-bg-base)' }}>
+    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
         <SectionHeading className="mb-12" subtitle="Less than a visa agency consultation. Far less than an overstay fine.">
           Mission Parameters
