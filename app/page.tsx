@@ -10,10 +10,17 @@ import { Button } from './components/ui/Button';
 function Hero() {
   return (
     <section
-      className="px-6 pt-24 pb-20 text-center"
+      className="relative overflow-hidden px-6 pt-24 pb-20 text-center"
       style={{ background: 'var(--color-bg-base)' }}
     >
-      <div className="max-w-[860px] mx-auto">
+      {/* Radiant Bloom */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+        style={{ background: 'var(--hero-bloom-bg)' }}
+      />
+
+      <div className="relative z-10 max-w-[860px] mx-auto">
         {/* Eyebrow */}
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-widest"
@@ -54,7 +61,7 @@ function Hero() {
 
         {/* Metrics strip */}
         <div
-          className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 px-4 sm:px-6 py-3 rounded-lg border"
+          className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 px-4 sm:px-6 py-3 rounded-lg border w-fit mx-auto"
           style={{
             background: 'var(--color-bg-elevated)',
             borderColor: 'var(--color-border)',
