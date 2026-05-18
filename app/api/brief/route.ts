@@ -9,7 +9,7 @@ import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
 import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
-import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT, ADMIN_DAILY_LIMIT } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
@@ -58,16 +58,18 @@ export async function POST(req: Request) {
 
   const isAdmin = isAdminUser(userId);
 
-  // Free tier daily cap — enforced per userId via Supabase (not IP; resets on cold start)
-  if (resolvedDepth === 'quick' && !DRY_RUN && !isAdmin) {
+  const dailyLimit = isAdmin ? ADMIN_DAILY_LIMIT : FREE_DAILY_LIMIT;
+
+  // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
+  if (resolvedDepth === 'quick' && !DRY_RUN) {
     try {
-      const cap = await checkFreeTierCap(userId);
+      const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
         await logIpAbuse(ip, userId, 'free_tier_daily_cap_exceeded').catch(() => {});
         await trackEvent('free_cap.reached', {
           userId,
           ipAddress: ip ?? null,
-          briefsUsed: FREE_DAILY_LIMIT,
+          briefsUsed: dailyLimit,
           destination: destination ?? null,
         });
         return new Response(
