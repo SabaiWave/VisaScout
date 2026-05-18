@@ -1,8 +1,9 @@
 import { getSupabase } from './supabase';
 
-export const FREE_DAILY_LIMIT = 1;
+export const FREE_DAILY_LIMIT = parseInt(process.env.MAX_BRIEFS_USER ?? '1', 10);
+export const ADMIN_DAILY_LIMIT = parseInt(process.env.MAX_BRIEFS_ADMIN ?? '50', 10);
 
-export async function checkFreeTierCap(userId: string): Promise<{ allowed: boolean; remaining: number }> {
+export async function checkFreeTierCap(userId: string, limit: number = FREE_DAILY_LIMIT): Promise<{ allowed: boolean; remaining: number }> {
   const today = new Date().toISOString().split('T')[0];
   const { data } = await getSupabase()
     .from('free_brief_daily')
@@ -13,8 +14,8 @@ export async function checkFreeTierCap(userId: string): Promise<{ allowed: boole
 
   const count = (data as { count: number } | null)?.count ?? 0;
   return {
-    allowed: count < FREE_DAILY_LIMIT,
-    remaining: Math.max(0, FREE_DAILY_LIMIT - count),
+    allowed: count < limit,
+    remaining: Math.max(0, limit - count),
   };
 }
 
