@@ -8,6 +8,8 @@ import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
 import { Button } from '@/app/components/ui/Button';
+import { DownloadPdfButton } from '@/app/components/ui/DownloadPdfButton';
+import { ShareButton } from '@/app/components/ui/ShareButton';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
@@ -127,7 +129,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         )}
         <span
           className="text-sm font-bold truncate"
-          style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+          style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}
         >
           {AGENT_DISPLAY[entry.agent] ?? entry.agent}
         </span>
@@ -269,13 +271,11 @@ function AppContent() {
   const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const wasCancelled = searchParams.get('cancelled') === 'true';
   const [error, setError] = useState<string | null>(
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
   const [submitted, setSubmitted] = useState(false);
-
   const isGenerating = phase === 'generating';
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
@@ -357,7 +357,6 @@ function AppContent() {
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
-    setCopied(false);
     setError(null);
 
     if (depth === 'standard' || depth === 'deep') {
@@ -390,7 +389,6 @@ function AppContent() {
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
-    setCopied(false);
     setError(null);
     await runBriefStream({
       nationality: 'American',
@@ -405,27 +403,10 @@ function AppContent() {
     setPhase('idle');
     setBrief(null);
     setBriefId(null);
-    setCopied(false);
     setParsedSituation(null);
     setAgentStatuses([]);
     setError(null);
     setSubmitted(false);
-  }
-
-  async function handleCopyLink() {
-    if (!briefId) return;
-    const url = `${window.location.origin}/brief/${briefId}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore clipboard error
-    }
-  }
-
-  function handleDownloadPdf() {
-    window.print();
   }
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
@@ -640,28 +621,25 @@ function AppContent() {
                     <BriefRenderer brief={brief} forPrint={false} />
                   </div>
 
-                  <div className="flex justify-center gap-4 mt-8">
+                  <div className="flex justify-center gap-4 mt-4">
                     {briefId && (
-                      <Button
-                        onClick={handleCopyLink}
-                        className="px-8 py-3"
-                        style={copied ? { background: 'var(--color-secondary-dark)' } : undefined}
-                      >
-                        {copied ? '✓ Copied' : 'Share'}
-                      </Button>
+                      <DownloadPdfButton briefId={briefId} depth={depth} className="px-8 py-3" />
                     )}
-                    <Button variant="secondary" onClick={handleDownloadPdf} className="px-8 py-3">
-                      Download PDF
-                    </Button>
+                    {briefId && (
+                      <ShareButton
+                        url={`${window.location.origin}/brief/${briefId}`}
+                        briefId={briefId}
+                        className="px-8 py-3"
+                      />
+                    )}
                     <Button variant="ghost" onClick={handleReset} className="px-8 py-3">
                       New Brief
                     </Button>
                   </div>
 
-                  <div className="mt-6 rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: '0 0 16px rgba(245,158,11,0.06)' }}>
-                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>Disclaimer</p>
-                    <p className="text-sm flex items-start gap-2" style={{ color: 'var(--color-amber)' }}>
-                      <span className="flex-shrink-0">⚠</span><span>{brief.disclaimer}</span>
+                  <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--color-border-muted)' }}>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-tertiary)', textWrap: 'pretty' } as React.CSSProperties}>
+                      ⚠ {brief.disclaimer}
                     </p>
                   </div>
                 </div>
