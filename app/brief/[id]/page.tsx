@@ -49,7 +49,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
       <nav
-        className="sticky top-0 z-50 border-b px-6 py-4"
+        className="sticky top-0 z-50 border-b px-4 sm:px-6 py-3 sm:py-4"
         style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
       >
         <div className="max-w-[1120px] mx-auto flex items-center justify-between">
@@ -63,7 +63,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
         </div>
       </nav>
 
-      <main className="max-w-[1120px] mx-auto px-6 py-10">
+      <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-[760px] mx-auto">
           <div className="mb-8">
             <SectionHeading size="md" as="h1">
