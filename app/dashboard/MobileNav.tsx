@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { Archive } from 'lucide-react';
+import Link from 'next/link';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
-import { MobileDrawer, HamburgerButton } from '@/app/components/ui/MobileDrawer';
+import { NavDrawer, HamburgerButton, navDrawerLinkStyle } from '@/app/components/ui/MobileDrawer';
+import { SidebarAccount } from './SidebarAccount';
 
 export function MobileNav() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -18,12 +21,23 @@ export function MobileNav() {
           minHeight: '56px',
         }}
       >
-        <HamburgerButton onClick={() => setDrawerOpen(true)} />
+        <HamburgerButton onClick={() => setOpen(true)} />
         <Wordmark />
         <VisaScoutUserButton />
       </nav>
 
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <NavDrawer open={open} onClose={() => setOpen(false)}>
+        <Link
+          href="/dashboard"
+          onClick={() => setOpen(false)}
+          style={{ ...navDrawerLinkStyle, color: 'var(--color-secondary-light)', background: 'var(--color-secondary-subtle)', border: 'none' }}
+        >
+          <Archive size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
+          History
+        </Link>
+        <div style={{ flex: 1 }} />
+        <SidebarAccount />
+      </NavDrawer>
     </>
   );
 }

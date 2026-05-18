@@ -1,13 +1,10 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefActions from '@/app/components/BriefActions';
 import BriefRenderer from '@/app/components/BriefRenderer';
+import { BriefHeader } from '@/app/components/BriefHeader';
 import type { VisaBrief } from '@/src/types/index';
-import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { Button } from '@/app/components/ui/Button';
-import { HeaderAuth } from '@/app/components/HeaderAuth';
 
 interface BriefRow {
   id: string;
@@ -48,20 +45,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-      <nav
-        className="sticky top-0 z-50 border-b px-4 sm:px-6 py-3 sm:py-4"
-        style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[1120px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <div className="flex items-center gap-2">
-            <Button asChild>
-              <Link href="/app">Generate Brief</Link>
-            </Button>
-            <HeaderAuth />
-          </div>
-        </div>
-      </nav>
+      <BriefHeader />
 
       <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-[760px] mx-auto">

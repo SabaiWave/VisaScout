@@ -1,24 +1,43 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { Archive, X } from 'lucide-react';
-import Link from 'next/link';
-import { Wordmark } from './Wordmark';
-import { SidebarAccount } from '@/app/dashboard/SidebarAccount';
+import { CSSProperties, ReactNode, useEffect } from 'react';
+import { X } from 'lucide-react';
 
-interface MobileDrawerProps {
+// Shared style constants for drawer nav links — use these in every page's drawer
+export const navDrawerLinkStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '12px 14px',
+  borderRadius: '8px',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  color: 'var(--color-text-secondary)',
+  textDecoration: 'none',
+  fontFamily: 'var(--font-mono)',
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  minHeight: '44px',
+  border: '1px solid var(--color-border)',
+};
+
+export const navDrawerPrimaryStyle: CSSProperties = {
+  ...navDrawerLinkStyle,
+  background: 'var(--color-secondary)',
+  color: '#ffffff',
+  border: 'none',
+  justifyContent: 'center',
+};
+
+interface NavDrawerProps {
   open: boolean;
   onClose: () => void;
+  children: ReactNode;
 }
 
-export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
-  const drawerRef = useRef<HTMLDivElement>(null);
-
+export function NavDrawer({ open, onClose, children }: NavDrawerProps) {
   useEffect(() => {
     if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
@@ -37,7 +56,7 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
           position: 'fixed',
           inset: 0,
           zIndex: 40,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(0,0,0,0.55)',
           backdropFilter: 'blur(2px)',
           opacity: open ? 1 : 0,
           pointerEvents: open ? 'auto' : 'none',
@@ -45,33 +64,30 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
         }}
       />
 
-      {/* Drawer panel */}
+      {/* Panel */}
       <div
-        ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
         style={{
           position: 'fixed',
           top: 0,
-          left: 0,
+          right: 0,
           bottom: 0,
           zIndex: 50,
           width: '260px',
           background: 'var(--color-bg-subtle)',
-          borderRight: '1px solid var(--color-border-muted)',
+          borderLeft: '1px solid var(--color-border-muted)',
           display: 'flex',
           flexDirection: 'column',
-          padding: '1.5rem 1rem',
-          gap: '0.25rem',
-          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          padding: '1.25rem 1rem',
+          gap: '0.5rem',
+          transform: open ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.25s ease',
           willChange: 'transform',
         }}
       >
-        {/* Header row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', paddingLeft: '0.5rem' }}>
-          <Wordmark />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
           <button
             onClick={onClose}
             aria-label="Close menu"
@@ -92,37 +108,15 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps) {
           </button>
         </div>
 
-        {/* Nav items */}
-        <Link
-          href="/dashboard"
-          onClick={onClose}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '10px 12px',
-            borderRadius: '8px',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: 'var(--color-secondary-light)',
-            background: 'var(--color-secondary-subtle)',
-            textDecoration: 'none',
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            minHeight: '44px',
-          }}
-        >
-          <Archive size={14} />
-          History
-        </Link>
-
-        <div style={{ flex: 1 }} />
-        <SidebarAccount />
+        {children}
       </div>
     </>
   );
 }
+
+// Keep MobileDrawer as an alias so the dashboard MobileNav import doesn't break
+// until we update it below
+export { NavDrawer as MobileDrawer };
 
 export function HamburgerButton({ onClick }: { onClick: () => void }) {
   return (
