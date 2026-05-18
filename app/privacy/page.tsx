@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { NavLink } from '@/app/components/ui/NavLink';
-import { FooterLink } from '@/app/components/ui/FooterLink';
+import { MiniFooter } from '@/app/components/ui/MiniFooter';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — VisaScout',
@@ -103,16 +103,7 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <footer
-        className="border-t px-6 py-8 text-center"
-        style={{ borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="flex justify-center gap-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-          <FooterLink href="/">Home</FooterLink>
-          <FooterLink href="/terms">Terms</FooterLink>
-          <FooterLink href="/contact">Contact</FooterLink>
-        </div>
-      </footer>
+      <MiniFooter exclude="/privacy" />
     </div>
   );
 }
