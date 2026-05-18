@@ -172,8 +172,8 @@ export async function POST(req: Request) {
           nationality,
           durationMs: Date.now() - startTime,
           estimatedCostUsd: cost.estimatedCostUsd,
-          agentStatuses: JSON.stringify(brief.metadata?.agentStatuses ?? {}),
-          degraded: Object.values(brief.metadata?.agentStatuses ?? {}).some((s) => s === 'failed'),
+          agentStatuses: JSON.stringify(brief.metadata?.agentStatuses ?? []),
+          degraded: (brief.metadata?.agentStatuses ?? []).some((s) => s.status === 'failed'),
         });
 
         log.info('pipeline complete', {
