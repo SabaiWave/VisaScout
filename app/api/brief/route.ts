@@ -189,15 +189,15 @@ export async function POST(req: Request) {
           estimatedCostUsd: cost.estimatedCostUsd.toFixed(4),
         });
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Pipeline failed';
-        log.error('pipeline error', { error: message, destination, depth: resolvedDepth });
+        const internalMessage = err instanceof Error ? err.message : 'Pipeline failed';
+        log.error('pipeline error', { error: internalMessage, destination, depth: resolvedDepth });
         await trackEvent('brief.failed', {
           userId,
           depth: resolvedDepth,
           destination: destination ?? null,
-          errorMessage: message,
+          errorMessage: internalMessage,
         });
-        send({ type: 'error', message });
+        send({ type: 'error', message: 'Something went wrong generating your brief. Please try again or contact support.' });
       } finally {
         Sentry.setUser(null);
         controller.close();

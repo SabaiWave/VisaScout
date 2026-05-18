@@ -127,7 +127,7 @@ export default async function DashboardPage({
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bloom-app-bg)' }}>
         <MobileNav />
 
         {/* Desktop top bar — utility nav (Resend pattern) */}
