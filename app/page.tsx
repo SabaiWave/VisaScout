@@ -31,8 +31,8 @@ function Hero() {
             border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)', display: 'inline-block' }} />
-          Multi-Agent Visa Intelligence · SEA
+          <span className="w-2 h-2 rounded-full flex-shrink-0 self-center animate-pulse" style={{ background: 'var(--color-success)' }} />
+          <span>Multi-Agent Visa Intelligence · SEA</span>
         </div>
 
         {/* H1 */}
