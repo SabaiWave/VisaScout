@@ -585,7 +585,7 @@ function AppContent() {
           {parsedSituation && (phase === 'generating' || phase === 'complete') && (
             <div className="max-w-[760px] mx-auto mb-6">
               <div
-                className="rounded-lg px-4 py-3 border"
+                className="brief-section rounded-lg px-4 py-3 border"
                 style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
               >
                 <p
@@ -607,7 +607,7 @@ function AppContent() {
               {agentStatuses.length > 0 && (
                 <div className="mb-8">
                   <div
-                    className="rounded-xl p-5 border"
+                    className="brief-section rounded-xl p-5 border"
                     style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.06)' }}
                   >
                     <p
