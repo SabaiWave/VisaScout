@@ -6,6 +6,7 @@ import { useAuth } from '@clerk/nextjs';
 import { Wordmark } from './ui/Wordmark';
 import { Button } from './ui/Button';
 import { NavDrawer, HamburgerButton, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
+import { NavLink } from './ui/NavLink';
 import { SidebarAccount } from './SidebarAccount';
 import { HeaderAuth } from './HeaderAuth';
 
@@ -24,6 +25,7 @@ export function BriefHeader() {
 
           {/* Desktop nav (md+) */}
           <div className="hidden md:flex items-center gap-2">
+            {isSignedIn && <NavLink href="/dashboard">My Briefs</NavLink>}
             <Button asChild>
               <Link href="/app">Generate Brief</Link>
             </Button>
@@ -39,6 +41,9 @@ export function BriefHeader() {
 
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Generate Brief</Link>
+        {isLoaded && isSignedIn && (
+          <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>My Briefs</Link>
+        )}
         {isLoaded && (isSignedIn ? (
           <>
             <div style={{ flex: 1 }} />

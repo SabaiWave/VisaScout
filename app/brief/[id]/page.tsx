@@ -5,6 +5,7 @@ import BriefRenderer from '@/app/components/BriefRenderer';
 import { BriefHeader } from '@/app/components/BriefHeader';
 import type { VisaBrief } from '@/src/types/index';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { BriefMeta } from '@/app/components/ui/BriefMeta';
 
 interface BriefRow {
   id: string;
@@ -53,9 +54,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
             <SectionHeading size="md" as="h1">
               {row.nationality} → {row.destination}
             </SectionHeading>
-            <p className="text-xs -mt-3" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-              {row.depth.toUpperCase()} DEPTH · {new Date(row.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
+            <BriefMeta depth={row.depth} generatedAt={row.created_at} className="mt-3" />
           </div>
 
           <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} />
@@ -73,7 +72,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
                 Brief is being generated — refresh in a minute.
               </div>
             ) : brief ? (
-              <BriefRenderer brief={brief} />
+              <BriefRenderer brief={brief} hideMetadata />
             ) : (
               <div
                 className="px-4 py-3 rounded"
