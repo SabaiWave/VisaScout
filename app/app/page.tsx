@@ -233,6 +233,7 @@ const INPUT_STYLE: React.CSSProperties = {
   borderRadius: 'var(--radius-md)',
   padding: '10px 14px',
   fontSize: '1rem',
+  fontFamily: 'var(--font-body)',
   color: 'var(--color-text-primary)',
   background: 'var(--color-bg-elevated)',
   outline: 'none',
@@ -240,13 +241,13 @@ const INPUT_STYLE: React.CSSProperties = {
 
 const LABEL_STYLE: React.CSSProperties = {
   display: 'block',
-  fontSize: '0.75rem',
+  fontSize: '0.8rem',
   fontWeight: 700,
   fontFamily: 'var(--font-mono)',
   textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: 'var(--color-text-tertiary)',
-  marginBottom: '6px',
+  letterSpacing: '0.1em',
+  color: 'var(--color-secondary-light)',
+  marginBottom: '8px',
 };
 
 // ─── Main page ─────────────────────────────────────────────────────────────
@@ -471,7 +472,8 @@ function AppContent() {
                   className="mb-6 rounded-lg px-4 py-3 text-sm border"
                   style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-error)' }}
                 >
-                  {error}
+                  {error}{' '}
+                  <a href="/contact" style={{ color: 'var(--color-error)', textDecoration: 'underline', opacity: 0.8 }}>Contact us</a>
                 </div>
               )}
 
@@ -585,14 +587,14 @@ function AppContent() {
           {parsedSituation && (phase === 'generating' || phase === 'complete') && (
             <div className="max-w-[760px] mx-auto mb-6">
               <div
-                className="brief-section rounded-lg px-4 py-3 border"
+                className="brief-section rounded-xl px-4 py-3 border"
                 style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
               >
                 <p
                   className="text-xl font-bold tracking-wider mb-1"
-                  style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
                 >
-                  We Understood
+                  <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>We Understood
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {parsedSituation.parsedSummary}
@@ -612,9 +614,9 @@ function AppContent() {
                   >
                     <p
                       className="text-xl font-bold tracking-wider mb-3"
-                      style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                      style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
                     >
-                      Agent Status
+                      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Agent Status
                     </p>
                     {agentStatuses.map(entry => (
                       <AgentRow key={entry.agent} entry={entry} />

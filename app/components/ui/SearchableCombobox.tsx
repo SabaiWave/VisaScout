@@ -135,7 +135,7 @@ export function SearchableCombobox({
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
             transition: 'border-color 0.15s, box-shadow 0.15s',
-            fontFamily: 'var(--font-mono)',
+            fontFamily: 'var(--font-body)',
           }}
         />
         {/* Chevron */}
@@ -185,7 +185,7 @@ export function SearchableCombobox({
               padding: '10px 12px',
               fontSize: '0.8rem',
               color: 'var(--color-text-tertiary)',
-              fontFamily: 'var(--font-mono)',
+              fontFamily: 'var(--font-body)',
             }}>
               No results
             </li>
@@ -212,7 +212,7 @@ export function SearchableCombobox({
                       ? 'var(--color-bg-subtle)'
                       : 'transparent',
                   fontWeight: option === value ? 600 : 400,
-                  fontFamily: 'var(--font-mono)',
+                  fontFamily: 'var(--font-body)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
