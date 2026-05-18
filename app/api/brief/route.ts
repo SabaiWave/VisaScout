@@ -9,7 +9,8 @@ import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
 import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
-import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT, ADMIN_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
@@ -55,16 +56,20 @@ export async function POST(req: Request) {
     ? (depth as 'quick' | 'standard' | 'deep')
     : 'standard';
 
-  // Free tier daily cap — enforced per userId via Supabase (not IP; resets on cold start)
+  const isAdmin = isAdminUser(userId);
+
+  const dailyLimit = isAdmin ? ADMIN_DAILY_LIMIT : FREE_DAILY_LIMIT;
+
+  // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
   if (resolvedDepth === 'quick' && !DRY_RUN) {
     try {
-      const cap = await checkFreeTierCap(userId);
+      const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
         await logIpAbuse(ip, userId, 'free_tier_daily_cap_exceeded').catch(() => {});
         await trackEvent('free_cap.reached', {
           userId,
           ipAddress: ip ?? null,
-          briefsUsed: FREE_DAILY_LIMIT,
+          briefsUsed: dailyLimit,
           destination: destination ?? null,
         });
         return new Response(
@@ -184,15 +189,15 @@ export async function POST(req: Request) {
           estimatedCostUsd: cost.estimatedCostUsd.toFixed(4),
         });
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Pipeline failed';
-        log.error('pipeline error', { error: message, destination, depth: resolvedDepth });
+        const internalMessage = err instanceof Error ? err.message : 'Pipeline failed';
+        log.error('pipeline error', { error: internalMessage, destination, depth: resolvedDepth });
         await trackEvent('brief.failed', {
           userId,
           depth: resolvedDepth,
           destination: destination ?? null,
-          errorMessage: message,
+          errorMessage: internalMessage,
         });
-        send({ type: 'error', message });
+        send({ type: 'error', message: 'Something went wrong generating your brief. Please try again or contact support.' });
       } finally {
         Sentry.setUser(null);
         controller.close();
