@@ -5,7 +5,7 @@ import { Button } from '@/app/components/ui/Button';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { NavLink } from '@/app/components/ui/NavLink';
-import { FooterLink } from '@/app/components/ui/FooterLink';
+import { MiniFooter } from '@/app/components/ui/MiniFooter';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -212,16 +212,7 @@ export default function ContactPage() {
         )}
       </main>
 
-      <footer
-        className="border-t px-6 py-8 text-center"
-        style={{ borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="flex justify-center gap-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-          <FooterLink href="/">Home</FooterLink>
-          <FooterLink href="/privacy">Privacy</FooterLink>
-          <FooterLink href="/terms">Terms</FooterLink>
-        </div>
-      </footer>
+      <MiniFooter exclude="/contact" />
     </div>
   );
 }

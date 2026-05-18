@@ -38,7 +38,7 @@ function Hero() {
         {/* H1 */}
         <h1
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
-          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-body)' }}
+          style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
         >
           Stop guessing. Know exactly where you stand.
         </h1>
@@ -218,8 +218,8 @@ function Pipeline() {
                   Agent {String(i + 1).padStart(2, '0')}
                 </div>
                 <div
-                  className="text-base font-bold"
-                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                  className="text-sm font-bold"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}
                 >
                   {agent.name}
                 </div>
@@ -440,7 +440,7 @@ function Footer() {
             ⚠ This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
           </p>
           <p
-            className="text-xs"
+            className="text-xs uppercase tracking-wider"
             style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
           >
             © {new Date().getFullYear()} VisaScout · All rights reserved.

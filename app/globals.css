@@ -219,6 +219,10 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
+h1, h2, h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
 /* Light theme override for PDF generation */
 .pdf-print-container {
   --color-bg-base:          #ffffff;
@@ -264,7 +268,7 @@ body {
 * { transition-duration: 150ms; transition-timing-function: ease; }
 
 /* Clerk UI — nuclear font + text override across ALL surfaces (covers renamed classes in any Clerk version) */
-/* Use var(--font-body) not 'Inter' — next/font loads Inter under a mangled internal name; var() is the only reliable reference */
+/* Use var(--font-body) not the font name directly — next/font exposes fonts via CSS vars only */
 [class*="cl-"] {
   --cl-color-text: #F4F4F5 !important;
   font-family: var(--font-body), system-ui, sans-serif !important;
