@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
 import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
-import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
+import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
@@ -128,17 +128,7 @@ export default async function DashboardPage({
 
       {/* Main content */}
       <main style={{ flex: 1, overflowY: 'auto' }}>
-        {/* Mobile top nav — wordmark + UserButton (sidebar hidden on mobile) */}
-        <nav
-          className="flex lg:hidden items-center justify-between"
-          style={{
-            padding: '1rem 1.5rem',
-            borderBottom: '1px solid var(--color-border-muted)',
-          }}
-        >
-          <Wordmark />
-          <VisaScoutUserButton />
-        </nav>
+        <MobileNav />
 
         {/* Desktop top bar — utility nav (Resend pattern) */}
         <div
@@ -152,15 +142,17 @@ export default async function DashboardPage({
           <NavLink href="/contact">Contact</NavLink>
         </div>
 
-        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
           {/* Page header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
             <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
               MY BRIEFS
             </SectionHeading>
-            <Button asChild style={{ whiteSpace: 'nowrap' }}>
-              <Link href="/app">+ New Brief</Link>
-            </Button>
+            {briefs.length > 0 && (
+              <Button asChild style={{ whiteSpace: 'nowrap' }}>
+                <Link href="/app">+ New Brief</Link>
+              </Button>
+            )}
           </div>
 
           {briefs.length === 0 ? (
@@ -169,7 +161,7 @@ export default async function DashboardPage({
             <>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
                 gap: '1rem',
                 marginBottom: '2rem',
               }}>

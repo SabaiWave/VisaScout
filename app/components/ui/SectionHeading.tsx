@@ -17,9 +17,9 @@ interface SectionHeadingProps {
 }
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'text-xl',
-  md: 'text-2xl',
-  lg: 'text-3xl',
+  sm: 'text-lg sm:text-xl',
+  md: 'text-xl sm:text-2xl',
+  lg: 'text-2xl sm:text-3xl',
 };
 
 export function SectionHeading({
