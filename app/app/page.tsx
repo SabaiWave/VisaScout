@@ -144,7 +144,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
           const s = confidenceStyle[entry.confidence];
           return (
             <span
-              className="text-xs font-bold px-2 py-0.5 rounded"
+              className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
               style={{ background: s?.bg, color: s?.color, fontFamily: 'var(--font-mono)' }}
             >
               {entry.confidence}
@@ -442,7 +442,9 @@ function AppContent() {
   }
 
   return (
-    <main className="max-w-[1120px] mx-auto px-6 py-12">
+    <div className="relative">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
+    <main className="relative z-10 max-w-[1120px] mx-auto px-6 py-12">
       {!isSignedIn ? (
         <SignInPrompt />
       ) : (
@@ -583,29 +585,36 @@ function AppContent() {
             </div>
           )}
 
-          {/* ── Parsed Confirmation ── */}
-          {parsedSituation && (phase === 'generating' || phase === 'complete') && (
-            <div className="max-w-[760px] mx-auto mb-6">
-              <div
-                className="brief-section rounded-xl px-4 py-3 border"
-                style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
-              >
-                <p
-                  className="text-xl font-bold tracking-wider mb-1"
-                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>We Understood
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  {parsedSituation.parsedSummary}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* ── Agent Progress + Output ── */}
+          {/* ── Generating / Complete output ── */}
           {(phase === 'generating' || phase === 'complete') && (
             <div className="max-w-[760px] mx-auto">
+
+              {/* We Understood — always first; skeleton while orchestrator parses */}
+              <div className="mb-6">
+                <div
+                  className="brief-section rounded-xl px-4 py-3 border"
+                  style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
+                >
+                  <p
+                    className="text-xl font-bold tracking-wider mb-1"
+                    style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>We Understood
+                  </p>
+                  {parsedSituation ? (
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                      {parsedSituation.parsedSummary}
+                    </p>
+                  ) : (
+                    <div className="space-y-2 mt-2">
+                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
+                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Agent Status */}
               {agentStatuses.length > 0 && (
                 <div className="mb-8">
                   <div
@@ -622,16 +631,6 @@ function AppContent() {
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
                   </div>
-                </div>
-              )}
-
-              {isGenerating && agentStatuses.length === 0 && (
-                <div className="text-center py-12 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                  <div
-                    className="inline-block w-6 h-6 rounded-full border-2 animate-spin mb-3"
-                    style={{ borderColor: 'var(--color-border-strong)', borderTopColor: 'var(--color-secondary)' }}
-                  />
-                  <p>Parsing your situation…</p>
                 </div>
               )}
 
@@ -672,6 +671,7 @@ function AppContent() {
         </>
       )}
     </main>
+    </div>
   );
 }
 

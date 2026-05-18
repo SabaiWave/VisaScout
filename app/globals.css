@@ -41,6 +41,8 @@
 
   /* Hero bloom */
   --hero-bloom-bg: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.35) 0%, transparent 70%);
+  /* App page bloom — same shape, reduced intensity for inner pages */
+  --bloom-app-bg:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 70%);
 
   /* Confidence */
   --color-confidence-high:   #22c55e;
@@ -167,6 +169,7 @@ html[data-theme="light"] {
 
   /* Hero bloom */
   --hero-bloom-bg: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 70%);
+  --bloom-app-bg:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%);
 }
 
 /* Light mode — replace neon hover glows with crisp shadows */
