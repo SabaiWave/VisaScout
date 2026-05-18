@@ -23,7 +23,7 @@ function Hero() {
       <div className="relative z-10 max-w-[860px] mx-auto">
         {/* Eyebrow */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-widest"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-wide sm:tracking-widest"
           style={{
             background: 'var(--color-secondary-subtle)',
             color: 'var(--color-secondary-light)',
@@ -31,7 +31,7 @@ function Hero() {
             border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
-          <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-success)' }} />
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)', display: 'inline-block' }} />
           Multi-Agent Visa Intelligence · SEA
         </div>
 
@@ -279,7 +279,7 @@ function Destinations() {
                 {name}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style={{ background: 'var(--color-success)' }} />
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)', display: 'inline-block' }} />
                 <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}>Ready</span>
               </span>
             </div>
