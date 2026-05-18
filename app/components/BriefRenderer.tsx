@@ -40,6 +40,38 @@ function SectionCard({ children }: { children: React.ReactNode }) {
   );
 }
 
+function CollapsibleCard({
+  header,
+  children,
+  forPrint = false,
+  defaultOpen = true,
+}: {
+  header: React.ReactNode;
+  children: React.ReactNode;
+  forPrint?: boolean;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const showContent = forPrint || open;
+  return (
+    <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left focus-visible:outline-none"
+        style={{ background: 'var(--color-bg-elevated)' }}
+      >
+        {header}
+        <span className="text-sm flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {showContent && (
+        <div className="px-5 py-4" style={{ background: 'var(--color-bg-base)' }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function VisaOptionCard({ option }: { option: VisaOption }) {
   const borderColor = {
     best:       'var(--color-success)',
@@ -89,80 +121,103 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
 }
 
 function ConflictSection({ report, forPrint = false }: { report: ConflictReport; forPrint?: boolean }) {
-  const [open, setOpen] = useState(true);
-  const showContent = forPrint || open;
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
-  return (
-    <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left"
-        style={{ background: 'var(--color-bg-elevated)' }}
-      >
-        <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-          <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Conflict Report — {total} item{total !== 1 ? 's' : ''}
-          {report.contested.length > 0 && (
-            <span className="ml-2 text-sm" style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
-          )}
-        </span>
-        <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
-      </button>
-      {showContent && (
-        <div className="px-5 py-4 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
-          {report.confirmed.length > 0 && (
-            <div>
-              <Label color="var(--color-success)">Confirmed</Label>
-              {report.confirmed.map((item, i) => (
-                <div key={i} className="mb-2 text-sm">
-                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-          {report.contested.length > 0 && (
-            <div>
-              <Label color="var(--color-amber)">Contested</Label>
-              {report.contested.map((item, i) => (
-                <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: 'var(--color-amber)' }}>
-                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
-                  {item.resolution && (
-                    <div className="mt-2">
-                      <Label color="var(--color-amber)">Resolution</Label>
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {report.unverified.length > 0 && (
-            <div>
-              <Label color="var(--color-error)">Unverified</Label>
-              {report.unverified.map((item, i) => (
-                <div key={i} className="mb-2 text-sm">
-                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
-                  <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+  const header = (
+    <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
+      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
+      Conflict Report — {total} item{total !== 1 ? 's' : ''}
+      {report.contested.length > 0 && (
+        <span className="ml-2 text-sm" style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
       )}
-    </div>
+    </span>
+  );
+  return (
+    <CollapsibleCard header={header} forPrint={forPrint}>
+      <div className="space-y-4">
+        {report.confirmed.length > 0 && (
+          <div>
+            <Label color="var(--color-success)">Confirmed</Label>
+            {report.confirmed.map((item, i) => (
+              <div key={i} className="mb-2 text-sm">
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {report.contested.length > 0 && (
+          <div>
+            <Label color="var(--color-amber)">Contested</Label>
+            {report.contested.map((item, i) => (
+              <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: 'var(--color-amber)' }}>
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
+                {item.resolution && (
+                  <div className="mt-2">
+                    <Label color="var(--color-amber)">Resolution</Label>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {report.unverified.length > 0 && (
+          <div>
+            <Label color="var(--color-error)">Unverified</Label>
+            {report.unverified.map((item, i) => (
+              <div key={i} className="mb-2 text-sm">
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </CollapsibleCard>
+  );
+}
+
+function ContingencySection({ contingency, forPrint = false }: { contingency: VisaBrief['contingency']; forPrint?: boolean }) {
+  const header = (
+    <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
+      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Contingency Planning
+    </span>
+  );
+  return (
+    <CollapsibleCard header={header} forPrint={forPrint}>
+      <div className="space-y-4 text-sm">
+        {contingency.deniedEntrySteps.length > 0 && (
+          <div>
+            <Label>If Denied Entry</Label>
+            <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+              {contingency.deniedEntrySteps.map((s, i) => <li key={i}>• {s}</li>)}
+            </ul>
+          </div>
+        )}
+        <div>
+          <Label>Overstay Scenario</Label>
+          <p style={{ color: 'var(--color-text-secondary)' }}>{contingency.overstayScenario}</p>
+        </div>
+        {contingency.emergencyContacts.length > 0 && (
+          <div>
+            <Label>Emergency Contacts</Label>
+            <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+              {contingency.emergencyContacts.map((c, i) => <li key={i}>• {c}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    </CollapsibleCard>
   );
 }
 
 export default function BriefRenderer({ brief, forPrint = false }: { brief: VisaBrief; forPrint?: boolean }) {
-  const [contingencyOpen, setContingencyOpen] = useState(true);
-  const showContingency = forPrint || contingencyOpen;
-
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
       {/* Recommended Action */}
       <div
-        className="border-l-4 rounded-r-lg px-5 py-4"
+        className="brief-section border-l-4 rounded-r-lg px-5 py-4"
         style={{
           background: 'rgba(245,158,11,0.06)',
           borderTop: '1px solid rgba(245,158,11,0.2)',
@@ -282,45 +337,10 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
       )}
 
       {/* Conflict Report */}
-      <div className="brief-section">
-        <ConflictSection report={brief.conflictReport} forPrint={forPrint} />
-      </div>
+      <ConflictSection report={brief.conflictReport} forPrint={forPrint} />
 
       {/* Contingency */}
-      <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
-        <button
-          onClick={() => setContingencyOpen(!contingencyOpen)}
-          className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left"
-          style={{ background: 'var(--color-bg-elevated)' }}
-        >
-          <span className="font-bold text-xl" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}><span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Contingency Planning</span>
-          <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{contingencyOpen ? '▲' : '▼'}</span>
-        </button>
-        {showContingency && (
-          <div className="px-5 py-4 space-y-4 text-sm" style={{ background: 'var(--color-bg-base)' }}>
-            {brief.contingency.deniedEntrySteps.length > 0 && (
-              <div>
-                <Label>If Denied Entry</Label>
-                <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-                  {brief.contingency.deniedEntrySteps.map((s, i) => <li key={i}>• {s}</li>)}
-                </ul>
-              </div>
-            )}
-            <div>
-              <Label>Overstay Scenario</Label>
-              <p style={{ color: 'var(--color-text-secondary)' }}>{brief.contingency.overstayScenario}</p>
-            </div>
-            {brief.contingency.emergencyContacts.length > 0 && (
-              <div>
-                <Label>Emergency Contacts</Label>
-                <ul className="space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-                  {brief.contingency.emergencyContacts.map((c, i) => <li key={i}>• {c}</li>)}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <ContingencySection contingency={brief.contingency} forPrint={forPrint} />
 
       {/* Metadata */}
       <div className="text-xs font-mono text-center pb-4" style={{ color: 'var(--color-text-tertiary)' }}>
