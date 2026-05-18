@@ -89,7 +89,7 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
 }
 
 function ConflictSection({ report, forPrint = false }: { report: ConflictReport; forPrint?: boolean }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const showContent = forPrint || open;
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
   return (
@@ -155,7 +155,7 @@ function ConflictSection({ report, forPrint = false }: { report: ConflictReport;
 }
 
 export default function BriefRenderer({ brief, forPrint = false }: { brief: VisaBrief; forPrint?: boolean }) {
-  const [contingencyOpen, setContingencyOpen] = useState(false);
+  const [contingencyOpen, setContingencyOpen] = useState(true);
   const showContingency = forPrint || contingencyOpen;
 
   return (
