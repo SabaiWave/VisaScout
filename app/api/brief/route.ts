@@ -10,6 +10,7 @@ import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
 import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
@@ -55,8 +56,10 @@ export async function POST(req: Request) {
     ? (depth as 'quick' | 'standard' | 'deep')
     : 'standard';
 
+  const isAdmin = isAdminUser(userId);
+
   // Free tier daily cap — enforced per userId via Supabase (not IP; resets on cold start)
-  if (resolvedDepth === 'quick' && !DRY_RUN) {
+  if (resolvedDepth === 'quick' && !DRY_RUN && !isAdmin) {
     try {
       const cap = await checkFreeTierCap(userId);
       if (!cap.allowed) {
