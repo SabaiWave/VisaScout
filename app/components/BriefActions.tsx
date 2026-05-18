@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
 
-export default function BriefActions({ url }: { url: string }) {
+interface BriefActionsProps {
+  url: string;
+  briefId: string;
+  depth: string;
+}
+
+export default function BriefActions({ url, briefId, depth }: BriefActionsProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -15,11 +21,25 @@ export default function BriefActions({ url }: { url: string }) {
     } catch {
       // ignore — clipboard unavailable
     }
+    fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'brief.shared', props: { briefId } }),
+    }).catch(() => {});
+  }
+
+  function handlePrint() {
+    window.print();
+    fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'brief.pdf_downloaded', props: { briefId, depth } }),
+    }).catch(() => {});
   }
 
   return (
     <div className="flex gap-3 mt-8">
-      <Button variant="secondary" onClick={() => window.print()}>
+      <Button variant="secondary" onClick={handlePrint}>
         Download PDF
       </Button>
       <Button variant="secondary" onClick={handleCopy}>

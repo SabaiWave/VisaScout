@@ -1,13 +1,15 @@
 import { auth } from '@clerk/nextjs/server';
 import Anthropic from '@anthropic-ai/sdk';
+import * as Sentry from '@sentry/nextjs';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
+import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
 import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
-import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse } from '@/src/lib/freeTier';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT } from '@/src/lib/freeTier';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
@@ -59,6 +61,12 @@ export async function POST(req: Request) {
       const cap = await checkFreeTierCap(userId);
       if (!cap.allowed) {
         await logIpAbuse(ip, userId, 'free_tier_daily_cap_exceeded').catch(() => {});
+        await trackEvent('free_cap.reached', {
+          userId,
+          ipAddress: ip ?? null,
+          briefsUsed: FREE_DAILY_LIMIT,
+          destination: destination ?? null,
+        });
         return new Response(
           JSON.stringify({ error: 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' }),
           { status: 429, headers: { 'Content-Type': 'application/json' } }
@@ -70,6 +78,18 @@ export async function POST(req: Request) {
   }
 
   resetUsage();
+
+  Sentry.setUser({ id: userId });
+  Sentry.setTag('destination', destination);
+  Sentry.setTag('nationality', nationality);
+  Sentry.setTag('depth', resolvedDepth);
+
+  await trackEvent('brief.started', {
+    userId,
+    depth: resolvedDepth,
+    destination,
+    nationality,
+  });
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -90,6 +110,17 @@ export async function POST(req: Request) {
           }
 
           send({ type: 'complete', brief: dryBrief, briefId: dryBriefId });
+          await trackEvent('brief.generated', {
+            userId,
+            briefId: dryBriefId ?? null,
+            depth: resolvedDepth,
+            destination,
+            nationality,
+            durationMs: null,
+            estimatedCostUsd: null,
+            agentStatuses: null,
+            degraded: false,
+          });
           log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth, briefId: dryBriefId });
           return;
         }
@@ -133,6 +164,18 @@ export async function POST(req: Request) {
 
         send({ type: 'complete', brief, briefId });
 
+        await trackEvent('brief.generated', {
+          userId,
+          briefId: briefId ?? null,
+          depth: resolvedDepth,
+          destination,
+          nationality,
+          durationMs: Date.now() - startTime,
+          estimatedCostUsd: cost.estimatedCostUsd,
+          agentStatuses: JSON.stringify(brief.metadata?.agentStatuses ?? []),
+          degraded: (brief.metadata?.agentStatuses ?? []).some((s) => s.status === 'failed'),
+        });
+
         log.info('pipeline complete', {
           destination, depth: resolvedDepth,
           durationMs: Date.now() - startTime,
@@ -143,8 +186,15 @@ export async function POST(req: Request) {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Pipeline failed';
         log.error('pipeline error', { error: message, destination, depth: resolvedDepth });
+        await trackEvent('brief.failed', {
+          userId,
+          depth: resolvedDepth,
+          destination: destination ?? null,
+          errorMessage: message,
+        });
         send({ type: 'error', message });
       } finally {
+        Sentry.setUser(null);
         controller.close();
       }
     },

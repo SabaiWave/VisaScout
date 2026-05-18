@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import * as Sentry from '@sentry/nextjs';
 import { tavilySearch } from '../tools/tavily';
 import { buildRecentChangesPrompt } from '../prompts/recentChanges';
 import { parseJSON } from '../lib/parseJSON';
@@ -96,6 +97,7 @@ export async function recentChangesAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
+    Sentry.captureException(err, { tags: { agent: 'recentChanges', destination: request.normalizedDestination } });
     return {
       status: 'failed',
       data: null,

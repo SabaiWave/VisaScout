@@ -74,7 +74,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
             </p>
           </div>
 
-          <BriefActions url={shareUrl} />
+          <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} />
 
           <div className="mt-8">
             {isProcessing ? (

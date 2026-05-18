@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { getStripe } from '@/src/lib/stripe';
 import { getSupabase } from '@/src/lib/supabase';
 import { log } from '@/src/lib/logger';
+import { trackEvent } from '@/src/lib/analytics';
 
 export const runtime = 'nodejs';
 
@@ -70,6 +71,13 @@ export async function POST(req: Request) {
     .from('briefs')
     .update({ payment_status: 'queued', stripe_session_id: session.id })
     .eq('id', briefId);
+
+  await trackEvent('payment.completed', {
+    userId: session.metadata?.user_id ?? null,
+    depth: session.metadata?.depth ?? null,
+    amountUsd: session.amount_total ? session.amount_total / 100 : null,
+    briefId: session.metadata?.brief_id ?? null,
+  });
 
   log.info('stripe webhook: job queued', { briefId });
   return new Response('ok', { status: 200 });
