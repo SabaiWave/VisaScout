@@ -3,6 +3,7 @@
 import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
 import { useState } from 'react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
+import { BriefMeta } from './ui/BriefMeta';
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -302,7 +303,7 @@ function ContingencySection({ contingency, forPrint }: { contingency: VisaBrief[
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export default function BriefRenderer({ brief, forPrint = false }: { brief: VisaBrief; forPrint?: boolean }) {
+export default function BriefRenderer({ brief, forPrint = false, hideMetadata = false }: { brief: VisaBrief; forPrint?: boolean; hideMetadata?: boolean }) {
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
       {/* Recommended Action */}
@@ -337,11 +338,15 @@ export default function BriefRenderer({ brief, forPrint = false }: { brief: Visa
       <ConflictSection report={brief.conflictReport} forPrint={forPrint} />
       <ContingencySection contingency={brief.contingency} forPrint={forPrint} />
 
-      {/* Metadata */}
-      <div className="text-xs text-center pb-4" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-        Generated {new Date(brief.metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })} · {new Date(brief.metadata.generatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC · {brief.metadata.depth} depth
-        {brief.metadata.degraded && <span className="ml-2" style={{ color: 'var(--color-amber)' }}>· degraded output</span>}
-      </div>
+      {!hideMetadata && (
+        <BriefMeta
+          depth={brief.metadata.depth}
+          generatedAt={brief.metadata.generatedAt}
+          degraded={brief.metadata.degraded}
+          center
+          className="pb-4"
+        />
+      )}
     </div>
   );
 }

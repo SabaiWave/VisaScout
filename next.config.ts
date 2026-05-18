@@ -26,7 +26,9 @@ if (process.env.VERCEL === '1') {
   }
 }
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
+};
 
 export default withSentryConfig(nextConfig, {
   org: 'sabaiwave',
