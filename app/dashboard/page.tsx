@@ -235,37 +235,35 @@ export default async function DashboardPage({
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
                   {page > 1 && (
-                    <Link
-                      href={`/dashboard?page=${page - 1}`}
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg border"
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        color: 'var(--color-text-secondary)',
-                        textDecoration: 'none',
-                        borderColor: 'var(--color-border-strong)',
-                      }}
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="sm"
+                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
+                      style={{ borderColor: 'var(--color-border-strong)' }}
                     >
-                      <ArrowLeft size={13} />
-                      Prev
-                    </Link>
+                      <Link href={`/dashboard?page=${page - 1}`}>
+                        <ArrowLeft size={13} />
+                        Prev
+                      </Link>
+                    </Button>
                   )}
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
                     {page} / {totalPages}
                   </span>
                   {page < totalPages && (
-                    <Link
-                      href={`/dashboard?page=${page + 1}`}
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg border"
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        color: 'var(--color-text-secondary)',
-                        textDecoration: 'none',
-                        borderColor: 'var(--color-border-strong)',
-                      }}
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="sm"
+                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
+                      style={{ borderColor: 'var(--color-border-strong)' }}
                     >
-                      Next
-                      <ArrowRight size={13} />
-                    </Link>
+                      <Link href={`/dashboard?page=${page + 1}`}>
+                        Next
+                        <ArrowRight size={13} />
+                      </Link>
+                    </Button>
                   )}
                 </div>
               )}
