@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import * as Sentry from '@sentry/nextjs';
 import { tavilySearch } from '../tools/tavily';
 import { buildEntryRequirementsPrompt } from '../prompts/entryRequirements';
 import { parseJSON } from '../lib/parseJSON';
@@ -14,6 +13,19 @@ export async function entryRequirementsAgent(
   client: Anthropic,
   depth: 'quick' | 'standard' | 'deep' = 'standard'
 ): Promise<AgentResult<EntryRequirementsOutput>> {
+  if (process.env.DRY_RUN === 'true') {
+    return {
+      status: 'success',
+      data: { requiredDocuments: [], onwardTicketRequired: false, healthRequirements: [], additionalNotes: [] },
+      confidence: 'low',
+      gaps: ['DRY_RUN mode — no API calls made'],
+      sourceTier: 4,
+      sourceUrls: [],
+      verified: false,
+      durationMs: 0,
+    };
+  }
+
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
   const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
@@ -79,7 +91,6 @@ export async function entryRequirementsAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
-    Sentry.captureException(err, { tags: { agent: 'entryRequirements', destination: request.normalizedDestination } });
     return {
       status: 'failed',
       data: null,

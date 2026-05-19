@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import * as Sentry from '@sentry/nextjs';
 import { tavilySearch } from '../tools/tavily';
 import { buildCommunityIntelPrompt } from '../prompts/communityIntel';
 import { parseJSON } from '../lib/parseJSON';
@@ -13,6 +12,19 @@ export async function communityIntelAgent(
   client: Anthropic,
   depth: 'quick' | 'standard' | 'deep' = 'standard'
 ): Promise<AgentResult<CommunityIntelOutput>> {
+  if (process.env.DRY_RUN === 'true') {
+    return {
+      status: 'success',
+      data: { recentReports: [], groundTruthNotes: [], enforcementReality: 'DRY_RUN — no data', commonIssues: [] },
+      confidence: 'low',
+      gaps: ['DRY_RUN mode — no API calls made'],
+      sourceTier: 4,
+      sourceUrls: [],
+      verified: false,
+      durationMs: 0,
+    };
+  }
+
   const start = Date.now();
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
   const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
@@ -74,7 +86,6 @@ export async function communityIntelAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
-    Sentry.captureException(err, { tags: { agent: 'communityIntel', destination: request.normalizedDestination } });
     return {
       status: 'failed',
       data: null,

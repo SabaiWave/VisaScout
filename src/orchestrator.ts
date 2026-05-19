@@ -47,23 +47,34 @@ export async function runOrchestrator(
     freeform: sanitizeFreeform(input.freeform),
   };
 
-  const prompt = buildOrchestratorPrompt(sanitizedInput);
+  let visaRequest: VisaRequest;
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 2048,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  if (process.env.DRY_RUN === 'true') {
+    visaRequest = {
+      ...sanitizedInput,
+      normalizedNationality: sanitizedInput.nationality,
+      normalizedDestination: sanitizedInput.destination,
+      parsedSummary: 'DRY_RUN mode — input not normalized by LLM.',
+    };
+  } else {
+    const prompt = buildOrchestratorPrompt(sanitizedInput);
 
-  recordUsage({
-    agent: 'orchestrator',
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
-    tavilySearches: 0,
-  });
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    });
 
-  const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
-  const visaRequest = parseJSON<VisaRequest>(raw);
+    recordUsage({
+      agent: 'orchestrator',
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      tavilySearches: 0,
+    });
+
+    const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
+    visaRequest = parseJSON<VisaRequest>(raw);
+  }
 
   onParsed?.(visaRequest);
 

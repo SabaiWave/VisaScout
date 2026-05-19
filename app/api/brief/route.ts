@@ -8,8 +8,8 @@ import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
-import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
-import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT, ADMIN_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
   const isAdmin = isAdminUser(userId);
 
-  const dailyLimit = isAdmin ? ADMIN_DAILY_LIMIT : FREE_DAILY_LIMIT;
+  const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
   // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
   if (resolvedDepth === 'quick' && !DRY_RUN) {
@@ -82,8 +82,6 @@ export async function POST(req: Request) {
     }
   }
 
-  resetUsage();
-
   Sentry.setUser({ id: userId });
   Sentry.setTag('destination', destination);
   Sentry.setTag('nationality', nationality);
@@ -98,6 +96,7 @@ export async function POST(req: Request) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      await withUsageTracking(async () => {
       const send = (data: unknown) => {
         controller.enqueue(new TextEncoder().encode(sseEvent(data)));
       };
@@ -202,6 +201,7 @@ export async function POST(req: Request) {
         Sentry.setUser(null);
         controller.close();
       }
+      });
     },
   });
 
