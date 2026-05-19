@@ -15,11 +15,18 @@ A rule addition to CLAUDE.md would prevent recurrence.
 Examples: "kept using middleware.ts instead of proxy.ts",
 "assumed createClient at module level instead of lazy getter"
 
-BUCKET B — Workflow/skill gap (requires a skill update in Claude.ai):
+BUCKET B — Workflow/skill gap (requires an update in Claude.ai):
 Gap in phase structure, missing DoD item, missing phase prompt content, or pattern
-that belongs in the bootstrapper, phase library, design generator, or auditor skill.
-Examples: "Phase 8 had no step for extracting components first",
-"design auditor didn't catch inline shadow values"
+that belongs in a Claude.ai skill OR a Claude Code command file.
+
+When classifying Bucket B, always specify which system:
+- Claude.ai skill: sbw-phase-library, sbw-project-bootstrapper, sbw-conventions,
+  sbw-design-generator, sbw-design-auditor, sbw-blueprint-auditor, sbw-prompt-writer, etc.
+- Claude Code command: /start, /stop, /audit-ui, /audit-backend, /improve
+
+Examples:
+- "Phase 8 had no step for extracting components" → sbw-phase-library (Claude.ai skill)
+- "audit-backend didn't check for missing imports" → /audit-backend (Claude Code command)
 
 ---
 
@@ -49,24 +56,30 @@ Write planning/improve.md with this structure:
 Session: [phase name or post-launch description from progress.md]
 Friction items: [count]
 
-## Skill Updates Needed (Bucket B)
+## Updates Needed (Bucket B)
 
 For each Bucket B item:
 ### [Short label]
 - Friction: [exact friction item from log]
-- Skill affected: [bootstrapper / phase-library / conventions / design-generator / design-auditor / other]
-- Proposed change: [specific language to add, remove, or modify in that skill]
+- Where: [Claude.ai skill name] OR [Claude Code command e.g. /audit-backend]
+- Proposed change: [specific language to add, remove, or modify]
 - Priority: [high / medium / low]
 
 ## CLAUDE.md Rules Proposed (Bucket A)
 [Copy the proposed rules from Step 2 output here for reference]
 
-## How to apply skill updates
-1. Open Claude.ai
-2. Trigger the relevant skill (e.g. sbw-phase-library)
-3. Paste this improve.md content and say:
-   "Apply the Bucket B skill updates from this improve log."
-4. Save the updated skill artifact via the Save Skill button.
+## How to apply
+**Bucket A — CLAUDE.md rules:**
+Open CLAUDE.md in VS Code. Paste rules under correct section. Save.
+
+**Bucket B — Claude.ai skills:**
+Bring this file to Claude.ai. Trigger the skill by name.
+Paste improve.md and say "apply Bucket B updates from this improve log."
+Save artifact via Save Skill button.
+
+**Bucket B — Claude Code commands:**
+Bring this file to Claude.ai. Say "update the /[command] command based on this improve log."
+Drop the output .md file into .claude/commands/ in VS Code.
 
 ---
 
@@ -76,13 +89,14 @@ When done, state:
 🔁 IMPROVE DONE.
 
 Bucket A — CLAUDE.md rules: [X] proposed.
-Open CLAUDE.md. paste rules under correct section. save.
+Open CLAUDE.md in VS Code. Paste rules under correct section. Save.
 
-Bucket B — skill updates: [Y] written to planning/improve.md.
-Open planning/improve.md.
-Go Claude.ai. trigger affected skill (e.g. sbw-phase-library).
-paste improve.md content. say "apply Bucket B updates".
-save skill artifact via Save Skill button.
+Bucket B — [Y] updates written to planning/improve.md.
+Open planning/improve.md. Bring to Claude.ai.
+
+For each item:
+- Claude.ai skill → trigger skill by name. paste improve.md. say "apply Bucket B updates". save artifact.
+- Claude Code command → say "update the /[command] command based on this improve log". drop output .md into .claude/commands/.
 
 Loop complete. /improve again next session.
 ---
