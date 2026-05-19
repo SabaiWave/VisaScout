@@ -1,4 +1,4 @@
-import { recordUsage, estimateCost, printCostSummary, resetUsage, calculateReportCost, getUsageLog } from '../../lib/cost';
+import { recordUsage, estimateCost, printCostSummary, resetUsage, calculateReportCost, getUsageLog, withUsageTracking } from '../../lib/cost';
 
 describe('cost tracking', () => {
   beforeEach(() => {
@@ -39,18 +39,22 @@ describe('cost tracking', () => {
   });
 
   describe('recordUsage', () => {
-    it('logs usage to console when recording', () => {
-      recordUsage({ agent: 'officialPolicy', inputTokens: 500, outputTokens: 200, tavilySearches: 1 });
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('officialPolicy')
-      );
+    it('logs usage to console when recording', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'officialPolicy', inputTokens: 500, outputTokens: 200, tavilySearches: 1 });
+        expect(console.log).toHaveBeenCalledWith(
+          expect.stringContaining('officialPolicy')
+        );
+      });
     });
 
-    it('includes token counts in log output', () => {
-      recordUsage({ agent: 'recentChanges', inputTokens: 1000, outputTokens: 500, tavilySearches: 2 });
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('1000in')
-      );
+    it('includes token counts in log output', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'recentChanges', inputTokens: 1000, outputTokens: 500, tavilySearches: 2 });
+        expect(console.log).toHaveBeenCalledWith(
+          expect.stringContaining('1000in')
+        );
+      });
     });
   });
 
@@ -74,15 +78,17 @@ describe('cost tracking', () => {
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('$0.0000'));
     });
 
-    it('aggregates tokens across multiple agent calls', () => {
-      recordUsage({ agent: 'a', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
-      recordUsage({ agent: 'b', inputTokens: 200, outputTokens: 100, tavilySearches: 2 });
+    it('aggregates tokens across multiple agent calls', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'a', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
+        recordUsage({ agent: 'b', inputTokens: 200, outputTokens: 100, tavilySearches: 2 });
 
-      jest.clearAllMocks();
-      printCostSummary();
+        jest.clearAllMocks();
+        printCostSummary();
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('300'));
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('3'));
+        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('300'));
+        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('3'));
+      });
     });
   });
 
@@ -126,35 +132,40 @@ describe('cost tracking', () => {
       expect(result.estimatedCostUsd).toBeCloseTo(18.0, 5); // $3 in + $15 out
     });
 
-    it('does not modify the module-level log', () => {
-      recordUsage({ agent: 'recorded', inputTokens: 100, outputTokens: 50, tavilySearches: 0 });
-      const externalUsages = [{ agent: 'external', inputTokens: 9999, outputTokens: 9999, tavilySearches: 10 }];
-      calculateReportCost(externalUsages);
+    it('does not modify the module-level log', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'recorded', inputTokens: 100, outputTokens: 50, tavilySearches: 0 });
+        const externalUsages = [{ agent: 'external', inputTokens: 9999, outputTokens: 9999, tavilySearches: 10 }];
+        calculateReportCost(externalUsages);
 
-      // getUsageLog should still only have the recorded usage
-      const log = getUsageLog();
-      expect(log).toHaveLength(1);
-      expect(log[0].agent).toBe('recorded');
+        const log = getUsageLog();
+        expect(log).toHaveLength(1);
+        expect(log[0].agent).toBe('recorded');
+      });
     });
   });
 
   describe('getUsageLog', () => {
-    it('returns a copy of the current log', () => {
-      recordUsage({ agent: 'test', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
-      const log = getUsageLog();
-      expect(log).toHaveLength(1);
-      expect(log[0].agent).toBe('test');
+    it('returns a copy of the current log', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'test', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
+        const log = getUsageLog();
+        expect(log).toHaveLength(1);
+        expect(log[0].agent).toBe('test');
+      });
     });
 
     it('returns empty array when log is empty', () => {
       expect(getUsageLog()).toHaveLength(0);
     });
 
-    it('returned copy does not mutate the internal log', () => {
-      recordUsage({ agent: 'a', inputTokens: 1, outputTokens: 1, tavilySearches: 0 });
-      const copy = getUsageLog();
-      copy.push({ agent: 'injected', inputTokens: 999, outputTokens: 999, tavilySearches: 0 });
-      expect(getUsageLog()).toHaveLength(1);
+    it('returned copy does not mutate the internal log', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'a', inputTokens: 1, outputTokens: 1, tavilySearches: 0 });
+        const copy = getUsageLog();
+        copy.push({ agent: 'injected', inputTokens: 999, outputTokens: 999, tavilySearches: 0 });
+        expect(getUsageLog()).toHaveLength(1);
+      });
     });
   });
 });
