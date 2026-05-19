@@ -15,8 +15,6 @@ import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
 
-const DRY_RUN = process.env.DRY_RUN === 'true';
-
 function sseEvent(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
@@ -56,12 +54,13 @@ export async function POST(req: Request) {
     ? (depth as 'quick' | 'standard' | 'deep')
     : 'standard';
 
+  const dryRun = process.env.DRY_RUN === 'true';
   const isAdmin = isAdminUser(userId);
 
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
   // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
-  if (resolvedDepth === 'quick' && !DRY_RUN) {
+  if (resolvedDepth === 'quick' && !dryRun) {
     try {
       const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
@@ -102,7 +101,7 @@ export async function POST(req: Request) {
       };
 
       try {
-        if (DRY_RUN) {
+        if (dryRun) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth });
           const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send);
 

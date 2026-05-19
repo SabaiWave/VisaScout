@@ -14,8 +14,6 @@ import type { VisaInput, VisaRequest } from '@/src/types/index';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-const DRY_RUN = process.env.DRY_RUN === 'true';
-
 async function runPipeline(jobId: string, briefId: string) {
   const { data: briefRow, error: briefFetchError } = await getSupabase()
     .from('briefs')
@@ -33,7 +31,7 @@ async function runPipeline(jobId: string, briefId: string) {
       let brief;
       let visaRequest: VisaRequest | undefined;
 
-      if (DRY_RUN) {
+      if (process.env.DRY_RUN === 'true') {
         const result = await runDryPipeline(() => {});
         brief = result.brief;
         visaRequest = result.visaRequest;

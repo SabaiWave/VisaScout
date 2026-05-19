@@ -13,8 +13,6 @@ export const runtime = 'nodejs';
 // Generous timeout — deep pipeline can take 200–240s
 export const maxDuration = 300;
 
-const DRY_RUN = process.env.DRY_RUN === 'true';
-
 export async function GET(req: Request) {
   // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
   // In local dev CRON_SECRET is not set, so skip the check
@@ -76,7 +74,7 @@ export async function GET(req: Request) {
       let brief;
       let visaRequest: VisaRequest | undefined;
 
-      if (DRY_RUN) {
+      if (process.env.DRY_RUN === 'true') {
         const result = await runDryPipeline(() => {});
         brief = result.brief;
         visaRequest = result.visaRequest;
