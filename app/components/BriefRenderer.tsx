@@ -4,6 +4,7 @@ import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
 import { useState } from 'react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
 import { BriefMeta } from './ui/BriefMeta';
+import { CardHeading } from './ui/CardHeading';
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -19,13 +20,7 @@ function Label({ children, color, size = 'sm' }: { children: React.ReactNode; co
 }
 
 function CardHeader({ title, badge }: { title: string; badge?: React.ReactNode }) {
-  return (
-    <span className="font-bold text-xl tracking-wider" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
-      {title}
-      {badge && <span className="ml-2 text-sm">{badge}</span>}
-    </span>
-  );
+  return <CardHeading badge={badge}>{title}</CardHeading>;
 }
 
 function WarningBox({ header, items }: { header: string; items: string[] }) {
@@ -230,7 +225,7 @@ function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrin
     ? <span style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
     : undefined;
   return (
-    <CollapsibleCard header={<CardHeader title={`Conflict Report — ${total} item${total !== 1 ? 's' : ''}`} badge={badge} />} forPrint={forPrint}>
+    <CollapsibleCard header={<CardHeader title={`Conflict Report: ${total} item${total !== 1 ? 's' : ''}`} badge={badge} />} forPrint={forPrint}>
       {report.confirmed.length > 0 && (
         <div>
           <Label color="var(--color-success)">Confirmed</Label>

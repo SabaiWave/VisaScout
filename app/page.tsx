@@ -4,6 +4,9 @@ import { SectionHeading } from './components/ui/SectionHeading';
 import { Wordmark } from './components/ui/Wordmark';
 import { FooterLink } from './components/ui/FooterLink';
 import { Button } from './components/ui/Button';
+import { clientConfig } from '@/config/client';
+
+const { landingPage: copy } = clientConfig;
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 
@@ -32,7 +35,7 @@ function Hero() {
           }}
         >
           <span className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)' }} />
-          <span>Multi-Agent Visa Intelligence · SEA</span>
+          <span>{copy.hero.eyebrow}</span>
         </div>
 
         {/* H1 */}
@@ -40,7 +43,7 @@ function Hero() {
           className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
           style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
         >
-          Stop guessing. Know exactly where you stand.
+          {copy.hero.h1}
         </h1>
 
         {/* Subhead */}
@@ -48,14 +51,13 @@ function Hero() {
           className="text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
           style={{ color: 'var(--color-text-secondary)' }}
         >
-          Official policy + recent enforcement changes + real traveler experience — synthesized
-          into one structured brief. Every claim sourced. Every recommendation confidence-scored.
+          {copy.hero.subhead}
         </p>
 
         {/* CTA */}
         <div className="flex justify-center mb-8">
           <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
-            <Link href="/app?depth=quick">Get your free brief</Link>
+            <Link href={copy.hero.ctaHref}>{copy.hero.cta}</Link>
           </Button>
         </div>
 
@@ -68,12 +70,7 @@ function Hero() {
             fontFamily: 'var(--font-mono)',
           }}
         >
-          {[
-            { value: '5', label: 'Agents' },
-            { value: '10', label: 'Countries' },
-            { value: 'T1–T4', label: 'Source tiers' },
-            { value: 'Per report', label: 'No subscription' },
-          ].map((m, i) => (
+          {copy.hero.metrics.map((m, i) => (
             <div key={m.label} className="flex items-center gap-3 sm:gap-6">
               {i > 0 && (
                 <div className="hidden sm:block w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
@@ -92,51 +89,36 @@ function Hero() {
 
 // ─── Features ──────────────────────────────────────────────────────────────
 
-const FEATURES = [
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    tag: 'Tier 1 Sources',
-    title: 'Official Policy, Verified',
-    body: 'Government immigration portals, embassy sites, and official advisories — pulled fresh and tagged by source tier. No outdated travel blogs.',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    tag: 'Last 90 Days',
-    title: 'Recent Enforcement Reality',
-    body: 'Rules on paper vs. what border officers are actually doing. Community intelligence from Reddit, Nomad List, and expat forums — reconciled against official sources.',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
-    tag: 'Per Claim',
-    title: 'Confidence Scores + Citations',
-    body: 'Every claim sourced and confidence-scored. High confidence = two+ Tier 1 sources agree. Contested claims flagged explicitly. Nothing hidden.',
-  },
+const FEATURE_ICONS = [
+  (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  ),
 ];
 
 function Features() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle="Five parallel intelligence agents. One structured brief. Contradictions resolved, not hidden.">
-          Intelligence Engine
+        <SectionHeading className="mb-12" subtitle={copy.features.subtitle}>
+          {copy.features.title}
         </SectionHeading>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {FEATURES.map(f => (
+          {copy.features.cards.map((card, i) => (
             <div
-              key={f.title}
+              key={card.title}
               className="brief-section p-6 rounded-xl border"
               style={{
                 background: 'var(--color-bg-base)',
@@ -150,7 +132,7 @@ function Features() {
                   className="w-10 h-10 rounded-lg flex items-center justify-center"
                   style={{ background: 'var(--color-secondary-subtle)', color: 'var(--color-secondary-light)' }}
                 >
-                  {f.icon}
+                  {FEATURE_ICONS[i]}
                 </div>
                 <span
                   className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
@@ -160,17 +142,17 @@ function Features() {
                     fontFamily: 'var(--font-mono)',
                   }}
                 >
-                  {f.tag}
+                  {card.tag}
                 </span>
               </div>
               <h3
                 className="text-sm font-bold mb-2 uppercase tracking-wider"
                 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
               >
-                {f.title}
+                {card.title}
               </h3>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {f.body}
+                {card.body}
               </p>
             </div>
           ))}
@@ -180,64 +162,46 @@ function Features() {
   );
 }
 
-// ─── Pipeline ──────────────────────────────────────────────────────────────
+// ─── How It Works ──────────────────────────────────────────────────────────
 
-const AGENTS = [
-  { name: 'Official Policy', tier: 'T1', color: 'var(--color-secondary)' },
-  { name: 'Recent Changes', tier: 'T1–T2', color: 'var(--color-secondary)' },
-  { name: 'Community Intel', tier: 'T4', color: 'var(--color-secondary)' },
-  { name: 'Entry Requirements', tier: 'T1', color: 'var(--color-secondary)' },
-  { name: 'Border Run', tier: 'T1–T4', color: 'var(--color-secondary)' },
-];
-
-function Pipeline() {
+function HowItWorks() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle="Every brief runs five agents in parallel. Results reconciled by a conflict resolver before synthesis.">
-          How It Works
+        <SectionHeading className="mb-12" subtitle={copy.howItWorks.subtitle}>
+          {copy.howItWorks.title}
         </SectionHeading>
 
-        {/* Agent pipeline */}
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-6">
-          {AGENTS.map((agent, i) => (
-            <div key={agent.name} className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {copy.howItWorks.steps.map(step => (
+            <div
+              key={step.number}
+              className="brief-section p-6 rounded-xl border flex flex-col gap-4"
+              style={{
+                background: 'var(--color-bg-elevated)',
+                borderColor: 'var(--color-border)',
+                borderLeft: '3px solid var(--color-secondary)',
+                boxShadow: 'var(--shadow-card)',
+              }}
+            >
               <div
-                className="brief-section p-4 rounded-lg border flex flex-col gap-2"
-                style={{
-                  background: 'var(--color-bg-elevated)',
-                  borderColor: 'var(--color-border)',
-                  borderLeft: '3px solid var(--color-secondary)',
-                  boxShadow: 'var(--shadow-card)',
-                }}
+                className="text-3xl font-bold"
+                style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
               >
-                <div
-                  className="text-sm font-bold uppercase tracking-wider"
-                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  Agent {String(i + 1).padStart(2, '0')}
-                </div>
-                <div
-                  className="text-sm font-bold"
-                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}
-                >
-                  {agent.name}
-                </div>
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded w-fit"
-                  style={{
-                    background: 'var(--color-secondary-subtle)',
-                    color: 'var(--color-secondary-light)',
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                >
-                  {agent.tier}
-                </span>
+                {step.number}
               </div>
+              <h3
+                className="text-sm font-bold uppercase tracking-wider"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              >
+                {step.title}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                {step.body}
+              </p>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
@@ -245,24 +209,16 @@ function Pipeline() {
 
 // ─── Destinations ──────────────────────────────────────────────────────────
 
-const DESTINATIONS = [
-  'Thailand', 'Vietnam', 'Indonesia', 'Malaysia', 'Philippines',
-  'Cambodia', 'Singapore', 'Laos', 'Myanmar', 'Brunei',
-];
-
 function Destinations() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading
-          subtitle="Top 5–6 visa types per country. Unsupported types flagged — never guessed."
-          className="mb-12"
-        >
-          Coverage Matrix
+        <SectionHeading subtitle={copy.destinations.subtitle} className="mb-12">
+          {copy.destinations.title}
         </SectionHeading>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {DESTINATIONS.map(name => (
+          {clientConfig.supportedDestinations.map(name => (
             <div
               key={name}
               className="brief-section p-4 rounded-lg border flex flex-col gap-2"
@@ -292,52 +248,16 @@ function Destinations() {
 
 // ─── Pricing ───────────────────────────────────────────────────────────────
 
-const PLANS = [
-  {
-    name: 'Quick',
-    tag: 'Free',
-    price: '$0',
-    priceNote: 'No credit card',
-    description: 'Full pipeline, all 5 agents, 3 sources each. Good for a fast overview.',
-    features: ['All 5 agents', '3 sources per agent', 'Visa brief', 'Shareable link'],
-    cta: 'Start free',
-    href: '/app?depth=quick',
-    highlight: false,
-  },
-  {
-    name: 'Standard',
-    tag: 'Popular',
-    price: '$5.99',
-    priceNote: 'Per report',
-    description: 'More sources, richer analysis, full conflict report, PDF download.',
-    features: ['All 5 agents', '5 sources per agent', 'Richer conflict analysis', 'PDF download', 'Shareable link'],
-    cta: 'Get Standard',
-    href: '/app?depth=standard',
-    highlight: true,
-  },
-  {
-    name: 'Deep',
-    tag: 'Max Intel',
-    price: '$11.99',
-    priceNote: 'Per report',
-    description: 'Everything in Standard, plus maximum sources and full border run analysis.',
-    features: ['Everything in Standard', '8 sources per agent', 'Extended community search', 'Full border run analysis', 'Conflict deep-dive'],
-    cta: 'Get Deep',
-    href: '/app?depth=deep',
-    highlight: false,
-  },
-];
-
 function Pricing() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle="Less than a visa agency consultation. Far less than an overstay fine.">
-          Mission Parameters
+        <SectionHeading className="mb-12" subtitle={copy.pricing.subtitle}>
+          {copy.pricing.title}
         </SectionHeading>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {PLANS.map(plan => (
+          {copy.pricing.plans.map(plan => (
             <div
               key={plan.name}
               className={`brief-section p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
@@ -424,11 +344,12 @@ function Footer() {
           <div>
             <Wordmark className="block mb-1" />
             <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              Visa intelligence for digital nomads.
+              {clientConfig.tagline}
             </span>
           </div>
 
           <div className="flex items-center gap-6">
+            <FooterLink href="/how-it-works">How It Works</FooterLink>
             <FooterLink href="/privacy">Privacy</FooterLink>
             <FooterLink href="/terms">Terms</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
@@ -437,13 +358,13 @@ function Footer() {
 
         <div className="border-t pt-4" style={{ borderColor: 'var(--color-border-muted)' }}>
           <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
-            ⚠ This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
+            ⚠ {clientConfig.disclaimerText}
           </p>
           <p
             className="text-xs uppercase tracking-wider"
             style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
           >
-            © {new Date().getFullYear()} VisaScout · All rights reserved.
+            © {new Date().getFullYear()} {clientConfig.brandName} · All rights reserved.
           </p>
         </div>
       </div>
@@ -459,7 +380,7 @@ export default function LandingPage() {
       <LandingNav />
       <Hero />
       <Features />
-      <Pipeline />
+      <HowItWorks />
       <Destinations />
       <Pricing />
       <Footer />
