@@ -14,7 +14,7 @@ export function MiniFooter({ exclude }: { exclude?: string }) {
       className="border-t px-6 py-8 text-center"
       style={{ borderColor: 'var(--color-border-muted)' }}
     >
-      <div className="flex justify-center gap-6">
+      <div className="flex justify-center gap-4">
         {links.map(l => (
           <FooterLink key={l.href} href={l.href}>
             {l.label}

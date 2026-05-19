@@ -11,6 +11,7 @@ import { Button } from '@/app/components/ui/Button';
 import { DownloadPdfButton } from '@/app/components/ui/DownloadPdfButton';
 import { ShareButton } from '@/app/components/ui/ShareButton';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { CardHeading } from '@/app/components/ui/CardHeading';
 import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
 // ─── Static data ───────────────────────────────────────────────────────────
@@ -198,7 +199,7 @@ function SignInPrompt() {
           <span style={{ color: 'var(--color-secondary)' }}>//</span> Sign in to generate briefs
         </h1>
         <p className="text-sm leading-relaxed max-w-sm mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
-          VisaScout runs a multi-agent intelligence pipeline — official sources, recent enforcement, and community ground truth — to build your visa brief.
+          VisaScout cross-checks official sources, recent enforcement, and community ground truth to build your visa brief.
         </p>
       </div>
       <SignInButton mode="modal">
@@ -243,12 +244,12 @@ const INPUT_STYLE: React.CSSProperties = {
 
 const LABEL_STYLE: React.CSSProperties = {
   display: 'block',
-  fontSize: '0.8rem',
+  fontSize: '0.75rem',
   fontWeight: 700,
   fontFamily: 'var(--font-mono)',
   textTransform: 'uppercase',
-  letterSpacing: '0.1em',
-  color: 'var(--color-secondary-light)',
+  letterSpacing: '0.08em',
+  color: 'var(--color-text-secondary)',
   marginBottom: '8px',
 };
 
@@ -557,10 +558,10 @@ function AppContent() {
                   {phase === 'redirecting'
                     ? 'Redirecting to checkout…'
                     : depth === 'quick'
-                      ? 'Generate Brief — Free'
+                      ? 'Generate Brief · Free'
                       : depth === 'standard'
-                        ? `Generate Brief — $${(PRICES.standard.amount / 100).toFixed(2)}`
-                        : `Generate Brief — $${(PRICES.deep.amount / 100).toFixed(2)}`}
+                        ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
+                        : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
                 </Button>
               </form>
             </div>
@@ -576,12 +577,7 @@ function AppContent() {
                   className="brief-section rounded-xl px-4 py-3 border"
                   style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
                 >
-                  <p
-                    className="text-xl font-bold tracking-wider mb-1"
-                    style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                  >
-                    <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>We Understood
-                  </p>
+                  <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
                   {parsedSituation ? (
                     <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                       {parsedSituation.parsedSummary}
@@ -602,12 +598,7 @@ function AppContent() {
                     className="brief-section rounded-xl p-5 border"
                     style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.06)' }}
                   >
-                    <p
-                      className="text-xl font-bold tracking-wider mb-3"
-                      style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                    >
-                      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>Agent Status
-                    </p>
+                    <p className="mb-3"><CardHeading>Agent Status</CardHeading></p>
                     {agentStatuses.map(entry => (
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
