@@ -63,7 +63,7 @@ const CONFIDENCE_LEVELS = [
   },
   {
     level: 'Low',
-    definition: 'No T1 or T2 source found. T3/T4 only.',
+    definition: 'No T1 or T2 source found. T3 or T4 only.',
     meaning: 'Treat as directional. Check official sources before making decisions.',
     color: 'var(--color-text-tertiary)',
   },
@@ -258,9 +258,9 @@ export default function HowItWorksPage() {
             boxShadow: 'var(--shadow-card)',
           }}
         >
-          <div className="mb-3">
-            <CardHeading>Run your first brief free</CardHeading>
-          </div>
+          <p className="text-xl font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
+            Run your first brief free
+          </p>
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             No card required.
           </p>
