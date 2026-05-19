@@ -76,8 +76,8 @@ function Hero() {
                 <div className="hidden sm:block w-px h-6" style={{ background: 'var(--color-border-strong)' }} />
               )}
               <div className="text-center">
-                <div className="text-base sm:text-lg font-bold" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
-                <div className="text-xs sm:text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
+                <div className="text-base sm:text-lg font-bold uppercase" style={{ color: 'var(--color-secondary-light)' }}>{m.value}</div>
+                <div className="text-xs sm:text-sm uppercase" style={{ color: 'var(--color-text-tertiary)' }}>{m.label}</div>
               </div>
             </div>
           ))}
