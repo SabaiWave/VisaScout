@@ -258,12 +258,9 @@ export default function HowItWorksPage() {
             boxShadow: 'var(--shadow-card)',
           }}
         >
-          <h3
-            className="text-xl font-bold mb-3"
-            style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-          >
-            Run your first brief free.
-          </h3>
+          <div className="mb-3">
+            <CardHeading>Run your first brief free</CardHeading>
+          </div>
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             No card required.
           </p>

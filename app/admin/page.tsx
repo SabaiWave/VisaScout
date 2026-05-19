@@ -148,7 +148,7 @@ export default async function AdminPage() {
               border: '1px solid var(--color-border)',
               borderRadius: '8px',
               padding: '1rem',
-              boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+              boxShadow: 'var(--shadow-card)',
             }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
                 {label}
@@ -172,7 +172,7 @@ export default async function AdminPage() {
               border: '1px solid var(--color-border)',
               borderRadius: '8px',
               padding: '1rem',
-              boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+              boxShadow: 'var(--shadow-card)',
             }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
                 {label}
@@ -328,19 +328,13 @@ export default async function AdminPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '2rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-secondary)', fontWeight: 700 }}>//</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {title}
-        </span>
-        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, rgba(99,102,241,0.4), transparent)' }} />
-      </div>
+      <SectionHeading size="sm" className="mb-3">{title}</SectionHeading>
       <div style={{
         background: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border)',
         borderRadius: '8px',
         padding: '1rem',
-        boxShadow: '0 0 20px rgba(99,102,241,0.05)',
+        boxShadow: 'var(--shadow-card)',
       }}>
         {children}
       </div>

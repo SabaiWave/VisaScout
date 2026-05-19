@@ -195,9 +195,7 @@ function SignInPrompt() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-          <span style={{ color: 'var(--color-secondary)' }}>//</span> Sign in to generate briefs
-        </h1>
+        <SectionHeading as="h1" size="sm" className="mb-2">Sign in to generate briefs</SectionHeading>
         <p className="text-sm leading-relaxed max-w-sm mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
           VisaScout cross-checks official sources, recent enforcement, and community ground truth to build your visa brief.
         </p>
@@ -528,19 +526,20 @@ function AppContent() {
                     style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)' }}
                   >
                     {(['quick', 'standard', 'deep'] as const).map(d => (
-                      <button
+                      <Button
                         key={d}
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setDepth(d)}
-                        className="flex-1 py-1.5 text-xs rounded-full font-bold uppercase tracking-wider transition-all"
+                        className="flex-1 rounded-full border-0 transition-all"
                         style={{
                           background: depth === d ? 'var(--color-secondary)' : 'transparent',
                           color: depth === d ? '#ffffff' : 'var(--color-text-tertiary)',
-                          fontFamily: 'var(--font-mono)',
                         }}
                       >
                         {d === 'quick' ? 'Quick' : d === 'standard' ? 'Standard' : 'Deep'}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -575,7 +574,7 @@ function AppContent() {
               <div className="mb-6">
                 <div
                   className="brief-section rounded-xl px-4 py-3 border"
-                  style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: '0 0 20px rgba(99,102,241,0.1)' }}
+                  style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
                 >
                   <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
                   {parsedSituation ? (
@@ -596,7 +595,7 @@ function AppContent() {
                 <div className="mb-8">
                   <div
                     className="brief-section rounded-xl p-5 border"
-                    style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: '0 0 20px rgba(99,102,241,0.06)' }}
+                    style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
                   >
                     <p className="mb-3"><CardHeading>Agent Status</CardHeading></p>
                     {agentStatuses.map(entry => (
