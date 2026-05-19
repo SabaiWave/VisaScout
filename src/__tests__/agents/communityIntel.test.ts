@@ -26,7 +26,10 @@ function makeClient(responseData: Record<string, unknown>): Anthropic {
 }
 
 describe('communityIntelAgent', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    delete process.env.DRY_RUN;
+    jest.clearAllMocks();
+  });
 
   it('returns AgentResult with status success on valid fixture input', async () => {
     mockTavilySearch.mockResolvedValue(communityFixture as ReturnType<typeof tavilySearch> extends Promise<infer T> ? T : never);

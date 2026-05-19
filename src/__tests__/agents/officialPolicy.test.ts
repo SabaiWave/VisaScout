@@ -28,6 +28,7 @@ function makeClient(responseData: Partial<OfficialPolicyOutput> & Record<string,
 
 describe('officialPolicyAgent', () => {
   beforeEach(() => {
+    delete process.env.DRY_RUN;
     jest.clearAllMocks();
   });
 
