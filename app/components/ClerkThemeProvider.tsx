@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { dark } from '@clerk/themes';
 
 const sharedVariables = {
-  fontFamily: "'Inter', system-ui, sans-serif",
+  fontFamily: "'Geist', system-ui, sans-serif",
   colorPrimary: '#6366F1',
   colorTextOnPrimaryBackground: '#ffffff',
   borderRadius: '0.5rem',

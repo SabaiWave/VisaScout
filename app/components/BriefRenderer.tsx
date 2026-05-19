@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
 import { BriefMeta } from './ui/BriefMeta';
 import { CardHeading } from './ui/CardHeading';
+import { Button } from './ui/Button';
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -51,14 +52,15 @@ function CollapsibleCard({
   const showContent = forPrint || open;
   return (
     <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left focus-visible:outline-none"
-        style={{ background: 'var(--color-bg-elevated)' }}
+        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left normal-case tracking-normal border-0 rounded-none hover:opacity-100"
+        style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}
       >
         {header}
         <span className="text-sm flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
-      </button>
+      </Button>
       {showContent && (
         <div className="px-5 py-5 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
           {children}
@@ -310,7 +312,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           borderRight: '1px solid rgba(245,158,11,0.2)',
           borderBottom: '1px solid rgba(245,158,11,0.2)',
           borderLeft: '4px solid var(--color-amber)',
-          boxShadow: '0 0 20px rgba(245,158,11,0.08)',
+          boxShadow: 'var(--shadow-amber)',
         }}
       >
         <Label color="var(--color-amber)" size="xl">Recommended Action</Label>

@@ -26,7 +26,7 @@ function Hero() {
       <div className="relative z-10 max-w-[860px] mx-auto">
         {/* Eyebrow */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-wide sm:tracking-widest"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-wide"
           style={{
             background: 'var(--color-secondary-subtle)',
             color: 'var(--color-secondary-light)',

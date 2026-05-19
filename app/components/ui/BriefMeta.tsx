@@ -21,7 +21,7 @@ export function BriefMeta({ depth, generatedAt, degraded, center, className = ''
       style={{
         color: 'var(--color-text-tertiary)',
         fontFamily: 'var(--font-mono)',
-        letterSpacing: '0.08em',
+        letterSpacing: '0.04em',
         textTransform: 'uppercase',
       }}
     >
