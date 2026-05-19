@@ -32,7 +32,7 @@ export function SectionHeading({
   return (
     <div className={cn(className)}>
       <Tag
-        className={cn(sizeClasses[size], 'font-bold mb-3')}
+        className={cn(sizeClasses[size], 'font-bold mb-3 uppercase')}
         style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
       >
         <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
