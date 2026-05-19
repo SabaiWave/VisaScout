@@ -10,14 +10,12 @@ import { NavDrawer, HamburgerButton, navDrawerLinkStyle, navDrawerPrimaryStyle }
 import { SidebarAccount } from './SidebarAccount';
 import { VisaScoutUserButton } from './VisaScoutUserButton';
 
-const ADMIN_EMAIL = 'admin@sabaiwave.com';
-
 export function LandingNav() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const [open, setOpen] = useState(false);
 
-  const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
+  const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
 
   return (
     <>
