@@ -42,10 +42,11 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }} className="relative">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
       {/* Nav */}
       <nav
-        className="border-b px-6 py-4"
+        className="relative z-10 border-b px-6 py-4"
         style={{ borderColor: 'var(--color-border-muted)' }}
       >
         <div className="max-w-[760px] mx-auto flex items-center justify-between">
@@ -54,10 +55,10 @@ export default function ContactPage() {
         </div>
       </nav>
 
-      <main className="max-w-[560px] mx-auto px-6 py-16">
-        <SectionHeading as="h1" className="mb-8">Contact</SectionHeading>
+      <main className="relative z-10 max-w-[560px] mx-auto px-6 py-16">
+        <SectionHeading as="h1" size="md" className="mb-8">Contact</SectionHeading>
         <p className="text-sm mb-10 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-          Questions, bugs, feedback, or partnership inquiries — send a message and we'll get back to you as soon as possible.
+          Questions, bug reports, feedback, or partnership inquiries. We reply within one business day.
         </p>
 
         {status === 'success' ? (
