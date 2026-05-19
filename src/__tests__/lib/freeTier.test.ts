@@ -1,4 +1,4 @@
-import { FREE_DAILY_LIMIT, checkFreeTierCap, incrementFreeTierCount, logIpAbuse } from '../../lib/freeTier';
+import { getFreeDailyLimit, checkFreeTierCap, incrementFreeTierCount, logIpAbuse } from '../../lib/freeTier';
 
 // Mock getSupabase
 jest.mock('../../lib/supabase', () => ({
@@ -26,9 +26,9 @@ function makeSupabaseMock(overrides: Record<string, unknown> = {}) {
 describe('freeTier', () => {
   afterEach(() => jest.clearAllMocks());
 
-  describe('FREE_DAILY_LIMIT', () => {
-    it('is 1 brief per day', () => {
-      expect(FREE_DAILY_LIMIT).toBe(1);
+  describe('getFreeDailyLimit', () => {
+    it('is 1 brief per day by default', () => {
+      expect(getFreeDailyLimit()).toBe(1);
     });
   });
 

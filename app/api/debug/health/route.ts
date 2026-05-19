@@ -5,6 +5,7 @@ export const runtime = 'nodejs';
 // Used by BetterStack uptime monitors and deployment smoke tests.
 // Returns 200 + ok:true when required keys are configured.
 // Returns 503 + ok:false when required keys are missing — triggers BetterStack alert.
+// Intentionally no DEBUG_ALLOWED guard — BetterStack needs production access.
 export async function GET() {
   const keys = {
     // Core

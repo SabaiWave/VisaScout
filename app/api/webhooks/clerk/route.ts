@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { render } from '@react-email/render';
-import { getResend, FROM_ADDRESS } from '@/src/lib/email';
+import { getResend, getFromAddress } from '@/src/lib/email';
 import { trackEvent } from '@/src/lib/analytics';
 import WelcomeEmail from '@/src/emails/welcome';
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       try {
         const html = await render(WelcomeEmail({ appUrl: `${appUrl}/app` }));
         await getResend().emails.send({
-          from: FROM_ADDRESS,
+          from: getFromAddress(),
           to: email,
           subject: 'Welcome to VisaScout — your first brief is free',
           html,

@@ -64,3 +64,12 @@ Rules:
 - Skip src/__fixtures__/, src/__tests__/, and any generated files.
 
 State: "Backend audit complete. X violations found. Ready for fixes or continue?"
+
+If violations found, append:
+---
+Fix violations before phase marked complete.
+Tell me "fix violations" and I'll work through them one by one.
+Run /audit-backend again after fixes to confirm clean.
+If fixes made: /stop to log what changed.
+If pattern worth preventing in future: /improve after /stop.
+---

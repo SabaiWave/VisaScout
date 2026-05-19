@@ -1,5 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+jest.mock('@clerk/nextjs/server', () => ({
+  auth: jest.fn().mockResolvedValue({ userId: 'user_test123' }),
+}));
+
+jest.mock('@vercel/functions', () => ({
+  waitUntil: jest.fn(),
+}));
+
 jest.mock('@/src/lib/supabase', () => ({ getSupabase: jest.fn() }));
 import { getSupabase } from '@/src/lib/supabase';
 import { GET } from '@/app/api/brief/poll/route';
@@ -9,7 +17,9 @@ const TEST_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
 
 function makeSelectChain(result: { data: unknown; error: unknown }) {
   const single = jest.fn().mockResolvedValue(result);
-  const eq = jest.fn(() => ({ single }));
+  const eqNode = { single } as Record<string, unknown>;
+  const eq = jest.fn(() => eqNode);
+  eqNode.eq = eq;
   const select = jest.fn(() => ({ eq }));
   return { select, eq, single, from: jest.fn(() => ({ select })) };
 }

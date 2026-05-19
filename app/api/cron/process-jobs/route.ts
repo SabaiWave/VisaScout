@@ -5,15 +5,13 @@ import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { updateBriefWithContent } from '@/src/lib/saveBrief';
 import { runDryPipeline } from '@/src/lib/dryRun';
-import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
+import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { log } from '@/src/lib/logger';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
 // Generous timeout — deep pipeline can take 200–240s
 export const maxDuration = 300;
-
-const DRY_RUN = process.env.DRY_RUN === 'true';
 
 export async function GET(req: Request) {
   // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
@@ -71,58 +69,58 @@ export async function GET(req: Request) {
 
   log.info('cron: processing job', { jobId: job.id, briefId: job.brief_id, destination: briefRow.destination });
 
-  resetUsage();
-
   try {
-    let brief;
-    let visaRequest: VisaRequest | undefined;
+    await withUsageTracking(async () => {
+      let brief;
+      let visaRequest: VisaRequest | undefined;
 
-    if (DRY_RUN) {
-      const result = await runDryPipeline(() => {});
-      brief = result.brief;
-      visaRequest = result.visaRequest;
-    } else {
-      const input: VisaInput = {
-        nationality: briefRow.nationality,
-        destination: briefRow.destination,
-        visaType: briefRow.visa_type ?? undefined,
-        freeform: briefRow.freeform_input ?? '',
-      };
-      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-      const startTime = Date.now();
+      if (process.env.DRY_RUN === 'true') {
+        const result = await runDryPipeline(() => {});
+        brief = result.brief;
+        visaRequest = result.visaRequest;
+      } else {
+        const input: VisaInput = {
+          nationality: briefRow.nationality,
+          destination: briefRow.destination,
+          visaType: briefRow.visa_type ?? undefined,
+          freeform: briefRow.freeform_input ?? '',
+        };
+        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const startTime = Date.now();
 
-      const envelope = await runOrchestrator(input, client, briefRow.depth, (parsed) => { visaRequest = parsed; });
-      if (!visaRequest) visaRequest = envelope.visaRequest;
+        const envelope = await runOrchestrator(input, client, briefRow.depth, (parsed) => { visaRequest = parsed; });
+        if (!visaRequest) visaRequest = envelope.visaRequest;
 
-      const conflictReport = await resolveConflicts(envelope, client);
-      brief = await synthesizeBrief(envelope, conflictReport, client, briefRow.depth, startTime);
-    }
+        const conflictReport = await resolveConflicts(envelope, client);
+        brief = await synthesizeBrief(envelope, conflictReport, client, briefRow.depth, startTime);
+      }
 
-    const cost = calculateReportCost(getUsageLog());
+      const cost = calculateReportCost(getUsageLog());
 
-    await updateBriefWithContent({
-      briefId: job.brief_id,
-      visaRequest: visaRequest!,
-      brief,
-      stripeSessionId: briefRow.stripe_session_id ?? '',
-      paymentStatus: 'paid',
-      cost,
+      await updateBriefWithContent({
+        briefId: job.brief_id,
+        visaRequest: visaRequest!,
+        brief,
+        stripeSessionId: briefRow.stripe_session_id ?? '',
+        paymentStatus: 'paid',
+        cost,
+      });
+
+      await getSupabase()
+        .from('brief_jobs')
+        .update({ status: 'done', completed_at: new Date().toISOString() })
+        .eq('id', job.id);
+
+      log.info('cron: job complete', { jobId: job.id, briefId: job.brief_id, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
     });
-
-    await getSupabase()
-      .from('brief_jobs')
-      .update({ status: 'done', completed_at: new Date().toISOString() })
-      .eq('id', job.id);
-
-    log.info('cron: job complete', { jobId: job.id, briefId: job.brief_id, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
-    return Response.json({ ok: true, processed: 1, briefId: job.brief_id });
-
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     log.error('cron: job failed', { jobId: job.id, briefId: job.brief_id, error: message });
     await failJob(job.id, job.brief_id, message);
     return Response.json({ ok: false, error: message }, { status: 500 });
   }
+
+  return Response.json({ ok: true, processed: 1, briefId: job.brief_id });
 }
 
 async function failJob(jobId: string, briefId: string, error: string): Promise<void> {
