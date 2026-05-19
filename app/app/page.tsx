@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import BriefRenderer from '@/app/components/BriefRenderer';
 import type { VisaBrief, VisaRequest } from '@/src/types/index';
 import { clientConfig } from '@/config/client';
@@ -256,8 +256,11 @@ const LABEL_STYLE: React.CSSProperties = {
 function AppContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const [phase, setPhase] = useState<Phase>('idle');
+  const [phase, setPhase] = useState<Phase>(
+    process.env.NODE_ENV === 'development' && searchParams.get('sim') === 'error' ? 'error' : 'idle'
+  );
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
   const [visaType, setVisaType] = useState('');
@@ -271,7 +274,9 @@ function AppContent() {
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
   const wasCancelled = searchParams.get('cancelled') === 'true';
+  const devSim = process.env.NODE_ENV === 'development' ? searchParams.get('sim') : null;
   const [error, setError] = useState<string | null>(
+    devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
   const [submitted, setSubmitted] = useState(false);
@@ -287,8 +292,15 @@ function AppContent() {
       });
 
       if (!response.ok) {
-        const err = await response.json() as { error?: string };
-        throw new Error(err.error ?? 'Request failed');
+        let errMsg = `Something went wrong (${response.status}). Try again or contact support.`;
+        const ct = response.headers.get('content-type') ?? '';
+        if (ct.includes('application/json')) {
+          try {
+            const err = await response.json() as { error?: string };
+            if (err.error) errMsg = err.error;
+          } catch { /* fall through to generic message */ }
+        }
+        throw new Error(errMsg);
       }
 
       const reader = response.body!.getReader();
@@ -367,8 +379,15 @@ function AppContent() {
           body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
         });
         if (!res.ok) {
-          const err = await res.json() as { error?: string };
-          throw new Error(err.error ?? 'Failed to start checkout');
+          let errMsg = 'Failed to start checkout. Try again or contact support.';
+          const ct = res.headers.get('content-type') ?? '';
+          if (ct.includes('application/json')) {
+            try {
+              const err = await res.json() as { error?: string };
+              if (err.error) errMsg = err.error;
+            } catch { /* fall through */ }
+          }
+          throw new Error(errMsg);
         }
         const { checkoutUrl } = await res.json() as { checkoutUrl: string };
         window.location.href = checkoutUrl;
@@ -383,19 +402,8 @@ function AppContent() {
     await runBriefStream({ nationality, destination, visaType: visaType || undefined, freeform, depth });
   }
 
-  async function handleFreeBrief() {
-    setAgentStatuses(INITIAL_AGENT_STATUSES);
-    setParsedSituation(null);
-    setBrief(null);
-    setBriefId(null);
-    setError(null);
-    await runBriefStream({
-      nationality: 'American',
-      destination: 'Thailand',
-      visaType: 'Visa Exemption',
-      freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
-      depth: 'quick',
-    });
+  function handleFreeBrief() {
+    router.push('/brief/pending?dev=true');
   }
 
   function handleReset() {
@@ -570,25 +578,27 @@ function AppContent() {
           {(phase === 'generating' || phase === 'complete') && (
             <div className="max-w-[760px] mx-auto">
 
-              {/* We Understood — always first; skeleton while orchestrator parses */}
-              <div className="mb-6">
-                <div
-                  className="brief-section rounded-xl px-4 py-3 border"
-                  style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
-                >
-                  <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
-                  {parsedSituation ? (
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                      {parsedSituation.parsedSummary}
-                    </p>
-                  ) : (
-                    <div className="space-y-2 mt-2">
-                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
-                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
-                    </div>
-                  )}
+              {/* We Understood — skeleton + live text during generation; BriefRenderer owns it once complete */}
+              {phase === 'generating' && (
+                <div className="mb-6">
+                  <div
+                    className="brief-section rounded-xl px-4 py-3 border"
+                    style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
+                  >
+                    <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
+                    {parsedSituation ? (
+                      <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                        {parsedSituation.parsedSummary}
+                      </p>
+                    ) : (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Agent Status */}
               {agentStatuses.length > 0 && (
