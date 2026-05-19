@@ -1,21 +1,31 @@
 ---
 name: start
-description: Begin or resume a VisaScout session — reads spec docs, identifies current phase, and executes it.
+description: Begin or resume a VisaScout session — reads spec docs, detects context (active phase vs post-launch), and executes accordingly.
 ---
 Read CLAUDE.md, BLUEPRINT.md, and DESIGN.md in full before doing anything else.
 
-Resume logic:
-1. Check if planning/progress.md exists.
-   - If YES: read it in full. Use the Resume Prompt inside it
-     to pick up exactly where the last session left off.
-     Do not re-run completed work.
-   - If NO: identify the current phase by checking which phases
-     are unchecked in BLUEPRINT.md. Execute the prompt for that
-     phase exactly as written.
+CONTEXT DETECTION — run this logic first, every session:
 
-Do not deviate from the architecture in CLAUDE.md.
-Do not skip the definition of done.
-When the current phase is complete, check it off in BLUEPRINT.md,
-summarize what was built, and explicitly state:
-"Phase X complete. Ready for Phase X+1."
-Do not proceed to the next phase without explicit instruction.
+1. Check planning/progress.md — does it exist?
+   - YES: read it in full. Use the Resume Prompt to pick up exactly where the last
+     session left off. Do not re-run completed work. Skip steps 2-3.
+   - NO: continue to step 2.
+
+2. Check BLUEPRINT.md — are there any unchecked phases?
+   - YES (unchecked phases exist): identify the first unchecked phase.
+     Execute that phase prompt exactly as written. Do not skip DoD.
+   - NO (all phases checked): POST-LAUNCH MODE — continue to step 3.
+
+3. Post-launch mode:
+   State: "All phases complete. Running in post-launch mode."
+   Read CLAUDE.md and DESIGN.md.
+   Ask: "What are we working on this session?"
+   Wait for instruction before doing anything.
+   Do not invent work. Do not re-run any phase.
+
+Rules (all modes):
+- Do not deviate from the architecture in CLAUDE.md.
+- Do not skip the definition of done.
+- When a phase completes: check it off in BLUEPRINT.md, summarize what was built,
+  state "Phase X complete. Ready for Phase X+1." Do not proceed without instruction.
+- Communication style: caveman skill (globally installed). If not active: /caveman.
