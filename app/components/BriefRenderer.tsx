@@ -29,8 +29,8 @@ function WarningBox({ header, items }: { header: string; items: string[] }) {
     <div className="rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: 'var(--shadow-amber)' }}>
       <Label color="var(--color-amber)">{header}</Label>
       {items.map((w, i) => (
-        <p key={i} className="text-sm flex items-start gap-2" style={{ color: 'var(--color-amber)' }}>
-          <span className="flex-shrink-0">⚠</span><span>{w}</span>
+        <p key={i} className="text-sm flex items-start gap-2" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="flex-shrink-0" style={{ color: 'var(--color-amber)' }}>⚠</span><span>{w}</span>
         </p>
       ))}
     </div>
@@ -89,9 +89,12 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
       className="rounded-lg border-l-4 p-4 mb-3"
       style={{ background: bg, borderTop: `1px solid var(--color-border)`, borderRight: `1px solid var(--color-border)`, borderBottom: `1px solid var(--color-border)`, borderLeft: `4px solid ${borderColor}` }}
     >
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-start justify-between mb-1 gap-3">
         <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
-        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>Max stay: {option.maxStay}</span>
+        <div className="text-right flex-shrink-0">
+          <span className="block text-xs font-bold uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
+          <span className="block text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
+        </div>
       </div>
       <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{option.summary}</p>
       {(option.pros.length > 0 || option.cons.length > 0) && (
@@ -300,9 +303,20 @@ function ContingencySection({ contingency, forPrint }: { contingency: VisaBrief[
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export default function BriefRenderer({ brief, forPrint = false, hideMetadata = false }: { brief: VisaBrief; forPrint?: boolean; hideMetadata?: boolean }) {
+export default function BriefRenderer({ brief, forPrint = false, hideMetadata = false, hideParsedSituation = false }: { brief: VisaBrief; forPrint?: boolean; hideMetadata?: boolean; hideParsedSituation?: boolean }) {
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
+      {/* We Understood */}
+      {!hideParsedSituation && brief.parsedSituation && (
+        <div
+          className="brief-section rounded-xl px-4 py-3 border"
+          style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
+        >
+          <CardHeading>We Understood</CardHeading>
+          <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{brief.parsedSituation}</p>
+        </div>
+      )}
+
       {/* Recommended Action */}
       <div
         className="brief-section border-l-4 rounded-r-lg px-5 py-4"
@@ -315,7 +329,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           boxShadow: 'var(--shadow-amber)',
         }}
       >
-        <Label color="var(--color-amber)" size="xl">Recommended Action</Label>
+        <Label color="var(--color-amber)">Recommended Action</Label>
         <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
         {brief.recommendedAction.deadline && (
           <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>

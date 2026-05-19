@@ -11,9 +11,11 @@ interface DownloadPdfButtonProps {
 
 export function DownloadPdfButton({ briefId, depth, className }: DownloadPdfButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleClick() {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/brief/${briefId}/pdf`);
       if (!response.ok) throw new Error('PDF generation failed');
@@ -35,15 +37,25 @@ export function DownloadPdfButton({ briefId, depth, className }: DownloadPdfButt
         body: JSON.stringify({ event: 'brief.pdf_downloaded', props: { briefId, depth } }),
       }).catch(() => {});
     } catch {
-      alert('PDF generation failed. Try again or contact support.');
+      setError('PDF generation failed. Try again or contact support.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Button onClick={handleClick} disabled={loading} className={className}>
-      {loading ? 'Preparing PDF…' : 'Download PDF'}
-    </Button>
+    <div>
+      <Button onClick={handleClick} disabled={loading} className={className}>
+        {loading ? 'Preparing PDF…' : 'Download PDF'}
+      </Button>
+      {error && (
+        <p
+          className="text-xs mt-2"
+          style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

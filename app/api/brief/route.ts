@@ -20,6 +20,18 @@ function sseEvent(data: unknown): string {
 }
 
 export async function POST(req: Request) {
+  try {
+    return await briefHandler(req);
+  } catch (outerErr) {
+    log.error('brief route unhandled error', { error: outerErr instanceof Error ? outerErr.message : String(outerErr) });
+    return new Response(JSON.stringify({ error: 'Something went wrong. Please try again or contact support.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function briefHandler(req: Request) {
   const { userId } = await auth();
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
