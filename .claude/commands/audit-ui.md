@@ -16,7 +16,7 @@ COMPONENT VIOLATIONS — patterns that must use a registered component:
 
 - Inline `//` heading pattern (raw JSX string or span) instead of <SectionHeading> or <CardHeading>
 - Bare <UserButton /> instead of <VisaScoutUserButton>
-- Raw <button> element outside app/components/ui/
+- Raw <button> element outside app/components/ui/ — when flagging, also check whether `import { Button }` exists in the file; if missing, append `(Button import missing)` to the finding
 - Styled <Link> with background/border outside app/components/ui/
 - Wordmark pattern (// VisaScout) written inline instead of <Wordmark>
 - Footer links written inline instead of <FooterLink>
