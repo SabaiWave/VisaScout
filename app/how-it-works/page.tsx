@@ -5,6 +5,8 @@ import { NavLink } from '@/app/components/ui/NavLink';
 import { MiniFooter } from '@/app/components/ui/MiniFooter';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { ConfidenceBadge } from '@/app/components/ui/Badge';
+import { CardHeading } from '@/app/components/ui/CardHeading';
 
 export const metadata: Metadata = {
   title: 'How It Works — VisaScout',
@@ -86,7 +88,7 @@ export default function HowItWorksPage() {
 
         {/* Header */}
         <section>
-          <SectionHeading as="h1" size="lg" className="mb-6">The research, explained.</SectionHeading>
+          <SectionHeading as="h1" size="md" className="mb-6">The research, explained.</SectionHeading>
           <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             The internet has plenty of visa information. Most of it is outdated, uncited, or contradictory. Here is exactly how we source, verify, and reconcile it.
           </p>
@@ -111,7 +113,7 @@ export default function HowItWorksPage() {
             {SOURCE_TIERS.map(t => (
               <div
                 key={t.tier}
-                className="brief-section p-5 rounded-lg border"
+                className="brief-section p-6 rounded-lg border"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   borderColor: 'var(--color-border)',
@@ -119,33 +121,51 @@ export default function HowItWorksPage() {
                   boxShadow: 'var(--shadow-card)',
                 }}
               >
-                <div className="flex items-start justify-between gap-4 mb-2">
+                <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex items-center gap-3">
                     <span
-                      className="text-xs font-bold px-2 py-0.5 rounded"
                       style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase' as const,
+                        letterSpacing: '0.05em',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
                         background: 'var(--color-bg-overlay)',
                         color: t.color,
-                        fontFamily: 'var(--font-mono)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        flexShrink: 0,
                       }}
                     >
                       {t.tier}
                     </span>
-                    <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                      {t.label}
-                    </span>
+                    <CardHeading>{t.label}</CardHeading>
                   </div>
                   <span
-                    className="text-xs font-bold uppercase tracking-wider flex-shrink-0"
-                    style={{ color: t.color, fontFamily: 'var(--font-mono)' }}
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase' as const,
+                      letterSpacing: '0.05em',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: `color-mix(in srgb, ${t.color} 15%, transparent)`,
+                      color: t.color,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      flexShrink: 0,
+                    }}
                   >
                     {t.trust}
                   </span>
                 </div>
-                <p className="text-xs mb-1" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                <p className="text-sm mb-2" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                   {t.examples}
                 </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {t.note}
                 </p>
               </div>
@@ -172,7 +192,7 @@ export default function HowItWorksPage() {
             {CONFIDENCE_LEVELS.map(c => (
               <div
                 key={c.level}
-                className="brief-section p-5 rounded-lg border"
+                className="brief-section p-6 rounded-lg border"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   borderColor: 'var(--color-border)',
@@ -180,22 +200,13 @@ export default function HowItWorksPage() {
                   boxShadow: 'var(--shadow-card)',
                 }}
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <span
-                    className="text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider"
-                    style={{
-                      background: 'var(--color-bg-overlay)',
-                      color: c.color,
-                      fontFamily: 'var(--font-mono)',
-                    }}
-                  >
-                    {c.level}
-                  </span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <ConfidenceBadge level={c.level.toLowerCase() as 'high' | 'medium' | 'low'} prefixed={false} />
+                  <span className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
                     {c.definition}
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {c.meaning}
                 </p>
               </div>
