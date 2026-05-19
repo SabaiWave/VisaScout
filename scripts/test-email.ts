@@ -28,3 +28,7 @@ async function main() {
 }
 
 main();
+
+
+// To test, enter in terminal:
+// RESEND_API_KEY=$(grep RESEND_API_KEY .env.local | cut -d= -f2) npx tsx scripts/test-email.ts admin@sabaiwave.com
