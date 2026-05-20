@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
 import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
@@ -72,6 +73,9 @@ export default async function DashboardPage({
   const user = await currentUser();
   if (!user) redirect('/sign-in');
 
+  const isAdmin = isAdminUser(user.id);
+  const showDev = isAdmin && process.env.NODE_ENV === 'development';
+
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10));
 
@@ -128,7 +132,7 @@ export default async function DashboardPage({
 
       {/* Main content */}
       <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bloom-app-bg)' }}>
-        <MobileNav />
+        <MobileNav isAdmin={isAdmin} showDev={showDev} />
 
         {/* Desktop top bar — utility nav (Resend pattern) */}
         <div
@@ -140,6 +144,8 @@ export default async function DashboardPage({
         >
           <NavLink href="/">Home</NavLink>
           <NavLink href="/contact">Contact</NavLink>
+          {isAdmin && <NavLink href="/admin">Admin</NavLink>}
+          {showDev && <NavLink href="/dev">Dev</NavLink>}
         </div>
 
         <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>

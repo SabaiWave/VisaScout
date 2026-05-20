@@ -8,7 +8,7 @@ import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 import { NavDrawer, HamburgerButton, navDrawerLinkStyle } from '@/app/components/ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
 
-export function MobileNav() {
+export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,6 +35,8 @@ export function MobileNav() {
           <Archive size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
           History
         </Link>
+        {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>}
+        {showDev && <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>}
         <div style={{ flex: 1 }} />
         <SidebarAccount />
       </NavDrawer>

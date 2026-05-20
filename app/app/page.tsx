@@ -66,6 +66,24 @@ const INITIAL_AGENT_STATUSES: AgentStatusEntry[] = [
   { agent: 'conflictResolver',  status: 'queued' },
 ];
 
+const AGENT_DISPLAY_ORDER = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun', 'conflictResolver'];
+
+// Only show an agent as complete/failed once all agents above it have displayed as complete.
+// Uses a Map of authoritative backend statuses — avoids a race where the ref is updated for a
+// later event before React runs an earlier event's setState, causing stale 'running' to slip through.
+function withOrderedCompletions(statuses: AgentStatusEntry[], backendStatus: Map<string, 'complete' | 'failed'>): AgentStatusEntry[] {
+  let prevDone = true;
+  return AGENT_DISPLAY_ORDER.map(agentName => {
+    const entry = statuses.find(s => s.agent === agentName) ?? { agent: agentName, status: 'queued' as const };
+    const finalStatus = backendStatus.get(agentName);
+    if (prevDone && finalStatus) {
+      return { ...entry, status: finalStatus };
+    }
+    prevDone = false;
+    return finalStatus ? { ...entry, status: 'running' as const } : entry;
+  });
+}
+
 type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
 
 const AGENT_DISPLAY: Record<string, string> = {
@@ -211,6 +229,7 @@ function AppContent() {
   );
   const [parsedSituation, setParsedSituation] = useState<VisaRequest | null>(null);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
+  const backendStatusRef = useRef<Map<string, 'complete' | 'failed'>>(new Map());
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
   const wasCancelled = searchParams.get('cancelled') === 'true';
@@ -269,16 +288,19 @@ function AppContent() {
               break;
             case 'status': {
               const entry = data as AgentStatusEntry;
+              if (entry.status === 'complete' || entry.status === 'failed') {
+                backendStatusRef.current = new Map([...backendStatusRef.current, [entry.agent, entry.status]]);
+              }
               setAgentStatuses(prev => {
                 const idx = prev.findIndex(a => a.agent === entry.agent);
-                const updated = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
-                const fiveAgents = updated.filter(a => a.agent !== 'conflictResolver');
-                const allDone = fiveAgents.length === 5 && fiveAgents.every(a => a.status !== 'running' && a.status !== 'queued');
-                const resolver = updated.find(a => a.agent === 'conflictResolver');
-                if (allDone && resolver?.status === 'queued') {
-                  return updated.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a);
-                }
-                return updated;
+                const raw = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                const allFiveBackendDone = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun']
+                  .every(a => backendStatusRef.current.has(a));
+                const resolver = raw.find(a => a.agent === 'conflictResolver');
+                const withResolver = allFiveBackendDone && resolver?.status === 'queued'
+                  ? raw.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a)
+                  : raw;
+                return withOrderedCompletions(withResolver, backendStatusRef.current);
               });
               break;
             }
@@ -286,10 +308,12 @@ function AppContent() {
               setAgentsVisible(true);
               setBrief(data.brief as VisaBrief);
               if (data.briefId) setBriefId(data.briefId as string);
+              backendStatusRef.current = new Map([...backendStatusRef.current, ['conflictResolver', 'complete']]);
               setAgentStatuses(prev => {
                 const idx = prev.findIndex(a => a.agent === 'conflictResolver');
                 const completed = { agent: 'conflictResolver', status: 'complete' as const };
-                return idx >= 0 ? prev.map((a, i) => i === idx ? completed : a) : [...prev, completed];
+                const raw = idx >= 0 ? prev.map((a, i) => i === idx ? completed : a) : [...prev, completed];
+                return withOrderedCompletions(raw, backendStatusRef.current);
               });
               setPhase('complete');
               break;
@@ -309,6 +333,7 @@ function AppContent() {
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
     setAgentStatuses(INITIAL_AGENT_STATUSES);
+    backendStatusRef.current = new Map();
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -350,6 +375,7 @@ function AppContent() {
   useEffect(() => {
     if (devTrigger !== 'quick' || !isSignedIn || !isLoaded) return;
     setAgentStatuses(INITIAL_AGENT_STATUSES);
+    backendStatusRef.current = new Map();
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
@@ -374,6 +400,7 @@ function AppContent() {
     setBriefId(null);
     setParsedSituation(null);
     setAgentStatuses([]);
+    backendStatusRef.current = new Map();
     setError(null);
     setSubmitted(false);
   }
@@ -530,23 +557,23 @@ function AppContent() {
 
               {/* Splash — shown for 2.5s before agent table appears */}
               {phase === 'generating' && !agentsVisible && (
-                <div className="flex flex-col items-center py-20 text-center">
+                <div className="flex flex-col items-center py-32 text-center">
                   <div
-                    className="w-10 h-10 rounded-full animate-spin mb-6"
-                    style={{ border: '2px solid rgba(99,102,241,0.2)', borderTopColor: 'var(--color-secondary)' }}
+                    className="w-20 h-20 rounded-full animate-spin mb-8"
+                    style={{ border: '3px solid rgba(99,102,241,0.2)', borderTopColor: 'var(--color-secondary)' }}
                   />
                   <h2
-                    className="text-base font-bold uppercase mb-3"
+                    className="text-2xl font-bold uppercase mb-4"
                     style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '0.04em' }}
                   >
                     <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
                     Agents Deployed
                   </h2>
-                  <p className="text-sm max-w-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
                     Cross-referencing official policy, enforcement records, and community intel.
                   </p>
                   {nationality && destination && (
-                    <p className="text-xs mt-3 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                    <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
                       {nationality} → {destination}
                     </p>
                   )}
