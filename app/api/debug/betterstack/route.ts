@@ -1,20 +1,19 @@
 export const runtime = 'nodejs';
 
-const BETTERSTACK_URL = 'https://s2405383.eu-fsn-3.betterstackdata.com';
-
 export async function GET() {
   if (!process.env.DEBUG_ALLOWED) {
     return new Response('Not found', { status: 404 });
   }
 
   const token = process.env.BETTERSTACK_SOURCE_TOKEN;
-  if (!token) {
-    return Response.json({ ok: false, error: 'BETTERSTACK_SOURCE_TOKEN not set' }, { status: 500 });
+  const url = process.env.BETTERSTACK_INGEST_URL;
+  if (!token || !url) {
+    return Response.json({ ok: false, error: 'BETTERSTACK_SOURCE_TOKEN or BETTERSTACK_INGEST_URL not set' }, { status: 500 });
   }
 
   const dt = new Date().toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
 
-  const res = await fetch(BETTERSTACK_URL, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -20,6 +20,7 @@ function logStartup() {
     // Observability
     SENTRY_DSN: !!process.env.SENTRY_DSN,
     BETTERSTACK_SOURCE_TOKEN: !!process.env.BETTERSTACK_SOURCE_TOKEN,
+    BETTERSTACK_INGEST_URL: !!process.env.BETTERSTACK_INGEST_URL,
     // Auth (Phase 5+)
     CLERK_SECRET_KEY: !!process.env.CLERK_SECRET_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
@@ -56,6 +57,7 @@ function logStartup() {
     console.log('  ·');
     console.log(fmt('SENTRY_DSN',                       'SENTRY_DSN'));
     console.log(fmt('BETTERSTACK_SOURCE_TOKEN',         'BETTERSTACK_SOURCE_TOKEN'));
+    console.log(fmt('BETTERSTACK_INGEST_URL',           'BETTERSTACK_INGEST_URL'));
     console.log('  ·');
     console.log(fmt('CLERK_SECRET_KEY',                 'CLERK_SECRET_KEY'));
     console.log(fmt('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY','NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY'));
