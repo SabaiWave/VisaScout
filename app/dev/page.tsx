@@ -199,6 +199,12 @@ export default function DevPage() {
               newTab
             />
             <DevButton
+              label="Checkout Started ↗"
+              sublabel="event:checkout.started · $19 standard"
+              href="/api/debug/sim?event=checkout.started"
+              newTab
+            />
+            <DevButton
               label="Brief Generated ↗"
               sublabel="event:brief.generated · healthy"
               href="/api/debug/sim?event=brief.generated"

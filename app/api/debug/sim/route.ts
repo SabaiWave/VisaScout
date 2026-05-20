@@ -19,6 +19,7 @@ const VALID_EVENTS = [
   'brief.generated',
   'brief.generated.degraded',
   'brief.failed',
+  'checkout.started',
   'payment.completed',
   'free-cap.reached',
 ];
@@ -97,9 +98,22 @@ export async function GET(req: Request) {
         sim: true,
       };
       await trackEvent('brief.failed', data);
-      // Also fire log.error so level:error alert triggers alongside event:brief.failed alert
-      log.error('sim: brief.failed', { ...data });
       fired = { event: 'brief.failed', ...data };
+      break;
+    }
+
+    case 'checkout.started': {
+      const data = {
+        userId: FAKE_USER_ID,
+        briefId: FAKE_BRIEF_ID,
+        depth: 'standard',
+        destination,
+        nationality,
+        priceUsd: 19.00,
+        sim: true,
+      };
+      await trackEvent('checkout.started', data);
+      fired = { event: 'checkout.started', ...data };
       break;
     }
 
