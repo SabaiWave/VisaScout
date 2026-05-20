@@ -112,7 +112,7 @@ export default function DevPage() {
       <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
         <SectionHeading size="md" as="h1" className="mb-1">Dev Tools</SectionHeading>
         <p className="text-sm mb-8" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          Dev only · admin gated · not accessible in production
+          DEV ONLY · ADMIN GATED · NOT ACCESSIBLE IN PRODUCTION
         </p>
 
         {/* Brief Flows */}
@@ -136,43 +136,113 @@ export default function DevPage() {
         {/* State simulation */}
         <DevSection title="State Simulation">
           <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
-            Each navigates to the target page and triggers that state on mount.
+            EACH NAVIGATES TO THE TARGET PAGE AND TRIGGERS THAT STATE ON MOUNT.
           </p>
           <DevGrid>
-            <DevButton label="Main: Error Banner"      sublabel="/app?sim=error"              href="/app?sim=error" />
-            <DevButton label="Main: Payment Cancelled" sublabel="/app?cancelled=true"         href="/app?cancelled=true" />
-            <DevButton label="Pending: Error"          sublabel="/brief/pending?sim=error"    href="/brief/pending?sim=error" />
-            <DevButton label="Pending: Timeout"        sublabel="/brief/pending?sim=timeout"  href="/brief/pending?sim=timeout" />
+            <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
+            <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
+            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"  href="/brief/pending?sim=error"    newTab />
+            <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
           </DevGrid>
         </DevSection>
 
-        {/* Page navigation */}
-        <DevSection title="Page Navigation">
+        {/* Log & Event Simulation */}
+        <DevSection title="Log & Event Simulation (requires DEBUG_ALLOWED=true)">
+          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+            FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB — CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
+          </p>
+          <div className="mb-2">
+            <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+              Alert triggers
+            </span>
+          </div>
           <DevGrid>
-            <DevButton label="Home"         href="/" />
-            <DevButton label="Generate"     href="/app" />
-            <DevButton label="Dashboard"    href="/dashboard" />
-            <DevButton label="Contact"      href="/contact" />
-            <DevButton label="How It Works" href="/how-it-works" />
-            <DevButton label="Admin"        href="/admin" />
-            <DevButton label="Sign In"      href="/sign-in" />
-            <DevButton label="Sign Up"      href="/sign-up" />
-            <DevButton label="404 Page"     href="/dev-this-does-not-exist" />
-            <DevButton label="Terms"        href="/terms" />
+            <DevButton
+              label="▲ Error Log ↗"
+              sublabel="level:error → must-have alert"
+              href="/api/debug/sim?event=error"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Brief Failed ↗"
+              sublabel="event:brief.failed + level:error"
+              href="/api/debug/sim?event=brief.failed"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Payment Completed ↗"
+              sublabel="event:payment.completed · $19 sim"
+              href="/api/debug/sim?event=payment.completed"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Free Cap Hit ↗"
+              sublabel="event:free_cap.reached"
+              href="/api/debug/sim?event=free-cap.reached"
+              newTab
+              accent
+            />
+          </DevGrid>
+          <div className="mt-3 mb-2">
+            <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+              Dashboard events
+            </span>
+          </div>
+          <DevGrid>
+            <DevButton
+              label="Brief Started ↗"
+              sublabel="event:brief.started · free tier"
+              href="/api/debug/sim?event=brief.started"
+              newTab
+            />
+            <DevButton
+              label="Brief Generated ↗"
+              sublabel="event:brief.generated · healthy"
+              href="/api/debug/sim?event=brief.generated"
+              newTab
+            />
+            <DevButton
+              label="Brief Generated Degraded ↗"
+              sublabel="event:brief.generated · degraded:true"
+              href="/api/debug/sim?event=brief.generated.degraded"
+              newTab
+            />
           </DevGrid>
         </DevSection>
 
         {/* Debug API */}
         <DevSection title="Debug API (requires DEBUG_ALLOWED=true)">
           <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
-            Opens in new tab. Returns 404 unless DEBUG_ALLOWED is set in .env.local.
+            OPENS IN NEW TAB. RETURNS 404 UNLESS DEBUG_ALLOWED IS SET IN .ENV.LOCAL.
           </p>
           <DevGrid>
             <DevButton label="Health Check ↗"  sublabel="GET /api/debug/health"      href="/api/debug/health"      newTab />
             <DevButton label="Sentry Test ↗"   sublabel="GET /api/debug/sentry"      href="/api/debug/sentry"      newTab />
-            <DevButton label="Pipeline Run ↗"  sublabel="POST /api/debug/pipeline"   href="/api/debug/pipeline"    newTab />
-            <DevButton label="Welcome Email ↗"  sublabel="GET /api/debug/email"       href="/api/debug/email"       newTab />
+            <DevButton label="Pipeline Run ↗"  sublabel="GET /api/debug/pipeline"    href="/api/debug/pipeline"    newTab />
+            <DevButton label="Welcome Email ↗" sublabel="GET /api/debug/email"        href="/api/debug/email"       newTab />
             <DevButton label="BetterStack ↗"   sublabel="GET /api/debug/betterstack" href="/api/debug/betterstack" newTab />
+          </DevGrid>
+        </DevSection>
+
+        {/* Page navigation */}
+        <DevSection title="Page Navigation">
+          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+            OPENS IN NEW TAB — /DEV STAYS OPEN AS HOME BASE.
+          </p>
+          <DevGrid>
+            <DevButton label="Home ↗"         href="/"                        newTab />
+            <DevButton label="Generate ↗"     href="/app"                     newTab />
+            <DevButton label="Dashboard ↗"    href="/dashboard"               newTab />
+            <DevButton label="Contact ↗"      href="/contact"                 newTab />
+            <DevButton label="How It Works ↗" href="/how-it-works"            newTab />
+            <DevButton label="Admin ↗"        href="/admin"                   newTab />
+            <DevButton label="Sign In ↗"      href="/sign-in"                 newTab />
+            <DevButton label="Sign Up ↗"      href="/sign-up"                 newTab />
+            <DevButton label="404 Page ↗"     href="/dev-this-does-not-exist" newTab />
+            <DevButton label="Terms ↗"        href="/terms"                   newTab />
           </DevGrid>
         </DevSection>
       </main>
