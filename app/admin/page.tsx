@@ -125,7 +125,10 @@ export default async function AdminPage() {
       >
         <div className="max-w-[1000px] mx-auto flex items-center justify-between">
           <Wordmark />
-          <NavLink href="/">Home</NavLink>
+          <div className="flex items-center gap-2">
+            <NavLink href="/">Home</NavLink>
+            {process.env.NODE_ENV === 'development' && <NavLink href="/dev">Dev</NavLink>}
+          </div>
         </div>
       </nav>
 

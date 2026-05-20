@@ -39,12 +39,12 @@ function PendingShell({ children }: { children: React.ReactNode }) {
         background: 'var(--color-bg-base)',
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: '4rem 1.5rem',
       }}
     >
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         {children}
       </div>
     </div>
@@ -55,7 +55,7 @@ function HudHeading({ children, color = 'var(--color-text-primary)' }: { childre
   return (
     <>
       <h1
-        className="text-xl font-bold mb-2"
+        className="text-2xl font-bold mb-2"
         style={{ fontFamily: 'var(--font-mono)', color, textTransform: 'uppercase', letterSpacing: '0.04em' }}
       >
         <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
@@ -72,7 +72,7 @@ function HudHeading({ children, color = 'var(--color-text-primary)' }: { childre
 function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
   return (
     <div
-      className="inline-flex items-center justify-center w-14 h-14 mb-6"
+      className="inline-flex items-center justify-center w-20 h-20 mb-6"
       style={{ background: bg, borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}
     >
       {children}
@@ -147,8 +147,8 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
         <div className="text-center mb-6">
           <IconBox bg="var(--color-secondary-subtle)">
             <div
-              className="w-6 h-6 rounded-full animate-spin"
-              style={{ border: '2px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
+              className="w-10 h-10 rounded-full animate-spin"
+              style={{ border: '3px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
             />
           </IconBox>
           <HudHeading>Agents Deployed</HudHeading>
