@@ -16,6 +16,7 @@ export function LandingNav() {
   const [open, setOpen] = useState(false);
 
   const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
+  const showDev = isAdmin && process.env.NODE_ENV === 'development';
 
   return (
     <>
@@ -33,6 +34,7 @@ export function LandingNav() {
             ) : isSignedIn ? (
               <>
                 {isAdmin && <NavLink href="/admin">Admin</NavLink>}
+                {showDev && <NavLink href="/dev">Dev</NavLink>}
                 <NavLink href="/dashboard">My Briefs</NavLink>
                 <Button asChild>
                   <Link href="/app">Generate Brief</Link>
@@ -61,6 +63,9 @@ export function LandingNav() {
           <>
             {isAdmin && (
               <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>
+            )}
+            {showDev && (
+              <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>
             )}
             <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>My Briefs</Link>
             <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Generate Brief</Link>

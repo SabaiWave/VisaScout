@@ -15,7 +15,7 @@ async function main() {
   const { data, error } = await getResend().emails.send({
     from: getFromAddress(),
     to,
-    subject: 'VisaScout — test email',
+    subject: "You're in. — VisaScout",
     html,
   });
 

@@ -8,21 +8,22 @@ const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
 const AGENT_SEQUENCE: Array<{
   agent: string;
-  delayAfterRunning: number;
+  fastDelay: number;
+  slowDelay: number;
   confidence: 'high' | 'medium' | 'low';
   sourceTier: 1 | 2 | 3 | 4;
   durationMs: number;
 }> = [
-  { agent: 'officialPolicy',    delayAfterRunning: 900,  confidence: 'high',   sourceTier: 1, durationMs: 1240 },
-  { agent: 'entryRequirements', delayAfterRunning: 700,  confidence: 'high',   sourceTier: 1, durationMs: 870  },
-  { agent: 'recentChanges',     delayAfterRunning: 800,  confidence: 'high',   sourceTier: 1, durationMs: 980  },
-  { agent: 'communityIntel',    delayAfterRunning: 1000, confidence: 'medium', sourceTier: 4, durationMs: 1100 },
-  { agent: 'borderRun',         delayAfterRunning: 950,  confidence: 'medium', sourceTier: 2, durationMs: 1050 },
+  { agent: 'officialPolicy',    fastDelay: 900,  slowDelay: 1000, confidence: 'high',   sourceTier: 1, durationMs: 1240 },
+  { agent: 'entryRequirements', fastDelay: 700,  slowDelay: 2500, confidence: 'high',   sourceTier: 1, durationMs: 870  },
+  { agent: 'recentChanges',     fastDelay: 800,  slowDelay: 4000, confidence: 'high',   sourceTier: 1, durationMs: 980  },
+  { agent: 'communityIntel',    fastDelay: 1000, slowDelay: 5500, confidence: 'medium', sourceTier: 4, durationMs: 1100 },
+  { agent: 'borderRun',         fastDelay: 950,  slowDelay: 7000, confidence: 'medium', sourceTier: 2, durationMs: 1050 },
 ];
 
-export async function runDryPipeline(send: (data: unknown) => void): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
+export async function runDryPipeline(send: (data: unknown) => void, slow = false): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
   // Step 1: emit parsed situation
-  await delay(400);
+  await delay(slow ? 800 : 400);
   send({ type: 'parsed', data: visaRequestFixture as VisaRequest });
 
   // Step 2: all agents start immediately (they run in parallel in real pipeline)
@@ -31,9 +32,10 @@ export async function runDryPipeline(send: (data: unknown) => void): Promise<{ b
   }
 
   // Step 3: agents complete with staggered delays (simulates parallel execution)
+  // slow=true spreads completions ~1.5s apart so the yellow→green animation is visible in dev
   await Promise.all(
     AGENT_SEQUENCE.map(async (entry) => {
-      await delay(entry.delayAfterRunning);
+      await delay(slow ? entry.slowDelay : entry.fastDelay);
       send({
         type: 'status',
         agent: entry.agent,
@@ -46,11 +48,11 @@ export async function runDryPipeline(send: (data: unknown) => void): Promise<{ b
   );
 
   // Step 4: conflict resolution
-  await delay(600);
+  await delay(slow ? 1500 : 600);
   const brief = visaBriefFixture as unknown as VisaBrief;
   send({ type: 'conflict', data: brief.conflictReport as ConflictReport });
 
   // Step 5: return fixtures — caller sends complete event with briefId after saving
-  await delay(800);
+  await delay(slow ? 1000 : 800);
   return { brief, visaRequest: visaRequestFixture as VisaRequest };
 }

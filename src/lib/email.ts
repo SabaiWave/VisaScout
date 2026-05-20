@@ -9,6 +9,7 @@ export function getResend(): Resend {
 
 // Lazy — evaluated at call time so Next.js build doesn't fail on missing env var
 export function getFromAddress(): string {
-  const domain = process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') ?? 'visascout.io';
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') ?? '';
+  const domain = raw && !raw.startsWith('localhost') ? raw : 'visascout.io';
   return `VisaScout <hello@${domain}>`;
 }
