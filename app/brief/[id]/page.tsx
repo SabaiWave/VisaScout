@@ -57,8 +57,6 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
             <BriefMeta depth={row.depth} generatedAt={row.created_at} className="mt-3" />
           </div>
 
-          <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} />
-
           <div className="mt-8">
             {isProcessing ? (
               <div
@@ -78,10 +76,16 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
                 className="px-4 py-3 rounded"
                 style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-error)' }}
               >
-                Brief content unavailable. Contact support at hello@visascout.io with reference: {row.id}
+                Brief content unavailable.{' '}
+                <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
+                  Contact support
+                </a>{' '}
+                with reference: {row.id}
               </div>
             )}
           </div>
+
+          {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} />}
         </div>
       </main>
     </div>

@@ -160,7 +160,7 @@ const styles = {
   },
   footer: {
     color: '#52525b',
-    fontSize: '12px',
+    fontSize: '14px',
     margin: '28px 0 0',
     fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },

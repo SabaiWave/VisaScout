@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 
@@ -9,6 +9,10 @@ const POLL_INTERVAL_MS = 3000;
 const MIN_DISPLAY_MS = 6000;
 const DEV_MIN_DISPLAY_MS = 3000;
 
+// When brief is ready: stagger each agent green, then redirect after COMPLETION_ANIM_MS
+const COMPLETION_STAGGER_MS = [0, 250, 500, 750, 1000, 1600];
+const COMPLETION_ANIM_MS = 1600 + 400;
+
 const DEV_BRIEF_INPUTS = {
   nationality: 'American',
   destination: 'Thailand',
@@ -16,6 +20,15 @@ const DEV_BRIEF_INPUTS = {
   freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
   depth: 'quick',
 };
+
+const SKELETON_AGENTS = [
+  'Official Policy',
+  'Recent Changes',
+  'Community Intel',
+  'Entry Requirements',
+  'Border Run',
+  'Conflict Resolver',
+];
 
 // ─── Shared layout shell ──────────────────────────────────────────────────────
 
@@ -26,9 +39,9 @@ function PendingShell({ children }: { children: React.ReactNode }) {
         background: 'var(--color-bg-base)',
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '0 1.5rem',
+        padding: '4rem 1.5rem',
       }}
     >
       <div className="w-full max-w-sm">
@@ -69,23 +82,88 @@ function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
 
 // ─── States ───────────────────────────────────────────────────────────────────
 
-function GeneratingState() {
+function SkeletonAgentRow({ label, index, done }: { label: string; index: number; done: boolean }) {
+  const isResolver = index === 5;
+  const isQueued = isResolver && !done;
+
+  const borderColor = done
+    ? 'var(--color-border)'
+    : isQueued
+    ? 'var(--color-border-muted)'
+    : 'rgba(99,102,241,0.15)';
+
+  return (
+    <div
+      className="flex items-center gap-2 px-4 py-3 rounded-lg border mb-1.5"
+      style={{
+        borderLeft: `3px solid ${done ? 'var(--color-secondary)' : isQueued ? 'var(--color-border-muted)' : 'var(--color-secondary)'}`,
+        borderTop: `1px solid ${borderColor}`,
+        borderRight: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        background: done ? 'var(--color-bg-elevated)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)',
+      }}
+    >
+      <span
+        className={`w-2 h-2 rounded-full flex-shrink-0 ${!done && !isQueued ? 'animate-pulse' : ''}`}
+        style={{
+          background: done
+            ? 'var(--color-success)'
+            : isQueued
+            ? 'var(--color-border-strong)'
+            : 'var(--color-amber)',
+        }}
+      />
+      <span
+        className="text-xs font-bold uppercase flex-1"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '0.08em',
+          color: isQueued && !done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+        }}
+      >
+        {label}
+      </span>
+      <span
+        className="text-xs uppercase"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          color: done
+            ? 'var(--color-success)'
+            : isQueued
+            ? 'var(--color-text-tertiary)'
+            : 'var(--color-secondary-light)',
+        }}
+      >
+        {done ? 'complete' : isQueued ? 'queued' : 'scanning…'}
+      </span>
+    </div>
+  );
+}
+
+function GeneratingState({ completedCount }: { completedCount: number }) {
   return (
     <PendingShell>
-      <div className="text-center">
-        <IconBox bg="var(--color-secondary-subtle)">
-          <div
-            className="w-6 h-6 rounded-full animate-spin"
-            style={{ border: '2px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
-          />
-        </IconBox>
-        <HudHeading>Generating Your Brief</HudHeading>
-        <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-          Payment confirmed. Our agents are researching your situation now.
-        </p>
-        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          This takes 2–4 minutes. Don&apos;t close this tab.
-        </p>
+      <div>
+        <div className="text-center mb-6">
+          <IconBox bg="var(--color-secondary-subtle)">
+            <div
+              className="w-6 h-6 rounded-full animate-spin"
+              style={{ border: '2px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
+            />
+          </IconBox>
+          <HudHeading>Agents Deployed</HudHeading>
+          <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+            Cross-referencing official policy, enforcement records, and community intel.
+          </p>
+          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+            Research depth determines duration — sit tight.
+          </p>
+        </div>
+        <div>
+          {SKELETON_AGENTS.map((label, i) => (
+            <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} />
+          ))}
+        </div>
       </div>
     </PendingShell>
   );
@@ -167,7 +245,21 @@ function PendingContent() {
   const [state, setState] = useState<'generating' | 'error' | 'timeout'>(
     sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : 'generating',
   );
-  const startTime = useRef(Date.now());
+  const [completedCount, setCompletedCount] = useState(0);
+  const [startTime] = useState(() => Date.now());
+
+  // Trigger rapid sequential completion animation, then redirect after animation finishes
+  function triggerCompletionAndRedirect(redirectFn: (delay: number) => void) {
+    COMPLETION_STAGGER_MS.forEach((ms, i) => {
+      setTimeout(() => setCompletedCount(i + 1), ms);
+    });
+    const elapsed = Date.now() - startTime;
+    // Wait for animation to finish, also respect any remaining minimum display time
+    const delay = Math.max(COMPLETION_ANIM_MS, 0);
+    redirectFn(delay);
+    // Suppress elapsed — MIN_DISPLAY_MS already accounted for by caller
+    void elapsed;
+  }
 
   // Dev mode: fire brief generation from this page, redirect after min display time
   useEffect(() => {
@@ -217,23 +309,26 @@ function PendingContent() {
 
         if (!foundBriefId) { setState('error'); return; }
 
-        const elapsed = Date.now() - startTime.current;
-        const delay = Math.max(0, DEV_MIN_DISPLAY_MS - elapsed);
-        setTimeout(() => router.replace(`/brief/${foundBriefId}`), delay);
+        const elapsed = Date.now() - startTime;
+        triggerCompletionAndRedirect((animDelay) => {
+          const totalDelay = Math.max(animDelay, DEV_MIN_DISPLAY_MS - elapsed);
+          setTimeout(() => router.replace(`/brief/${foundBriefId}`), totalDelay);
+        });
       } catch {
         setState('error');
       }
     };
 
     void run();
-  }, [isDev, sim, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDev, sim, router, startTime]);
 
   // Real payment flow: poll for brief status
   useEffect(() => {
     if (isDev || !briefId || sim) return;
 
     const poll = async () => {
-      if (Date.now() - startTime.current > MAX_WAIT_MS) {
+      if (Date.now() - startTime > MAX_WAIT_MS) {
         setState('timeout');
         return;
       }
@@ -244,9 +339,11 @@ function PendingContent() {
         const data = await res.json() as { status: string };
 
         if (data.status === 'paid') {
-          const elapsed = Date.now() - startTime.current;
-          const delay = Math.max(0, MIN_DISPLAY_MS - elapsed);
-          setTimeout(() => router.replace(`/brief/${briefId}`), delay);
+          const elapsed = Date.now() - startTime;
+          triggerCompletionAndRedirect((animDelay) => {
+            const totalDelay = Math.max(animDelay, MIN_DISPLAY_MS - elapsed);
+            setTimeout(() => router.replace(`/brief/${briefId}`), totalDelay);
+          });
           return;
         }
         if (data.status === 'error') {
@@ -259,17 +356,18 @@ function PendingContent() {
     void poll();
     const interval = setInterval(() => { void poll(); }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [isDev, briefId, sim, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDev, briefId, sim, router, startTime]);
 
   if (state === 'timeout') return <TimedOutState briefId={briefId} />;
   if (state === 'error')   return <ErrorState briefId={briefId} />;
-  return <GeneratingState />;
+  return <GeneratingState completedCount={completedCount} />;
 }
 
 // ─── Suspense shell ───────────────────────────────────────────────────────────
 
 function PendingFallback() {
-  return <GeneratingState />;
+  return <GeneratingState completedCount={0} />;
 }
 
 export default function PendingPage() {
