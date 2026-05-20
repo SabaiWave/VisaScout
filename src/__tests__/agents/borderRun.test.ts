@@ -27,7 +27,10 @@ function makeClient(responseData: Record<string, unknown>): Anthropic {
 }
 
 describe('borderRunAgent', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    delete process.env.DRY_RUN;
+    jest.clearAllMocks();
+  });
 
   it('returns AgentResult with status success on valid fixture input', async () => {
     mockTavilySearch

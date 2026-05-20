@@ -3,9 +3,9 @@ import * as Sentry from '@sentry/nextjs';
 export const runtime = 'nodejs';
 
 // Throws a test error to verify Sentry is capturing events.
-// Protected in production by SENTRY_TEST_ALLOWED env var.
+// Protected by DEBUG_ALLOWED — consistent with all other debug endpoints.
 export async function GET() {
-  if (process.env.NODE_ENV === 'production' && !process.env.SENTRY_TEST_ALLOWED) {
+  if (!process.env.DEBUG_ALLOWED) {
     return new Response('Not found', { status: 404 });
   }
 

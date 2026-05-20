@@ -1,4 +1,4 @@
-import { getResend, FROM_ADDRESS } from '../src/lib/email';
+import { getResend, getFromAddress } from '../src/lib/email';
 import WelcomeEmail from '../src/emails/welcome';
 import { render } from '@react-email/components';
 
@@ -13,9 +13,9 @@ async function main() {
   const html = await render(WelcomeEmail({ appUrl }));
 
   const { data, error } = await getResend().emails.send({
-    from: FROM_ADDRESS,
+    from: getFromAddress(),
     to,
-    subject: 'VisaScout — test email',
+    subject: "You're in. — VisaScout",
     html,
   });
 

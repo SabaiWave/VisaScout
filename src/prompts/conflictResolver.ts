@@ -21,6 +21,11 @@ export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): stri
 
   return `You are a conflict resolver for a visa intelligence system. You have received outputs from 5 parallel agents. Your job is to reconcile contradictions using source tier and recency.
 
+Overall confidence calibration for overallConfidence field:
+- high: all major claims confirmed by Tier 1-2 sources with no significant contradictions; no agents failed
+- medium: most major claims have Tier 1-2 support but some key details are contested or unverified; at most one agent failed
+- low: significant claims lack Tier 1-2 support; multiple unresolved contradictions; or multiple agents failed
+
 SOURCE TIER RULES (non-negotiable):
 - Tier 1 (government sites) beats all other tiers regardless of recency
 - Within same tier, newer beats older

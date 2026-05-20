@@ -8,20 +8,30 @@ import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { saveBrief } from '@/src/lib/saveBrief';
-import { resetUsage, getUsageLog, calculateReportCost } from '@/src/lib/cost';
-import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, FREE_DAILY_LIMIT, ADMIN_DAILY_LIMIT } from '@/src/lib/freeTier';
+import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
+import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
-
-const DRY_RUN = process.env.DRY_RUN === 'true';
 
 function sseEvent(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
 
 export async function POST(req: Request) {
+  try {
+    return await briefHandler(req);
+  } catch (outerErr) {
+    log.error('brief route unhandled error', { error: outerErr instanceof Error ? outerErr.message : String(outerErr) });
+    return new Response(JSON.stringify({ error: 'Something went wrong. Please try again or contact support.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function briefHandler(req: Request) {
   const { userId } = await auth();
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -56,12 +66,13 @@ export async function POST(req: Request) {
     ? (depth as 'quick' | 'standard' | 'deep')
     : 'standard';
 
+  const dryRun = process.env.DRY_RUN === 'true';
   const isAdmin = isAdminUser(userId);
 
-  const dailyLimit = isAdmin ? ADMIN_DAILY_LIMIT : FREE_DAILY_LIMIT;
+  const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
   // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
-  if (resolvedDepth === 'quick' && !DRY_RUN) {
+  if (resolvedDepth === 'quick' && !dryRun) {
     try {
       const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
@@ -82,8 +93,6 @@ export async function POST(req: Request) {
     }
   }
 
-  resetUsage();
-
   Sentry.setUser({ id: userId });
   Sentry.setTag('destination', destination);
   Sentry.setTag('nationality', nationality);
@@ -98,14 +107,15 @@ export async function POST(req: Request) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      await withUsageTracking(async () => {
       const send = (data: unknown) => {
         controller.enqueue(new TextEncoder().encode(sseEvent(data)));
       };
 
       try {
-        if (DRY_RUN) {
+        if (dryRun) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth });
-          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send);
+          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development');
 
           let dryBriefId: string | undefined;
           try {
@@ -202,6 +212,7 @@ export async function POST(req: Request) {
         Sentry.setUser(null);
         controller.close();
       }
+      });
     },
   });
 

@@ -15,6 +15,8 @@ interface BriefRow {
   brief_markdown: string | null;
 }
 
+// Intentionally unauthenticated — brief UUID is the access token (122-bit entropy).
+// This enables shareable links. Users who share their link consent to sharing brief contents.
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },

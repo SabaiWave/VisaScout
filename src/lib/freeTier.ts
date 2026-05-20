@@ -1,9 +1,14 @@
 import { getSupabase } from './supabase';
 
-export const FREE_DAILY_LIMIT = parseInt(process.env.MAX_BRIEFS_USER ?? '1', 10);
-export const ADMIN_DAILY_LIMIT = parseInt(process.env.MAX_BRIEFS_ADMIN ?? '50', 10);
+// Lazy — evaluated at call time so Next.js build doesn't fail on missing env vars
+export function getFreeDailyLimit(): number {
+  return parseInt(process.env.MAX_BRIEFS_USER ?? '1', 10);
+}
+export function getAdminDailyLimit(): number {
+  return parseInt(process.env.MAX_BRIEFS_ADMIN ?? '50', 10);
+}
 
-export async function checkFreeTierCap(userId: string, limit: number = FREE_DAILY_LIMIT): Promise<{ allowed: boolean; remaining: number }> {
+export async function checkFreeTierCap(userId: string, limit: number = getFreeDailyLimit()): Promise<{ allowed: boolean; remaining: number }> {
   const today = new Date().toISOString().split('T')[0];
   const { data } = await getSupabase()
     .from('free_brief_daily')

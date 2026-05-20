@@ -59,7 +59,7 @@ export function TierLabel({ tier }: { tier: 1 | 2 | 3 | 4 }) {
         fontWeight: isTop ? 600 : 400,
       }}
     >
-      Tier {tier}
+      T{tier}
     </span>
   );
 }

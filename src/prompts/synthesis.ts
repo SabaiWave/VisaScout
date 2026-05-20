@@ -41,7 +41,7 @@ SYNTHESIS RULES:
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
 - Recommended action must be specific, actionable, and include a deadline if applicable
 - Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
-- Confidence scores must be honest — do not uniformly set to "high"
+- Confidence scores must be honest — do not uniformly set to "high". Calibration: high = all major facts confirmed by Tier 1-2 sources, no agent failures, conflict report shows mostly confirmed items; medium = Tier 1 source found but key details contested, or 1-2 agents failed; low = no Tier 1-2 sources for the relevant claim, or multiple agents failed
 - Source citations: maximum 8, only the most authoritative per claim. Prefer Tier 1-2.
 - If an agent failed, include the specific gap message in the relevant section notes
 - Contingency must address both denied entry AND overstay scenarios

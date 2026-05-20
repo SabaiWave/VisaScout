@@ -17,6 +17,7 @@ if (process.env.VERCEL === '1') {
     // Phase 7 — domain + email
     'RESEND_API_KEY',
     'NEXT_PUBLIC_APP_URL',
+    'SUPPORT_EMAIL',
     // Phase 10 — admin dashboard
     'ADMIN_USER_ID',
   ];
@@ -28,6 +29,9 @@ if (process.env.VERCEL === '1') {
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
+  outputFileTracingIncludes: {
+    '/api/brief/[id]/pdf': ['./node_modules/@sparticuz/chromium/**'],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

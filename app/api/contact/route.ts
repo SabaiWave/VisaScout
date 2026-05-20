@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
-let resend: Resend;
-function getResend() {
-  if (!resend) resend = new Resend(process.env.RESEND_API_KEY!);
-  return resend;
-}
+import { getResend, getFromAddress } from '@/src/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,9 +9,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 });
     }
 
+    const to = process.env.SUPPORT_EMAIL;
+    if (!to) throw new Error('SUPPORT_EMAIL not set');
+
     await getResend().emails.send({
-      from: 'VisaScout <hello@visascout.io>',
-      to: 'sabaiwave.inbox@gmail.com',
+      from: getFromAddress(),
+      to,
       replyTo: email,
       subject: `[Contact] ${name}`,
       text: `From: ${name} <${email}>\n\n${message}`,

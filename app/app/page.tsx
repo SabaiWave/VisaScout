@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import BriefRenderer from '@/app/components/BriefRenderer';
@@ -80,103 +80,42 @@ const AGENT_DISPLAY: Record<string, string> = {
 // ─── Agent row ─────────────────────────────────────────────────────────────
 
 function AgentRow({ entry }: { entry: AgentStatusEntry }) {
-  const borderColor = {
-    queued:   'var(--color-border-muted)',
-    running:  'var(--color-secondary)',
-    complete: 'var(--color-border)',
-    failed:   'var(--color-error-border)',
-  }[entry.status];
+  const isQueued = entry.status === 'queued';
+  const isDone = entry.status === 'complete';
+  const isFailed = entry.status === 'failed';
 
-  const bg = {
-    queued:   'transparent',
-    running:  'var(--color-secondary-subtle)',
-    complete: 'var(--color-bg-elevated)',
-    failed:   'var(--color-error-bg)',
-  }[entry.status];
+  const leftBorder = isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-border-muted)' : 'var(--color-secondary)';
+  const borderColor = isDone ? 'var(--color-border)' : isFailed ? 'rgba(239,68,68,0.3)' : isQueued ? 'var(--color-border-muted)' : 'rgba(99,102,241,0.15)';
+  const bg = isDone ? 'var(--color-bg-elevated)' : isFailed ? 'var(--color-error-bg)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)';
 
-  const leftBorder = {
-    queued:   'var(--color-border-muted)',
-    running:  'var(--color-secondary)',
-    complete: 'var(--color-secondary)',
-    failed:   'var(--color-error)',
-  }[entry.status];
-
-  const confidenceStyle: Record<string, { bg: string; color: string }> = {
-    high:   { bg: 'rgba(34,197,94,0.15)',  color: 'var(--color-confidence-high)' },
-    medium: { bg: 'rgba(245,158,11,0.15)', color: 'var(--color-confidence-medium)' },
-    low:    { bg: 'rgba(239,68,68,0.15)',  color: 'var(--color-confidence-low)' },
-  };
+  const dotColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-border-strong)' : 'var(--color-amber)';
+  const labelText = isDone ? 'complete' : isFailed ? 'failed' : isQueued ? 'queued' : 'scanning…';
+  const labelColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary-light)';
 
   return (
     <div
-      className="flex flex-wrap items-center gap-2 px-3 sm:px-4 py-3 rounded-lg border mb-1.5"
+      className="flex items-center gap-2 px-4 py-3 rounded-lg border mb-1.5"
       style={{
+        borderLeft: `3px solid ${leftBorder}`,
         borderTop: `1px solid ${borderColor}`,
         borderRight: `1px solid ${borderColor}`,
         borderBottom: `1px solid ${borderColor}`,
-        borderLeft: `3px solid ${leftBorder}`,
         background: bg,
-        animation: entry.status === 'running' ? 'pulse-ring 1.5s ease infinite' : undefined,
       }}
     >
-      {/* Status dot + agent name — always on same line */}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        {entry.status === 'queued' ? (
-          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: 'var(--color-border-strong)' }} />
-        ) : entry.status === 'running' ? (
-          <span className="w-2 h-2 rounded-full animate-pulse inline-block flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
-        ) : (
-          <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: entry.status === 'complete' ? 'var(--color-success)' : 'var(--color-error)' }} />
-        )}
-        <span
-          className="text-sm font-bold truncate"
-          style={{ color: entry.status === 'queued' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}
-        >
-          {AGENT_DISPLAY[entry.agent] ?? entry.agent}
-        </span>
-      </div>
-      {/* Badges — wrap on narrow screens */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        {entry.status === 'queued' && (
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>queued</span>
-        )}
-        {entry.status === 'running' && (
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>analyzing…</span>
-        )}
-        {entry.status === 'complete' && entry.confidence && (() => {
-          const s = confidenceStyle[entry.confidence];
-          return (
-            <span
-              className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-              style={{ background: s?.bg, color: s?.color, fontFamily: 'var(--font-mono)' }}
-            >
-              {entry.confidence}
-            </span>
-          );
-        })()}
-        {entry.status === 'complete' && entry.sourceTier && (
-          <span
-            className="text-xs px-2 py-0.5 rounded"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              background: entry.sourceTier === 1 ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
-              color: entry.sourceTier === 1 ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
-              border: `1px solid ${entry.sourceTier === 1 ? 'rgba(99,102,241,0.3)' : 'var(--color-border)'}`,
-              fontWeight: entry.sourceTier === 1 ? 500 : 400,
-            }}
-          >
-            T{entry.sourceTier}
-          </span>
-        )}
-        {entry.status === 'complete' && entry.durationMs !== undefined && (
-          <span className="text-xs hidden sm:inline" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
-            {entry.durationMs}ms
-          </span>
-        )}
-        {entry.status === 'failed' && (
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>failed</span>
-        )}
-      </div>
+      <span
+        className={`w-2 h-2 rounded-full flex-shrink-0 ${entry.status === 'running' ? 'animate-pulse' : ''}`}
+        style={{ background: dotColor }}
+      />
+      <span
+        className="text-xs font-bold uppercase flex-1"
+        style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)' }}
+      >
+        {AGENT_DISPLAY[entry.agent] ?? entry.agent}
+      </span>
+      <span className="text-xs uppercase" style={{ fontFamily: 'var(--font-mono)', color: labelColor }}>
+        {labelText}
+      </span>
     </div>
   );
 }
@@ -257,7 +196,11 @@ function AppContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const searchParams = useSearchParams();
 
-  const [phase, setPhase] = useState<Phase>('idle');
+  const [phase, setPhase] = useState<Phase>(
+    process.env.NODE_ENV === 'development' && searchParams.get('sim') === 'error' ? 'error' : 'idle'
+  );
+  const [agentsVisible, setAgentsVisible] = useState(false);
+  const agentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
   const [visaType, setVisaType] = useState('');
@@ -271,14 +214,19 @@ function AppContent() {
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
   const wasCancelled = searchParams.get('cancelled') === 'true';
+  const devSim = process.env.NODE_ENV === 'development' ? searchParams.get('sim') : null;
+  const devTrigger = process.env.NODE_ENV === 'development' ? searchParams.get('trigger') : null;
   const [error, setError] = useState<string | null>(
+    devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
   const [submitted, setSubmitted] = useState(false);
-  const isGenerating = phase === 'generating';
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
+    setAgentsVisible(false);
+    if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
+    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 2500);
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
@@ -287,8 +235,15 @@ function AppContent() {
       });
 
       if (!response.ok) {
-        const err = await response.json() as { error?: string };
-        throw new Error(err.error ?? 'Request failed');
+        let errMsg = `Something went wrong (${response.status}). Try again or contact support.`;
+        const ct = response.headers.get('content-type') ?? '';
+        if (ct.includes('application/json')) {
+          try {
+            const err = await response.json() as { error?: string };
+            if (err.error) errMsg = err.error;
+          } catch { /* fall through to generic message */ }
+        }
+        throw new Error(errMsg);
       }
 
       const reader = response.body!.getReader();
@@ -328,6 +283,7 @@ function AppContent() {
               break;
             }
             case 'complete':
+              setAgentsVisible(true);
               setBrief(data.brief as VisaBrief);
               if (data.briefId) setBriefId(data.briefId as string);
               setAgentStatuses(prev => {
@@ -367,8 +323,15 @@ function AppContent() {
           body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
         });
         if (!res.ok) {
-          const err = await res.json() as { error?: string };
-          throw new Error(err.error ?? 'Failed to start checkout');
+          let errMsg = 'Failed to start checkout. Try again or contact support.';
+          const ct = res.headers.get('content-type') ?? '';
+          if (ct.includes('application/json')) {
+            try {
+              const err = await res.json() as { error?: string };
+              if (err.error) errMsg = err.error;
+            } catch { /* fall through */ }
+          }
+          throw new Error(errMsg);
         }
         const { checkoutUrl } = await res.json() as { checkoutUrl: string };
         window.location.href = checkoutUrl;
@@ -383,22 +346,29 @@ function AppContent() {
     await runBriefStream({ nationality, destination, visaType: visaType || undefined, freeform, depth });
   }
 
-  async function handleFreeBrief() {
+  // Dev: auto-fire quick brief when navigated from /dev with ?trigger=quick
+  useEffect(() => {
+    if (devTrigger !== 'quick' || !isSignedIn || !isLoaded) return;
     setAgentStatuses(INITIAL_AGENT_STATUSES);
     setParsedSituation(null);
     setBrief(null);
     setBriefId(null);
     setError(null);
-    await runBriefStream({
+    setSubmitted(false);
+    void runBriefStream({
       nationality: 'American',
       destination: 'Thailand',
       visaType: 'Visa Exemption',
       freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
       depth: 'quick',
     });
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [devTrigger, isSignedIn, isLoaded]);
 
   function handleReset() {
+    if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
+    agentTimerRef.current = null;
+    setAgentsVisible(false);
     setPhase('idle');
     setBrief(null);
     setBriefId(null);
@@ -436,18 +406,6 @@ function AppContent() {
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
-
-              {process.env.NODE_ENV === 'development' && (
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={handleFreeBrief}
-                  disabled={isGenerating}
-                  className="w-full mb-8 py-2.5"
-                >
-                  Dev Mode: Generate a Free Brief — USA → Thailand, Visa Exemption
-                </Button>
-              )}
 
               {error && (
                 <div
@@ -542,7 +500,7 @@ function AppContent() {
                       </Button>
                     ))}
                   </div>
-                  <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                  <p className="text-xs mt-1.5 text-center uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
                     {depth === 'quick' && 'Free · Fast results · 3 sources per agent'}
                     {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Balanced · 5 sources per agent`}
                     {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Thorough · 8 sources per agent · slower`}
@@ -570,28 +528,55 @@ function AppContent() {
           {(phase === 'generating' || phase === 'complete') && (
             <div className="max-w-[760px] mx-auto">
 
-              {/* We Understood — always first; skeleton while orchestrator parses */}
-              <div className="mb-6">
-                <div
-                  className="brief-section rounded-xl px-4 py-3 border"
-                  style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
-                >
-                  <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
-                  {parsedSituation ? (
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                      {parsedSituation.parsedSummary}
+              {/* Splash — shown for 2.5s before agent table appears */}
+              {phase === 'generating' && !agentsVisible && (
+                <div className="flex flex-col items-center py-20 text-center">
+                  <div
+                    className="w-10 h-10 rounded-full animate-spin mb-6"
+                    style={{ border: '2px solid rgba(99,102,241,0.2)', borderTopColor: 'var(--color-secondary)' }}
+                  />
+                  <h2
+                    className="text-base font-bold uppercase mb-3"
+                    style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '0.04em' }}
+                  >
+                    <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
+                    Agents Deployed
+                  </h2>
+                  <p className="text-sm max-w-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    Cross-referencing official policy, enforcement records, and community intel.
+                  </p>
+                  {nationality && destination && (
+                    <p className="text-xs mt-3 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                      {nationality} → {destination}
                     </p>
-                  ) : (
-                    <div className="space-y-2 mt-2">
-                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
-                      <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
-                    </div>
                   )}
                 </div>
-              </div>
+              )}
+
+              {/* We Understood — skeleton + live text during generation; BriefRenderer owns it once complete */}
+              {phase === 'generating' && agentsVisible && (
+                <div className="mb-6">
+                  <div
+                    className="brief-section rounded-xl px-4 py-3 border"
+                    style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
+                  >
+                    <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
+                    {parsedSituation ? (
+                      <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                        {parsedSituation.parsedSummary}
+                      </p>
+                    ) : (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Agent Status */}
-              {agentStatuses.length > 0 && (
+              {agentsVisible && agentStatuses.length > 0 && (
                 <div className="mb-8">
                   <div
                     className="brief-section rounded-xl p-5 border"
