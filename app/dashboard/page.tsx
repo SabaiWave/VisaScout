@@ -1,18 +1,18 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
+import { Archive } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
 import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
+import { BriefGrid } from './BriefGrid';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 interface BriefRow {
   id: string;
@@ -33,6 +33,7 @@ async function getUserBriefs(userId: string, page: number): Promise<{ briefs: Br
     .from('briefs')
     .select('id, created_at, nationality, destination, depth, overall_confidence, payment_status, degraded', { count: 'exact' })
     .eq('user_id', userId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -164,116 +165,7 @@ export default async function DashboardPage({
           {briefs.length === 0 ? (
             <EmptyState />
           ) : (
-            <>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem',
-              }}>
-                {briefs.map((brief) => (
-                  <Link key={brief.id} href={`/brief/${brief.id}`} style={{ textDecoration: 'none' }}>
-                    <div
-                      className="visa-track-card"
-                      style={{
-                        background: 'var(--color-bg-elevated)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <p style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '1rem',
-                        fontWeight: 700,
-                        color: 'var(--color-text-primary)',
-                        margin: '0 0 2px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.03em',
-                      }}>
-                        {brief.destination}
-                      </p>
-                      <p style={{
-                        fontFamily: 'var(--font-body)',
-                        fontSize: '0.8rem',
-                        color: 'var(--color-text-tertiary)',
-                        margin: '0 0 12px',
-                      }}>
-                        {brief.nationality}
-                      </p>
-
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-                        <DepthBadge depth={brief.depth as 'quick' | 'standard' | 'deep'} />
-                        {brief.overall_confidence && (
-                          <ConfidenceBadge level={brief.overall_confidence as 'high' | 'medium' | 'low'} />
-                        )}
-                        {brief.degraded && (
-                          <span style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase' as const,
-                            letterSpacing: '0.05em',
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: 'rgba(245,158,11,0.12)',
-                            color: 'var(--color-amber)',
-                          }}>
-                            DEGRADED
-                          </span>
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
-                          {new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-                          {' · '}
-                          {new Date(brief.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC
-                        </span>
-                        <ArrowRight size={15} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
-                  {page > 1 && (
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
-                      style={{ borderColor: 'var(--color-border-strong)' }}
-                    >
-                      <Link href={`/dashboard?page=${page - 1}`}>
-                        <ArrowLeft size={13} />
-                        Prev
-                      </Link>
-                    </Button>
-                  )}
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
-                    {page} / {totalPages}
-                  </span>
-                  {page < totalPages && (
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
-                      style={{ borderColor: 'var(--color-border-strong)' }}
-                    >
-                      <Link href={`/dashboard?page=${page + 1}`}>
-                        Next
-                        <ArrowRight size={13} />
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              )}
-            </>
+            <BriefGrid briefs={briefs} total={total} page={page} />
           )}
         </div>
       </main>
