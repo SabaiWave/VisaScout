@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { getStripe, PRICES } from '@/src/lib/stripe';
 import { createShellBrief } from '@/src/lib/saveBrief';
 import { log } from '@/src/lib/logger';
+import { trackEvent } from '@/src/lib/analytics';
 
 export const runtime = 'nodejs';
 
@@ -74,11 +75,19 @@ export async function POST(req: Request) {
         },
         quantity: 1,
       }],
-      metadata: { brief_id: briefId, user_id: userId },
+      metadata: { brief_id: briefId, user_id: userId, nationality, destination, depth },
       success_url: `${baseUrl}/brief/pending?brief_id=${briefId}`,
       cancel_url: `${baseUrl}/?cancelled=true`,
     });
 
+    await trackEvent('checkout.started', {
+      userId,
+      briefId,
+      depth,
+      destination,
+      nationality,
+      priceUsd: PRICES[depth].amount / 100,
+    });
     log.info('checkout session created', { briefId, depth, destination });
     return new Response(JSON.stringify({ checkoutUrl: session.url }), {
       status: 200,

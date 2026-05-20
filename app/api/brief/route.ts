@@ -98,9 +98,12 @@ async function briefHandler(req: Request) {
   Sentry.setTag('nationality', nationality);
   Sentry.setTag('depth', resolvedDepth);
 
+  const tier = isAdmin ? 'admin' : resolvedDepth === 'quick' ? 'free' : 'paid';
+
   await trackEvent('brief.started', {
     userId,
     depth: resolvedDepth,
+    tier,
     destination,
     nationality,
   });
@@ -129,11 +132,12 @@ async function briefHandler(req: Request) {
             userId,
             briefId: dryBriefId ?? null,
             depth: resolvedDepth,
+            tier,
             destination,
             nationality,
             durationMs: null,
             estimatedCostUsd: null,
-            agentStatuses: null,
+            failedAgents: 0,
             degraded: false,
           });
           log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth, briefId: dryBriefId });
@@ -179,16 +183,18 @@ async function briefHandler(req: Request) {
 
         send({ type: 'complete', brief, briefId });
 
+        const agentStatuses = brief.metadata?.agentStatuses ?? [];
         await trackEvent('brief.generated', {
           userId,
           briefId: briefId ?? null,
           depth: resolvedDepth,
+          tier,
           destination,
           nationality,
           durationMs: Date.now() - startTime,
           estimatedCostUsd: cost.estimatedCostUsd,
-          agentStatuses: JSON.stringify(brief.metadata?.agentStatuses ?? []),
-          degraded: (brief.metadata?.agentStatuses ?? []).some((s) => s.status === 'failed'),
+          failedAgents: agentStatuses.filter((s) => s.status === 'failed').length,
+          degraded: agentStatuses.some((s) => s.status === 'failed'),
         });
 
         log.info('pipeline complete', {
