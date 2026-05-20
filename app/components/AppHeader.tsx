@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
 import { NavDrawer, HamburgerButton, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
@@ -11,7 +11,11 @@ import { VisaScoutUserButton } from './VisaScoutUserButton';
 
 export function AppHeader() {
   const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
   const [open, setOpen] = useState(false);
+
+  const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
+  const showDev = isAdmin && process.env.NODE_ENV === 'development';
 
   return (
     <>
@@ -26,6 +30,8 @@ export function AppHeader() {
           <div className="hidden md:flex items-center gap-2">
             <NavLink href="/">Home</NavLink>
             <NavLink href="/dashboard">My Briefs</NavLink>
+            {isAdmin && <NavLink href="/admin">Admin</NavLink>}
+            {showDev && <NavLink href="/dev">Dev</NavLink>}
             {isLoaded && (isSignedIn
               ? <VisaScoutUserButton />
               : <Link href="/sign-in" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Sign in</Link>
@@ -42,6 +48,8 @@ export function AppHeader() {
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         <Link href="/" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Home</Link>
         <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>My Briefs</Link>
+        {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>}
+        {showDev && <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>}
         {isLoaded && (isSignedIn ? (
           <>
             <div style={{ flex: 1 }} />
