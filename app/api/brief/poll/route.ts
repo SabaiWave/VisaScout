@@ -9,6 +9,7 @@ import { updateBriefWithContent } from '@/src/lib/saveBrief';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { log } from '@/src/lib/logger';
+import { trackEvent } from '@/src/lib/analytics';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
@@ -30,6 +31,7 @@ async function runPipeline(jobId: string, briefId: string) {
     await withUsageTracking(async () => {
       let brief;
       let visaRequest: VisaRequest | undefined;
+      const pipelineStart = Date.now();
 
       if (process.env.DRY_RUN === 'true') {
         const result = await runDryPipeline(() => {});
@@ -68,6 +70,18 @@ async function runPipeline(jobId: string, briefId: string) {
         .update({ status: 'done', completed_at: new Date().toISOString() })
         .eq('id', jobId);
 
+      const agentStatuses = brief.metadata?.agentStatuses ?? [];
+      await trackEvent('brief.generated', {
+        briefId,
+        depth: briefRow.depth,
+        tier: 'paid',
+        destination: briefRow.destination,
+        nationality: briefRow.nationality,
+        durationMs: Date.now() - pipelineStart,
+        estimatedCostUsd: cost.estimatedCostUsd,
+        failedAgents: agentStatuses.filter((s: { status: string }) => s.status === 'failed').length,
+        degraded: agentStatuses.some((s: { status: string }) => s.status === 'failed'),
+      });
       log.info('poll: job complete', { jobId, briefId, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
     });
   } catch (err) {
