@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 
@@ -17,18 +18,17 @@ interface BriefRow {
   degraded: boolean;
 }
 
-export function BriefCard({ brief }: { brief: BriefRow }) {
+export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () => void }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
-
-  if (deleted) return null;
 
   async function handleDelete() {
     setDeleting(true);
     try {
       await fetch(`/api/brief/${brief.id}`, { method: 'DELETE' });
       setDeleted(true);
+      onDelete?.();
     } finally {
       setDeleting(false);
       setShowConfirm(false);
@@ -47,8 +47,16 @@ export function BriefCard({ brief }: { brief: BriefRow }) {
         loading={deleting}
       />
 
-      <Link href={`/brief/${brief.id}`} style={{ textDecoration: 'none' }}>
-        <div
+      <AnimatePresence>
+        {!deleted && (
+          <motion.div
+            layout
+            initial={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            <Link href={`/brief/${brief.id}`} style={{ textDecoration: 'none' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
+              <div
           className="visa-track-card"
           style={{
             background: 'var(--color-bg-elevated)',
@@ -80,7 +88,7 @@ export function BriefCard({ brief }: { brief: BriefRow }) {
             onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(239,68,68,0.85)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
 
           <p style={{
@@ -135,7 +143,10 @@ export function BriefCard({ brief }: { brief: BriefRow }) {
             <ArrowRight size={15} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
           </div>
         </div>
-      </Link>
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

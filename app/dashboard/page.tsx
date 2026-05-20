@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { ArrowRight, ArrowLeft, Archive } from 'lucide-react';
+import { Archive } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
 import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
@@ -10,9 +10,9 @@ import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
-import { BriefCard } from './BriefCard';
+import { BriefGrid } from './BriefGrid';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 interface BriefRow {
   id: string;
@@ -165,54 +165,7 @@ export default async function DashboardPage({
           {briefs.length === 0 ? (
             <EmptyState />
           ) : (
-            <>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem',
-              }}>
-                {briefs.map((brief) => (
-                  <BriefCard key={brief.id} brief={brief} />
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
-                  {page > 1 && (
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
-                      style={{ borderColor: 'var(--color-border-strong)' }}
-                    >
-                      <Link href={`/dashboard?page=${page - 1}`}>
-                        <ArrowLeft size={13} />
-                        Prev
-                      </Link>
-                    </Button>
-                  )}
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
-                    {page} / {totalPages}
-                  </span>
-                  {page < totalPages && (
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="dash-pagination-btn inline-flex items-center gap-1.5 py-2"
-                      style={{ borderColor: 'var(--color-border-strong)' }}
-                    >
-                      <Link href={`/dashboard?page=${page + 1}`}>
-                        Next
-                        <ArrowRight size={13} />
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              )}
-            </>
+            <BriefGrid briefs={briefs} total={total} page={page} />
           )}
         </div>
       </main>
