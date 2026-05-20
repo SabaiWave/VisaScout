@@ -77,9 +77,11 @@ export async function POST(req: Request) {
 
   await trackEvent('payment.completed', {
     userId: session.metadata?.user_id ?? null,
-    depth: session.metadata?.depth ?? null,
-    amountUsd: session.amount_total ? session.amount_total / 100 : null,
     briefId: session.metadata?.brief_id ?? null,
+    depth: session.metadata?.depth ?? null,
+    destination: session.metadata?.destination ?? null,
+    nationality: session.metadata?.nationality ?? null,
+    amountUsd: session.amount_total ? session.amount_total / 100 : null,
   });
 
   log.info('stripe webhook: job queued', { briefId });
