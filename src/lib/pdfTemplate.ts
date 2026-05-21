@@ -77,11 +77,11 @@ function visaOptionHtml(opt: VisaOption): string {
   const borderColor = opt.suitability === 'best' ? C.success : opt.suitability === 'good' ? C.indigo : C.borderStrong;
   const bg = opt.suitability === 'best' ? C.successSubtle : opt.suitability === 'good' ? C.indigoSubtle : C.bgElevated;
   return `<div style="border-left:4px solid ${borderColor};border-top:1px solid ${C.border};border-right:1px solid ${C.border};border-bottom:1px solid ${C.border};border-radius:0 6px 6px 0;background:${bg};padding:12px;margin-bottom:10px;page-break-inside:avoid;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:4px;">
+    <div style="margin-bottom:4px;">
       <span style="font-family:'Geist',sans-serif;font-weight:700;font-size:13px;color:${C.textPrimary};">${esc(opt.name)}</span>
-      <div style="text-align:right;flex-shrink:0;">
-        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${C.textTertiary};margin:0 0 1px;">Max Stay</p>
-        <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${C.indigoDeep};margin:0;">${esc(opt.maxStay)}</p>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-top:3px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${C.textTertiary};flex-shrink:0;">Max Stay</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${C.indigoDeep};">${esc(opt.maxStay)}</span>
       </div>
     </div>
     <p style="font-size:12px;color:${C.textSecondary};margin:0 0 8px;line-height:1.5;">${esc(opt.summary)}</p>

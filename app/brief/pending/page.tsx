@@ -30,6 +30,24 @@ const SKELETON_AGENTS = [
   'Conflict Resolver',
 ];
 
+// ─── Scanning dots ────────────────────────────────────────────────────────────
+
+function ScanningDots({ label }: { label: string }) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => (t + 1) % 3), 450);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span>
+      {label}
+      <span style={{ display: 'inline-block', width: '3ch', textAlign: 'left' }}>
+        {'...'.slice(0, tick + 1)}
+      </span>
+    </span>
+  );
+}
+
 // ─── Shared layout shell ──────────────────────────────────────────────────────
 
 function PendingShell({ children }: { children: React.ReactNode }) {
@@ -82,9 +100,11 @@ function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
 
 // ─── States ───────────────────────────────────────────────────────────────────
 
-function SkeletonAgentRow({ label, index, done }: { label: string; index: number; done: boolean }) {
+function SkeletonAgentRow({ label, index, done, completedCount }: { label: string; index: number; done: boolean; completedCount: number }) {
   const isResolver = index === 5;
-  const isQueued = isResolver && !done;
+  const isResolving = isResolver && completedCount >= 5 && !done;
+  const isQueued = isResolver && completedCount < 5 && !done;
+  const isRunning = !done && !isQueued && !isResolving;
 
   const borderColor = done
     ? 'var(--color-border)'
@@ -104,7 +124,7 @@ function SkeletonAgentRow({ label, index, done }: { label: string; index: number
       }}
     >
       <span
-        className={`w-2 h-2 rounded-full flex-shrink-0 ${!done && !isQueued ? 'animate-pulse' : ''}`}
+        className={`w-2 h-2 rounded-full flex-shrink-0 ${(isRunning || isResolving) ? 'animate-pulse' : ''}`}
         style={{
           background: done
             ? 'var(--color-success)'
@@ -118,7 +138,7 @@ function SkeletonAgentRow({ label, index, done }: { label: string; index: number
         style={{
           fontFamily: 'var(--font-mono)',
           letterSpacing: '0.08em',
-          color: isQueued && !done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+          color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
         }}
       >
         {label}
@@ -134,7 +154,7 @@ function SkeletonAgentRow({ label, index, done }: { label: string; index: number
             : 'var(--color-secondary-light)',
         }}
       >
-        {done ? 'complete' : isQueued ? 'queued' : 'scanning…'}
+        {done ? 'complete' : isQueued ? 'queued' : <ScanningDots label={isResolving ? 'resolving' : 'scanning'} />}
       </span>
     </div>
   );
@@ -161,7 +181,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
         </div>
         <div>
           {SKELETON_AGENTS.map((label, i) => (
-            <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} />
+            <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} completedCount={completedCount} />
           ))}
         </div>
       </div>
