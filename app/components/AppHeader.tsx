@@ -15,7 +15,7 @@ export function AppHeader() {
   const [open, setOpen] = useState(false);
 
   const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
-  const showDev = isAdmin && process.env.NODE_ENV === 'development';
+  const showDev = isAdmin && process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
 
   return (
     <>
