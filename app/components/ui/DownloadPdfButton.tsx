@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import * as Sentry from '@sentry/nextjs';
