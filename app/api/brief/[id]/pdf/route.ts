@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { getSupabase } from '@/src/lib/supabase';
 import { generateBriefHtml } from '@/src/lib/pdfTemplate';
+import { log } from '@/src/lib/logger';
 import type { VisaBrief } from '@/src/types/index';
 
 export const maxDuration = 60;
@@ -13,6 +15,7 @@ interface BriefRow {
   destination: string;
   depth: string;
   brief_markdown: string | null;
+  user_id: string | null;
 }
 
 // Intentionally unauthenticated — brief UUID is the access token (122-bit entropy).
@@ -25,7 +28,7 @@ export async function GET(
 
   const { data, error } = await getSupabase()
     .from('briefs')
-    .select('id, created_at, nationality, destination, depth, brief_markdown')
+    .select('id, created_at, nationality, destination, depth, brief_markdown, user_id')
     .eq('id', id)
     .single();
 
@@ -72,8 +75,10 @@ export async function GET(
     });
 
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(20000);
+    // domcontentloaded avoids waiting for Google Fonts — external font requests stall networkidle2 in serverless
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await page.setContent(html, { waitUntil: 'networkidle2' as any });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' as any });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -97,7 +102,9 @@ export async function GET(
     });
   } catch (err) {
     if (browser) await browser.close().catch(() => {});
-    if (process.env.DEBUG_ALLOWED) console.error('[pdf] generation failed', err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    log.error('pdf generation failed', { briefId: id, userId: row.user_id ?? null, errorMessage });
+    Sentry.captureException(err, { extra: { briefId: id, userId: row.user_id ?? null } });
     return NextResponse.json({ error: 'PDF generation failed' }, { status: 500 });
   }
 }

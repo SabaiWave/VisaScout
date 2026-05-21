@@ -40,7 +40,8 @@ export async function runOrchestrator(
   client: Anthropic,
   depth: 'quick' | 'standard' | 'deep' = 'standard',
   onParsed?: (request: VisaRequest) => void,
-  onAgentStatus?: (event: AgentStatusEvent) => void
+  onAgentStatus?: (event: AgentStatusEvent) => void,
+  userId?: string
 ): Promise<AgentResultEnvelope> {
   const sanitizedInput: VisaInput = {
     ...input,
@@ -83,14 +84,14 @@ export async function runOrchestrator(
     fn: () => Promise<AgentResult<T>>
   ): Promise<AgentResult<T>> {
     onAgentStatus?.({ agent: name, status: 'running' });
-    log.info('agent start', { agent: name });
+    log.info(`agent:${name} start`, { agent: name, userId });
     const result = await fn();
     if (result.status === 'success') {
       onAgentStatus?.({ agent: name, status: 'complete', confidence: result.confidence, sourceTier: result.sourceTier, durationMs: result.durationMs });
-      log.info('agent complete', { agent: name, durationMs: result.durationMs, confidence: result.confidence, sourceTier: result.sourceTier });
+      log.info(`agent:${name} complete`, { agent: name, userId, durationMs: result.durationMs, confidence: result.confidence, sourceTier: result.sourceTier });
     } else {
       onAgentStatus?.({ agent: name, status: 'failed', error: result.error });
-      log.error('agent failed', { agent: name, error: result.error });
+      log.error(`agent:${name} failed`, { agent: name, userId, error: result.error });
     }
     return result;
   }

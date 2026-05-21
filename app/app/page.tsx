@@ -665,7 +665,7 @@ function AppContent() {
                     <BriefRenderer brief={brief} forPrint={false} />
                   </div>
 
-                  <div className="flex justify-center gap-4 mt-4">
+                  <div className="flex justify-center items-start gap-4 mt-4">
                     {briefId && (
                       <DownloadPdfButton briefId={briefId} depth={depth} className="px-8 py-3" />
                     )}
