@@ -233,7 +233,7 @@ function AppContent() {
   const searchParams = useSearchParams();
 
   const [phase, setPhase] = useState<Phase>(
-    process.env.NODE_ENV === 'development' && searchParams.get('sim') === 'error' ? 'error' : 'idle'
+    process.env.NODE_ENV === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
   );
   const [agentsVisible, setAgentsVisible] = useState(false);
   const agentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -255,8 +255,10 @@ function AppContent() {
   const devTrigger = process.env.NODE_ENV === 'development' ? searchParams.get('trigger') : null;
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
+    devSim === 'free-cap' ? 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
+  const [capReached, setCapReached] = useState(devSim === 'free-cap');
   const [submitted, setSubmitted] = useState(false);
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
@@ -280,6 +282,7 @@ function AppContent() {
             if (err.error) errMsg = err.error;
           } catch { /* fall through to generic message */ }
         }
+        if (response.status === 429) setCapReached(true);
         throw new Error(errMsg);
       }
 
@@ -356,6 +359,7 @@ function AppContent() {
     setBrief(null);
     setBriefId(null);
     setError(null);
+    setCapReached(false);
 
     if (depth === 'standard' || depth === 'deep') {
       setPhase('redirecting');
@@ -409,6 +413,11 @@ function AppContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devTrigger, isSignedIn, isLoaded]);
 
+  useEffect(() => {
+    if (devSim !== 'free-cap') return;
+    fetch('/api/debug/sim?event=free-cap.reached').catch(() => {});
+  }, [devSim]);
+
   function handleReset() {
     if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
     agentTimerRef.current = null;
@@ -452,7 +461,7 @@ function AppContent() {
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
 
-              {error && (
+              {error && !capReached && (
                 <div
                   className="mb-6 rounded-lg px-4 py-3 text-sm border"
                   style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-error)' }}
@@ -461,6 +470,7 @@ function AppContent() {
                   <a href="/contact" style={{ color: 'var(--color-error)', textDecoration: 'underline', opacity: 0.8 }}>Contact us</a>
                 </div>
               )}
+
 
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 <div>
@@ -551,6 +561,20 @@ function AppContent() {
                     {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Thorough · 8 sources per agent · slower`}
                   </p>
                 </div>
+
+                {capReached && (
+                  <div
+                    className="rounded-lg px-4 py-3 border"
+                    style={{ background: 'var(--color-amber-subtle)', borderColor: 'rgba(245,158,11,0.35)' }}
+                  >
+                    <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-amber)' }}>
+                      Free brief limit reached
+                    </p>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      You&apos;ve used your free brief. Select Standard or Deep above to continue with unlimited research.
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   type="submit"
