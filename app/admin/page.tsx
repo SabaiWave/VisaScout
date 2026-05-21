@@ -5,6 +5,7 @@ import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { NavLink } from '@/app/components/ui/NavLink';
+import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 
 async function getAdminMetrics() {
   const supabase = getSupabase();
@@ -197,7 +198,7 @@ export default async function AdminPage() {
               <table style={{ width: '100%', minWidth: '400px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>
                 <thead>
                   <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                    {['Email', 'Signed Up'].map(h => (
+                    {['Email', 'Signed Up', 'User ID', ''].map(h => (
                       <th key={h} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -210,6 +211,12 @@ export default async function AdminPage() {
                       </td>
                       <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
                         {new Date(u.createdAt).toLocaleString()}
+                      </td>
+                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
+                        {u.id}
+                      </td>
+                      <td style={{ padding: '0.6rem 0.75rem' }}>
+                        <ClearBriefButton userId={u.id} />
                       </td>
                     </tr>
                   ))}
