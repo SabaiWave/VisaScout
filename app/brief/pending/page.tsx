@@ -258,9 +258,9 @@ function PendingContent() {
   const searchParams = useSearchParams();
   const briefId = searchParams.get('brief_id');
 
-  const isDev = process.env.NODE_ENV === 'development' && searchParams.get('dev') === 'true';
+  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('dev') === 'true';
   // dev-only error simulation via ?sim=error or ?sim=timeout
-  const sim = process.env.NODE_ENV === 'development' ? searchParams.get('sim') : null;
+  const sim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
 
   const [state, setState] = useState<'generating' | 'error' | 'timeout'>(
     sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : 'generating',

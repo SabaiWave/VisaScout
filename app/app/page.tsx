@@ -233,7 +233,7 @@ function AppContent() {
   const searchParams = useSearchParams();
 
   const [phase, setPhase] = useState<Phase>(
-    process.env.NODE_ENV === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
   );
   const [agentsVisible, setAgentsVisible] = useState(false);
   const agentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -251,8 +251,8 @@ function AppContent() {
   const [brief, setBrief] = useState<VisaBrief | null>(null);
   const [briefId, setBriefId] = useState<string | null>(null);
   const wasCancelled = searchParams.get('cancelled') === 'true';
-  const devSim = process.env.NODE_ENV === 'development' ? searchParams.get('sim') : null;
-  const devTrigger = process.env.NODE_ENV === 'development' ? searchParams.get('trigger') : null;
+  const devSim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
+  const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     devSim === 'free-cap' ? 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' :
@@ -260,6 +260,7 @@ function AppContent() {
   );
   const [capReached, setCapReached] = useState(devSim === 'free-cap');
   const [submitted, setSubmitted] = useState(false);
+  const [isCheckingCap, setIsCheckingCap] = useState(false);
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
@@ -349,7 +350,7 @@ function AppContent() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
@@ -360,6 +361,22 @@ function AppContent() {
     setBriefId(null);
     setError(null);
     setCapReached(false);
+
+    if (depth === 'quick') {
+      setIsCheckingCap(true);
+      try {
+        const capRes = await fetch('/api/user/cap');
+        if (capRes.ok) {
+          const cap = await capRes.json() as { allowed: boolean };
+          if (!cap.allowed) {
+            setCapReached(true);
+            setIsCheckingCap(false);
+            return;
+          }
+        }
+      } catch { /* network error — let the stream handle it */ }
+      setIsCheckingCap(false);
+    }
 
     if (depth === 'standard' || depth === 'deep') {
       setPhase('redirecting');
@@ -568,7 +585,7 @@ function AppContent() {
                     style={{ background: 'var(--color-amber-subtle)', borderColor: 'rgba(245,158,11,0.35)' }}
                   >
                     <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-amber)' }}>
-                      Free brief limit reached
+                      Daily free brief limit reached
                     </p>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       You&apos;ve used your free brief. Select Standard or Deep above to continue with unlimited research.
@@ -578,16 +595,18 @@ function AppContent() {
 
                 <Button
                   type="submit"
-                  disabled={phase === 'redirecting'}
+                  disabled={phase === 'redirecting' || isCheckingCap}
                   className="w-full py-3"
                 >
-                  {phase === 'redirecting'
-                    ? 'Redirecting to checkout…'
-                    : depth === 'quick'
-                      ? 'Generate Brief · Free'
-                      : depth === 'standard'
-                        ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
-                        : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
+                  {isCheckingCap
+                    ? 'Checking…'
+                    : phase === 'redirecting'
+                      ? 'Redirecting to checkout…'
+                      : depth === 'quick'
+                        ? 'Generate Brief · Free'
+                        : depth === 'standard'
+                          ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
+                          : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
                 </Button>
               </form>
             </div>

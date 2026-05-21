@@ -1,4 +1,4 @@
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
@@ -7,7 +7,8 @@ import { trackEvent } from '@/src/lib/analytics';
 
 export async function POST(req: NextRequest) {
   const { userId: callerId } = await auth();
-  if (!callerId || !isAdminUser(callerId)) {
+  const isDev = process.env.ENVIRONMENT === 'development';
+  if (!callerId || (!isAdminUser(callerId) && !isDev)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -23,9 +24,8 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabase();
-  const deleted: Record<string, number | string> = {};
+  const cleared: Record<string, number> = {};
 
-  // Get brief IDs first — brief_jobs FK has no CASCADE
   const { data: userBriefs } = await supabase
     .from('briefs')
     .select('id')
@@ -38,56 +38,39 @@ export async function POST(req: NextRequest) {
       .from('brief_jobs')
       .delete({ count: 'exact' })
       .in('brief_id', briefIds);
-    deleted.brief_jobs = count ?? 0;
+    cleared.brief_jobs = count ?? 0;
   } else {
-    deleted.brief_jobs = 0;
+    cleared.brief_jobs = 0;
   }
 
   const { count: briefCount } = await supabase
     .from('briefs')
     .delete({ count: 'exact' })
     .eq('user_id', targetUserId);
-  deleted.briefs = briefCount ?? 0;
+  cleared.briefs = briefCount ?? 0;
 
   const { count: freeCount } = await supabase
     .from('free_brief_daily')
     .delete({ count: 'exact' })
     .eq('user_id', targetUserId);
-  deleted.free_brief_daily = freeCount ?? 0;
+  cleared.free_brief_daily = freeCount ?? 0;
 
-  const { count: abuseCount } = await supabase
-    .from('ip_abuse_log')
-    .delete({ count: 'exact' })
-    .eq('user_id', targetUserId);
-  deleted.ip_abuse_log = abuseCount ?? 0;
-
-  try {
-    const clerk = await clerkClient();
-    await clerk.users.deleteUser(targetUserId);
-    deleted.clerk = 'deleted';
-  } catch (err) {
-    deleted.clerk = `error: ${err instanceof Error ? err.message : 'unknown'}`;
-  }
-
-  const clerkSuccess = deleted.clerk === 'deleted';
-  log.info('admin.delete_user', {
+  log.info('admin.clear_briefs', {
     callerUserId: callerId,
     targetUserId,
-    briefs: deleted.briefs,
-    brief_jobs: deleted.brief_jobs,
-    free_brief_daily: deleted.free_brief_daily,
-    ip_abuse_log: deleted.ip_abuse_log,
-    clerkDeleted: clerkSuccess,
+    isDev,
+    briefs: cleared.briefs,
+    brief_jobs: cleared.brief_jobs,
+    free_brief_daily: cleared.free_brief_daily,
   });
-  await trackEvent('admin.delete_user', {
+  await trackEvent('admin.clear_briefs', {
     callerUserId: callerId,
     targetUserId,
-    briefs: typeof deleted.briefs === 'number' ? deleted.briefs : null,
-    brief_jobs: typeof deleted.brief_jobs === 'number' ? deleted.brief_jobs : null,
-    free_brief_daily: typeof deleted.free_brief_daily === 'number' ? deleted.free_brief_daily : null,
-    ip_abuse_log: typeof deleted.ip_abuse_log === 'number' ? deleted.ip_abuse_log : null,
-    clerkDeleted: clerkSuccess,
+    isDev,
+    briefs: cleared.briefs,
+    brief_jobs: cleared.brief_jobs,
+    free_brief_daily: cleared.free_brief_daily,
   });
 
-  return Response.json({ ok: true, deleted });
+  return Response.json({ ok: true, cleared });
 }
