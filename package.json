@@ -59,5 +59,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5"
+  },
+  "overrides": {
+    "js-cookie": ">=3.0.6"
   }
 }
