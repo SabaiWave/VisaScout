@@ -18,7 +18,7 @@ export const maxDuration = 300;
 async function runPipeline(jobId: string, briefId: string) {
   const { data: briefRow, error: briefFetchError } = await getSupabase()
     .from('briefs')
-    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id')
+    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id, user_id')
     .eq('id', briefId)
     .single();
 
@@ -47,7 +47,7 @@ async function runPipeline(jobId: string, briefId: string) {
         const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
         const startTime = Date.now();
 
-        const envelope = await runOrchestrator(input, client, briefRow.depth, (parsed) => { visaRequest = parsed; });
+        const envelope = await runOrchestrator(input, client, briefRow.depth, (parsed) => { visaRequest = parsed; }, undefined, briefRow.user_id ?? undefined);
         if (!visaRequest) visaRequest = envelope.visaRequest;
 
         const conflictReport = await resolveConflicts(envelope, client);

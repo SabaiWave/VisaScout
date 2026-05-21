@@ -156,7 +156,8 @@ async function briefHandler(req: Request) {
           client,
           resolvedDepth,
           (visaRequest) => { capturedVisaRequest = visaRequest; send({ type: 'parsed', data: visaRequest }); },
-          (event) => { send({ type: 'status', ...event }); }
+          (event) => { send({ type: 'status', ...event }); },
+          userId ?? undefined
         );
 
         const conflictReport = await resolveConflicts(envelope, client);
