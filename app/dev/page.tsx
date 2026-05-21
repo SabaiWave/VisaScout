@@ -174,6 +174,14 @@ export default function DevPage() {
             <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"  href="/brief/pending?sim=error"    newTab />
             <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
           </DevGrid>
+          <div className="mt-3 mb-2">
+            <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+              Brief page states
+            </span>
+          </div>
+          <DevGrid>
+            <DevButton label="Brief: PDF Error ↗" sublabel="/brief/sim-pdf-error" href="/brief/sim-pdf-error" newTab />
+          </DevGrid>
         </DevSection>
 
         {/* Log & Event Simulation */}
@@ -212,6 +220,13 @@ export default function DevPage() {
               label="▲ Free Cap Hit ↗"
               sublabel="event:free_cap.reached"
               href="/api/debug/sim?event=free-cap.reached"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ PDF Failed ↗"
+              sublabel="event:brief.pdf_failed + level:error"
+              href="/api/debug/sim?event=brief.pdf_failed"
               newTab
               accent
             />

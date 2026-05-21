@@ -6,6 +6,9 @@ import { BriefHeader } from '@/app/components/BriefHeader';
 import type { VisaBrief } from '@/src/types/index';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { BriefMeta } from '@/app/components/ui/BriefMeta';
+import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
+
+const SIM_PDF_ERROR_ID = 'sim-pdf-error';
 
 interface BriefRow {
   id: string;
@@ -17,8 +20,34 @@ interface BriefRow {
   payment_status: string;
 }
 
-export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BriefPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string>> }) {
   const { id } = await params;
+  const sp = await searchParams;
+  const simPdfError = sp?.sim === 'pdf-error';
+
+  // Dev sim sentinel — no DB lookup, uses fixture brief
+  if (id === SIM_PDF_ERROR_ID) {
+    if (!process.env.DEBUG_ALLOWED) notFound();
+    const brief = visaBriefFixture as unknown as VisaBrief;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+    return (
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        <BriefHeader />
+        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="max-w-[760px] mx-auto">
+            <div className="mb-8">
+              <SectionHeading size="md" as="h1">American → Thailand</SectionHeading>
+              <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
+            </div>
+            <div className="mt-8">
+              <BriefRenderer brief={brief} hideMetadata />
+            </div>
+            <BriefActions url={`${appUrl}/brief/${SIM_PDF_ERROR_ID}`} briefId={SIM_PDF_ERROR_ID} depth="quick" forceError={true} />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const { data, error } = await getSupabase()
     .from('briefs')
@@ -85,7 +114,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
 
-          {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} />}
+          {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} forceError={simPdfError} />}
         </div>
       </main>
     </div>

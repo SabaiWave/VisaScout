@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 
@@ -19,6 +20,7 @@ const VALID_EVENTS = [
   'brief.generated',
   'brief.generated.degraded',
   'brief.failed',
+  'brief.pdf_failed',
   'checkout.started',
   'payment.completed',
   'free-cap.reached',
@@ -40,6 +42,7 @@ export async function GET(req: Request) {
     case 'error': {
       const data = { source: 'dev-sim', sim: true };
       log.error('sim: pipeline error', data);
+      Sentry.captureException(new Error('Simulated: pipeline error'), { extra: data });
       fired = { level: 'error', message: 'sim: pipeline error', ...data };
       break;
     }
@@ -97,8 +100,26 @@ export async function GET(req: Request) {
         errorMessage: 'Simulated: Anthropic API timeout after 30s',
         sim: true,
       };
+      log.error('brief generation failed', { userId: FAKE_USER_ID, depth: data.depth, destination, errorMessage: data.errorMessage, sim: true });
+      Sentry.captureException(new Error(data.errorMessage), { extra: { userId: FAKE_USER_ID, depth: data.depth, destination, sim: true } });
       await trackEvent('brief.failed', data);
       fired = { event: 'brief.failed', ...data };
+      break;
+    }
+
+    case 'brief.pdf_failed': {
+      const data = {
+        briefId: FAKE_BRIEF_ID,
+        userId: FAKE_USER_ID,
+        depth: 'quick',
+        statusCode: 500,
+        errorMessage: 'Simulated: Puppeteer launch failed',
+        sim: true,
+      };
+      log.error('pdf generation failed', { briefId: FAKE_BRIEF_ID, userId: FAKE_USER_ID, errorMessage: data.errorMessage, sim: true });
+      Sentry.captureException(new Error(data.errorMessage), { extra: { briefId: FAKE_BRIEF_ID, userId: FAKE_USER_ID, sim: true } });
+      await trackEvent('brief.pdf_failed', data);
+      fired = { event: 'brief.pdf_failed', ...data };
       break;
     }
 
