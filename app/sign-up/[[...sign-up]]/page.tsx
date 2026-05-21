@@ -6,7 +6,7 @@ export default function SignUpPage() {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-base)' }}>
       <LandingNav />
       <div className="flex-1 flex items-center justify-center px-4">
-        <SignUp />
+        <SignUp afterSignUpUrl="/app" signInUrl="/sign-in" />
       </div>
     </div>
   );
