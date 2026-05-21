@@ -31,12 +31,6 @@ if (process.env.VERCEL === '1') {
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
-  outputFileTracingIncludes: {
-    '/api/brief/[id]/pdf': [
-      './node_modules/@sparticuz/chromium/bin/**/*',
-      './node_modules/@sparticuz/chromium/**/*.js',
-    ],
-  },
 };
 
 export default withSentryConfig(nextConfig, {
