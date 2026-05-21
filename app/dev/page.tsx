@@ -140,6 +140,7 @@ export default function DevPage() {
           </p>
           <DevGrid>
             <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
+            <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
             <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"  href="/brief/pending?sim=error"    newTab />
             <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
