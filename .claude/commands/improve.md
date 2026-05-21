@@ -1,13 +1,25 @@
 ---
 name: improve
-description: Analyze the friction log from planning/progress.md. Produces direct CLAUDE.md rule proposals and a structured planning/improve.md ready to paste into Claude.ai for skill updates.
+description: End-of-night command. Reads ALL planning/progress-*.md files, consolidates friction into one improve.md, proposes CLAUDE.md rules and skill/command updates. Run once after all /stop checkpoints for the night.
 ---
-Read planning/progress.md in full. Focus on the Friction Log section.
+Scan planning/ for ALL files matching progress-*.md.
 
-If no friction log exists or it says "None.":
-State: "No friction logged. Nothing to improve." and stop.
+If no progress-*.md files exist:
+State: "No progress files found. Nothing to improve." and stop.
 
-STEP 1 — Classify each friction item into one of two buckets:
+List the files found:
+"Reading: progress-[slug1].md, progress-[slug2].md, ..."
+
+Read each file in full. Focus on the Friction Log section of each.
+
+If ALL friction logs say "None.":
+State: "No friction logged across [N] sessions. Nothing to improve." and stop.
+
+---
+
+STEP 1 — Consolidate and classify all friction items across all files.
+
+For each friction item, classify into one of two buckets:
 
 BUCKET A — Claude Code behavioral (fixable by adding a rule to CLAUDE.md):
 Claude Code did something wrong, assumed incorrectly, or needed mid-session correction.
@@ -42,31 +54,30 @@ Rule text:
 [Exact text to paste into CLAUDE.md — written as a rule, not a note]
 ---
 
-If no Bucket A items: state "No CLAUDE.md changes needed this session."
+If no Bucket A items: state "No CLAUDE.md changes needed."
 
 ---
 
-STEP 3 — Output 2: Write planning/improve.md
-
-Write planning/improve.md with this structure:
+STEP 3 — Write planning/improve.md
 
 # Improve Log — [date]
 
-## Source
-Session: [phase name or post-launch description from progress.md]
-Friction items: [count]
+## Sources
+Sessions consolidated: [list progress-*.md files read]
+Total friction items: [count across all files]
 
 ## Updates Needed (Bucket B)
 
-For each Bucket B item:
+For each Bucket B item (note which session it came from):
 ### [Short label]
+- Source: progress-[slug].md
 - Friction: [exact friction item from log]
-- Where: [Claude.ai skill name] OR [Claude Code command e.g. /audit-backend]
+- Where: [Claude.ai skill name] OR [Claude Code command]
 - Proposed change: [specific language to add, remove, or modify]
 - Priority: [high / medium / low]
 
 ## CLAUDE.md Rules Proposed (Bucket A)
-[Copy the proposed rules from Step 2 output here for reference]
+[Copy proposed rules from Step 2 here for reference]
 
 ## How to apply
 **Bucket A — CLAUDE.md rules:**
@@ -81,22 +92,26 @@ Save artifact via Save Skill button.
 Bring this file to Claude.ai. Say "update the /[command] command based on this improve log."
 Drop the output .md file into .claude/commands/ in VS Code.
 
+**After applying all updates:**
+Archive processed progress files:
+Move planning/progress-*.md → planning/archive/progress-[slug]-[date].md
+Or delete if you don't need the history.
+planning/improve.md can stay as a record or be deleted.
+
 ---
 
 When done, state:
 
 ---
-🔁 IMPROVE DONE.
+🔁 IMPROVE DONE — [N] sessions consolidated.
 
 Bucket A — CLAUDE.md rules: [X] proposed.
-Open CLAUDE.md in VS Code. Paste rules under correct section. Save.
+Open CLAUDE.md in VS Code. Paste rules. Save.
 
-Bucket B — [Y] updates written to planning/improve.md.
-Open planning/improve.md. Bring to Claude.ai.
+Bucket B — [Y] updates in planning/improve.md.
+Bring to Claude.ai.
+- Claude.ai skill → trigger by name. paste. say "apply Bucket B updates". save artifact.
+- Claude Code command → say "update /[command] based on this improve log". drop .md into .claude/commands/.
 
-For each item:
-- Claude.ai skill → trigger skill by name. paste improve.md. say "apply Bucket B updates". save artifact.
-- Claude Code command → say "update the /[command] command based on this improve log". drop output .md into .claude/commands/.
-
-Loop complete. /improve again next session.
+After applying: archive or delete planning/progress-*.md files.
 ---

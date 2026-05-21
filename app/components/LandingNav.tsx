@@ -16,7 +16,8 @@ export function LandingNav() {
   const [open, setOpen] = useState(false);
 
   const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
-  const showDev = isAdmin;
+  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
+  const showDev = isAdmin || isDev;
 
   return (
     <>
@@ -33,7 +34,7 @@ export function LandingNav() {
               <div className="w-8 h-8" />
             ) : isSignedIn ? (
               <>
-                {isAdmin && <NavLink href="/admin">Admin</NavLink>}
+                {(isAdmin || isDev) && <NavLink href="/admin">Admin</NavLink>}
                 {showDev && <NavLink href="/dev">Dev</NavLink>}
                 <NavLink href="/dashboard">My Briefs</NavLink>
                 <Button asChild>
@@ -61,7 +62,7 @@ export function LandingNav() {
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         {isLoaded && (isSignedIn ? (
           <>
-            {isAdmin && (
+            {(isAdmin || isDev) && (
               <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>
             )}
             {showDev && (

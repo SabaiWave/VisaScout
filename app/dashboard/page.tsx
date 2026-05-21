@@ -75,7 +75,7 @@ export default async function DashboardPage({
   if (!user) redirect('/sign-in');
 
   const isAdmin = isAdminUser(user.id);
-  const showDev = isAdmin && process.env.NODE_ENV === 'development';
+  const showDev = isAdmin && process.env.ENVIRONMENT === 'development';
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10));

@@ -85,13 +85,17 @@ export default function DevPage() {
   const router = useRouter();
 
   const isAdmin = !!ADMIN_USER_ID && userId === ADMIN_USER_ID;
+  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
+  const canAccess = isAdmin || isDev;
 
-  const [deleteUserId, setDeleteUserId] = useState('');
+  const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
+  const [clearState, setClearState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [clearResult, setClearResult] = useState<string | null>(null);
 
   async function handleDeleteUser() {
-    const target = deleteUserId.trim();
+    const target = userMgmtId.trim();
     if (!target) return;
     setDeleteState('loading');
     setDeleteResult(null);
@@ -108,7 +112,7 @@ export default function DevPage() {
       } else {
         setDeleteState('success');
         setDeleteResult(JSON.stringify(data.deleted, null, 2));
-        setDeleteUserId('');
+        setUserMgmtId('');
       }
     } catch (err) {
       setDeleteState('error');
@@ -116,12 +120,37 @@ export default function DevPage() {
     }
   }
 
+  async function handleClearBriefs() {
+    const target = userMgmtId.trim();
+    if (!target) return;
+    setClearState('loading');
+    setClearResult(null);
+    try {
+      const res = await fetch('/api/admin/clear-briefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: target }),
+      });
+      const data = await res.json() as { error?: string; cleared?: Record<string, unknown> };
+      if (!res.ok) {
+        setClearState('error');
+        setClearResult(data.error ?? 'Failed');
+      } else {
+        setClearState('success');
+        setClearResult(JSON.stringify(data.cleared, null, 2));
+      }
+    } catch (err) {
+      setClearState('error');
+      setClearResult(err instanceof Error ? err.message : 'Network error');
+    }
+  }
+
   useEffect(() => {
     if (!isLoaded) return;
-    if (!isAdmin) router.replace('/');
-  }, [isLoaded, isAdmin, router]);
+    if (!canAccess) router.replace('/');
+  }, [isLoaded, canAccess, router]);
 
-  if (!isLoaded || !isAdmin) return null;
+  if (!isLoaded || !canAccess) return null;
 
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
@@ -281,16 +310,16 @@ export default function DevPage() {
         {/* User Management */}
         <DevSection title="User Management">
           <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
-            DELETES ALL SUPABASE RECORDS + CLERK ACCOUNT. IRREVERSIBLE.
-            {deleteUserId.trim() === userId && (
-              <span style={{ color: 'var(--color-amber)' }}> ⚠ THIS IS YOUR OWN ACCOUNT — YOU WILL BE SIGNED OUT.</span>
+            ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY — ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
+            {userMgmtId.trim() === userId && (
+              <span style={{ color: 'var(--color-amber)' }}> ⚠ THIS IS YOUR OWN ACCOUNT.</span>
             )}
           </p>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <input
               type="text"
-              value={deleteUserId}
-              onChange={e => { setDeleteUserId(e.target.value); setDeleteState('idle'); setDeleteResult(null); }}
+              value={userMgmtId}
+              onChange={e => { setUserMgmtId(e.target.value); setDeleteState('idle'); setDeleteResult(null); setClearState('idle'); setClearResult(null); }}
               placeholder="user_..."
               style={{
                 flex: 1,
@@ -305,8 +334,29 @@ export default function DevPage() {
             />
             <button
               type="button"
+              onClick={() => void handleClearBriefs()}
+              disabled={!userMgmtId.trim() || clearState === 'loading'}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: '1px solid rgba(99,102,241,0.4)',
+                background: 'rgba(99,102,241,0.1)',
+                color: 'var(--color-secondary-light)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                cursor: userMgmtId.trim() && clearState !== 'loading' ? 'pointer' : 'not-allowed',
+                opacity: userMgmtId.trim() && clearState !== 'loading' ? 1 : 0.4,
+              }}
+            >
+              {clearState === 'loading' ? 'Clearing…' : 'Clear Briefs'}
+            </button>
+            <button
+              type="button"
               onClick={() => void handleDeleteUser()}
-              disabled={!deleteUserId.trim() || deleteState === 'loading'}
+              disabled={!userMgmtId.trim() || deleteState === 'loading'}
               style={{
                 padding: '0.5rem 1rem',
                 borderRadius: '6px',
@@ -318,13 +368,31 @@ export default function DevPage() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
-                cursor: deleteUserId.trim() && deleteState !== 'loading' ? 'pointer' : 'not-allowed',
-                opacity: deleteUserId.trim() && deleteState !== 'loading' ? 1 : 0.4,
+                cursor: userMgmtId.trim() && deleteState !== 'loading' ? 'pointer' : 'not-allowed',
+                opacity: userMgmtId.trim() && deleteState !== 'loading' ? 1 : 0.4,
               }}
             >
-              {deleteState === 'loading' ? 'Deleting…' : 'Delete'}
+              {deleteState === 'loading' ? 'Deleting…' : 'Delete User'}
             </button>
           </div>
+          {clearResult && (
+            <pre
+              style={{
+                fontSize: '0.7rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '6px',
+                marginBottom: '6px',
+                border: `1px solid ${clearState === 'success' ? 'rgba(99,102,241,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                background: clearState === 'success' ? 'rgba(99,102,241,0.05)' : 'rgba(239,68,68,0.05)',
+                color: clearState === 'success' ? 'var(--color-secondary-light)' : 'var(--color-error)',
+                fontFamily: 'var(--font-mono)',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+              }}
+            >
+              {`clear-briefs: ${clearResult}`}
+            </pre>
+          )}
           {deleteResult && (
             <pre
               style={{
@@ -339,7 +407,7 @@ export default function DevPage() {
                 wordBreak: 'break-all',
               }}
             >
-              {deleteResult}
+              {`delete-user: ${deleteResult}`}
             </pre>
           )}
         </DevSection>

@@ -81,7 +81,8 @@ async function getAdminMetrics() {
 export default async function AdminPage() {
   const { userId } = await auth();
 
-  if (!userId || !isAdminUser(userId)) {
+  const isDev = process.env.ENVIRONMENT === 'development';
+  if (!userId || (!isAdminUser(userId) && !isDev)) {
     redirect('/');
   }
 
@@ -127,7 +128,7 @@ export default async function AdminPage() {
           <Wordmark />
           <div className="flex items-center gap-2">
             <NavLink href="/">Home</NavLink>
-            {process.env.NODE_ENV === 'development' && <NavLink href="/dev">Dev</NavLink>}
+            {process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && <NavLink href="/dev">Dev</NavLink>}
           </div>
         </div>
       </nav>

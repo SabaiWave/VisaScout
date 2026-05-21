@@ -71,8 +71,8 @@ async function briefHandler(req: Request) {
 
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
-  // Free tier daily cap — enforced per userId via Supabase (not IP; resets daily)
-  if (resolvedDepth === 'quick' && !dryRun) {
+  // Free tier daily cap — Supabase op, runs in DRY_RUN too (CLAUDE.md: Supabase saves run in DRY_RUN)
+  if (resolvedDepth === 'quick') {
     try {
       const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
@@ -125,6 +125,12 @@ async function briefHandler(req: Request) {
             dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId });
           } catch (saveErr) {
             log.error('saveBrief failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+          }
+
+          if (resolvedDepth === 'quick') {
+            incrementFreeTierCount(userId).catch((err) => {
+              log.error('free tier count increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
+            });
           }
 
           send({ type: 'complete', brief: dryBrief, briefId: dryBriefId });

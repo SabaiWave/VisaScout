@@ -1,12 +1,24 @@
 ---
 name: stop
-description: End the current session — detects phase vs post-launch context, writes progress to planning/progress.md, logs friction, and finds a home for post-launch work in BLUEPRINT.md.
+description: Checkpoint the current session — writes progress to planning/progress-[slug].md (never overwrites other threads), logs friction, and finds a home for post-launch work in BLUEPRINT.md. Safe to run mid-session before token compaction.
 ---
+
 Create planning/ directory if it doesn't exist.
 
-CONTEXT DETECTION — run this logic first:
+SLUG GENERATION — do this first:
+Derive a short slug from what was worked on this session.
+Rules: lowercase, hyphens only, 2-4 words max.
+Examples: dashboard-qa, betterstack-alerts, phase-9-cost, auth-clerk-setup
+This slug becomes the filename: planning/progress-[slug].md
+Never write to planning/progress.md — always use the slug form.
+re-running in the same thread overwrites, that's intended.
+
+---
+
+CONTEXT DETECTION:
 
 Check BLUEPRINT.md — are there any unchecked phases?
+
 - YES (unchecked phases exist): PHASE MODE — follow Phase Mode instructions below.
 - NO (all phases checked): POST-LAUNCH MODE — follow Post-Launch Mode instructions below.
 
@@ -14,18 +26,26 @@ Check BLUEPRINT.md — are there any unchecked phases?
 
 PHASE MODE:
 
-Write planning/progress.md with these sections:
+Write planning/progress-[slug].md with these sections:
+
+## Session
+
+[slug] — [date]
 
 ## Current Phase
+
 [Which phase is currently in progress — name and number]
 
 ## Completed This Session
+
 [Bullet list of what was built or completed this session]
 
 ## Remaining in This Phase
+
 [Bullet list of what's left from the current phase prompt in BLUEPRINT.md]
 
 ## Friction Log
+
 [Bullet list of anything this session that felt manual, repetitive, or like it
 should be automatic. Be specific — "had to manually set max_tokens for resolver"
 is useful. "prompts could be better" is not.
@@ -37,15 +57,18 @@ exists elsewhere. These are the improvement signals.
 If nothing, write "None."]
 
 ## Phase Complete Summary
+
 [Only if ALL DoD items for this phase are checked. Include:
+
 - What was built (bullet list)
 - What was fixed (bullet list)
 - Decisions made
 - New environment variables introduced (name, purpose, where to get it)
 - Manual verification steps
-If phase is not complete, omit this section entirely.]
+  If phase is not complete, omit this section entirely.]
 
 ## Resume Prompt
+
 [Exact instruction to start the next session — specific file, specific action.
 Always first line: "Read CLAUDE.md, BLUEPRINT.md, and DESIGN.md before starting."
 Then: what to do next.]
@@ -54,47 +77,58 @@ Then: what to do next.]
 
 POST-LAUNCH MODE:
 
-1. Summarize what was worked on this session (feature branch, polish, hotfix, etc.)
+1. Derive slug from what was worked on (e.g. dev-tooling, sim-endpoint, landing-copy).
 
 2. Find a home in BLUEPRINT.md:
-   - Does this session's work relate closely to an existing phase?
-     YES: append a post-launch iteration note under that phase in BLUEPRINT.md:
-       ### Post-launch: [short label] — [date]
-       - [bullet: what was done]
-     NO: create a new phase entry at the bottom of BLUEPRINT.md:
-       ## Phase [N] — [Descriptive Name]
-       ### Post-launch: [short label] — [date]
-       - [bullet: what was done]
-       Mark it checked [x] if work is complete.
+   - Work relates to an existing phase?
+     YES: append under that phase:
+     ### Post-launch: [short label] — [date]
+     - [bullet: what was done]
+       NO: create new entry at bottom:
+     ## Phase [N] — [Descriptive Name]
+     ### Post-launch: [short label] — [date]
+     - [bullet: what was done]
+       Mark checked [x] if complete.
 
-3. Write planning/progress.md with these sections:
+3. Write planning/progress-[slug].md with these sections:
+
+## Session
+
+[slug] — [date]
 
 ## Session Type
-Post-launch — [feature branch name or short description]
+
+Post-launch — [short description]
 
 ## Completed This Session
+
 [Bullet list of what was built, fixed, or changed]
 
 ## Friction Log
+
 [Same rules as phase mode — be specific. If nothing, write "None."]
 
 ## BLUEPRINT.md Update
+
 [Note which phase was updated or created, and what was added]
 
 ## Resume Prompt
-[If work is incomplete: exact instruction to resume next session.
-If work is complete: "Session complete. No resume needed."]
+
+[If work incomplete: exact instruction to resume.
+If complete: "Session complete. No resume needed."]
 
 ---
 
-Overwrite planning/progress.md if it already exists.
 When done, confirm:
 
 ---
-✅ SESSION SAVED. planning/progress.md written.
 
-Next: /improve
-Why: process friction log. propose CLAUDE.md fixes. write planning/improve.md.
-After /improve: open planning/improve.md. bring to Claude.ai. update skills. save artifacts.
-No /improve = friction lost. system no get smarter.
+✅ CHECKPOINT SAVED → planning/progress-[slug].md
+
+Safe to compact or start new thread. /start will detect this file and resume.
+
+End of night: run /improve
+/improve reads ALL progress-\*.md files → one consolidated improve.md.
+Then bring improve.md to Claude.ai → update skills/commands → archive progress files.
+
 ---
