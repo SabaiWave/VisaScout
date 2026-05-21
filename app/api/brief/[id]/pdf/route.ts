@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { getSupabase } from '@/src/lib/supabase';
@@ -21,10 +22,11 @@ interface BriefRow {
 // Intentionally unauthenticated — brief UUID is the access token (122-bit entropy).
 // This enables shareable links. Users who share their link consent to sharing brief contents.
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const intent = req.nextUrl.searchParams.get('intent') ?? 'download';
 
   const { data, error } = await getSupabase()
     .from('briefs')
@@ -58,11 +60,19 @@ export async function GET(
 
   let browser;
   try {
+    const start = Date.now();
     const chromium = (await import('@sparticuz/chromium')).default;
     const puppeteer = (await import('puppeteer-core')).default;
 
     const localExec = process.env.CHROME_EXECUTABLE_PATH;
-    const executablePath = localExec ?? (await chromium.executablePath());
+    const chromiumCached = existsSync('/tmp/chromium');
+    // In production: binary is too large to bundle (61MB). Download from GitHub releases
+    // and cache in /tmp — only paid on cold start, reused for warm Lambda invocations.
+    const executablePath = localExec
+      ? localExec
+      : await chromium.executablePath(
+          'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.tar',
+        );
     const args = localExec
       ? ['--no-sandbox', '--disable-setuid-sandbox']
       : chromium.args;
@@ -92,6 +102,14 @@ export async function GET(
     const dateStamp = new Date(row.created_at).toISOString().slice(0, 10).replace(/-/g, '');
     const filename = `visascout-brief-${dateStamp}.pdf`;
 
+    await log.info('pdf generated', {
+      briefId: id,
+      userId: row.user_id ?? null,
+      durationMs: Date.now() - start,
+      chromiumCached,
+      intent,
+    });
+
     return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
@@ -103,7 +121,7 @@ export async function GET(
   } catch (err) {
     if (browser) await browser.close().catch(() => {});
     const errorMessage = err instanceof Error ? err.message : String(err);
-    await log.error('pdf generation failed', { briefId: id, userId: row.user_id ?? null, errorMessage });
+    await log.error('pdf generation failed', { briefId: id, userId: row.user_id ?? null, intent, errorMessage });
     Sentry.setUser(row.user_id ? { id: row.user_id } : null);
     Sentry.captureException(err, {
       tags: { briefId: id, depth: row.depth },
