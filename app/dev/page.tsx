@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
@@ -85,14 +85,43 @@ export default function DevPage() {
   const router = useRouter();
 
   const isAdmin = !!ADMIN_USER_ID && userId === ADMIN_USER_ID;
-  const isDev = process.env.NODE_ENV === 'development';
+
+  const [deleteUserId, setDeleteUserId] = useState('');
+  const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [deleteResult, setDeleteResult] = useState<string | null>(null);
+
+  async function handleDeleteUser() {
+    const target = deleteUserId.trim();
+    if (!target) return;
+    setDeleteState('loading');
+    setDeleteResult(null);
+    try {
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: target }),
+      });
+      const data = await res.json() as { error?: string; deleted?: Record<string, unknown> };
+      if (!res.ok) {
+        setDeleteState('error');
+        setDeleteResult(data.error ?? 'Failed');
+      } else {
+        setDeleteState('success');
+        setDeleteResult(JSON.stringify(data.deleted, null, 2));
+        setDeleteUserId('');
+      }
+    } catch (err) {
+      setDeleteState('error');
+      setDeleteResult(err instanceof Error ? err.message : 'Network error');
+    }
+  }
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (!isDev || !isAdmin) router.replace('/');
-  }, [isLoaded, isDev, isAdmin, router]);
+    if (!isAdmin) router.replace('/');
+  }, [isLoaded, isAdmin, router]);
 
-  if (!isLoaded || !isDev || !isAdmin) return null;
+  if (!isLoaded || !isAdmin) return null;
 
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
@@ -112,7 +141,7 @@ export default function DevPage() {
       <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
         <SectionHeading size="md" as="h1" className="mb-1">Dev Tools</SectionHeading>
         <p className="text-sm mb-8" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          DEV ONLY · ADMIN GATED · NOT ACCESSIBLE IN PRODUCTION
+          ADMIN GATED · SOME TOOLS REQUIRE DEBUG_ALLOWED=TRUE
         </p>
 
         {/* Brief Flows */}
@@ -232,6 +261,72 @@ export default function DevPage() {
             <DevButton label="Welcome Email ↗" sublabel="GET /api/debug/email"        href="/api/debug/email"       newTab />
             <DevButton label="BetterStack ↗"   sublabel="GET /api/debug/betterstack" href="/api/debug/betterstack" newTab />
           </DevGrid>
+        </DevSection>
+
+        {/* User Management */}
+        <DevSection title="User Management">
+          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+            DELETES ALL SUPABASE RECORDS + CLERK ACCOUNT. IRREVERSIBLE.
+            {deleteUserId.trim() === userId && (
+              <span style={{ color: 'var(--color-amber)' }}> ⚠ THIS IS YOUR OWN ACCOUNT — YOU WILL BE SIGNED OUT.</span>
+            )}
+          </p>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            <input
+              type="text"
+              value={deleteUserId}
+              onChange={e => { setDeleteUserId(e.target.value); setDeleteState('idle'); setDeleteResult(null); }}
+              placeholder="user_..."
+              style={{
+                flex: 1,
+                padding: '0.5rem 0.75rem',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border-strong)',
+                background: 'var(--color-bg-base)',
+                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => void handleDeleteUser()}
+              disabled={!deleteUserId.trim() || deleteState === 'loading'}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: '1px solid rgba(239,68,68,0.4)',
+                background: 'rgba(239,68,68,0.1)',
+                color: 'var(--color-error)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                cursor: deleteUserId.trim() && deleteState !== 'loading' ? 'pointer' : 'not-allowed',
+                opacity: deleteUserId.trim() && deleteState !== 'loading' ? 1 : 0.4,
+              }}
+            >
+              {deleteState === 'loading' ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+          {deleteResult && (
+            <pre
+              style={{
+                fontSize: '0.7rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: '6px',
+                border: `1px solid ${deleteState === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                background: deleteState === 'success' ? 'rgba(34,197,94,0.05)' : 'rgba(239,68,68,0.05)',
+                color: deleteState === 'success' ? 'var(--color-success)' : 'var(--color-error)',
+                fontFamily: 'var(--font-mono)',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+              }}
+            >
+              {deleteResult}
+            </pre>
+          )}
         </DevSection>
 
         {/* Page navigation */}

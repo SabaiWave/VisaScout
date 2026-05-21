@@ -19,8 +19,20 @@ function sendToBetterStack(entry: object): void {
   }); // fire-and-forget — logging must never throw
 }
 
+function buildEnvContext() {
+  const vercelEnv = process.env.VERCEL_ENV;
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
+  const region = process.env.VERCEL_REGION;
+  const env = vercelEnv ?? (process.env.NODE_ENV === 'production' ? 'production' : 'development');
+  return {
+    env,
+    ...(sha ? { sha } : {}),
+    ...(region ? { region } : {}),
+  };
+}
+
 function emit(level: 'info' | 'warn' | 'error', message: string, meta: LogMeta = {}) {
-  const entry = { dt: new Date().toISOString(), level, message, ...meta };
+  const entry = { dt: new Date().toISOString(), level, message, ...buildEnvContext(), ...meta };
 
   if (process.env.NODE_ENV !== 'production') {
     const prefix = level === 'error' ? '✖' : level === 'warn' ? '⚠' : '✔';
