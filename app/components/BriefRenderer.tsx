@@ -89,11 +89,11 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
       className="rounded-lg border-l-4 p-4 mb-3"
       style={{ background: bg, borderTop: `1px solid var(--color-border)`, borderRight: `1px solid var(--color-border)`, borderBottom: `1px solid var(--color-border)`, borderLeft: `4px solid ${borderColor}` }}
     >
-      <div className="flex items-start justify-between mb-1 gap-3">
+      <div className="mb-2">
         <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
-        <div className="text-right flex-shrink-0">
-          <span className="block text-xs font-bold uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
-          <span className="block text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
+        <div className="flex items-baseline gap-2 mt-1">
+          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
+          <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
         </div>
       </div>
       <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{option.summary}</p>
