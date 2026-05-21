@@ -1,7 +1,12 @@
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import { SignUp } from '@clerk/nextjs';
 import { LandingNav } from '@/app/components/LandingNav';
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const { userId } = await auth();
+  if (userId) redirect('/app');
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-base)' }}>
       <LandingNav />
