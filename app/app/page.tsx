@@ -97,6 +97,22 @@ const AGENT_DISPLAY: Record<string, string> = {
 
 // ─── Agent row ─────────────────────────────────────────────────────────────
 
+function ScanningDots({ label }: { label: string }) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => (t + 1) % 3), 450);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span>
+      {label}
+      <span style={{ display: 'inline-block', width: '3ch', textAlign: 'left' }}>
+        {'...'.slice(0, tick + 1)}
+      </span>
+    </span>
+  );
+}
+
 function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   const isQueued = entry.status === 'queued';
   const isDone = entry.status === 'complete';
@@ -107,7 +123,9 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   const bg = isDone ? 'var(--color-bg-elevated)' : isFailed ? 'var(--color-error-bg)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)';
 
   const dotColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-border-strong)' : 'var(--color-amber)';
-  const labelText = isDone ? 'complete' : isFailed ? 'failed' : isQueued ? 'queued' : 'scanning…';
+  const isConflictResolver = entry.agent === 'conflictResolver';
+  const runningLabel = isConflictResolver ? 'resolving' : 'scanning';
+  const labelText = isDone ? 'complete' : isFailed ? 'failed' : isQueued ? 'queued' : runningLabel;
   const labelColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary-light)';
 
   return (
@@ -132,7 +150,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         {AGENT_DISPLAY[entry.agent] ?? entry.agent}
       </span>
       <span className="text-xs uppercase" style={{ fontFamily: 'var(--font-mono)', color: labelColor }}>
-        {labelText}
+        {entry.status === 'running' ? <ScanningDots label={runningLabel} /> : labelText}
       </span>
     </div>
   );
