@@ -42,7 +42,8 @@ export async function GET(req: Request) {
     case 'error': {
       const data = { source: 'dev-sim', sim: true };
       log.error('sim: pipeline error', data);
-      Sentry.captureException(new Error('Simulated: pipeline error'), { extra: data });
+      Sentry.setUser({ id: FAKE_USER_ID });
+      Sentry.captureException(new Error('Simulated: pipeline error'), { tags: { sim: 'true' }, extra: data });
       fired = { level: 'error', message: 'sim: pipeline error', ...data };
       break;
     }
@@ -101,7 +102,8 @@ export async function GET(req: Request) {
         sim: true,
       };
       log.error('brief generation failed', { userId: FAKE_USER_ID, depth: data.depth, destination, errorMessage: data.errorMessage, sim: true });
-      Sentry.captureException(new Error(data.errorMessage), { extra: { userId: FAKE_USER_ID, depth: data.depth, destination, sim: true } });
+      Sentry.setUser({ id: FAKE_USER_ID });
+      Sentry.captureException(new Error(data.errorMessage), { tags: { depth: data.depth, sim: 'true' }, extra: { userId: FAKE_USER_ID, destination } });
       await trackEvent('brief.failed', data);
       fired = { event: 'brief.failed', ...data };
       break;
@@ -117,7 +119,8 @@ export async function GET(req: Request) {
         sim: true,
       };
       log.error('pdf generation failed', { briefId: FAKE_BRIEF_ID, userId: FAKE_USER_ID, errorMessage: data.errorMessage, sim: true });
-      Sentry.captureException(new Error(data.errorMessage), { extra: { briefId: FAKE_BRIEF_ID, userId: FAKE_USER_ID, sim: true } });
+      Sentry.setUser({ id: FAKE_USER_ID });
+      Sentry.captureException(new Error(data.errorMessage), { tags: { briefId: FAKE_BRIEF_ID, depth: 'quick', sim: 'true' }, extra: { userId: FAKE_USER_ID } });
       await trackEvent('brief.pdf_failed', data);
       fired = { event: 'brief.pdf_failed', ...data };
       break;

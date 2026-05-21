@@ -103,8 +103,13 @@ export async function GET(
   } catch (err) {
     if (browser) await browser.close().catch(() => {});
     const errorMessage = err instanceof Error ? err.message : String(err);
-    log.error('pdf generation failed', { briefId: id, userId: row.user_id ?? null, errorMessage });
-    Sentry.captureException(err, { extra: { briefId: id, userId: row.user_id ?? null } });
+    await log.error('pdf generation failed', { briefId: id, userId: row.user_id ?? null, errorMessage });
+    Sentry.setUser(row.user_id ? { id: row.user_id } : null);
+    Sentry.captureException(err, {
+      tags: { briefId: id, depth: row.depth },
+      extra: { userId: row.user_id ?? null, errorMessage },
+    });
+    await Sentry.flush(2000);
     return NextResponse.json({ error: 'PDF generation failed' }, { status: 500 });
   }
 }

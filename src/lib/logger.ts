@@ -6,32 +6,30 @@ interface LogMeta {
   [key: string]: unknown;
 }
 
-function sendToBetterStack(entry: object): void {
+function sendToBetterStack(entry: object): Promise<void> {
   const token = process.env.BETTERSTACK_SOURCE_TOKEN;
   const url = process.env.BETTERSTACK_INGEST_URL;
-  if (!token || !url) return;
-  fetch(url, {
+  if (!token || !url) return Promise.resolve();
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(entry),
-  }).catch((err) => {
+  }).then(() => {}).catch((err) => {
     if (process.env.NODE_ENV !== 'production') console.error('BetterStack send failed:', err);
-  }); // fire-and-forget — logging must never throw
+  });
 }
 
 function buildEnvContext() {
-  const vercelEnv = process.env.VERCEL_ENV;
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
   const region = process.env.VERCEL_REGION;
-  const env = vercelEnv ?? (process.env.NODE_ENV === 'production' ? 'production' : 'development');
   return {
-    env,
+    env: process.env.ENVIRONMENT ?? 'development',
     ...(sha ? { sha } : {}),
     ...(region ? { region } : {}),
   };
 }
 
-function emit(level: 'info' | 'warn' | 'error', message: string, meta: LogMeta = {}) {
+function emit(level: 'info' | 'warn' | 'error', message: string, meta: LogMeta = {}): Promise<void> {
   const entry = { dt: new Date().toISOString(), level, message, ...buildEnvContext(), ...meta };
 
   if (process.env.NODE_ENV !== 'production') {
@@ -47,11 +45,11 @@ function emit(level: 'info' | 'warn' | 'error', message: string, meta: LogMeta =
     else console.log(line);
   }
 
-  sendToBetterStack(entry);
+  return sendToBetterStack(entry);
 }
 
 export const log = {
-  info: (message: string, meta?: LogMeta) => emit('info', message, meta),
-  warn: (message: string, meta?: LogMeta) => emit('warn', message, meta),
-  error: (message: string, meta?: LogMeta) => emit('error', message, meta),
+  info: (message: string, meta?: LogMeta): Promise<void> => emit('info', message, meta),
+  warn: (message: string, meta?: LogMeta): Promise<void> => emit('warn', message, meta),
+  error: (message: string, meta?: LogMeta): Promise<void> => emit('error', message, meta),
 };
