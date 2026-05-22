@@ -322,6 +322,12 @@ export default function DevPage() {
               accent
             />
             <DevButton
+              label="Stuck Count ↗"
+              sublabel="GET /api/admin/stuck-count — ok:false = stuck briefs found"
+              href="/api/admin/stuck-count"
+              newTab
+            />
+            <DevButton
               label="→ Admin Dashboard ↗"
               sublabel="Check Support section after running a sim"
               href="/admin"
