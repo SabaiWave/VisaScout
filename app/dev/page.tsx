@@ -200,7 +200,8 @@ export default function DevPage() {
             <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
-            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"  href="/brief/pending?sim=error"    newTab />
+            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
+            <DevButton label="Pending: Handoff ↗"        sublabel="/brief/pending?sim=handoff" href="/brief/pending?sim=handoff" newTab />
             <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
           </DevGrid>
           <div className="mt-3 mb-2">
@@ -242,6 +243,13 @@ export default function DevPage() {
               label="▲ Payment Completed ↗"
               sublabel="event:payment.completed · $19 sim"
               href="/api/debug/sim?event=payment.completed"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Poll: Job Claimed ↗"
+              sublabel="event:poll.job_claimed · pipeline fires"
+              href="/api/debug/sim?event=poll.job_claimed"
               newTab
               accent
             />

@@ -23,6 +23,7 @@ const VALID_EVENTS = [
   'brief.pdf_failed',
   'checkout.started',
   'payment.completed',
+  'poll.job_claimed',
   'free-cap.reached',
 ];
 
@@ -153,6 +154,20 @@ export async function GET(req: Request) {
       };
       await trackEvent('payment.completed', data);
       fired = { event: 'payment.completed', ...data };
+      break;
+    }
+
+    case 'poll.job_claimed': {
+      const data = {
+        briefId: FAKE_BRIEF_ID,
+        jobId: 'dev-sim-job-00000000-0001',
+        depth: 'standard',
+        destination,
+        nationality,
+        sim: true,
+      };
+      await trackEvent('poll.job_claimed', data);
+      fired = { event: 'poll.job_claimed', ...data };
       break;
     }
 
