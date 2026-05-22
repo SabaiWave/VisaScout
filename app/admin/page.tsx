@@ -236,14 +236,20 @@ export default async function AdminPage() {
 
         {/* Support — stuck briefs */}
         <Section title="SUPPORT — STUCK BRIEFS">
-          <p className="text-xs mb-4 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em', lineHeight: 1.6 }}>
-            Recovery flow — use in order:{' '}
-            <span style={{ color: 'var(--color-error)' }}>① No Stripe session → Resend webhook in Stripe dashboard</span>
-            {' · '}
-            <span style={{ color: 'var(--color-secondary-light)' }}>② Session exists, no job → Force Queue</span>
-            {' · '}
-            <span style={{ color: 'var(--color-amber)' }}>③ Job stuck or failed → Retry</span>
-          </p>
+          <div className="mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {[
+              { n: '①', label: 'No Stripe session', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
+              { n: '②', label: 'Session exists, no job', action: 'Force Queue', color: 'var(--color-secondary-light)' },
+              { n: '③', label: 'Job stuck or failed', action: 'Retry', color: 'var(--color-amber)' },
+            ].map(({ n, label, action, color }) => (
+              <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
+                <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{n}</span>
+                <span style={{ color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
+                <span style={{ color: 'var(--color-border-strong)', flexShrink: 0 }}>→</span>
+                <span style={{ color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{action}</span>
+              </div>
+            ))}
+          </div>
           {stuckBriefs.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-success)' }}>
               ✓ All clear — no stuck briefs in the last 7 days.
