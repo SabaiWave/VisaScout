@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 
 export const runtime = 'nodejs';
@@ -22,11 +23,14 @@ export async function GET(req: Request) {
     return Response.json({ ok: false, error: 'scenario must be 2 or 3' }, { status: 400 });
   }
 
+  const { userId } = await auth();
   const supabase = getSupabase();
   const nationality = pick(NATIONALITIES);
   const destination = pick(DESTINATIONS);
   const depth = pick(DEPTHS);
   const fakeSessionId = `cs_test_sim_${Date.now()}`;
+  // Backdate so stuck-count endpoint (15 min threshold) detects it immediately
+  const twentyMinAgo = new Date(Date.now() - 20 * 60 * 1000).toISOString();
 
   // Insert brief with stripe_session_id (payment confirmed) but no job record yet
   const { data: brief, error: briefError } = await supabase
@@ -38,6 +42,8 @@ export async function GET(req: Request) {
       freeform_input: `[DEV SIM scenario ${scenario}] How long can I stay?`,
       payment_status: 'queued',
       stripe_session_id: fakeSessionId,
+      user_id: userId ?? null,
+      created_at: twentyMinAgo,
     })
     .select('id')
     .single();

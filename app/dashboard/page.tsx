@@ -11,6 +11,7 @@ import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
 import { BriefGrid } from './BriefGrid';
+import { DashboardAutoRefresh } from './DashboardAutoRefresh';
 
 const PAGE_SIZE = 12;
 
@@ -82,6 +83,7 @@ export default async function DashboardPage({
 
   const { briefs, total } = await getUserBriefs(user.id, page);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const hasGenerating = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-base)' }}>
@@ -162,6 +164,7 @@ export default async function DashboardPage({
             )}
           </div>
 
+          <DashboardAutoRefresh hasGenerating={hasGenerating} />
           {briefs.length === 0 ? (
             <EmptyState />
           ) : (

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const POLL_INTERVAL_MS = 5000;
-const TIMEOUT_MS = 15 * 60 * 1000;
+const TIMEOUT_MS = 8 * 60 * 1000;
 
 export function BriefProcessingBanner({ briefId }: { briefId: string }) {
   const router = useRouter();
