@@ -71,18 +71,19 @@ async function runPipeline(jobId: string, briefId: string) {
         .eq('id', jobId);
 
       const agentStatuses = brief.metadata?.agentStatuses ?? [];
+      const pipelineDurationMs = Date.now() - pipelineStart;
       await trackEvent('brief.generated', {
         briefId,
         depth: briefRow.depth,
         tier: 'paid',
         destination: briefRow.destination,
         nationality: briefRow.nationality,
-        durationMs: Date.now() - pipelineStart,
+        durationMs: pipelineDurationMs,
         estimatedCostUsd: cost.estimatedCostUsd,
         failedAgents: agentStatuses.filter((s: { status: string }) => s.status === 'failed').length,
         degraded: agentStatuses.some((s: { status: string }) => s.status === 'failed'),
       });
-      log.info('poll: job complete', { jobId, briefId, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
+      log.info('poll: job complete', { jobId, briefId, durationMs: pipelineDurationMs, estimatedCostUsd: cost.estimatedCostUsd.toFixed(4) });
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -125,7 +126,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await getSupabase()
     .from('briefs')
-    .select('id, payment_status')
+    .select('id, payment_status, depth, destination, nationality')
     .eq('id', briefId)
     .eq('user_id', userId)
     .single();
@@ -155,7 +156,9 @@ export async function GET(req: Request) {
         .select('id');
 
       if (claimed && claimed.length > 0) {
-        log.info('poll: claimed job, firing pipeline', { jobId: job.id, briefId });
+        const row = data as typeof data & { depth: string; destination: string; nationality: string };
+        log.info('poll: claimed job, firing pipeline', { jobId: job.id, briefId, depth: row.depth });
+        void trackEvent('poll.job_claimed', { briefId, jobId: job.id, depth: row.depth, destination: row.destination, nationality: row.nationality });
         waitUntil(runPipeline(job.id, briefId));
       }
     }

@@ -7,6 +7,7 @@ import type { VisaBrief } from '@/src/types/index';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { BriefMeta } from '@/app/components/ui/BriefMeta';
 import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
+import { BriefProcessingBanner } from './BriefProcessingBanner';
 
 const SIM_PDF_ERROR_ID = 'sim-pdf-error';
 
@@ -88,16 +89,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
           <div className="mt-8">
             {isProcessing ? (
-              <div
-                className="flex items-center gap-3 px-4 py-3 rounded"
-                style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}
-              >
-                <div
-                  className="w-4 h-4 rounded-full animate-spin flex-shrink-0"
-                  style={{ border: '2px solid var(--color-border-strong)', borderTopColor: 'var(--color-secondary)' }}
-                />
-                Brief is being generated — refresh in a minute.
-              </div>
+              <BriefProcessingBanner briefId={row.id} />
             ) : brief ? (
               <BriefRenderer brief={brief} hideMetadata />
             ) : (

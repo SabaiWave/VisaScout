@@ -200,7 +200,8 @@ export default function DevPage() {
             <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
-            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"  href="/brief/pending?sim=error"    newTab />
+            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
+            <DevButton label="Pending: Handoff ↗"        sublabel="/brief/pending?sim=handoff" href="/brief/pending?sim=handoff" newTab />
             <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
           </DevGrid>
           <div className="mt-3 mb-2">
@@ -242,6 +243,13 @@ export default function DevPage() {
               label="▲ Payment Completed ↗"
               sublabel="event:payment.completed · $19 sim"
               href="/api/debug/sim?event=payment.completed"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Poll: Job Claimed ↗"
+              sublabel="event:poll.job_claimed · pipeline fires"
+              href="/api/debug/sim?event=poll.job_claimed"
               newTab
               accent
             />
@@ -288,6 +296,35 @@ export default function DevPage() {
               label="Brief Generated Degraded ↗"
               sublabel="event:brief.generated · degraded:true"
               href="/api/debug/sim?event=brief.generated.degraded"
+              newTab
+            />
+          </DevGrid>
+        </DevSection>
+
+        {/* Admin Sims */}
+        <DevSection title="Admin Sims (requires DEBUG_ALLOWED=true)">
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
+            Creates a real brief row in DB to test the Support — Stuck Briefs section in admin. Opens JSON in new tab — then check admin to verify the action button appears. Delete sim rows from Supabase when done.
+          </p>
+          <DevGrid>
+            <DevButton
+              label="Sim: Scenario 2 ↗"
+              sublabel="Brief + stripe session, no job → Force Queue button"
+              href="/api/debug/sim-stuck-brief?scenario=2"
+              newTab
+              accent
+            />
+            <DevButton
+              label="Sim: Scenario 3 ↗"
+              sublabel="Brief + stripe session + failed job → Retry button"
+              href="/api/debug/sim-stuck-brief?scenario=3"
+              newTab
+              accent
+            />
+            <DevButton
+              label="→ Admin Dashboard ↗"
+              sublabel="Check Support section after running a sim"
+              href="/admin"
               newTab
             />
           </DevGrid>

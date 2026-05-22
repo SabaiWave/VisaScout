@@ -114,6 +114,12 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
             <DepthBadge depth={brief.depth as 'quick' | 'standard' | 'deep'} />
+            {(brief.payment_status === 'queued' || brief.payment_status === 'processing' || brief.payment_status === 'pending') && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-amber)' }}>
+                <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-amber)', display: 'inline-block', flexShrink: 0 }} />
+                Generating
+              </span>
+            )}
             {brief.overall_confidence && (
               <ConfidenceBadge level={brief.overall_confidence as 'high' | 'medium' | 'low'} />
             )}
