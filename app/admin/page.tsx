@@ -6,6 +6,8 @@ import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Wordmark } from '@/app/components/ui/Wordmark';
 import { NavLink } from '@/app/components/ui/NavLink';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
+import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
+import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
 
 async function getAdminMetrics() {
   const supabase = getSupabase();
@@ -23,7 +25,7 @@ async function getAdminMetrics() {
       .limit(50),
     supabase
       .from('brief_jobs')
-      .select('status, created_at, error')
+      .select('id, brief_id, status, created_at, started_at, error')
       .order('created_at', { ascending: false })
       .limit(20),
     // Free tier today
@@ -68,8 +70,11 @@ async function getAdminMetrics() {
       created_at: string;
     }>,
     jobs: (jobs.data ?? []) as Array<{
+      id: string;
+      brief_id: string;
       status: string;
       created_at: string;
+      started_at: string | null;
       error: string | null;
     }>,
     freeTierToday: sumCounts(freeTierToday.data as Array<{ count: number }> | null),
@@ -77,6 +82,45 @@ async function getAdminMetrics() {
     freeTierAllTime: sumCounts(freeTierAllTime.data as Array<{ count: number }> | null),
     subscriberCount: paidUserIds.size,
   };
+}
+
+interface StuckBrief {
+  id: string;
+  created_at: string;
+  nationality: string;
+  destination: string;
+  depth: string;
+  payment_status: string;
+  stripe_session_id: string | null;
+  user_id: string | null;
+  job: { id: string; status: string; started_at: string | null; error: string | null } | null;
+}
+
+async function getStuckBriefs(): Promise<StuckBrief[]> {
+  const supabase = getSupabase();
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: briefs } = await supabase
+    .from('briefs')
+    .select('id, created_at, nationality, destination, depth, payment_status, stripe_session_id, user_id')
+    .in('payment_status', ['pending', 'queued'])
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (!briefs || briefs.length === 0) return [];
+
+  const { data: jobs } = await supabase
+    .from('brief_jobs')
+    .select('id, brief_id, status, started_at, error')
+    .in('brief_id', briefs.map(b => b.id));
+
+  const jobMap = new Map((jobs ?? []).map(j => [j.brief_id as string, j as { id: string; status: string; started_at: string | null; error: string | null }]));
+
+  return briefs.map(b => ({
+    ...(b as { id: string; created_at: string; nationality: string; destination: string; depth: string; payment_status: string; stripe_session_id: string | null; user_id: string | null }),
+    job: jobMap.get(b.id) ?? null,
+  }));
 }
 
 export default async function AdminPage() {
@@ -88,10 +132,11 @@ export default async function AdminPage() {
   }
 
   const client = await clerkClient();
-  const [userCount, recentSignupsResult, metrics] = await Promise.all([
+  const [userCount, recentSignupsResult, metrics, stuckBriefs] = await Promise.all([
     client.users.getCount(),
     client.users.getUserList({ limit: 10, orderBy: '-created_at' }),
     getAdminMetrics(),
+    getStuckBriefs(),
   ]);
 
   const { briefs, ipLogs, jobs, freeTierToday, freeTierWeek, freeTierAllTime, subscriberCount } = metrics;
@@ -188,6 +233,93 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Support — stuck briefs */}
+        <Section title="SUPPORT — STUCK BRIEFS">
+          <p className="text-xs mb-4 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em', lineHeight: 1.6 }}>
+            Recovery flow — use in order:{' '}
+            <span style={{ color: 'var(--color-error)' }}>① No Stripe session → Resend webhook in Stripe dashboard</span>
+            {' · '}
+            <span style={{ color: 'var(--color-secondary-light)' }}>② Session exists, no job → Force Queue</span>
+            {' · '}
+            <span style={{ color: 'var(--color-amber)' }}>③ Job stuck or failed → Retry</span>
+          </p>
+          {stuckBriefs.length === 0 ? (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-success)' }}>
+              ✓ All clear — no stuck briefs in the last 7 days.
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['Brief ID', 'Destination', 'Depth', 'Created', 'Payment', 'Stripe Session', 'Job', 'Action'].map(h => (
+                      <th key={h} style={{ padding: '0.4rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {stuckBriefs.map((b) => {
+                    const hasSession = !!b.stripe_session_id;
+                    const job = b.job;
+                    const jobStuck = job?.status === 'processing' && job.started_at
+                      ? Date.now() - new Date(job.started_at).getTime() > 6 * 60 * 1000
+                      : false;
+                    const jobFailed = job?.status === 'failed';
+                    const jobRunning = job && !jobStuck && !jobFailed;
+
+                    // Determine step
+                    const step = !hasSession ? 1 : !job ? 2 : (jobStuck || jobFailed) ? 3 : 0;
+                    const stepColor = step === 1 ? 'var(--color-error)' : step === 2 ? 'var(--color-secondary-light)' : step === 3 ? 'var(--color-amber)' : 'var(--color-text-tertiary)';
+
+                    return (
+                      <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>
+                          {b.id.slice(0, 8)}…
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-primary)', textTransform: 'uppercase' }}>
+                          {b.destination}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>
+                          {b.depth}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+                          {new Date(b.created_at).toLocaleTimeString()}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: stepColor, textTransform: 'uppercase' }}>
+                          {b.payment_status}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>
+                          {hasSession
+                            ? <span style={{ color: 'var(--color-success)' }}>✓ {b.stripe_session_id!.slice(0, 14)}…</span>
+                            : <span style={{ color: 'var(--color-error)' }}>✗ None</span>
+                          }
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
+                          {!job ? '—' : jobRunning ? <span style={{ color: 'var(--color-secondary-light)' }}>Running</span> : <span style={{ color: jobFailed ? 'var(--color-error)' : 'var(--color-amber)' }}>{job.status}{jobStuck ? ' ⚠' : ''}</span>}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
+                          {step === 1 && (
+                            <span style={{ color: 'var(--color-error)', fontSize: '0.65rem' }}>→ Resend in Stripe</span>
+                          )}
+                          {step === 2 && (
+                            <ForceQueueButton briefId={b.id} />
+                          )}
+                          {step === 3 && job && (
+                            <RetryBriefButton briefId={b.id} jobId={job.id} />
+                          )}
+                          {step === 0 && (
+                            <span style={{ color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>Pipeline running…</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Section>
 
         {/* Recent signups */}
         <Section title="RECENT SIGNUPS">
@@ -287,18 +419,52 @@ export default async function AdminPage() {
         {/* Background jobs */}
         {(pendingJobs.length > 0 || failedJobs.length > 0) && (
           <Section title="BACKGROUND JOBS">
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-              {pendingJobs.length > 0 && (
-                <p style={{ color: 'var(--color-amber)', marginBottom: '0.5rem' }}>
-                  ⚠ {pendingJobs.length} job(s) pending / processing
-                </p>
-              )}
-              {failedJobs.map((j, i) => (
-                <p key={i} style={{ color: 'var(--color-error)', marginBottom: '0.25rem' }}>
-                  ✗ FAILED — {new Date(j.created_at).toLocaleString()}: {j.error ?? 'unknown error'}
-                </p>
-              ))}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '560px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['Status', 'Brief ID', 'Created', 'Started', 'Error', ''].map(h => (
+                      <th key={h} style={{ padding: '0.4rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...pendingJobs, ...failedJobs].map((j) => {
+                    const isStuck = j.status === 'processing' && j.started_at
+                      ? Date.now() - new Date(j.started_at).getTime() > 6 * 60 * 1000
+                      : false;
+                    const statusColor = j.status === 'failed' ? 'var(--color-error)' : isStuck ? 'var(--color-amber)' : 'var(--color-text-secondary)';
+                    return (
+                      <tr key={j.id} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', color: statusColor, whiteSpace: 'nowrap' }}>
+                          {j.status.toUpperCase()}{isStuck ? ' ⚠' : ''}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>
+                          {j.brief_id ? j.brief_id.slice(0, 8) + '…' : '—'}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+                          {new Date(j.created_at).toLocaleTimeString()}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+                          {j.started_at ? new Date(j.started_at).toLocaleTimeString() : '—'}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-error)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {j.error ?? '—'}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
+                          {j.brief_id && (j.status === 'failed' || isStuck) && (
+                            <RetryBriefButton briefId={j.brief_id} jobId={j.id} />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--color-text-tertiary)', marginTop: '0.75rem', marginBottom: 0 }}>
+              RETRY resets job → pending + brief → queued. Only use if job has been processing &gt;5min (past Vercel timeout).
+            </p>
           </Section>
         )}
 
