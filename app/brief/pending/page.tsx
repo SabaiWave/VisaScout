@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 
 const MAX_WAIT_MS = 10 * 60 * 1000;
+const SOFT_HANDOFF_MS = 90 * 1000;
 const POLL_INTERVAL_MS = 3000;
 const MIN_DISPLAY_MS = 6000;
 const DEV_MIN_DISPLAY_MS = 3000;
@@ -175,7 +176,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Cross-referencing official policy, enforcement records, and community intel.
           </p>
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+          <p className="text-xs uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>
             Research depth determines duration — sit tight.
           </p>
         </div>
@@ -183,6 +184,38 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           {SKELETON_AGENTS.map((label, i) => (
             <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} completedCount={completedCount} />
           ))}
+        </div>
+      </div>
+    </PendingShell>
+  );
+}
+
+function HandoffState({ briefId }: { briefId: string | null }) {
+  const router = useRouter();
+  return (
+    <PendingShell>
+      <div className="text-center">
+        <IconBox bg="var(--color-secondary-subtle)">
+          <div
+            className="w-10 h-10 rounded-full animate-spin"
+            style={{ border: '3px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
+          />
+        </IconBox>
+        <HudHeading>Still Working</HudHeading>
+        <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+          Your brief is generating in the background — this can take a few minutes for deep research.
+        </p>
+        <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+          You can safely navigate away. Head to My Briefs — a loading indicator will show until it&apos;s ready.
+        </p>
+        {briefId && (
+          <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+            Ref: {briefId}
+          </p>
+        )}
+        <div className="flex flex-col gap-3">
+          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
         </div>
       </div>
     </PendingShell>
@@ -200,8 +233,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading color="var(--color-amber)">Taking Longer Than Expected</HudHeading>
         <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief may still be generating — try refreshing in a few minutes.
-          If it&apos;s been a while, get in touch and we&apos;ll sort it out.
+          Your brief is still generating in the background. Check My Briefs in a couple of minutes — it&apos;ll be there when it&apos;s ready.
         </p>
         {briefId && (
           <p
@@ -212,8 +244,8 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
           </p>
         )}
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push(contactHref)}>Contact Us</Button>
-          <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
+          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button variant="secondary" onClick={() => router.push(contactHref)}>Contact Us</Button>
         </div>
       </div>
     </PendingShell>
@@ -262,8 +294,8 @@ function PendingContent() {
   // dev-only error simulation via ?sim=error or ?sim=timeout
   const sim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
 
-  const [state, setState] = useState<'generating' | 'error' | 'timeout'>(
-    sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : 'generating',
+  const [state, setState] = useState<'generating' | 'handoff' | 'error' | 'timeout'>(
+    sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : sim === 'handoff' ? 'handoff' : 'generating',
   );
   const [completedCount, setCompletedCount] = useState(0);
   const [startTime] = useState(() => Date.now());
@@ -348,9 +380,13 @@ function PendingContent() {
     if (isDev || !briefId || sim) return;
 
     const poll = async () => {
-      if (Date.now() - startTime > MAX_WAIT_MS) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > MAX_WAIT_MS) {
         setState('timeout');
         return;
+      }
+      if (elapsed > SOFT_HANDOFF_MS) {
+        setState((prev) => prev === 'generating' ? 'handoff' : prev);
       }
 
       try {
@@ -381,6 +417,7 @@ function PendingContent() {
 
   if (state === 'timeout') return <TimedOutState briefId={briefId} />;
   if (state === 'error')   return <ErrorState briefId={briefId} />;
+  if (state === 'handoff') return <HandoffState briefId={briefId} />;
   return <GeneratingState completedCount={completedCount} />;
 }
 
