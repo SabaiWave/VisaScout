@@ -56,6 +56,15 @@ exists elsewhere. These are the improvement signals.
 
 If nothing, write "None."]
 
+## Gotchas & Dead Ends
+
+[Bullet list of approaches tried and abandoned this session, and WHY they failed.
+Also: any workarounds currently in place that the next session needs to know about.
+Be specific — "tried outputFileTracingIncludes to bundle chromium, doesn't work on
+Vercel serverless — file size limit" is useful. "PDF generation was tricky" is not.
+This section is for the next Claude Code session, not the improve loop.
+If nothing, write "None."]
+
 ## Phase Complete Summary
 
 [Only if ALL DoD items for this phase are checked. Include:
@@ -105,7 +114,7 @@ POST-LAUNCH MODE:
      - [bullet: what was done]
        Mark checked [x] if complete.
 
-3. Write planning/progress-[slug].md with these sections:
+4. Write planning/progress-[slug].md with these sections:
 
 ## Session
 
@@ -122,6 +131,11 @@ Post-launch — [short description]
 ## Friction Log
 
 [Same rules as phase mode — be specific. If nothing, write "None."]
+
+## Gotchas & Dead Ends
+
+[Same rules as phase mode — failed approaches, WHY they failed, active workarounds.
+If nothing, write "None."]
 
 ## BLUEPRINT.md Update
 
