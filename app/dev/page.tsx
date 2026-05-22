@@ -193,7 +193,7 @@ export default function DevPage() {
 
         {/* State simulation */}
         <DevSection title="State Simulation">
-          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             EACH NAVIGATES TO THE TARGET PAGE AND TRIGGERS THAT STATE ON MOUNT.
           </p>
           <DevGrid>
@@ -215,7 +215,7 @@ export default function DevPage() {
 
         {/* Log & Event Simulation */}
         <DevSection title="Log & Event Simulation (requires DEBUG_ALLOWED=true)">
-          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB — CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
           </p>
           <div className="mb-2">
@@ -295,7 +295,7 @@ export default function DevPage() {
 
         {/* Debug API */}
         <DevSection title="Debug API (requires DEBUG_ALLOWED=true)">
-          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB. RETURNS 404 UNLESS DEBUG_ALLOWED IS SET IN .ENV.LOCAL.
           </p>
           <DevGrid>
@@ -309,7 +309,7 @@ export default function DevPage() {
 
         {/* User Management */}
         <DevSection title="User Management">
-          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY — ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
             {userMgmtId.trim() === userId && (
               <span style={{ color: 'var(--color-amber)' }}> ⚠ THIS IS YOUR OWN ACCOUNT.</span>
@@ -414,7 +414,7 @@ export default function DevPage() {
 
         {/* Page navigation */}
         <DevSection title="Page Navigation">
-          <p className="text-xs mb-3" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB — /DEV STAYS OPEN AS HOME BASE.
           </p>
           <DevGrid>

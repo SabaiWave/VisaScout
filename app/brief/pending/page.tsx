@@ -175,7 +175,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Cross-referencing official policy, enforcement records, and community intel.
           </p>
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+          <p className="text-xs uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>
             Research depth determines duration — sit tight.
           </p>
         </div>
