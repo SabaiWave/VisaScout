@@ -301,6 +301,35 @@ export default function DevPage() {
           </DevGrid>
         </DevSection>
 
+        {/* Admin Sims */}
+        <DevSection title="Admin Sims (requires DEBUG_ALLOWED=true)">
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
+            Creates a real brief row in DB to test the Support — Stuck Briefs section in admin. Opens JSON in new tab — then check admin to verify the action button appears. Delete sim rows from Supabase when done.
+          </p>
+          <DevGrid>
+            <DevButton
+              label="Sim: Scenario 2 ↗"
+              sublabel="Brief + stripe session, no job → Force Queue button"
+              href="/api/debug/sim-stuck-brief?scenario=2"
+              newTab
+              accent
+            />
+            <DevButton
+              label="Sim: Scenario 3 ↗"
+              sublabel="Brief + stripe session + failed job → Retry button"
+              href="/api/debug/sim-stuck-brief?scenario=3"
+              newTab
+              accent
+            />
+            <DevButton
+              label="→ Admin Dashboard ↗"
+              sublabel="Check Support section after running a sim"
+              href="/admin"
+              newTab
+            />
+          </DevGrid>
+        </DevSection>
+
         {/* Debug API */}
         <DevSection title="Debug API (requires DEBUG_ALLOWED=true)">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
