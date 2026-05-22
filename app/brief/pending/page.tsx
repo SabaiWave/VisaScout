@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 
-const MAX_WAIT_MS = 10 * 60 * 1000;
+const MAX_WAIT_MS = 6 * 60 * 1000;
 const SOFT_HANDOFF_MS = 90 * 1000;
 const POLL_INTERVAL_MS = 3000;
 const MIN_DISPLAY_MS = 6000;
