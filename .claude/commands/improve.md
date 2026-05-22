@@ -75,14 +75,35 @@ For each Bucket B item:
 **Bucket A — CLAUDE.md rules:**
 Open CLAUDE.md in VS Code. Paste rules under correct section. Save.
 
-**Bucket B — Claude.ai skills:**
-Bring this file to Claude.ai. Trigger the skill by name.
-Paste improve.md and say "apply Bucket B updates from this improve log."
-Save artifact via Save Skill button.
+**Bucket B — copy-paste prompts (one per item):**
 
-**Bucket B — Claude Code commands:**
-Bring this file to Claude.ai. Say "update the /[command] command based on this improve log."
-Drop the output .md file into .claude/commands/ in VS Code.
+For each Bucket B item, generate a ready-to-send block in this exact format:
+
+---
+### [Short label] — [skill name or /command]
+
+**Where:** Claude.ai → [skill trigger phrase] OR Claude Code → `.claude/commands/[command].md`
+
+**Paste this prompt into Claude.ai:**
+```
+I have an improve log item. Apply this update to the [skill name / /command] skill/command.
+
+Item: [short label]
+Friction: [exact friction item]
+Proposed change: [specific language to add, remove, or modify]
+
+Here is the full improve.md for context:
+[paste improve.md]
+```
+
+**What to do with the output:**
+- Skill update → save via Save Skill button in Claude.ai
+- Command update → drop output .md file into `.claude/commands/` in VS Code
+---
+
+Generate one block per Bucket B item. Do not collapse multiple items into one prompt — one prompt per item, one artifact per update.
+
+If there are zero Bucket B items: state "No skill or command updates needed."
 
 ---
 
@@ -101,13 +122,13 @@ When done, state:
 ---
 🔁 IMPROVE DONE — [N] sessions consolidated.
 
-Bucket A — CLAUDE.md rules: [X] proposed.
-Open CLAUDE.md in VS Code. Paste rules. Save.
+Bucket A — [X] CLAUDE.md rules proposed.
+Open CLAUDE.md in VS Code. Paste under sections listed. Save.
 
-Bucket B — [Y] updates in planning/improve.md.
-Bring to Claude.ai.
-- Claude.ai skill → trigger by name. paste. say "apply Bucket B updates". save artifact.
-- Claude Code command → say "update /[command] based on this improve log". drop .md into .claude/commands/.
+Bucket B — [Y] updates. Copy-paste prompts above in planning/improve.md.
+
+[List each item on its own line:]
+→ [short label] — [skill name or /command] — [one-line action e.g. "save artifact" or "drop into .claude/commands/"]
 
 Progress files archived → planning/archive/
 planning/ is clean. Ready for next session.

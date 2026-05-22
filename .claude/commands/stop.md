@@ -75,11 +75,26 @@ Then: what to do next.]
 
 ---
 
+Before writing the file, run this check:
+Was a new `/api/admin/*` route created this session?
+- YES: confirm a corresponding UI action exists in the `/admin` page.
+  If missing: build it before writing progress. Admin routes with no UI trigger are invisible debt.
+- NO: proceed.
+
+---
+
 POST-LAUNCH MODE:
 
 1. Derive slug from what was worked on (e.g. dev-tooling, sim-endpoint, landing-copy).
 
-2. Find a home in BLUEPRINT.md:
+2. **Admin route completeness check:**
+   Before writing the progress file, check: was a new `/api/admin/*` route created this session?
+   - YES: confirm a corresponding UI action exists in the `/admin` page for it.
+     If no UI exists: build it now, then continue to step 3.
+     Do not stop with an orphaned admin route — admin routes with no UI trigger are invisible and never get used.
+   - NO: continue to step 3.
+
+3. Find a home in BLUEPRINT.md:
    - Work relates to an existing phase?
      YES: append under that phase:
      ### Post-launch: [short label] — [date]
