@@ -10,13 +10,14 @@ Traveler context:
 - Intended duration: ${request.intendedDuration || 'unknown'}
 - Entry/exit pattern: ${request.entryExitPattern || 'unknown'}
 - Current visa type: ${request.visaType || 'not specified'}
-- Freeform: ${request.freeform}
+- Freeform: ${request.freeform.slice(0, 600)}
 
 Search results from official sources:
 ${searchResults}
 
 Extract comprehensive visa policy information. Be specific and cite exact rules.
 If you cannot find information from Tier 1 sources (government sites), explicitly state this.
+If search results contain no data for a field, return null or []. Do not infer or invent facts not present in the search results.
 
 Return ONLY valid JSON (no markdown fences):
 {

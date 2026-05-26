@@ -10,6 +10,10 @@ import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
 import { BriefProcessingBanner } from './BriefProcessingBanner';
 
 const SIM_PDF_ERROR_ID = 'sim-pdf-error';
+const SIM_CONFIDENCE_HIGH_ID   = 'sim-confidence-high';
+const SIM_CONFIDENCE_MEDIUM_ID = 'sim-confidence-medium';
+const SIM_CONFIDENCE_LOW_ID    = 'sim-confidence-low';
+const CONFIDENCE_SIM_IDS = [SIM_CONFIDENCE_HIGH_ID, SIM_CONFIDENCE_MEDIUM_ID, SIM_CONFIDENCE_LOW_ID] as const;
 
 interface BriefRow {
   id: string;
@@ -25,6 +29,36 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
   const { id } = await params;
   const sp = await searchParams;
   const simPdfError = sp?.sim === 'pdf-error';
+
+  // Dev sim sentinels — confidence label states (no DB lookup, overrides fixture confidence fields)
+  if ((CONFIDENCE_SIM_IDS as readonly string[]).includes(id)) {
+    if (!process.env.DEBUG_ALLOWED) notFound();
+    const level = id === SIM_CONFIDENCE_HIGH_ID ? 'high' : id === SIM_CONFIDENCE_MEDIUM_ID ? 'medium' : 'low';
+    const base = visaBriefFixture as unknown as VisaBrief;
+    const brief: VisaBrief = {
+      ...base,
+      confidenceScore: { ...base.confidenceScore, overall: level },
+      conflictReport:  { ...base.conflictReport,  overallConfidence: level },
+    };
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+    return (
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        <BriefHeader />
+        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="max-w-[760px] mx-auto">
+            <div className="mb-8">
+              <SectionHeading size="md" as="h1">American → Thailand</SectionHeading>
+              <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
+            </div>
+            <div className="mt-8">
+              <BriefRenderer brief={brief} hideMetadata />
+            </div>
+            <BriefActions url={`${appUrl}/brief/${id}`} briefId={id} depth="quick" />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // Dev sim sentinel — no DB lookup, uses fixture brief
   if (id === SIM_PDF_ERROR_ID) {

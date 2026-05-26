@@ -6,7 +6,7 @@ export function buildOrchestratorPrompt(input: VisaInput): string {
 Nationality: ${input.nationality}
 Destination: ${input.destination}
 Current Visa Type (if specified): ${input.visaType || 'Not specified'}
-Freeform context: ${input.freeform}
+Freeform context: ${input.freeform.slice(0, 2000)}
 
 Your task: Parse and normalize this input into a structured VisaRequest JSON object.
 

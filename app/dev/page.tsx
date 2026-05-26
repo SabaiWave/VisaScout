@@ -210,7 +210,10 @@ export default function DevPage() {
             </span>
           </div>
           <DevGrid>
-            <DevButton label="Brief: PDF Error ↗" sublabel="/brief/sim-pdf-error" href="/brief/sim-pdf-error" newTab />
+            <DevButton label="Brief: PDF Error ↗"                sublabel="/brief/sim-pdf-error"         href="/brief/sim-pdf-error"         newTab />
+            <DevButton label="Brief: Well Sourced ↗"             sublabel="/brief/sim-confidence-high"   href="/brief/sim-confidence-high"   newTab />
+            <DevButton label="Brief: Verify Key Details ↗"       sublabel="/brief/sim-confidence-medium" href="/brief/sim-confidence-medium" newTab />
+            <DevButton label="Brief: Verify Before Travel ↗"     sublabel="/brief/sim-confidence-low"    href="/brief/sim-confidence-low"    newTab />
           </DevGrid>
         </DevSection>
 
@@ -264,6 +267,13 @@ export default function DevPage() {
               label="▲ PDF Failed ↗"
               sublabel="event:brief.pdf_failed + level:error"
               href="/api/debug/sim?event=brief.pdf_failed"
+              newTab
+              accent
+            />
+            <DevButton
+              label="▲ Input Oversized ↗"
+              sublabel="level:warn · API bypass signal"
+              href="/api/debug/sim?event=input.oversized"
               newTab
               accent
             />

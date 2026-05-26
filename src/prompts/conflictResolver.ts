@@ -3,19 +3,19 @@ import type { AgentResultEnvelope } from '../types/index';
 export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): string {
   const summaries = {
     officialPolicy: envelope.officialPolicy.status === 'success'
-      ? JSON.stringify(envelope.officialPolicy.data, null, 2)
+      ? JSON.stringify(envelope.officialPolicy.data)
       : `FAILED: ${envelope.officialPolicy.error}`,
     recentChanges: envelope.recentChanges.status === 'success'
-      ? JSON.stringify(envelope.recentChanges.data, null, 2)
+      ? JSON.stringify(envelope.recentChanges.data)
       : `FAILED: ${envelope.recentChanges.error}`,
     communityIntel: envelope.communityIntel.status === 'success'
-      ? JSON.stringify(envelope.communityIntel.data, null, 2)
+      ? JSON.stringify(envelope.communityIntel.data)
       : `FAILED: ${envelope.communityIntel.error}`,
     entryRequirements: envelope.entryRequirements.status === 'success'
-      ? JSON.stringify(envelope.entryRequirements.data, null, 2)
+      ? JSON.stringify(envelope.entryRequirements.data)
       : `FAILED: ${envelope.entryRequirements.error}`,
     borderRun: envelope.borderRun.status === 'success'
-      ? JSON.stringify(envelope.borderRun.data, null, 2)
+      ? JSON.stringify(envelope.borderRun.data)
       : `FAILED: ${envelope.borderRun.error}`,
   };
 
@@ -23,8 +23,8 @@ export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): stri
 
 Overall confidence calibration for overallConfidence field:
 - high: all major claims confirmed by Tier 1-2 sources with no significant contradictions; no agents failed
-- medium: most major claims have Tier 1-2 support but some key details are contested or unverified; at most one agent failed
-- low: significant claims lack Tier 1-2 support; multiple unresolved contradictions; or multiple agents failed
+- medium: primary claims (visa eligibility, stay duration) have Tier 1-2 support even if secondary details are contested or unverified; OR at most one agent failed but core sourcing is solid
+- low: primary visa eligibility or duration claims lack Tier 1-2 support AND multiple key items are unverified; a single agent failure with solid Tier 1-2 coverage of core claims does NOT justify low — use medium
 
 SOURCE TIER RULES (non-negotiable):
 - Tier 1 (government sites) beats all other tiers regardless of recency
@@ -60,8 +60,7 @@ Return ONLY valid JSON (no markdown fences):
     {
       "topic": "<topic>",
       "description": "<what is confirmed>",
-      "sources": ["<url>"],
-      "resolution": null
+      "sources": ["<url>"]
     }
   ],
   "contested": [

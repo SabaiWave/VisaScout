@@ -11,13 +11,14 @@ Traveler context:
 - Intended duration: ${request.intendedDuration || 'unknown'}
 - Entry/exit pattern: ${request.entryExitPattern || 'unknown'}
 - Visa type: ${request.visaType || 'not specified'}
-- Freeform: ${request.freeform}
+- Freeform: ${request.freeform.slice(0, 600)}
 
 Search results (official + community):
 ${searchResults}
 
 Extract border run / visa run information. Be specific and honest about enforcement posture.
 Do NOT soften enforcement reality — travelers need accurate risk assessment.
+If search results contain no data for a field, return null or []. Do not infer or invent facts not present in the search results.
 
 Analyze:
 1. How many land border entries are allowed per year (if restricted)?
