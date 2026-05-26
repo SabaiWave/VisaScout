@@ -1,3 +1,8 @@
+export interface PromptResult {
+  system: string;
+  user: string;
+}
+
 export interface VisaInput {
   nationality: string;
   destination: string;

@@ -10,12 +10,13 @@ export async function resolveConflicts(
   envelope: AgentResultEnvelope,
   client: Anthropic
 ): Promise<ConflictReport> {
-  const prompt = buildConflictResolverPrompt(envelope);
+  const { system, user } = buildConflictResolverPrompt(envelope);
 
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 8192,
-    messages: [{ role: 'user', content: prompt }],
+    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: user }],
   });
 
   recordUsage({
@@ -23,6 +24,8 @@ export async function resolveConflicts(
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
     tavilySearches: 0,
+    cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+    cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
   });
 
   const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';

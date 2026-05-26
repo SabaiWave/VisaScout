@@ -69,12 +69,13 @@ export async function recentChangesAgent(
       .map((r) => `[${r.url}]\nPublished: ${r.publishedDate ?? 'unknown'}\nTitle: ${r.title}\n${r.content}`)
       .join('\n\n---\n\n');
 
-    const prompt = buildRecentChangesPrompt(request, searchText || 'No results found.');
+    const { system, user } = buildRecentChangesPrompt(request, searchText || 'No results found.');
 
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: agentMaxTokens,
-      messages: [{ role: 'user', content: prompt }],
+      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: user }],
     });
 
     recordUsage({
@@ -82,6 +83,8 @@ export async function recentChangesAgent(
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       tavilySearches: destDomains.length ? 2 : 1,
+      cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+      cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';

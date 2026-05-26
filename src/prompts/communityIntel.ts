@@ -1,21 +1,11 @@
-import type { VisaRequest } from '../types/index';
+import type { VisaRequest, PromptResult } from '../types/index';
 
 export function buildCommunityIntelPrompt(
   request: VisaRequest,
   searchResults: string
-): string {
-  return `You are a visa analyst reviewing real traveler reports. Analyze recent community reports from Reddit, Nomad List, and travel forums about visa experiences for ${request.normalizedNationality} passport holders in ${request.normalizedDestination}.
-
-Traveler context:
-- Intended duration: ${request.intendedDuration || 'unknown'}
-- Visa type: ${request.visaType || 'not specified'}
-- Entry pattern: ${request.entryExitPattern || 'unknown'}
-- Freeform: ${request.freeform.slice(0, 600)}
-
-Community search results:
-${searchResults}
-
-Extract ground truth information from recent traveler reports. Focus on:
+): PromptResult {
+  return {
+    system: `You are a visa analyst reviewing real traveler reports. Extract ground truth information from recent traveler reports. Focus on:
 1. Actual enforcement reality vs. official rules
 2. Recent experiences at borders/immigration
 3. Common issues travelers face
@@ -50,5 +40,17 @@ Note: Community intel is always verified=false — it supplements but never over
 Confidence calibration for community intel (always Tier 4 — calibrate on data volume and recency):
 - high: 5+ consistent reports within the last 90 days with specific matching details about enforcement reality; multiple independent sources agree
 - medium: 2-4 consistent reports; OR a few reports with partially matching details; OR older but plentiful corroborating data
-- low: single report, contradictory reports, no data within 90 days, or very sparse community coverage`;
+- low: single report, contradictory reports, no data within 90 days, or very sparse community coverage`,
+
+    user: `Analyzing community reports about visa experiences for ${request.normalizedNationality} passport holders in ${request.normalizedDestination}.
+
+Traveler context:
+- Intended duration: ${request.intendedDuration || 'unknown'}
+- Visa type: ${request.visaType || 'not specified'}
+- Entry pattern: ${request.entryExitPattern || 'unknown'}
+- Freeform: ${request.freeform.slice(0, 600)}
+
+Community search results:
+${searchResults}`,
+  };
 }
