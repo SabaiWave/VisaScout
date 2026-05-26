@@ -62,6 +62,10 @@ async function briefHandler(req: Request) {
   }
 
   if (freeform.length > 2000 || nationality.length > 100 || destination.length > 100 || (visaType && visaType.length > 100)) {
+    const field = freeform.length > 2000 ? 'freeform' : nationality.length > 100 ? 'nationality' : visaType && visaType.length > 100 ? 'visaType' : 'destination';
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+    await log.warn('input.oversized', { field, length: { freeform: freeform.length, nationality: nationality.length, destination: destination.length }, ip });
     return new Response(JSON.stringify({ error: 'Input exceeds maximum allowed length' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
