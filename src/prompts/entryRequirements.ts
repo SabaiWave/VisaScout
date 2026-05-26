@@ -10,7 +10,7 @@ Traveler context:
 - Intended duration: ${request.intendedDuration || 'unknown'}
 - Income source: ${request.incomeSource || 'unknown'}
 - Visa type: ${request.visaType || 'not specified'}
-- Freeform: ${request.freeform}
+- Freeform: ${request.freeform.slice(0, 600)}
 
 Search results from official sources:
 ${searchResults}
@@ -23,6 +23,7 @@ Extract ALL entry requirements. Be specific about:
 5. Any other entry conditions
 
 Explicitly state if Tier 1 source not found for any requirement.
+If search results contain no data for a field, return null or []. Do not infer or invent facts not present in the search results.
 
 Return ONLY valid JSON (no markdown fences):
 {

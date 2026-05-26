@@ -25,6 +25,7 @@ const VALID_EVENTS = [
   'payment.completed',
   'poll.job_claimed',
   'free-cap.reached',
+  'input.oversized',
 ];
 
 export async function GET(req: Request) {
@@ -181,6 +182,13 @@ export async function GET(req: Request) {
       };
       await trackEvent('free_cap.reached', data);
       fired = { event: 'free_cap.reached', ...data };
+      break;
+    }
+
+    case 'input.oversized': {
+      const data = { field: 'freeform', length: { freeform: 9999, nationality: 12, destination: 9 }, ip: '1.2.3.4', sim: true };
+      await log.warn('input.oversized', data);
+      fired = { level: 'warn', message: 'input.oversized', ...data };
       break;
     }
 

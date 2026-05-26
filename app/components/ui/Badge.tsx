@@ -13,6 +13,12 @@ const badgeBase: React.CSSProperties = {
 
 // ─── Confidence ──────────────────────────────────────────────────────────────
 
+const confidenceLabelMap = {
+  high:   'WELL SOURCED',
+  medium: 'VERIFY KEY DETAILS',
+  low:    'VERIFY BEFORE TRAVEL',
+} as const;
+
 const confidenceMap = {
   high:   { background: 'rgba(34,197,94,0.15)',  color: 'var(--color-confidence-high)' },
   medium: { background: 'rgba(245,158,11,0.15)', color: 'var(--color-confidence-medium)' },
@@ -28,7 +34,7 @@ export function ConfidenceBadge({
 }) {
   return (
     <span style={{ ...badgeBase, ...confidenceMap[level] }}>
-      {prefixed ? `CONF · ${level.toUpperCase()}` : level.toUpperCase()}
+      {prefixed ? confidenceLabelMap[level] : level.toUpperCase()}
     </span>
   );
 }
