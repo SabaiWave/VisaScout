@@ -10,7 +10,7 @@ Traveler context:
 - Intended duration: ${request.intendedDuration || 'unknown'}
 - Visa type: ${request.visaType || 'not specified'}
 - Entry pattern: ${request.entryExitPattern || 'unknown'}
-- Freeform: ${request.freeform}
+- Freeform: ${request.freeform.slice(0, 600)}
 
 Community search results:
 ${searchResults}
@@ -23,6 +23,7 @@ Extract ground truth information from recent traveler reports. Focus on:
 
 IMPORTANT: Community intel (Tier 4) cannot override official policy (Tier 1-2).
 Its value is flagging enforcement divergence and practical realities.
+If search results contain no data for a field, return null or []. Do not infer or invent facts not present in the search results.
 
 Return ONLY valid JSON (no markdown fences):
 {

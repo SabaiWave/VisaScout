@@ -3,19 +3,19 @@ import type { AgentResultEnvelope } from '../types/index';
 export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): string {
   const summaries = {
     officialPolicy: envelope.officialPolicy.status === 'success'
-      ? JSON.stringify(envelope.officialPolicy.data, null, 2)
+      ? JSON.stringify(envelope.officialPolicy.data)
       : `FAILED: ${envelope.officialPolicy.error}`,
     recentChanges: envelope.recentChanges.status === 'success'
-      ? JSON.stringify(envelope.recentChanges.data, null, 2)
+      ? JSON.stringify(envelope.recentChanges.data)
       : `FAILED: ${envelope.recentChanges.error}`,
     communityIntel: envelope.communityIntel.status === 'success'
-      ? JSON.stringify(envelope.communityIntel.data, null, 2)
+      ? JSON.stringify(envelope.communityIntel.data)
       : `FAILED: ${envelope.communityIntel.error}`,
     entryRequirements: envelope.entryRequirements.status === 'success'
-      ? JSON.stringify(envelope.entryRequirements.data, null, 2)
+      ? JSON.stringify(envelope.entryRequirements.data)
       : `FAILED: ${envelope.entryRequirements.error}`,
     borderRun: envelope.borderRun.status === 'success'
-      ? JSON.stringify(envelope.borderRun.data, null, 2)
+      ? JSON.stringify(envelope.borderRun.data)
       : `FAILED: ${envelope.borderRun.error}`,
   };
 
@@ -60,8 +60,7 @@ Return ONLY valid JSON (no markdown fences):
     {
       "topic": "<topic>",
       "description": "<what is confirmed>",
-      "sources": ["<url>"],
-      "resolution": null
+      "sources": ["<url>"]
     }
   ],
   "contested": [

@@ -61,6 +61,13 @@ async function briefHandler(req: Request) {
     });
   }
 
+  if (freeform.length > 2000 || nationality.length > 100 || destination.length > 100 || (visaType && visaType.length > 100)) {
+    return new Response(JSON.stringify({ error: 'Input exceeds maximum allowed length' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const validDepths = ['quick', 'standard', 'deep'] as const;
   const resolvedDepth = validDepths.includes(depth as 'quick' | 'standard' | 'deep')
     ? (depth as 'quick' | 'standard' | 'deep')
