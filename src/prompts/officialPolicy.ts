@@ -1,21 +1,11 @@
-import type { VisaRequest } from '../types/index';
+import type { VisaRequest, PromptResult } from '../types/index';
 
 export function buildOfficialPolicyPrompt(
   request: VisaRequest,
   searchResults: string
-): string {
-  return `You are a visa policy analyst. Analyze the following official government sources about visa rules for ${request.normalizedNationality} passport holders traveling to ${request.normalizedDestination}.
-
-Traveler context:
-- Intended duration: ${request.intendedDuration || 'unknown'}
-- Entry/exit pattern: ${request.entryExitPattern || 'unknown'}
-- Current visa type: ${request.visaType || 'not specified'}
-- Freeform: ${request.freeform.slice(0, 600)}
-
-Search results from official sources:
-${searchResults}
-
-Extract comprehensive visa policy information. Be specific and cite exact rules.
+): PromptResult {
+  return {
+    system: `You are a visa policy analyst. Extract comprehensive visa policy information. Be specific and cite exact rules.
 If you cannot find information from Tier 1 sources (government sites), explicitly state this.
 If search results contain no data for a field, return null or []. Do not infer or invent facts not present in the search results.
 
@@ -47,5 +37,17 @@ Set verified=false if no Tier 1 government sources were found.
 Confidence calibration (be decisive — do not default to low):
 - high: core visa rules (stay duration, eligibility, fees) confirmed by Tier 1 sources with specific values
 - medium: Tier 1 source found but key details (exact fees, specific stay length) unconfirmed; OR primary source is Tier 2
-- low: NO Tier 1-2 source found, relying entirely on aggregators or community (Tier 3-4 only)`;
+- low: NO Tier 1-2 source found, relying entirely on aggregators or community (Tier 3-4 only)`,
+
+    user: `Analyzing visa policy for ${request.normalizedNationality} passport holders traveling to ${request.normalizedDestination}.
+
+Traveler context:
+- Intended duration: ${request.intendedDuration || 'unknown'}
+- Entry/exit pattern: ${request.entryExitPattern || 'unknown'}
+- Current visa type: ${request.visaType || 'not specified'}
+- Freeform: ${request.freeform.slice(0, 600)}
+
+Search results from official sources:
+${searchResults}`,
+  };
 }

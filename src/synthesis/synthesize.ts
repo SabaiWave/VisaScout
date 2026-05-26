@@ -42,12 +42,13 @@ export async function synthesizeBrief(
   startTime: number = Date.now()
 ): Promise<VisaBrief> {
   const degradedContext = buildDegradedContext(envelope);
-  const prompt = buildSynthesisPrompt(envelope, conflictReport, degradedContext);
+  const { system, user } = buildSynthesisPrompt(envelope, conflictReport, degradedContext);
 
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 16000,
-    messages: [{ role: 'user', content: prompt }],
+    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: user }],
   });
 
   recordUsage({
@@ -55,6 +56,8 @@ export async function synthesizeBrief(
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
     tavilySearches: 0,
+    cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+    cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
   });
 
   if (response.stop_reason === 'max_tokens') {

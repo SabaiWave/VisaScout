@@ -1,39 +1,12 @@
-import type { AgentResultEnvelope, ConflictReport } from '../types/index';
+import type { AgentResultEnvelope, ConflictReport, PromptResult } from '../types/index';
 
 export function buildSynthesisPrompt(
   envelope: AgentResultEnvelope,
   conflictReport: ConflictReport,
   degradedContext: string
-): string {
-  return `You are a visa intelligence analyst. Synthesize all agent outputs into a comprehensive, actionable visa intelligence brief.
-
-TRAVELER SITUATION:
-Nationality: ${envelope.visaRequest.normalizedNationality}
-Destination: ${envelope.visaRequest.normalizedDestination}
-Visa type of interest: ${envelope.visaRequest.visaType || 'not specified'}
-Intended duration: ${envelope.visaRequest.intendedDuration || 'unknown'}
-Entry/exit pattern: ${envelope.visaRequest.entryExitPattern || 'unknown'}
-Income source: ${envelope.visaRequest.incomeSource || 'unknown'}
-
-CONFLICT REPORT:
-${JSON.stringify(conflictReport)}
-
-OFFICIAL POLICY (${envelope.officialPolicy.status}):
-${envelope.officialPolicy.status === 'success' ? JSON.stringify(envelope.officialPolicy.data) : 'FAILED'}
-
-RECENT CHANGES (${envelope.recentChanges.status}):
-${envelope.recentChanges.status === 'success' ? JSON.stringify(envelope.recentChanges.data) : 'FAILED'}
-
-COMMUNITY INTEL (${envelope.communityIntel.status}):
-${envelope.communityIntel.status === 'success' ? JSON.stringify(envelope.communityIntel.data) : 'FAILED'}
-
-ENTRY REQUIREMENTS (${envelope.entryRequirements.status}):
-${envelope.entryRequirements.status === 'success' ? JSON.stringify(envelope.entryRequirements.data) : 'FAILED'}
-
-BORDER RUN (${envelope.borderRun.status}):
-${envelope.borderRun.status === 'success' ? JSON.stringify(envelope.borderRun.data) : 'FAILED'}
-
-${degradedContext ? `DATA GAPS (from failed agents):\n${degradedContext}` : ''}
+): PromptResult {
+  return {
+    system: `You are a visa intelligence analyst. Synthesize all agent outputs into a comprehensive, actionable visa intelligence brief.
 
 SYNTHESIS RULES:
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
@@ -111,5 +84,34 @@ Return ONLY valid JSON (no markdown fences):
     "emergencyContacts": ["<relevant embassy or hotline>"]
   },
   "disclaimer": "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice."
-}`;
+}`,
+
+    user: `TRAVELER SITUATION:
+Nationality: ${envelope.visaRequest.normalizedNationality}
+Destination: ${envelope.visaRequest.normalizedDestination}
+Visa type of interest: ${envelope.visaRequest.visaType || 'not specified'}
+Intended duration: ${envelope.visaRequest.intendedDuration || 'unknown'}
+Entry/exit pattern: ${envelope.visaRequest.entryExitPattern || 'unknown'}
+Income source: ${envelope.visaRequest.incomeSource || 'unknown'}
+
+CONFLICT REPORT:
+${JSON.stringify(conflictReport)}
+
+OFFICIAL POLICY (${envelope.officialPolicy.status}):
+${envelope.officialPolicy.status === 'success' ? JSON.stringify(envelope.officialPolicy.data) : 'FAILED'}
+
+RECENT CHANGES (${envelope.recentChanges.status}):
+${envelope.recentChanges.status === 'success' ? JSON.stringify(envelope.recentChanges.data) : 'FAILED'}
+
+COMMUNITY INTEL (${envelope.communityIntel.status}):
+${envelope.communityIntel.status === 'success' ? JSON.stringify(envelope.communityIntel.data) : 'FAILED'}
+
+ENTRY REQUIREMENTS (${envelope.entryRequirements.status}):
+${envelope.entryRequirements.status === 'success' ? JSON.stringify(envelope.entryRequirements.data) : 'FAILED'}
+
+BORDER RUN (${envelope.borderRun.status}):
+${envelope.borderRun.status === 'success' ? JSON.stringify(envelope.borderRun.data) : 'FAILED'}
+
+${degradedContext ? `DATA GAPS (from failed agents):\n${degradedContext}` : ''}`,
+  };
 }
