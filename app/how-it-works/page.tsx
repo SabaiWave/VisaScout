@@ -50,21 +50,21 @@ const SOURCE_TIERS = [
 
 const CONFIDENCE_LEVELS = [
   {
-    level: 'High',
-    definition: 'Two or more T1 sources agree.',
+    level: 'Well Sourced',
+    definition: 'Two or more official (T1) sources agree.',
     meaning: 'Act on this. The official record is clear and corroborated.',
     color: 'var(--color-success)',
   },
   {
-    level: 'Medium',
-    definition: 'One T1 source found, or multiple T2 sources agree.',
-    meaning: 'Reliable. Verify the deadline or specific requirement before travel.',
+    level: 'Verify Key Details',
+    definition: 'One T1 source found, or multiple T2 sources agree. One or more claims are contested.',
+    meaning: 'Reliable for primary rules. Verify the contested item or deadline before travel.',
     color: 'var(--color-amber)',
   },
   {
-    level: 'Low',
-    definition: 'No T1 or T2 source found. T3 or T4 only.',
-    meaning: 'Treat as directional. Check official sources before making decisions.',
+    level: 'Verify Before Travel',
+    definition: 'Official sources are limited or unavailable for this destination.',
+    meaning: 'Content is directional. Check official embassy or government sources before making any decisions.',
     color: 'var(--color-text-tertiary)',
   },
 ];

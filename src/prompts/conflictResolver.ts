@@ -23,8 +23,8 @@ export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): stri
 
 Overall confidence calibration for overallConfidence field:
 - high: all major claims confirmed by Tier 1-2 sources with no significant contradictions; no agents failed
-- medium: most major claims have Tier 1-2 support but some key details are contested or unverified; at most one agent failed
-- low: significant claims lack Tier 1-2 support; multiple unresolved contradictions; or multiple agents failed
+- medium: primary claims (visa eligibility, stay duration) have Tier 1-2 support even if secondary details are contested or unverified; OR at most one agent failed but core sourcing is solid
+- low: primary visa eligibility or duration claims lack Tier 1-2 support AND multiple key items are unverified; a single agent failure with solid Tier 1-2 coverage of core claims does NOT justify low — use medium
 
 SOURCE TIER RULES (non-negotiable):
 - Tier 1 (government sites) beats all other tiers regardless of recency

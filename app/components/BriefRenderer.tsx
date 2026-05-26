@@ -226,9 +226,14 @@ function SourceCitationsSection({ citations, forPrint }: { citations: VisaBrief[
 
 function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrint: boolean }) {
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
-  const badge = report.contested.length > 0
-    ? <span style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
-    : undefined;
+  const badge = (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+      <ConfidenceBadge level={report.overallConfidence} />
+      {report.contested.length > 0 && (
+        <span style={{ color: 'var(--color-amber)' }}>({report.contested.length} contested)</span>
+      )}
+    </span>
+  );
   return (
     <CollapsibleCard header={<CardHeader title={`Conflict Report: ${total} item${total !== 1 ? 's' : ''}`} badge={badge} />} forPrint={forPrint}>
       {report.confirmed.length > 0 && (
@@ -335,10 +340,6 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
         )}
         <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
-        <div className="mt-2">
-          <ConfidenceBadge level={brief.confidenceScore.overall} />
-          <span className="ml-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>Overall Confidence</span>
-        </div>
       </div>
 
       <VisaOptionsSection options={brief.visaOptions} forPrint={forPrint} />
