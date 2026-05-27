@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { buildSynthesisPrompt } from '../prompts/synthesis';
 import { parseJSON } from '../lib/parseJSON';
 import { recordUsage } from '../lib/cost';
+import { computeOverallConfidence } from './conflictResolver';
 import type {
   AgentResultEnvelope,
   ConflictReport,
@@ -42,12 +43,13 @@ export async function synthesizeBrief(
   startTime: number = Date.now()
 ): Promise<VisaBrief> {
   const degradedContext = buildDegradedContext(envelope);
-  const prompt = buildSynthesisPrompt(envelope, conflictReport, degradedContext);
+  const { system, user } = buildSynthesisPrompt(envelope, conflictReport, degradedContext);
 
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 16000,
-    messages: [{ role: 'user', content: prompt }],
+    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: user }],
   });
 
   recordUsage({
@@ -55,6 +57,8 @@ export async function synthesizeBrief(
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
     tavilySearches: 0,
+    cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+    cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
   });
 
   if (response.stop_reason === 'max_tokens') {
@@ -64,6 +68,9 @@ export async function synthesizeBrief(
   const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
 
   const brief = parseJSON<Omit<VisaBrief, 'metadata'>>(raw);
+  // Keep confidenceScore.overall in sync with the deterministic scorer
+  // (LLM-generated value would otherwise diverge from conflictReport.overallConfidence)
+  brief.confidenceScore.overall = computeOverallConfidence(conflictReport, envelope);
 
   const agentStatuses: AgentStatus[] = [
     { agent: 'OfficialPolicy', ...statusFrom(envelope.officialPolicy) },

@@ -49,12 +49,13 @@ export async function entryRequirementsAgent(
       .map((r) => `[${r.url}]\nTitle: ${r.title}\n${r.content}`)
       .join('\n\n---\n\n');
 
-    const prompt = buildEntryRequirementsPrompt(request, searchText || 'No results found.');
+    const { system, user } = buildEntryRequirementsPrompt(request, searchText || 'No results found.');
 
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: agentMaxTokens,
-      messages: [{ role: 'user', content: prompt }],
+      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: user }],
     });
 
     recordUsage({
@@ -62,6 +63,8 @@ export async function entryRequirementsAgent(
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       tavilySearches: 1,
+      cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+      cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';

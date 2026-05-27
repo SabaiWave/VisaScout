@@ -41,6 +41,19 @@ function makeFailedResult<T>(gapMessage: string): AgentResult<T> {
   };
 }
 
+function makeSuccessResult<T>(sourceTier: 1 | 2 | 3 | 4): AgentResult<T> {
+  return {
+    status: 'success',
+    data: {} as T,
+    confidence: 'medium',
+    gaps: [],
+    sourceTier,
+    sourceUrls: [],
+    verified: true,
+    durationMs: 100,
+  };
+}
+
 const BASE_ENVELOPE: AgentResultEnvelope = {
   visaRequest: visaRequestFixture as VisaRequest,
   officialPolicy: officialPolicyFixture as AgentResult<OfficialPolicyOutput>,
@@ -117,8 +130,19 @@ describe('resolveConflicts', () => {
       overallConfidence: 'low',
     };
 
+    // Envelope with no Tier 1-2 agents and low agent agreement (2 succeeded)
+    // → deterministic computeOverallConfidence returns 'low'
+    const noTier1Envelope: AgentResultEnvelope = {
+      visaRequest: visaRequestFixture as VisaRequest,
+      officialPolicy: makeFailedResult<OfficialPolicyOutput>('OfficialPolicy failed — no tier1 source'),
+      recentChanges: makeSuccessResult<RecentChangesOutput>(4),
+      communityIntel: makeSuccessResult<CommunityIntelOutput>(4),
+      entryRequirements: makeFailedResult<EntryRequirementsOutput>('EntryRequirements failed'),
+      borderRun: makeFailedResult<BorderRunOutput>('BorderRun failed'),
+    };
+
     const client = makeClient(mockReport);
-    const result = await resolveConflicts(BASE_ENVELOPE, client);
+    const result = await resolveConflicts(noTier1Envelope, client);
 
     expect(result.unverified).toHaveLength(1);
     expect(result.overallConfidence).toBe('low');

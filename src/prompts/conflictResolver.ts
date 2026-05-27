@@ -1,6 +1,6 @@
-import type { AgentResultEnvelope } from '../types/index';
+import type { AgentResultEnvelope, PromptResult } from '../types/index';
 
-export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): string {
+export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): PromptResult {
   const summaries = {
     officialPolicy: envelope.officialPolicy.status === 'success'
       ? JSON.stringify(envelope.officialPolicy.data)
@@ -19,35 +19,16 @@ export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): stri
       : `FAILED: ${envelope.borderRun.error}`,
   };
 
-  return `You are a conflict resolver for a visa intelligence system. You have received outputs from 5 parallel agents. Your job is to reconcile contradictions using source tier and recency.
+  return {
+    system: `You are a conflict resolver for a visa intelligence system. You have received outputs from 5 parallel agents. Your job is to reconcile contradictions using source tier and recency.
 
-Overall confidence calibration for overallConfidence field:
-- high: all major claims confirmed by Tier 1-2 sources with no significant contradictions; no agents failed
-- medium: primary claims (visa eligibility, stay duration) have Tier 1-2 support even if secondary details are contested or unverified; OR at most one agent failed but core sourcing is solid
-- low: primary visa eligibility or duration claims lack Tier 1-2 support AND multiple key items are unverified; a single agent failure with solid Tier 1-2 coverage of core claims does NOT justify low — use medium
+NOTE: The overallConfidence field in your response is overridden by a deterministic scorer after parsing — set it to your best estimate but it will not be used directly.
 
 SOURCE TIER RULES (non-negotiable):
 - Tier 1 (government sites) beats all other tiers regardless of recency
 - Within same tier, newer beats older
 - Tier 4 (community) NEVER overrides Tier 1-2, but flags enforcement divergence
 - If no Tier 1-2 source found → mark as unverified, confidence: low
-
-Agent outputs:
-
-OFFICIAL POLICY (Tier ${envelope.officialPolicy.sourceTier}, ${envelope.officialPolicy.status}):
-${summaries.officialPolicy}
-
-RECENT CHANGES (Tier ${envelope.recentChanges.sourceTier}, ${envelope.recentChanges.status}):
-${summaries.recentChanges}
-
-COMMUNITY INTEL (Tier ${envelope.communityIntel.sourceTier}, ${envelope.communityIntel.status}):
-${summaries.communityIntel}
-
-ENTRY REQUIREMENTS (Tier ${envelope.entryRequirements.sourceTier}, ${envelope.entryRequirements.status}):
-${summaries.entryRequirements}
-
-BORDER RUN (Tier ${envelope.borderRun.sourceTier}, ${envelope.borderRun.status}):
-${summaries.borderRun}
 
 Identify:
 1. CONFIRMED: Claims supported by Tier 1-2 sources with no contradictions
@@ -80,5 +61,23 @@ Return ONLY valid JSON (no markdown fences):
     }
   ],
   "overallConfidence": "<high|medium|low>"
-}`;
+}`,
+
+    user: `Agent outputs:
+
+OFFICIAL POLICY (Tier ${envelope.officialPolicy.sourceTier}, ${envelope.officialPolicy.status}):
+${summaries.officialPolicy}
+
+RECENT CHANGES (Tier ${envelope.recentChanges.sourceTier}, ${envelope.recentChanges.status}):
+${summaries.recentChanges}
+
+COMMUNITY INTEL (Tier ${envelope.communityIntel.sourceTier}, ${envelope.communityIntel.status}):
+${summaries.communityIntel}
+
+ENTRY REQUIREMENTS (Tier ${envelope.entryRequirements.sourceTier}, ${envelope.entryRequirements.status}):
+${summaries.entryRequirements}
+
+BORDER RUN (Tier ${envelope.borderRun.sourceTier}, ${envelope.borderRun.status}):
+${summaries.borderRun}`,
+  };
 }

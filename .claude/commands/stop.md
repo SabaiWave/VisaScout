@@ -98,6 +98,13 @@ Did this session modify behavior covered by any `docs/` file?
 - YES: update the relevant docs/ file before writing progress. Stale docs are worse than no docs.
 - NO: proceed.
 
+**Legal/marketing alignment check:**
+Did this session change any of the following: scoring logic, agent behavior, source tier rules, pricing tiers, data collection, or any user-facing claim about how VisaScout works?
+- YES: open `app/how-it-works/page.tsx`, `app/terms/page.tsx`, and `app/privacy/page.tsx`.
+  Read the relevant sections. Flag any definition, claim, or statement that no longer matches the implementation.
+  Fix misalignments before writing progress. Log any that require legal review in Friction Log instead.
+- NO: proceed.
+
 ---
 
 POST-LAUNCH MODE:
@@ -112,6 +119,10 @@ POST-LAUNCH MODE:
 
    Docs update check: did this session modify behavior covered by any `docs/` file?
    - YES: update the relevant docs/ file before writing progress.
+   - NO: continue.
+
+   Legal/marketing alignment check: did this session change scoring logic, agent behavior, source tier rules, pricing tiers, data collection, or any user-facing claim about how VisaScout works?
+   - YES: check `app/how-it-works/page.tsx`, `app/terms/page.tsx`, `app/privacy/page.tsx` for stale definitions or claims. Fix before writing progress. Log legal-review items in Friction Log.
    - NO: continue.
 
 3. Find a home in BLUEPRINT.md:
