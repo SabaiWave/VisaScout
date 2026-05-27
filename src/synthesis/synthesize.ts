@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { buildSynthesisPrompt } from '../prompts/synthesis';
 import { parseJSON } from '../lib/parseJSON';
 import { recordUsage } from '../lib/cost';
+import { computeOverallConfidence } from './conflictResolver';
 import type {
   AgentResultEnvelope,
   ConflictReport,
@@ -67,6 +68,9 @@ export async function synthesizeBrief(
   const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
 
   const brief = parseJSON<Omit<VisaBrief, 'metadata'>>(raw);
+  // Keep confidenceScore.overall in sync with the deterministic scorer
+  // (LLM-generated value would otherwise diverge from conflictReport.overallConfidence)
+  brief.confidenceScore.overall = computeOverallConfidence(conflictReport, envelope);
 
   const agentStatuses: AgentStatus[] = [
     { agent: 'OfficialPolicy', ...statusFrom(envelope.officialPolicy) },
