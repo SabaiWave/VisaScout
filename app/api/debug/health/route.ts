@@ -25,6 +25,8 @@ export async function GET() {
     appUrl:      !!process.env.NEXT_PUBLIC_APP_URL,
     // Admin (Phase 10)
     adminUserId: !!process.env.ADMIN_USER_ID,
+    // Rate limiting (optional — graceful no-op when absent)
+    upstash:     !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN,
   };
 
   const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;
