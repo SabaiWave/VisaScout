@@ -13,7 +13,7 @@ function getRateLimiter(): Ratelimit | null {
   limiter = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(5, '60 s'),
-    prefix: 'visascout:brief',
+    prefix: `visascout:brief:${process.env.ENVIRONMENT ?? 'development'}`,
   });
   return limiter;
 }
