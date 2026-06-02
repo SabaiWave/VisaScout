@@ -9,6 +9,16 @@ import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 jest.mock('@/src/tools/tavily', () => ({ tavilySearch: jest.fn().mockResolvedValue([]) }));
 
+// Force non-DRY_RUN path — these tests mock the LLM client and must exercise the real orchestrator logic.
+// CI sets DRY_RUN=true for the test step; without this override the LLM call is skipped entirely
+// and offTopic detection / sanitization never runs.
+const originalDryRun = process.env.DRY_RUN;
+beforeAll(() => { process.env.DRY_RUN = 'false'; });
+afterAll(() => {
+  if (originalDryRun === undefined) delete process.env.DRY_RUN;
+  else process.env.DRY_RUN = originalDryRun;
+});
+
 const BASE_INPUT: VisaInput = {
   nationality: 'American',
   destination: 'Thailand',
