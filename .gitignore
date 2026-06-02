@@ -43,7 +43,7 @@ next-env.d.ts
 
 # VisaScout internal docs and outputs
 /outputs/
-/planning/
+/sessions/
 CLAUDE*.md
 BLUEPRINT.md
 DESIGN.md
@@ -51,9 +51,5 @@ GTM.md
 STRATEGY.md
 /docs
 
-# Claude Code — machine-specific settings (absolute paths, personal allowlists)
-.claude/settings.local.json
-# Claude Code skills — third-party tooling, not app code
-.claude/skills/
-.claude/skills/**/__pycache__/
+.claude/
 
