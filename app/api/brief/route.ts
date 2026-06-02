@@ -11,7 +11,14 @@ import { saveBrief } from '@/src/lib/saveBrief';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
+import { checkRateLimit } from '@/src/lib/rateLimit';
+import { OffTopicError } from '@/src/lib/errors';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
+
+const SUPPORTED_DESTINATIONS = new Set([
+  'thailand', 'vietnam', 'indonesia', 'malaysia', 'philippines',
+  'cambodia', 'laos', 'myanmar', 'singapore', 'brunei',
+]);
 
 export const runtime = 'nodejs';
 
@@ -70,6 +77,28 @@ async function briefHandler(req: Request) {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  if (!SUPPORTED_DESTINATIONS.has(destination.trim().toLowerCase())) {
+    return new Response(
+      JSON.stringify({ error: 'Destination not yet supported. VisaScout covers Thailand, Vietnam, Indonesia, Malaysia, Philippines, Cambodia, Laos, Myanmar, Singapore, and Brunei.' }),
+      { status: 422, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const rateCheck = await checkRateLimit(userId);
+  if (!rateCheck.allowed) {
+    await log.warn('rate.limit.exceeded', { userId, ip });
+    return new Response(
+      JSON.stringify({ error: 'Too many requests. Please wait a moment before trying again.' }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(rateCheck.retryAfter ? { 'Retry-After': String(rateCheck.retryAfter) } : {}),
+        },
+      }
+    );
   }
 
   const validDepths = ['quick', 'standard', 'deep'] as const;
@@ -223,6 +252,10 @@ async function briefHandler(req: Request) {
           estimatedCostUsd: cost.estimatedCostUsd.toFixed(4),
         });
       } catch (err) {
+        if (err instanceof OffTopicError) {
+          send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported SEA destination. Please describe your nationality, destination country, and visa situation.' });
+          return;
+        }
         const internalMessage = err instanceof Error ? err.message : 'Pipeline failed';
         log.error('pipeline error', { error: internalMessage, destination, depth: resolvedDepth });
         await trackEvent('brief.failed', {
