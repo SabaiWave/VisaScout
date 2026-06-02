@@ -19,6 +19,7 @@ export interface VisaRequest extends VisaInput {
   priorVisitHistory?: string;
   accommodationType?: string;
   parsedSummary: string;
+  offTopic?: boolean;
 }
 
 export interface AgentResult<T> {

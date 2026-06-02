@@ -3,6 +3,7 @@ import { buildOrchestratorPrompt } from './prompts/orchestrator';
 import { parseJSON } from './lib/parseJSON';
 import { recordUsage } from './lib/cost';
 import { log } from './lib/logger';
+import { OffTopicError } from './lib/errors';
 import { officialPolicyAgent } from './agents/officialPolicy';
 import { recentChangesAgent } from './agents/recentChanges';
 import { communityIntelAgent } from './agents/communityIntel';
@@ -35,6 +36,11 @@ function sanitizeFreeform(text: string): string {
     .trim();
 }
 
+// Strip angle brackets from short fields to prevent XML tag injection into the orchestrator prompt template
+function sanitizeShortField(text: string): string {
+  return text.replace(/[<>]/g, '').trim();
+}
+
 export async function runOrchestrator(
   input: VisaInput,
   client: Anthropic,
@@ -45,6 +51,9 @@ export async function runOrchestrator(
 ): Promise<AgentResultEnvelope> {
   const sanitizedInput: VisaInput = {
     ...input,
+    nationality: sanitizeShortField(input.nationality),
+    destination: sanitizeShortField(input.destination),
+    visaType: input.visaType ? sanitizeShortField(input.visaType) : undefined,
     freeform: sanitizeFreeform(input.freeform),
   };
 
@@ -63,7 +72,8 @@ export async function runOrchestrator(
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
+      system: prompt.system,
+      messages: [{ role: 'user', content: prompt.user }],
     });
 
     recordUsage({
@@ -75,6 +85,10 @@ export async function runOrchestrator(
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '{}';
     visaRequest = parseJSON<VisaRequest>(raw);
+
+    if (visaRequest.offTopic) {
+      throw new OffTopicError();
+    }
   }
 
   onParsed?.(visaRequest);
