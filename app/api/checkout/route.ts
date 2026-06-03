@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { getStripe, PRICES } from '@/src/lib/stripe';
 import { createShellBrief } from '@/src/lib/saveBrief';
+import { isEarlyAccessUser, redeemEarlyAccessCode, incrementEarlyAccessUsage } from '@/src/lib/earlyAccess';
+import { getSupabase } from '@/src/lib/supabase';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 
@@ -25,7 +27,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const { nationality, destination, visaType, freeform, depth } = body as Record<string, string>;
+  const { nationality, destination, visaType, freeform, depth, inviteCode } = body as Record<string, string>;
 
   if (!nationality || !destination || !freeform) {
     return new Response(JSON.stringify({ error: 'nationality, destination, and freeform are required' }), {
@@ -63,6 +65,53 @@ export async function POST(req: Request) {
     });
   }
 
+  // Early access: redeem code at checkout if provided, or detect returning early access user
+  let earlyAccess = false;
+  if (inviteCode?.trim()) {
+    const redeemResult = await redeemEarlyAccessCode(userId, inviteCode.trim());
+    if (!redeemResult.ok) {
+      await log.warn('checkout: early access code rejected', { userId, codeAttempted: inviteCode.trim(), reason: redeemResult.error });
+      return new Response(JSON.stringify({ error: redeemResult.error }), {
+        status: redeemResult.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    earlyAccess = true;
+  } else {
+    earlyAccess = await isEarlyAccessUser(userId);
+  }
+
+  if (earlyAccess) {
+    try {
+      const { error: jobError } = await getSupabase()
+        .from('brief_jobs')
+        .insert({ brief_id: briefId });
+
+      if (jobError) throw new Error(jobError.message);
+
+      await getSupabase()
+        .from('briefs')
+        .update({ payment_status: 'queued' })
+        .eq('id', briefId);
+
+      await incrementEarlyAccessUsage(userId);
+
+      await trackEvent('early_access.brief_started', { userId, briefId, depth, destination, nationality });
+      log.info('checkout: early access bypass', { briefId, depth, userId, codeUsed: inviteCode?.trim() || 'returning_user' });
+
+      return new Response(
+        JSON.stringify({ checkoutUrl: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}` }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    } catch (err) {
+      log.error('checkout: early access job queue failed', { briefId, error: err instanceof Error ? err.message : String(err) });
+      return new Response(JSON.stringify({ error: 'Failed to queue brief. Please try again.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
   try {
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
@@ -76,7 +125,7 @@ export async function POST(req: Request) {
         quantity: 1,
       }],
       metadata: { brief_id: briefId, user_id: userId, nationality, destination, depth },
-      success_url: `${baseUrl}/brief/pending?brief_id=${briefId}`,
+      success_url: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}`,
       cancel_url: `${baseUrl}/?cancelled=true`,
     });
 

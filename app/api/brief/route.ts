@@ -12,6 +12,7 @@ import { saveBrief } from '@/src/lib/saveBrief';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
+import { isEarlyAccessUser, incrementEarlyAccessUsage } from '@/src/lib/earlyAccess';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
@@ -107,8 +108,11 @@ async function briefHandler(req: Request) {
 
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
+  // Invite code users bypass Quick cap — check once here, reuse at completion for usage tracking
+  const earlyAccess = resolvedDepth === 'quick' ? await isEarlyAccessUser(userId).catch(() => false) : false;
+
   // Free tier daily cap — Supabase op, runs in DRY_RUN too (CLAUDE.md: Supabase saves run in DRY_RUN)
-  if (resolvedDepth === 'quick') {
+  if (resolvedDepth === 'quick' && !earlyAccess) {
     try {
       const cap = await checkFreeTierCap(userId, dailyLimit);
       if (!cap.allowed) {
@@ -164,9 +168,15 @@ async function briefHandler(req: Request) {
           }
 
           if (resolvedDepth === 'quick') {
-            incrementFreeTierCount(userId).catch((err) => {
-              log.error('free tier count increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
-            });
+            if (earlyAccess) {
+              incrementEarlyAccessUsage(userId).catch((err) => {
+                log.error('early access usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
+              });
+            } else {
+              incrementFreeTierCount(userId).catch((err) => {
+                log.error('free tier count increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
+              });
+            }
           }
 
           send({ type: 'complete', brief: dryBrief, briefId: dryBriefId });
@@ -217,11 +227,17 @@ async function briefHandler(req: Request) {
           }
         }
 
-        // Increment free tier counter after successful brief
+        // Increment usage counter after successful brief
         if (resolvedDepth === 'quick') {
-          incrementFreeTierCount(userId).catch((err) => {
-            log.error('free tier count increment failed', { error: err instanceof Error ? err.message : String(err) });
-          });
+          if (earlyAccess) {
+            incrementEarlyAccessUsage(userId).catch((err) => {
+              log.error('early access usage increment failed', { error: err instanceof Error ? err.message : String(err) });
+            });
+          } else {
+            incrementFreeTierCount(userId).catch((err) => {
+              log.error('free tier count increment failed', { error: err instanceof Error ? err.message : String(err) });
+            });
+          }
         }
 
         send({ type: 'complete', brief, briefId });

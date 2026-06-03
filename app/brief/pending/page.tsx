@@ -190,7 +190,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
   );
 }
 
-function HandoffState({ briefId }: { briefId: string | null }) {
+function HandoffState({ briefId, depth }: { briefId: string | null; depth: string }) {
   const router = useRouter();
   return (
     <PendingShell>
@@ -203,7 +203,7 @@ function HandoffState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading>Still Working</HudHeading>
         <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is generating in the background — this can take a few minutes for deep research.
+          Your brief is generating in the background — this can take {depth === 'deep' ? 'a few minutes' : 'a minute or two'} for {depth === 'deep' ? 'deep' : 'standard'} research.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
           You can safely navigate away. Head to My Briefs — a loading indicator will show until it&apos;s ready.
@@ -289,6 +289,7 @@ function PendingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const briefId = searchParams.get('brief_id');
+  const depth = searchParams.get('depth') ?? 'standard';
 
   const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('dev') === 'true';
   // dev-only error simulation via ?sim=error or ?sim=timeout
@@ -417,7 +418,7 @@ function PendingContent() {
 
   if (state === 'timeout') return <TimedOutState briefId={briefId} />;
   if (state === 'error')   return <ErrorState briefId={briefId} />;
-  if (state === 'handoff') return <HandoffState briefId={briefId} />;
+  if (state === 'handoff') return <HandoffState briefId={briefId} depth={depth} />;
   return <GeneratingState completedCount={completedCount} />;
 }
 
