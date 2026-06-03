@@ -26,6 +26,8 @@ const VALID_EVENTS = [
   'poll.job_claimed',
   'free-cap.reached',
   'input.oversized',
+  'early-access.redeemed',
+  'early-access.invalid-code',
 ];
 
 export async function GET(req: Request) {
@@ -189,6 +191,23 @@ export async function GET(req: Request) {
       const data = { field: 'freeform', length: { freeform: 9999, nationality: 12, destination: 9 }, ip: '1.2.3.4', sim: true };
       await log.warn('input.oversized', data);
       fired = { level: 'warn', message: 'input.oversized', ...data };
+      break;
+    }
+
+    case 'early-access.redeemed': {
+      const fakeCode = 'sim-code-aaaa-bbbb-cccc-000000000001';
+      const data = { userId: FAKE_USER_ID, codeUsed: fakeCode, sim: true };
+      await trackEvent('early_access.redeemed', data);
+      log.info('early-access: code redeemed', data);
+      fired = { event: 'early_access.redeemed', ...data };
+      break;
+    }
+
+    case 'early-access.invalid-code': {
+      const fakeCode = 'sim-code-INVALID-0000-0000-000000000000';
+      const data = { userId: FAKE_USER_ID, codeAttempted: fakeCode, reason: 'Invalid invite code.', sim: true };
+      await log.warn('early-access: redemption failed', data);
+      fired = { level: 'warn', message: 'early-access: redemption failed', ...data };
       break;
     }
 
