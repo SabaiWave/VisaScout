@@ -258,9 +258,15 @@ function AppContent() {
     devSim === 'free-cap' ? 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
+  const [inviteCodeError, setInviteCodeError] = useState<string | null>(
+    devSim === 'invalid-code' ? 'Invalid invite code.' :
+    devSim === 'code-already-used' ? 'This invite code has already been used.' : null
+  );
   const [capReached, setCapReached] = useState(devSim === 'free-cap');
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingCap, setIsCheckingCap] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [earlyAccess, setEarlyAccess] = useState(false);
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
@@ -384,7 +390,7 @@ function AppContent() {
         const res = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
+          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth, inviteCode: inviteCode.trim() || undefined }),
         });
         if (!res.ok) {
           let errMsg = 'Failed to start checkout. Try again or contact support.';
@@ -394,6 +400,12 @@ function AppContent() {
               const err = await res.json() as { error?: string };
               if (err.error) errMsg = err.error;
             } catch { /* fall through */ }
+          }
+          // Invite code errors: stay on form so user can fix the code
+          if (inviteCode.trim() && (res.status === 400 || res.status === 409)) {
+            setInviteCodeError(errMsg);
+            setPhase('idle');
+            return;
           }
           throw new Error(errMsg);
         }
@@ -434,6 +446,19 @@ function AppContent() {
     if (devSim !== 'free-cap') return;
     fetch('/api/debug/sim?event=free-cap.reached').catch(() => {});
   }, [devSim]);
+
+  useEffect(() => {
+    if (devSim !== 'invalid-code' && devSim !== 'code-already-used') return;
+    fetch('/api/debug/sim?event=early-access.invalid-code').catch(() => {});
+  }, [devSim]);
+
+  useEffect(() => {
+    if (!isSignedIn || !isLoaded) return;
+    fetch('/api/user/cap')
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { earlyAccess?: boolean } | null) => { if (data?.earlyAccess) setEarlyAccess(true); })
+      .catch(() => {});
+  }, [isSignedIn, isLoaded]);
 
   function handleReset() {
     if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
@@ -579,6 +604,35 @@ function AppContent() {
                   </p>
                 </div>
 
+                {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (earlyAccess || depth === 'standard' || depth === 'deep') && (
+                  <div>
+                    {earlyAccess ? (
+                      <p className="text-xs font-bold uppercase flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', color: 'var(--color-success)' }}>
+                        <span>✓</span> Invite access active
+                      </p>
+                    ) : (
+                      <>
+                        <label style={LABEL_STYLE}>
+                          Invite Code
+                          <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={inviteCode}
+                          onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
+                          placeholder="Invite code"
+                          style={{ ...INPUT_STYLE, border: `1px solid ${inviteCodeError ? 'var(--color-error)' : 'var(--color-border-strong)'}` }}
+                        />
+                        {inviteCodeError && (
+                          <p className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
+                            <span>▸</span> {inviteCodeError}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
                 {capReached && (
                   <div
                     className="rounded-lg px-4 py-3 border"
@@ -601,8 +655,8 @@ function AppContent() {
                   {isCheckingCap
                     ? 'Checking…'
                     : phase === 'redirecting'
-                      ? 'Redirecting to checkout…'
-                      : depth === 'quick'
+                      ? 'Starting…'
+                      : depth === 'quick' || earlyAccess
                         ? 'Generate Brief · Free'
                         : depth === 'standard'
                           ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`

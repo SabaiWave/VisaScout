@@ -8,6 +8,7 @@ import { NavLink } from '@/app/components/ui/NavLink';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
 import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
+import { RevokeEarlyAccessButton } from '@/app/components/admin/RevokeEarlyAccessButton';
 
 async function getAdminMetrics() {
   const supabase = getSupabase();
@@ -96,6 +97,24 @@ interface StuckBrief {
   job: { id: string; status: string; started_at: string | null; error: string | null } | null;
 }
 
+interface EarlyAccessUser {
+  id: string;
+  user_id: string;
+  code_used: string;
+  redeemed_at: string;
+  briefs_generated: number;
+  last_brief_at: string | null;
+  revoked_at: string | null;
+}
+
+async function getEarlyAccessUsers(): Promise<EarlyAccessUser[]> {
+  const { data } = await getSupabase()
+    .from('early_access_users')
+    .select('id, user_id, code_used, redeemed_at, briefs_generated, last_brief_at, revoked_at')
+    .order('redeemed_at', { ascending: false });
+  return (data ?? []) as EarlyAccessUser[];
+}
+
 async function getStuckBriefs(): Promise<StuckBrief[]> {
   const supabase = getSupabase();
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -132,11 +151,12 @@ export default async function AdminPage() {
   }
 
   const client = await clerkClient();
-  const [userCount, recentSignupsResult, metrics, stuckBriefs] = await Promise.all([
+  const [userCount, recentSignupsResult, metrics, stuckBriefs, earlyAccessUsers] = await Promise.all([
     client.users.getCount(),
     client.users.getUserList({ limit: 10, orderBy: '-created_at' }),
     getAdminMetrics(),
     getStuckBriefs(),
+    getEarlyAccessUsers(),
   ]);
 
   const { briefs, ipLogs, jobs, freeTierToday, freeTierWeek, freeTierAllTime, subscriberCount } = metrics;
@@ -317,6 +337,49 @@ export default async function AdminPage() {
                           {step === 0 && (
                             <span style={{ color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>Pipeline running…</span>
                           )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Section>
+
+        {/* Invite code users */}
+        <Section title="INVITE CODE USERS">
+          {earlyAccessUsers.length === 0 ? (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No invite code users yet.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+                <thead>
+                  <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
+                    {['User ID', 'Code', 'Redeemed', 'Briefs', 'Last Brief', 'Status', ''].map(h => (
+                      <th key={h} style={{ padding: '0.4rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {earlyAccessUsers.map((u) => {
+                    const isRevoked = !!u.revoked_at;
+                    return (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-muted)', color: isRevoked ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>{u.user_id.slice(0, 18)}…</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>{u.code_used.slice(0, 8)}…</td>
+                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>{new Date(u.redeemed_at).toLocaleDateString()}</td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>{u.briefs_generated}</td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+                          {u.last_brief_at ? new Date(u.last_brief_at).toLocaleDateString() : '—'}
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem' }}>
+                          <span style={{ color: isRevoked ? 'var(--color-error)' : 'var(--color-success)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '0.65rem' }}>
+                            {isRevoked ? 'Revoked' : 'Active'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
+                          {!isRevoked && <RevokeEarlyAccessButton userId={u.user_id} />}
                         </td>
                       </tr>
                     );

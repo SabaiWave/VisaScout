@@ -203,6 +203,8 @@ export default function DevPage() {
             <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
             <DevButton label="Pending: Handoff ↗"        sublabel="/brief/pending?sim=handoff" href="/brief/pending?sim=handoff" newTab />
             <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
+            <DevButton label="Main: Invalid Code ↗"       sublabel="/app?sim=invalid-code"      href="/app?sim=invalid-code"      newTab />
+            <DevButton label="Main: Code Already Used ↗"  sublabel="/app?sim=code-already-used" href="/app?sim=code-already-used" newTab />
           </DevGrid>
           <div className="mt-3 mb-2">
             <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
@@ -277,6 +279,13 @@ export default function DevPage() {
               newTab
               accent
             />
+            <DevButton
+              label="▲ Invalid Invite Code ↗"
+              sublabel="level:warn · bad invite code"
+              href="/api/debug/sim?event=early-access.invalid-code"
+              newTab
+              accent
+            />
           </DevGrid>
           <div className="mt-3 mb-2">
             <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
@@ -306,6 +315,12 @@ export default function DevPage() {
               label="Brief Generated Degraded ↗"
               sublabel="event:brief.generated · degraded:true"
               href="/api/debug/sim?event=brief.generated.degraded"
+              newTab
+            />
+            <DevButton
+              label="Invite Code Redeemed ↗"
+              sublabel="event:early_access.redeemed + log:info"
+              href="/api/debug/sim?event=early-access.redeemed"
               newTab
             />
           </DevGrid>
