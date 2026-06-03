@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
@@ -14,6 +15,14 @@ import { isAdminUser } from '@/src/lib/adminAccess';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
+
+const BriefInputSchema = z.object({
+  nationality: z.string().min(1).max(100),
+  destination: z.string().min(1).max(100),
+  visaType: z.string().max(100).optional(),
+  freeform: z.string().min(1).max(2000),
+  depth: z.enum(['quick', 'standard', 'deep']).optional(),
+});
 
 const SUPPORTED_DESTINATIONS = new Set([
   'thailand', 'vietnam', 'indonesia', 'malaysia', 'philippines',
@@ -59,25 +68,15 @@ async function briefHandler(req: Request) {
     });
   }
 
-  const { nationality, destination, visaType, freeform, depth } = body as Record<string, string>;
-
-  if (!nationality || !destination || !freeform) {
-    return new Response(JSON.stringify({ error: 'nationality, destination, and freeform are required' }), {
+  const parsed = BriefInputSchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  if (freeform.length > 2000 || nationality.length > 100 || destination.length > 100 || (visaType && visaType.length > 100)) {
-    const field = freeform.length > 2000 ? 'freeform' : nationality.length > 100 ? 'nationality' : visaType && visaType.length > 100 ? 'visaType' : 'destination';
-    const forwarded = req.headers.get('x-forwarded-for');
-    const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-    await log.warn('input.oversized', { field, length: { freeform: freeform.length, nationality: nationality.length, destination: destination.length }, ip });
-    return new Response(JSON.stringify({ error: 'Input exceeds maximum allowed length' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const { nationality, destination, visaType, freeform, depth } = parsed.data;
 
   if (!SUPPORTED_DESTINATIONS.has(destination.trim().toLowerCase())) {
     return new Response(
@@ -101,10 +100,7 @@ async function briefHandler(req: Request) {
     );
   }
 
-  const validDepths = ['quick', 'standard', 'deep'] as const;
-  const resolvedDepth = validDepths.includes(depth as 'quick' | 'standard' | 'deep')
-    ? (depth as 'quick' | 'standard' | 'deep')
-    : 'standard';
+  const resolvedDepth = depth ?? 'standard';
 
   const dryRun = process.env.DRY_RUN === 'true';
   const isAdmin = isAdminUser(userId);
