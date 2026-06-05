@@ -24,17 +24,17 @@ function Hero() {
       />
 
       <div className="relative z-10 max-w-[860px] mx-auto">
-        {/* Eyebrow */}
+        {/* HUD region indicator */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-wide"
+          className="inline-flex items-center gap-2 mb-8 text-sm font-bold uppercase"
           style={{
-            background: 'var(--color-secondary-subtle)',
-            color: 'var(--color-secondary-light)',
+            color: 'var(--color-text-tertiary)',
             fontFamily: 'var(--font-mono)',
-            border: '1px solid rgba(99,102,241,0.2)',
+            letterSpacing: '0.04em',
           }}
         >
-          <span className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)' }} />
+          <span style={{ color: 'var(--color-secondary)' }}>//</span>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ background: 'var(--color-success)' }} />
           <span>{copy.hero.eyebrow}</span>
         </div>
 
@@ -89,71 +89,49 @@ function Hero() {
 
 // ─── Features ──────────────────────────────────────────────────────────────
 
-const FEATURE_ICONS = [
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-    </svg>
-  ),
-];
-
 function Features() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle={copy.features.subtitle}>
+        <SectionHeading className="mb-10" subtitle={copy.features.subtitle}>
           {copy.features.title}
         </SectionHeading>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Intel signal row — each channel distinct by tag + body, no structural repetition */}
+        <div
+          className="rounded-xl border divide-y"
+          style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
+        >
           {copy.features.cards.map((card, i) => (
             <div
               key={card.title}
-              className="brief-section p-6 rounded-xl border"
-              style={{
-                background: 'var(--color-bg-base)',
-                borderColor: 'var(--color-border)',
-                borderLeft: '3px solid var(--color-secondary)',
-                boxShadow: 'var(--shadow-card)',
-              }}
+              className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 px-5 py-5"
+              style={{ borderColor: 'var(--color-border)' }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ background: 'var(--color-secondary-subtle)', color: 'var(--color-secondary-light)' }}
-                >
-                  {FEATURE_ICONS[i]}
-                </div>
-                <span
-                  className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                  style={{
-                    background: 'var(--color-secondary-subtle)',
-                    color: 'var(--color-secondary-light)',
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                >
-                  {card.tag}
-                </span>
-              </div>
-              <h3
-                className="text-sm font-bold mb-2 uppercase tracking-wider"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              <div
+                className="flex-shrink-0 text-xs font-bold uppercase"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.04em',
+                  color: 'var(--color-secondary)',
+                  minWidth: '90px',
+                  paddingTop: '2px',
+                }}
               >
-                {card.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {card.body}
-              </p>
+                <span style={{ color: 'var(--color-text-tertiary)' }}>0{i + 1} /</span> {card.tag}
+              </div>
+              <div className="hidden sm:block w-px self-stretch" style={{ background: 'var(--color-border-strong)', flexShrink: 0 }} />
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-bold mb-1 uppercase"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
+                >
+                  {card.title}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {card.body}
+                </p>
+              </div>
             </div>
           ))}
         </div>

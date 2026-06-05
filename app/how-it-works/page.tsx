@@ -264,7 +264,7 @@ export default function HowItWorksPage() {
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             No card required.
           </p>
-          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: '#0A0A0A' }}>
+          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
             <Link href="/app?depth=quick">Start free</Link>
           </Button>
         </section>

@@ -174,7 +174,7 @@ export function SearchableCombobox({
             background: 'var(--color-bg-elevated)',
             border: '1px solid var(--color-border-strong)',
             borderRadius: 'var(--radius-md)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            boxShadow: 'var(--shadow-dropdown)',
             margin: 0,
             padding: '4px',
             listStyle: 'none',

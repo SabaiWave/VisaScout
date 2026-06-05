@@ -94,6 +94,8 @@
   --shadow-card:       0 0 24px rgba(99,102,241,0.12);
   --shadow-card-hover: 0 0 0 1px rgba(99,102,241,0.25), 0 0 32px rgba(99,102,241,0.22);
   --shadow-amber:      0 0 16px rgba(245,158,11,0.06);
+  --shadow-dropdown:   0 8px 24px rgba(0,0,0,0.15);
+  --color-border-amber: rgba(245,158,11,0.2);
 
   /* Radius */
   --radius-sm:   4px;
@@ -166,6 +168,8 @@ html[data-theme="light"] {
   --shadow-card:             0 4px 12px rgba(99, 102, 241, 0.04);
   --shadow-card-hover:       0 4px 16px rgba(99, 102, 241, 0.08), 0 0 0 1px rgba(99,102,241,0.12);
   --shadow-amber:            0 2px 8px rgba(245, 158, 11, 0.08);
+  --shadow-dropdown:         0 8px 24px rgba(0,0,0,0.08);
+  --color-border-amber:      rgba(245,158,11,0.3);
 
   /* Hero bloom */
   --hero-bloom-bg: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 70%);

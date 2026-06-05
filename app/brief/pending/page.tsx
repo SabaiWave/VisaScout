@@ -92,7 +92,7 @@ function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
   return (
     <div
       className="inline-flex items-center justify-center w-20 h-20 mb-6"
-      style={{ background: bg, borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}
+      style={{ background: bg, borderRadius: '4px', border: '1px solid var(--color-border-muted)' }}
     >
       {children}
     </div>
@@ -138,7 +138,7 @@ function SkeletonAgentRow({ label, index, done, completedCount }: { label: strin
         className="text-xs font-bold uppercase flex-1"
         style={{
           fontFamily: 'var(--font-mono)',
-          letterSpacing: '0.08em',
+          letterSpacing: '0.04em',
           color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
         }}
       >
@@ -176,7 +176,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Cross-referencing official policy, enforcement records, and community intel.
           </p>
-          <p className="text-xs uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>
+          <p className="text-xs uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
             Research depth determines duration — sit tight.
           </p>
         </div>
