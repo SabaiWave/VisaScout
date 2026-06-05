@@ -31,14 +31,11 @@ export async function GET() {
 
   const ok = keys.anthropic && keys.tavily && keys.clerk && keys.supabase;
 
-  const body = {
-    ok,
-    env:     process.env.NODE_ENV ?? 'unknown',
-    version: VERSION,
-    dry_run: process.env.DRY_RUN === 'true',
-    keys,
-    timestamp: new Date().toISOString(),
-  };
+  // BetterStack only needs ok + version. Full keys payload is reconnaissance risk if public.
+  const base = { ok, version: VERSION, timestamp: new Date().toISOString() };
+  const body = process.env.DEBUG_ALLOWED
+    ? { ...base, env: process.env.NODE_ENV ?? 'unknown', dry_run: process.env.DRY_RUN === 'true', keys }
+    : base;
 
   return Response.json(body, { status: ok ? 200 : 503 });
 }

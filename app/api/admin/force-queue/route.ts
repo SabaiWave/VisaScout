@@ -1,7 +1,10 @@
+import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { log } from '@/src/lib/logger';
+
+const ForceQueueSchema = z.object({ briefId: z.string().uuid() });
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -9,10 +12,11 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { briefId } = await req.json() as { briefId?: string };
-  if (!briefId) {
-    return Response.json({ error: 'briefId required' }, { status: 400 });
-  }
+  let body: unknown;
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid JSON body' }, { status: 400 }); }
+  const parsed = ForceQueueSchema.safeParse(body);
+  if (!parsed.success) return Response.json({ error: 'briefId must be a valid UUID' }, { status: 400 });
+  const { briefId } = parsed.data;
 
   const supabase = getSupabase();
 

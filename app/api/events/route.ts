@@ -1,5 +1,11 @@
+import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { trackEvent } from '@/src/lib/analytics';
+
+const EventSchema = z.object({
+  event: z.string().min(1).max(100),
+  props: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
+});
 
 export const runtime = 'nodejs';
 
@@ -24,10 +30,15 @@ export async function POST(req: Request) {
     });
   }
 
-  const { event, props } = body as {
-    event: string;
-    props?: Record<string, string | number | boolean | null | undefined>;
-  };
+  const parsed = EventSchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: 'Invalid request' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const { event, props } = parsed.data;
 
   if (!ALLOWED_EVENTS.has(event)) {
     return new Response(JSON.stringify({ error: 'Unknown event' }), {
