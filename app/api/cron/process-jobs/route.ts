@@ -15,13 +15,14 @@ export const maxDuration = 300;
 
 export async function GET(req: Request) {
   // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
-  // In local dev CRON_SECRET is not set, so skip the check
+  // CRON_SECRET must be set in all environments — use any non-empty value in local dev
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!cronSecret) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const authHeader = req.headers.get('authorization');
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Pick up one pending job at a time — claim it atomically

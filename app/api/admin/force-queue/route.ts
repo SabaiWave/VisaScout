@@ -5,8 +5,7 @@ import { log } from '@/src/lib/logger';
 
 export async function POST(req: Request) {
   const { userId } = await auth();
-  const isDev = process.env.ENVIRONMENT === 'development';
-  if (!userId || (!isAdminUser(userId) && !isDev)) {
+  if (!userId || !isAdminUser(userId)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

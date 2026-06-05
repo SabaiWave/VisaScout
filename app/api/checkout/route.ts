@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { getStripe, PRICES } from '@/src/lib/stripe';
 import { createShellBrief } from '@/src/lib/saveBrief';
@@ -5,6 +6,15 @@ import { isEarlyAccessUser, redeemEarlyAccessCode, incrementEarlyAccessUsage } f
 import { getSupabase } from '@/src/lib/supabase';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
+
+const CheckoutSchema = z.object({
+  nationality: z.string().min(1).max(100),
+  destination: z.string().min(1).max(100),
+  visaType: z.string().max(100).optional(),
+  freeform: z.string().min(1).max(2000),
+  depth: z.enum(['standard', 'deep']),
+  inviteCode: z.string().max(100).optional(),
+});
 
 export const runtime = 'nodejs';
 
@@ -27,21 +37,15 @@ export async function POST(req: Request) {
     });
   }
 
-  const { nationality, destination, visaType, freeform, depth, inviteCode } = body as Record<string, string>;
-
-  if (!nationality || !destination || !freeform) {
-    return new Response(JSON.stringify({ error: 'nationality, destination, and freeform are required' }), {
+  const parsed = CheckoutSchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: 'Invalid request body', details: parsed.error.flatten().fieldErrors }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  if (depth !== 'standard' && depth !== 'deep') {
-    return new Response(JSON.stringify({ error: 'Checkout is only for standard or deep depth. Quick is free.' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+  const { nationality, destination, visaType, freeform, depth, inviteCode } = parsed.data;
 
   const proto = req.headers.get('x-forwarded-proto') ?? 'http';
   const host = req.headers.get('host') ?? 'localhost:3000';
