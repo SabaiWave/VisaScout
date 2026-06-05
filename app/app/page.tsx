@@ -145,7 +145,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
       />
       <span
         className="text-xs font-bold uppercase flex-1"
-        style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)' }}
+        style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)' }}
       >
         {AGENT_DISPLAY[entry.agent] ?? entry.agent}
       </span>
