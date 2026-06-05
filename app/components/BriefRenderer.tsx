@@ -340,6 +340,19 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
         )}
         <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
+        {brief.recommendedAction.stalePolicyWarning && (
+          <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(245,158,11,0.25)' }}>
+            <p className="text-xs font-bold leading-relaxed" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>
+              {brief.recommendedAction.stalePolicyWarning}
+            </p>
+            {brief.metadata.depth === 'quick' && (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                Standard and Deep include a dedicated Recent Changes agent with retry.{' '}
+                <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Run Standard →</a>
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <VisaOptionsSection options={brief.visaOptions} forPrint={forPrint} />
