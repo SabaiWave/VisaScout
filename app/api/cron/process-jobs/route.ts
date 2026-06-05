@@ -1,5 +1,7 @@
+import { auth } from '@clerk/nextjs/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getSupabase } from '@/src/lib/supabase';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
@@ -14,14 +16,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 export async function GET(req: Request) {
-  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
-  // CRON_SECRET must be set in all environments — use any non-empty value in local dev
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  // Manual fallback trigger — admin only. No Vercel cron schedule configured.
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
