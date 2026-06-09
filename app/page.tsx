@@ -24,17 +24,17 @@ function Hero() {
       />
 
       <div className="relative z-10 max-w-[860px] mx-auto">
-        {/* HUD region indicator */}
+        {/* Eyebrow */}
         <div
-          className="inline-flex items-center gap-2 mb-8 text-sm font-bold uppercase"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold mb-8 uppercase tracking-wide"
           style={{
-            color: 'var(--color-text-tertiary)',
+            background: 'var(--color-secondary-subtle)',
+            color: 'var(--color-secondary-light)',
             fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.04em',
+            border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
-          <span style={{ color: 'var(--color-secondary)' }}>//</span>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ background: 'var(--color-success)' }} />
+          <span className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: 'var(--color-success)' }} />
           <span>{copy.hero.eyebrow}</span>
         </div>
 
@@ -97,41 +97,30 @@ function Features() {
           {copy.features.title}
         </SectionHeading>
 
-        {/* Intel signal row — each channel distinct by tag + body, no structural repetition */}
         <div
           className="rounded-xl border divide-y"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
         >
-          {copy.features.cards.map((card, i) => (
+          {copy.features.cards.map((card) => (
             <div
               key={card.title}
-              className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 px-5 py-5"
-              style={{ borderColor: 'var(--color-border)' }}
+              className="px-5 py-5 flex flex-col gap-1"
             >
-              <div
-                className="flex-shrink-0 text-xs font-bold uppercase"
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.04em',
-                  color: 'var(--color-secondary)',
-                  minWidth: '90px',
-                  paddingTop: '2px',
-                }}
+              <p
+                className="text-xs font-bold uppercase mb-1"
+                style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}
               >
-                <span style={{ color: 'var(--color-text-tertiary)' }}>0{i + 1} /</span> {card.tag}
-              </div>
-              <div className="hidden sm:block w-px self-stretch" style={{ background: 'var(--color-border-strong)', flexShrink: 0 }} />
-              <div className="flex-1 min-w-0">
-                <p
-                  className="text-sm font-bold mb-1 uppercase"
-                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
-                >
-                  {card.title}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                  {card.body}
-                </p>
-              </div>
+                {card.tag}
+              </p>
+              <p
+                className="text-base font-bold uppercase"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
+              >
+                {card.title}
+              </p>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                {card.body}
+              </p>
             </div>
           ))}
         </div>

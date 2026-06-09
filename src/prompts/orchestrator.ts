@@ -20,7 +20,7 @@ Freeform context: ${input.freeform}
 </user_input>
 
 Parse the above into a structured VisaRequest JSON object. Extract:
-- normalizedNationality: standardized English country name for the nationality
+- normalizedNationality: country name, never a demonym ("American" → "United States", "Thai" → "Thailand", "British" → "United Kingdom")
 - normalizedDestination: standardized English country name for the destination
 - intendedDuration: how long they plan to stay (e.g. "28 days", "3 months")
 - entryExitPattern: how they plan to enter/exit (e.g. "single entry", "border run to Malaysia", "multiple entries")

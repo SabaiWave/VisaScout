@@ -145,7 +145,7 @@ html[data-theme="light"] {
   /* Text */
   --color-text-primary:      #0A0A0A;
   --color-text-secondary:    #4B5563;
-  --color-text-tertiary:     #9CA3AF;
+  --color-text-tertiary:     #6B7280;
 
   /* Status — ink style: darker for text on light backgrounds */
   --color-status-ready:      #166534;

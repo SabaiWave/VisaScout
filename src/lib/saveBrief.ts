@@ -52,6 +52,8 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
   const { error } = await getSupabase()
     .from('briefs')
     .update({
+      nationality: input.visaRequest.normalizedNationality,
+      destination: input.visaRequest.normalizedDestination,
       visa_request: input.visaRequest,
       brief_markdown: JSON.stringify(input.brief),
       conflict_report: input.brief.conflictReport,
