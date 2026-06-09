@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
   log.info('admin.clear_briefs', {
     callerUserId: callerId,
     targetUserId,
-    isDev,
     briefs: cleared.briefs,
     brief_jobs: cleared.brief_jobs,
     free_brief_daily: cleared.free_brief_daily,
@@ -66,7 +65,6 @@ export async function POST(req: NextRequest) {
   await trackEvent('admin.clear_briefs', {
     callerUserId: callerId,
     targetUserId,
-    isDev,
     briefs: cleared.briefs,
     brief_jobs: cleared.brief_jobs,
     free_brief_daily: cleared.free_brief_daily,

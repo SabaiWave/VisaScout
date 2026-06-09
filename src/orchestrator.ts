@@ -112,7 +112,7 @@ export async function runOrchestrator(
 
   const [
     officialPolicyResult,
-    recentChangesResult,
+    recentChangesResultInitial,
     communityIntelResult,
     entryRequirementsResult,
     borderRunResult,
@@ -123,6 +123,21 @@ export async function runOrchestrator(
     runWithStatus('entryRequirements', () => entryRequirementsAgent(visaRequest, client, depth)),
     runWithStatus('borderRun', () => borderRunAgent(visaRequest, client, depth)),
   ]);
+
+  // Retry Recent Changes once on Standard/Deep — Quick skips retry for cost reasons
+  let recentChangesResult = recentChangesResultInitial;
+  if (depth !== 'quick') {
+    const initialFailed =
+      recentChangesResultInitial.status === 'rejected' ||
+      (recentChangesResultInitial.status === 'fulfilled' && recentChangesResultInitial.value.status === 'failed');
+    if (initialFailed) {
+      log.info('recentChanges:retry', { userId, depth });
+      const [retried] = await Promise.allSettled([
+        runWithStatus('recentChanges', () => recentChangesAgent(visaRequest, client, depth)),
+      ]);
+      recentChangesResult = retried;
+    }
+  }
 
   function unwrap<T>(
     result: PromiseSettledResult<AgentResult<T>>,

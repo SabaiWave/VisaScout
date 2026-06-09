@@ -32,12 +32,29 @@ describe('checkRateLimit', () => {
     else process.env.UPSTASH_REDIS_REST_TOKEN = originalToken;
   });
 
-  it('returns allowed:true when env vars not set — graceful no-op', async () => {
+  it('activates in-memory fallback when Upstash env vars not set — allows requests within limit', async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
     const { checkRateLimit } = await import('@/src/lib/rateLimit');
-    const result = await checkRateLimit('user_123');
-    expect(result).toEqual({ allowed: true });
+    // First 5 requests for same userId: all allowed
+    for (let i = 0; i < 5; i++) {
+      const result = await checkRateLimit('user_fallback');
+      expect(result.allowed).toBe(true);
+    }
+    expect(mockLimit).not.toHaveBeenCalled();
+  });
+
+  it('in-memory fallback blocks requests beyond the limit', async () => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    const { checkRateLimit } = await import('@/src/lib/rateLimit');
+    // Exhaust the in-memory limit (5 req/60s)
+    for (let i = 0; i < 5; i++) {
+      await checkRateLimit('user_over_limit');
+    }
+    const blocked = await checkRateLimit('user_over_limit');
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.retryAfter).toBeGreaterThan(0);
     expect(mockLimit).not.toHaveBeenCalled();
   });
 

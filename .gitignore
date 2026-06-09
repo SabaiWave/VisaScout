@@ -47,9 +47,16 @@ next-env.d.ts
 CLAUDE.md
 PHASES.md
 DESIGN.md
+PRODUCT.md
 GTM.md
 STRATEGY.md
-/docs
+/handoffs/*
+!handoffs/.gitkeep
+/docs/*
+!docs/.gitkeep
 
 .claude/
 
+
+
+!docs/.gitkeep

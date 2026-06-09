@@ -110,12 +110,12 @@ export function DownloadPdfButton({ briefId, depth, className, forceError }: Dow
           className="rounded-lg px-4 py-3 border"
           style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}
         >
-          <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-error)' }}>
+          <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-error)' }}>
             PDF generation failed
           </p>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             Try again or{' '}
-            <a href="/contact" style={{ color: 'var(--color-primary)' }}>contact support</a>.
+            <a href="/contact" style={{ color: 'var(--color-secondary)' }}>contact support</a>.
           </p>
         </div>
       )}

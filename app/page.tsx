@@ -89,68 +89,35 @@ function Hero() {
 
 // ─── Features ──────────────────────────────────────────────────────────────
 
-const FEATURE_ICONS = [
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-    </svg>
-  ),
-];
-
 function Features() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle={copy.features.subtitle}>
+        <SectionHeading className="mb-10" subtitle={copy.features.subtitle}>
           {copy.features.title}
         </SectionHeading>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {copy.features.cards.map((card, i) => (
+        <div
+          className="rounded-xl border divide-y"
+          style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
+        >
+          {copy.features.cards.map((card) => (
             <div
               key={card.title}
-              className="brief-section p-6 rounded-xl border"
-              style={{
-                background: 'var(--color-bg-base)',
-                borderColor: 'var(--color-border)',
-                borderLeft: '3px solid var(--color-secondary)',
-                boxShadow: 'var(--shadow-card)',
-              }}
+              className="px-5 py-5 flex flex-col gap-1"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ background: 'var(--color-secondary-subtle)', color: 'var(--color-secondary-light)' }}
-                >
-                  {FEATURE_ICONS[i]}
-                </div>
-                <span
-                  className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                  style={{
-                    background: 'var(--color-secondary-subtle)',
-                    color: 'var(--color-secondary-light)',
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                >
-                  {card.tag}
-                </span>
-              </div>
-              <h3
-                className="text-sm font-bold mb-2 uppercase tracking-wider"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              <p
+                className="text-xs font-bold uppercase mb-1"
+                style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}
+              >
+                {card.tag}
+              </p>
+              <p
+                className="text-base font-bold uppercase"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
               >
                 {card.title}
-              </h3>
+              </p>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                 {card.body}
               </p>

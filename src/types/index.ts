@@ -146,6 +146,7 @@ export interface RecommendedAction {
   deadline?: string;
   rationale: string;
   urgency: 'high' | 'medium' | 'low';
+  stalePolicyWarning?: string | null;
 }
 
 export interface EntryRequirementSummary {
