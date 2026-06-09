@@ -5,8 +5,6 @@ import { NavLink } from '@/app/components/ui/NavLink';
 import { MiniFooter } from '@/app/components/ui/MiniFooter';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { ConfidenceBadge } from '@/app/components/ui/Badge';
-import { CardHeading } from '@/app/components/ui/CardHeading';
 
 export const metadata: Metadata = {
   title: 'How It Works — VisaScout',
@@ -51,20 +49,20 @@ const SOURCE_TIERS = [
 const CONFIDENCE_LEVELS = [
   {
     level: 'Well Sourced',
-    definition: 'Two or more official (T1) sources agree — or 4 of 5 research agents reached the same conclusion with no contested claims.',
-    meaning: 'Act on this. The official record is clear and corroborated.',
+    meaning: 'Act on this.',
+    definition: 'The official record is clear and corroborated. Two or more official (T1) sources agree — or 4 of 5 research agents reached the same conclusion with no contested claims.',
     color: 'var(--color-success)',
   },
   {
     level: 'Verify Key Details',
-    definition: 'One T1 source confirmed, or a majority of research agents agree with at most one contested claim.',
-    meaning: 'Reliable for primary rules. Verify the contested item or deadline before travel.',
+    meaning: 'Reliable for primary rules.',
+    definition: 'Verify the contested item or deadline before travel. One T1 source confirmed, or a majority of research agents agree with at most one contested claim.',
     color: 'var(--color-amber)',
   },
   {
     level: 'Verify Before Travel',
-    definition: 'Official sources are sparse for this destination and agent agreement is low. The brief reflects what is publicly available — not a pipeline failure.',
-    meaning: 'Content is directional. Check official embassy or government sources before making any decisions.',
+    meaning: 'Content is directional.',
+    definition: 'Check official embassy or government sources before making any decisions. Official sources are sparse for this destination and agent agreement is low — not a pipeline failure.',
     color: 'var(--color-text-tertiary)',
   },
 ];
@@ -109,63 +107,29 @@ export default function HowItWorksPage() {
             black box.
           </p>
 
-          <div className="space-y-3">
-            {SOURCE_TIERS.map(t => (
+          <div className="rounded-xl border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+            {SOURCE_TIERS.map((t, i) => (
               <div
                 key={t.tier}
-                className="brief-section p-6 rounded-lg border"
-                style={{
-                  background: 'var(--color-bg-elevated)',
-                  borderColor: 'var(--color-border)',
-                  borderLeft: `3px solid ${t.color}`,
-                  boxShadow: 'var(--shadow-card)',
-                }}
+                className="p-6"
+                style={{ borderLeft: `3px solid ${t.color}` }}
               >
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-3">
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        textTransform: 'uppercase' as const,
-                        letterSpacing: '0.05em',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: 'var(--color-bg-overlay)',
-                        color: t.color,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {t.tier}
-                    </span>
-                    <CardHeading>{t.label}</CardHeading>
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase' as const,
-                      letterSpacing: '0.05em',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      background: `color-mix(in srgb, ${t.color} 15%, transparent)`,
-                      color: t.color,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {t.trust}
-                  </span>
-                </div>
-                <p className="text-sm mb-2" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                <p
+                  className="text-xs font-bold uppercase mb-1"
+                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: t.color }}
+                >
+                  Tier {i + 1}
+                </p>
+                <p
+                  className="text-base font-bold uppercase mb-2"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
+                >
+                  {t.label}
+                </p>
+                <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}>
                   {t.examples}
                 </p>
-                <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {t.note}
                 </p>
               </div>
@@ -188,26 +152,24 @@ export default function HowItWorksPage() {
             verify something from official sources, we say so.
           </p>
 
-          <div className="space-y-3">
+          <div className="rounded-xl border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
             {CONFIDENCE_LEVELS.map(c => (
               <div
                 key={c.level}
-                className="brief-section p-6 rounded-lg border"
-                style={{
-                  background: 'var(--color-bg-elevated)',
-                  borderColor: 'var(--color-border)',
-                  borderLeft: `3px solid ${c.color}`,
-                  boxShadow: 'var(--shadow-card)',
-                }}
+                className="p-6"
+                style={{ borderLeft: `3px solid ${c.color}` }}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <ConfidenceBadge level={c.level.toLowerCase() as 'high' | 'medium' | 'low'} prefixed={false} />
-                  <span className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                    {c.definition}
-                  </span>
-                </div>
-                <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <p
+                  className="text-xs font-bold uppercase mb-1"
+                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: c.color }}
+                >
+                  {c.level}
+                </p>
+                <p className="text-base font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
                   {c.meaning}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {c.definition}
                 </p>
               </div>
             ))}
@@ -264,7 +226,7 @@ export default function HowItWorksPage() {
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             No card required.
           </p>
-          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: '#0A0A0A' }}>
+          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
             <Link href="/app?depth=quick">Start free</Link>
           </Button>
         </section>

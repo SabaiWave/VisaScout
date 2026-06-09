@@ -221,7 +221,7 @@ const LABEL_STYLE: React.CSSProperties = {
   fontWeight: 700,
   fontFamily: 'var(--font-mono)',
   textTransform: 'uppercase',
-  letterSpacing: '0.08em',
+  letterSpacing: '0.04em',
   color: 'var(--color-text-secondary)',
   marginBottom: '8px',
 };
@@ -498,7 +498,7 @@ function AppContent() {
           {/* ── Form ── */}
           {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
             <div className="max-w-[560px] mx-auto">
-              <SectionHeading as="h1" className="mb-4">Generate Brief</SectionHeading>
+              <SectionHeading as="h1" size="md" className="mb-4">Generate Brief</SectionHeading>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Official sources. Contradictions flagged. Confidence scored.
               </p>
@@ -638,7 +638,7 @@ function AppContent() {
                     className="rounded-lg px-4 py-3 border"
                     style={{ background: 'var(--color-amber-subtle)', borderColor: 'rgba(245,158,11,0.35)' }}
                   >
-                    <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-amber)' }}>
+                    <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
                       Daily free brief limit reached
                     </p>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
@@ -709,8 +709,8 @@ function AppContent() {
                       </p>
                     ) : (
                       <div className="space-y-2 mt-2">
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'var(--color-secondary-subtle)', width: '85%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'var(--color-secondary-subtle)', width: '60%' }} />
                       </div>
                     )}
                   </div>

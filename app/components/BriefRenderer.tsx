@@ -92,7 +92,7 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
       <div className="mb-2">
         <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
         <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
+          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
           <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
         </div>
       </div>
@@ -327,9 +327,9 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
         className="brief-section border-l-4 rounded-r-lg px-5 py-4"
         style={{
           background: 'rgba(245,158,11,0.06)',
-          borderTop: '1px solid rgba(245,158,11,0.2)',
-          borderRight: '1px solid rgba(245,158,11,0.2)',
-          borderBottom: '1px solid rgba(245,158,11,0.2)',
+          borderTop: '1px solid var(--color-border-amber)',
+          borderRight: '1px solid var(--color-border-amber)',
+          borderBottom: '1px solid var(--color-border-amber)',
           borderLeft: '4px solid var(--color-amber)',
           boxShadow: 'var(--shadow-amber)',
         }}
@@ -341,7 +341,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
         )}
         <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
         {brief.recommendedAction.stalePolicyWarning && (
-          <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(245,158,11,0.25)' }}>
+          <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--color-border-amber)' }}>
             <p className="text-xs font-bold leading-relaxed" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>
               {brief.recommendedAction.stalePolicyWarning}
             </p>
