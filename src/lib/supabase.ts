@@ -6,6 +6,8 @@ let _client: SupabaseClient<any, any, any> | null = null;
 // Server-side singleton using the service role key.
 // Lazy — not initialized at module load so Next.js build succeeds without env vars.
 // Never expose this client to the browser — service role bypasses RLS.
+// VisaScout runs on a shared Supabase project (sbw-dev / sbw-prod). All tables and
+// RPCs live in the visascout schema — never public. db.schema routes all queries there.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSupabase(): SupabaseClient<any, any, any> {
   if (!_client) {
