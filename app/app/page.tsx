@@ -741,12 +741,15 @@ function AppContent() {
 
                   {brief.metadata.depth === 'quick' && (brief.conflictReport.contested.length + brief.conflictReport.unverified.length) > 0 && (
                     <div
-                      className="mt-3 px-4 py-3 rounded-lg"
-                      style={{ background: 'var(--color-secondary-subtle)', border: '1px solid rgba(99,102,241,0.2)' }}
+                      className="mt-3 rounded-lg px-4 py-3 border"
+                      style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)' }}
                     >
-                      <p className="text-xs font-bold" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                        {'// '}{brief.conflictReport.contested.length + brief.conflictReport.unverified.length} contested policy items identified. Standard and Deep include full conflict resolution.{' '}
-                        <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Upgrade →</a>
+                      <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary-light)' }}>
+                        {brief.conflictReport.contested.length + brief.conflictReport.unverified.length} contested policy items detected
+                      </p>
+                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        Standard and Deep include full conflict resolution with source-tier weighting.{' '}
+                        <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Upgrade.</a>
                       </p>
                     </div>
                   )}
