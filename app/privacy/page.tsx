@@ -73,6 +73,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>7. Cookies</h2>
             <p>We use session cookies required for authentication and anonymous analytics. We do not use advertising cookies or third-party tracking cookies.</p>
+            <p className="mt-3">We use strictly necessary cookies to manage your authenticated session (Clerk) and protect against automated abuse (Cloudflare). No tracking or advertising cookies are used.</p>
           </section>
 
           <section>

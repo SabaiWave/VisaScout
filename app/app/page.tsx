@@ -709,8 +709,9 @@ function AppContent() {
                       </p>
                     ) : (
                       <div className="space-y-2 mt-2">
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'var(--color-secondary-subtle)', width: '85%' }} />
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'var(--color-secondary-subtle)', width: '60%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '72%' }} />
+                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
                       </div>
                     )}
                   </div>
