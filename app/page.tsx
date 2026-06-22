@@ -147,7 +147,6 @@ function HowItWorks() {
               style={{
                 background: 'var(--color-bg-elevated)',
                 borderColor: 'var(--color-border)',
-                borderLeft: '3px solid var(--color-secondary)',
                 boxShadow: 'var(--shadow-card)',
               }}
             >
