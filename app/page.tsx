@@ -231,7 +231,6 @@ function Pricing() {
               style={{
                 background: 'var(--color-bg-elevated)',
                 borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
-                borderLeft: plan.highlight ? '3px solid var(--color-secondary)' : '3px solid var(--color-border)',
                 boxShadow: plan.highlight ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
               }}
             >
@@ -256,7 +255,7 @@ function Pricing() {
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-2 mb-1">
+              <div className="flex items-baseline gap-2 mb-3">
                 <span
                   className="text-3xl font-bold"
                   style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
