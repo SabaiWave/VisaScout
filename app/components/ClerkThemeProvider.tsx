@@ -2,7 +2,6 @@
 
 import { ClerkProvider } from '@clerk/nextjs';
 import { useTheme } from 'next-themes';
-import { dark } from '@clerk/themes';
 
 const sharedVariables = {
   fontFamily: "'Geist', system-ui, sans-serif",
@@ -156,7 +155,6 @@ export function ClerkThemeProvider({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: isDark ? dark : undefined,
         variables: isDark ? darkVariables : lightVariables,
         elements: isDark ? darkElements : lightElements,
       }}
