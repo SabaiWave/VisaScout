@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
+import { log } from '@/src/lib/logger';
 
 export const runtime = 'nodejs';
 
@@ -11,11 +12,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get('token');
 
-  const isDev = process.env.ENVIRONMENT === 'development';
   const isAuthorized =
     (userId && isAdminUser(userId)) ||
-    (token && process.env.MONITOR_SECRET && token === process.env.MONITOR_SECRET) ||
-    (isDev && !!userId);
+    (token && process.env.MONITOR_SECRET && token === process.env.MONITOR_SECRET);
 
   if (!isAuthorized) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -33,7 +32,8 @@ export async function GET(req: Request) {
     .limit(20);
 
   if (error) {
-    return Response.json({ ok: false, error: error.message }, { status: 500 });
+    log.error('stuck-count: query failed', { errorMessage: error.message });
+    return Response.json({ ok: false, error: 'Database query failed' }, { status: 500 });
   }
 
   const stuckBriefs = data ?? [];

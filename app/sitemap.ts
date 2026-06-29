@@ -1,8 +1,7 @@
 import type { MetadataRoute } from 'next';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';
-
 export default function sitemap(): MetadataRoute.Sitemap {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';
   return [
     {
       url: APP_URL,

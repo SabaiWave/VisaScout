@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/app/components/ui/Button';
 
 export function RetryBriefButton({ briefId, jobId }: { briefId: string; jobId: string }) {
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
@@ -33,28 +34,16 @@ export function RetryBriefButton({ briefId, jobId }: { briefId: string; jobId: s
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-      <button
+      <Button
+        variant="warning"
+        size="xs"
         type="button"
         onClick={() => void handleClick()}
         disabled={state === 'loading' || state === 'done'}
-        style={{
-          padding: '0.2rem 0.6rem',
-          borderRadius: '4px',
-          border: '1px solid rgba(245,158,11,0.4)',
-          background: 'rgba(245,158,11,0.08)',
-          color: 'var(--color-amber)',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '0.65rem',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-          cursor: state === 'loading' || state === 'done' ? 'not-allowed' : 'pointer',
-          opacity: state === 'loading' || state === 'done' ? 0.5 : 1,
-          whiteSpace: 'nowrap',
-        }}
+        style={{ whiteSpace: 'nowrap' }}
       >
         {state === 'loading' ? '…' : 'Retry'}
-      </button>
+      </Button>
       {result && (
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color }}>{result}</span>
       )}

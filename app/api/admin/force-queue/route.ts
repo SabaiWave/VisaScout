@@ -8,8 +8,7 @@ const ForceQueueSchema = z.object({ briefId: z.string().uuid() });
 
 export async function POST(req: Request) {
   const { userId } = await auth();
-  const isDev = process.env.ENVIRONMENT === 'development';
-  if (!userId || (!isAdminUser(userId) && !isDev)) {
+  if (!userId || !isAdminUser(userId)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -28,7 +27,7 @@ export async function POST(req: Request) {
 
   if (jobError && jobError.code !== '23505') {
     log.error('admin: force-queue failed', { briefId, errorMessage: jobError.message });
-    return Response.json({ error: jobError.message }, { status: 500 });
+    return Response.json({ error: 'Failed to queue brief' }, { status: 500 });
   }
 
   // Ensure brief is queued so poll endpoint will claim it

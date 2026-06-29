@@ -31,8 +31,8 @@ export async function GET(req: Request) {
     .limit(1);
 
   if (fetchError) {
-    log.error('cron: failed to fetch pending jobs', { error: fetchError.message });
-    return Response.json({ error: fetchError.message }, { status: 500 });
+    log.error('cron: failed to fetch pending jobs', { errorMessage: fetchError.message });
+    return Response.json({ error: 'Failed to fetch pending jobs' }, { status: 500 });
   }
 
   if (!jobs || jobs.length === 0) {
@@ -115,7 +115,7 @@ export async function GET(req: Request) {
     const message = err instanceof Error ? err.message : String(err);
     log.error('cron: job failed', { jobId: job.id, briefId: job.brief_id, error: message });
     await failJob(job.id, job.brief_id, message);
-    return Response.json({ ok: false, error: message }, { status: 500 });
+    return Response.json({ ok: false, error: 'Pipeline failed. Check logs.' }, { status: 500 });
   }
 
   return Response.json({ ok: true, processed: 1, briefId: job.brief_id });
