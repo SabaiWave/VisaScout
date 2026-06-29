@@ -26,7 +26,8 @@ export async function GET() {
   });
 
   if (error) {
-    return Response.json({ ok: false, error: error.message }, { status: 500 });
+    if (process.env.DEBUG_ALLOWED) console.error('[debug/email] send failed', error);
+    return Response.json({ ok: false, error: 'Failed to send email' }, { status: 500 });
   }
 
   return Response.json({ ok: true, messageId: data?.id, to });

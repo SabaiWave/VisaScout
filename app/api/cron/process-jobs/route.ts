@@ -31,8 +31,8 @@ export async function GET(req: Request) {
     .limit(1);
 
   if (fetchError) {
-    log.error('cron: failed to fetch pending jobs', { error: fetchError.message });
-    return Response.json({ error: fetchError.message }, { status: 500 });
+    log.error('cron: failed to fetch pending jobs', { errorMessage: fetchError.message });
+    return Response.json({ error: 'Failed to fetch pending jobs' }, { status: 500 });
   }
 
   if (!jobs || jobs.length === 0) {

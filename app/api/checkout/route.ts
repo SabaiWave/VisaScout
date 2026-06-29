@@ -59,9 +59,7 @@ export async function POST(req: Request) {
 
   const { nationality, destination, visaType, freeform, depth, inviteCode } = parsed.data;
 
-  const proto = req.headers.get('x-forwarded-proto') ?? 'http';
-  const host = req.headers.get('host') ?? 'localhost:3000';
-  const baseUrl = `${proto}://${host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
   let briefId: string;
   try {

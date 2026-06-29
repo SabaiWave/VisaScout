@@ -11,21 +11,28 @@ const ContactSchema = z.object({
 // In-memory IP rate limit: 5 requests per 15 minutes
 const ipRequests = new Map<string, number[]>();
 
-function checkIpRateLimit(ip: string): boolean {
+function checkIpRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const windowMs = 15 * 60 * 1000;
   const limit = 5;
   const timestamps = (ipRequests.get(ip) ?? []).filter(t => t > now - windowMs);
-  if (timestamps.length >= limit) return false;
+  if (timestamps.length >= limit) {
+    const retryAfter = Math.ceil((timestamps[0] + windowMs - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
   timestamps.push(now);
   ipRequests.set(ip, timestamps);
-  return true;
+  return { allowed: true };
 }
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-  if (!checkIpRateLimit(ip)) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  const rateLimitResult = checkIpRateLimit(ip);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, {
+      status: 429,
+      headers: rateLimitResult.retryAfter ? { 'Retry-After': String(rateLimitResult.retryAfter) } : {},
+    });
   }
 
   let body: unknown;

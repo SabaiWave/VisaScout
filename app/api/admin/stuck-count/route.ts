@@ -12,11 +12,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get('token');
 
-  const isDev = process.env.ENVIRONMENT === 'development';
   const isAuthorized =
     (userId && isAdminUser(userId)) ||
-    (token && process.env.MONITOR_SECRET && token === process.env.MONITOR_SECRET) ||
-    (isDev && !!userId);
+    (token && process.env.MONITOR_SECRET && token === process.env.MONITOR_SECRET);
 
   if (!isAuthorized) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
