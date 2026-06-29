@@ -27,6 +27,10 @@ describe('buildCsp', () => {
       expect(directives['script-src']).toContain('https://*.clerk.com');
     });
 
+    it('allows Clerk custom domain (clerk.visascout.io)', () => {
+      expect(directives['script-src']).toContain('https://clerk.visascout.io');
+    });
+
     it('allows Cloudflare bot challenge (required by Clerk)', () => {
       expect(directives['script-src']).toContain('https://challenges.cloudflare.com');
     });
@@ -44,6 +48,10 @@ describe('buildCsp', () => {
 
     it('allows Clerk production frames', () => {
       expect(directives['frame-src']).toContain('https://*.clerk.com');
+    });
+
+    it('allows Clerk custom domain frames (clerk.visascout.io)', () => {
+      expect(directives['frame-src']).toContain('https://clerk.visascout.io');
     });
   });
 
