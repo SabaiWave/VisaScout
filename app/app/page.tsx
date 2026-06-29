@@ -607,7 +607,7 @@ function AppContent() {
                 {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (earlyAccess || depth === 'standard' || depth === 'deep') && (
                   <div>
                     {earlyAccess ? (
-                      <p className="text-xs font-bold uppercase flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', color: 'var(--color-success)' }}>
+                      <p className="text-xs font-bold uppercase flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-success)' }}>
                         <span>✓</span> Invite access active
                       </p>
                     ) : (
@@ -684,8 +684,11 @@ function AppContent() {
                     <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
                     Agents Deployed
                   </h2>
-                  <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
-                    Cross-referencing official policy, enforcement records, and community intel.
+                  <p className="text-base mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                    We&apos;re pulling from official immigration sources, recent enforcement reports, and what travelers are actually seeing on the ground.
+                  </p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                    This usually takes about a minute. Your brief will appear here when it&apos;s ready.
                   </p>
                   {nationality && destination && (
                     <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>

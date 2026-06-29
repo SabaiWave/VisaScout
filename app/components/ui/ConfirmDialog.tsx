@@ -66,7 +66,7 @@ export function ConfirmDialog({
           fontWeight: 700,
           color: 'var(--color-text-primary)',
           textTransform: 'uppercase',
-          letterSpacing: '0.06em',
+          letterSpacing: '0.04em',
           margin: '0 0 8px',
         }}>
           {title}
