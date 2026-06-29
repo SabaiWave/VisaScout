@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redeemEarlyAccessCode } from '@/src/lib/earlyAccess';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
+import { checkRateLimit } from '@/src/lib/rateLimit';
 
 export const runtime = 'nodejs';
 
@@ -14,6 +15,17 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const rateCheck = await checkRateLimit(userId);
+  if (!rateCheck.allowed) {
+    return Response.json(
+      { error: 'Too many requests. Please wait before trying again.' },
+      {
+        status: 429,
+        headers: rateCheck.retryAfter ? { 'Retry-After': String(rateCheck.retryAfter) } : {},
+      }
+    );
   }
 
   let body: unknown;

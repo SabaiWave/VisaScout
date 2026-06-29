@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   if (jobReset.error || briefReset.error) {
     const errMsg = jobReset.error?.message ?? briefReset.error?.message ?? 'DB error';
     log.error('admin: retry-brief failed', { briefId, jobId, errorMessage: errMsg });
-    return Response.json({ error: errMsg }, { status: 500 });
+    return Response.json({ error: 'Failed to reset brief. Check logs.' }, { status: 500 });
   }
 
   log.info('admin: brief reset for retry', { briefId, jobId, adminUserId: userId });

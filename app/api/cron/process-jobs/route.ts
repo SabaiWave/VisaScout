@@ -115,7 +115,7 @@ export async function GET(req: Request) {
     const message = err instanceof Error ? err.message : String(err);
     log.error('cron: job failed', { jobId: job.id, briefId: job.brief_id, error: message });
     await failJob(job.id, job.brief_id, message);
-    return Response.json({ ok: false, error: message }, { status: 500 });
+    return Response.json({ ok: false, error: 'Pipeline failed. Check logs.' }, { status: 500 });
   }
 
   return Response.json({ ok: true, processed: 1, briefId: job.brief_id });

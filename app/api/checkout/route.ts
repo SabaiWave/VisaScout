@@ -6,6 +6,7 @@ import { isEarlyAccessUser, redeemEarlyAccessCode, incrementEarlyAccessUsage } f
 import { getSupabase } from '@/src/lib/supabase';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
+import { checkRateLimit } from '@/src/lib/rateLimit';
 
 const CheckoutSchema = z.object({
   nationality: z.string().min(1).max(100),
@@ -24,6 +25,17 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const rateCheck = await checkRateLimit(userId);
+  if (!rateCheck.allowed) {
+    return new Response(JSON.stringify({ error: 'Too many requests. Please wait before trying again.' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(rateCheck.retryAfter ? { 'Retry-After': String(rateCheck.retryAfter) } : {}),
+      },
     });
   }
 
