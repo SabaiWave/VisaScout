@@ -71,7 +71,7 @@ export async function GET(
     const executablePath = localExec
       ? localExec
       : await chromium.executablePath(
-          'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar',
+          process.env.CHROMIUM_BINARY_URL ?? 'https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar',
         );
     const args = localExec
       ? ['--no-sandbox', '--disable-setuid-sandbox']
