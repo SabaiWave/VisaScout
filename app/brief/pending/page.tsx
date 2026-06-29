@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
+import { NavLink } from '@/app/components/ui/NavLink';
 
 const MAX_WAIT_MS = 6 * 60 * 1000;
 const SOFT_HANDOFF_MS = 90 * 1000;
@@ -173,17 +174,20 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
             />
           </IconBox>
           <HudHeading>Agents Deployed</HudHeading>
-          <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-            Cross-referencing official policy, enforcement records, and community intel.
+          <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+            We&apos;re pulling from official immigration sources, recent enforcement reports, and what real travelers are seeing on the ground.
           </p>
-          <p className="text-xs uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-            Research depth determines duration — sit tight.
+          <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to My Briefs whenever and it&apos;ll be there when it&apos;s done.
           </p>
         </div>
         <div>
           {SKELETON_AGENTS.map((label, i) => (
             <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} completedCount={completedCount} />
           ))}
+        </div>
+        <div className="mt-4 text-center">
+          <NavLink href="/dashboard">Go to My Briefs →</NavLink>
         </div>
       </div>
     </PendingShell>
@@ -203,10 +207,10 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
         </IconBox>
         <HudHeading>Still Working</HudHeading>
         <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is generating in the background — this can take {depth === 'deep' ? 'a few minutes' : 'a minute or two'} for {depth === 'deep' ? 'deep' : 'standard'} research.
+          Your brief is still being put together. {depth === 'deep' ? 'Deep research can take a few minutes' : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-          You can safely navigate away. Head to My Briefs — a loading indicator will show until it&apos;s ready.
+          You can head to My Briefs whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
         </p>
         {briefId && (
           <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -233,7 +237,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading color="var(--color-amber)">Taking Longer Than Expected</HudHeading>
         <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is still generating in the background. Check My Briefs in a couple of minutes — it&apos;ll be there when it&apos;s ready.
+          Your brief is taking longer than expected but it&apos;s still running. Check My Briefs in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
         </p>
         {briefId && (
           <p
@@ -263,8 +267,7 @@ function ErrorState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading color="var(--color-error)">Brief Generation Failed</HudHeading>
         <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Something went wrong while generating your brief. Please reach out and
-          we&apos;ll investigate and make it right.
+          Something went wrong while putting your brief together. Get in touch and we&apos;ll look into it and make it right.
         </p>
         {briefId && (
           <p
