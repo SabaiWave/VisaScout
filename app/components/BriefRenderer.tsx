@@ -92,7 +92,7 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
       <div className="mb-2">
         <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
         <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em' }}>Max Stay</span>
+          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>Max Stay</span>
           <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
         </div>
       </div>

@@ -70,6 +70,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowConfirm(true); }}
             aria-label="Delete brief"
+            title="Delete brief"
             className="brief-delete-btn"
             style={{
               position: 'absolute',
