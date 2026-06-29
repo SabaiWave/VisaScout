@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
+import { log } from '@/src/lib/logger';
 
 export const runtime = 'nodejs';
 
@@ -33,7 +34,8 @@ export async function GET(req: Request) {
     .limit(20);
 
   if (error) {
-    return Response.json({ ok: false, error: error.message }, { status: 500 });
+    log.error('stuck-count: query failed', { errorMessage: error.message });
+    return Response.json({ ok: false, error: 'Database query failed' }, { status: 500 });
   }
 
   const stuckBriefs = data ?? [];
