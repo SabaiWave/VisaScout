@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { Archive } from 'lucide-react';
+import { Archive, ShieldCheck, Terminal } from 'lucide-react';
 import { SidebarAccount } from './SidebarAccount';
 import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
@@ -128,6 +128,52 @@ export default async function DashboardPage({
           History
         </Link>
 
+        {isAdmin && (
+          <Link
+            href="/admin"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
+            <ShieldCheck size={14} />
+            Admin
+          </Link>
+        )}
+
+        {showDev && (
+          <Link
+            href="/dev"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
+            <Terminal size={14} />
+            Dev
+          </Link>
+        )}
+
         <div style={{ flex: 1 }} />
 
         <SidebarAccount />
@@ -147,8 +193,6 @@ export default async function DashboardPage({
         >
           <NavLink href="/">Home</NavLink>
           <NavLink href="/contact">Contact</NavLink>
-          {isAdmin && <NavLink href="/admin">Admin</NavLink>}
-          {showDev && <NavLink href="/dev">Dev</NavLink>}
         </div>
 
         <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
