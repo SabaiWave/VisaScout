@@ -1,11 +1,12 @@
 import * as Sentry from '@sentry/nextjs';
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 
 export const runtime = 'nodejs';
 
-// Throws a test error to verify Sentry is capturing events.
-// Protected by DEBUG_ALLOWED — consistent with all other debug endpoints.
 export async function GET() {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 

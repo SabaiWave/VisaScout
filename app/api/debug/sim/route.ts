@@ -1,4 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 
@@ -31,7 +33,8 @@ const VALID_EVENTS = [
 ];
 
 export async function GET(req: Request) {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 

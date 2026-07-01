@@ -90,7 +90,7 @@ export default function DevPage() {
     <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
         <SectionHeading size="md" as="h1" className="mb-1">Dev Tools</SectionHeading>
         <p className="text-sm mb-8" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          ADMIN GATED · SOME TOOLS REQUIRE DEBUG_ALLOWED=TRUE
+          ADMIN GATED
         </p>
 
         {/* Brief Flows */}
@@ -140,7 +140,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Log & Event Simulation */}
-        <DevSection title="Log & Event Simulation (requires DEBUG_ALLOWED=true)">
+        <DevSection title="Log & Event Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB — CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
           </p>
@@ -247,7 +247,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Admin Sims */}
-        <DevSection title="Admin Sims (requires DEBUG_ALLOWED=true)">
+        <DevSection title="Admin Sims">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             Creates a real brief row in DB to test the Support — Stuck Briefs section in admin. Opens JSON in new tab — then check admin to verify the action button appears. Delete sim rows from Supabase when done.
           </p>
@@ -282,9 +282,9 @@ export default function DevPage() {
         </DevSection>
 
         {/* Debug API */}
-        <DevSection title="Debug API (requires DEBUG_ALLOWED=true)">
+        <DevSection title="Debug API">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            OPENS IN NEW TAB. RETURNS 404 UNLESS DEBUG_ALLOWED IS SET IN .ENV.LOCAL.
+            OPENS IN NEW TAB. ADMIN ONLY.
           </p>
           <DevGrid>
             <DevButton label="Health Check ↗"  sublabel="GET /api/debug/health"      href="/api/debug/health"      newTab />

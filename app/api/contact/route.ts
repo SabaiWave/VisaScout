@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    if (process.env.DEBUG_ALLOWED) console.error('[contact]', err);
+    console.error('[contact]', err);
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }
