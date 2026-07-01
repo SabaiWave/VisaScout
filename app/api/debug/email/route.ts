@@ -1,11 +1,14 @@
 import { render } from '@react-email/components';
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import WelcomeEmail from '@/src/emails/welcome';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 
@@ -26,7 +29,7 @@ export async function GET() {
   });
 
   if (error) {
-    if (process.env.DEBUG_ALLOWED) console.error('[debug/email] send failed', error);
+    console.error('[debug/email] send failed', error);
     return Response.json({ ok: false, error: 'Failed to send email' }, { status: 500 });
   }
 

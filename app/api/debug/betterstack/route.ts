@@ -1,7 +1,11 @@
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
+
 export const runtime = 'nodejs';
 
 export async function GET() {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 

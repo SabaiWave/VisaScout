@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefActions from '@/app/components/BriefActions';
 import BriefRenderer from '@/app/components/BriefRenderer';
@@ -30,9 +32,12 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
   const sp = await searchParams;
   const simPdfError = sp?.sim === 'pdf-error';
 
+  const { userId } = await auth();
+  const isAdmin = isAdminUser(userId ?? '');
+
   // Dev sim sentinels — confidence label states (no DB lookup, overrides fixture confidence fields)
   if ((CONFIDENCE_SIM_IDS as readonly string[]).includes(id)) {
-    if (!process.env.DEBUG_ALLOWED) notFound();
+    if (!isAdmin) notFound();
     const level = id === SIM_CONFIDENCE_HIGH_ID ? 'high' : id === SIM_CONFIDENCE_MEDIUM_ID ? 'medium' : 'low';
     const base = visaBriefFixture as unknown as VisaBrief;
     const brief: VisaBrief = {
@@ -62,7 +67,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
   // Dev sim sentinel — no DB lookup, uses fixture brief
   if (id === SIM_PDF_ERROR_ID) {
-    if (!process.env.DEBUG_ALLOWED) notFound();
+    if (!isAdmin) notFound();
     const brief = visaBriefFixture as unknown as VisaBrief;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
