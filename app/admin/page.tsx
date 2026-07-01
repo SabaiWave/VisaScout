@@ -3,8 +3,6 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { Wordmark } from '@/app/components/ui/Wordmark';
-import { NavLink } from '@/app/components/ui/NavLink';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
 import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
@@ -185,20 +183,6 @@ export default async function AdminPage() {
   const recentUsers = recentSignupsResult.data ?? [];
 
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-      <nav
-        className="sticky top-0 z-50 border-b px-6 py-4"
-        style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[1000px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <div className="flex items-center gap-2">
-            <NavLink href="/">Home</NavLink>
-            {process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && <NavLink href="/dev">Dev</NavLink>}
-          </div>
-        </div>
-      </nav>
-
     <main className="px-4 sm:px-8 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <SectionHeading size="md" as="h1" className="mb-8">
@@ -567,7 +551,6 @@ export default async function AdminPage() {
         </Section>
       </div>
     </main>
-    </div>
   );
 }
 

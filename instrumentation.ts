@@ -35,7 +35,7 @@ function logStartup() {
     RESEND_API_KEY: !!process.env.RESEND_API_KEY,
     NEXT_PUBLIC_APP_URL: !!process.env.NEXT_PUBLIC_APP_URL,
     // Admin (Phase 10+)
-    ADMIN_USER_ID: !!process.env.ADMIN_USER_ID,
+    ADMIN_USER_IDS: !!process.env.ADMIN_USER_IDS,
     MONITOR_SECRET: !!process.env.MONITOR_SECRET,
   };
 
@@ -73,7 +73,7 @@ function logStartup() {
     console.log(fmt('RESEND_API_KEY',                   'RESEND_API_KEY'));
     console.log(fmt('NEXT_PUBLIC_APP_URL',              'NEXT_PUBLIC_APP_URL'));
     console.log('  ·');
-    console.log(fmt('ADMIN_USER_ID',                    'ADMIN_USER_ID'));
+    console.log(fmt('ADMIN_USER_IDS',                   'ADMIN_USER_IDS'));
     console.log(fmt('MONITOR_SECRET',                   'MONITOR_SECRET'));
     console.log(`  ${'DRY_RUN'.padEnd(38)}${process.env.DRY_RUN === 'true' ? 'true — fixture data, zero API cost' : 'false — real API calls'}`);
     console.log('─────────────────────────────────────────────────────\n');

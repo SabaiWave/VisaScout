@@ -1,12 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { Archive } from 'lucide-react';
-import { SidebarAccount } from './SidebarAccount';
-import { MobileNav } from './MobileNav';
 import { getSupabase } from '@/src/lib/supabase';
-import { isAdminUser } from '@/src/lib/adminAccess';
-import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
@@ -75,9 +70,6 @@ export default async function DashboardPage({
   const user = await currentUser();
   if (!user) redirect('/sign-in');
 
-  const isAdmin = isAdminUser(user.id);
-  const showDev = isAdmin && process.env.ENVIRONMENT === 'development';
-
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10));
 
@@ -86,92 +78,38 @@ export default async function DashboardPage({
   const hasGenerating = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-base)' }}>
-      {/* Sidebar — desktop only */}
-      <aside
-        className="hidden lg:flex"
+    <>
+      {/* Desktop top bar */}
+      <div
+        className="hidden lg:flex items-center justify-end gap-1 px-4"
         style={{
-          width: '240px',
-          flexShrink: 0,
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          overflowY: 'auto',
-          background: 'var(--color-bg-subtle)',
-          borderRight: '1px solid var(--color-border-muted)',
-          flexDirection: 'column',
-          padding: '2rem 1rem 1.5rem',
-          gap: '0.25rem',
+          height: '52px',
+          borderBottom: '1px solid var(--color-border-muted)',
         }}
       >
-        <Wordmark className="block px-2 mb-6" />
+        <NavLink href="/">Home</NavLink>
+        <NavLink href="/contact">Contact</NavLink>
+      </div>
 
-        <Link
-          href="/dashboard"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: 'var(--color-secondary-light)',
-            background: 'var(--color-secondary-subtle)',
-            textDecoration: 'none',
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-          }}
-        >
-          <Archive size={14} />
-          History
-        </Link>
-
-        <div style={{ flex: 1 }} />
-
-        <SidebarAccount />
-      </aside>
-
-      {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bloom-app-bg)' }}>
-        <MobileNav isAdmin={isAdmin} showDev={showDev} />
-
-        {/* Desktop top bar — utility nav (Resend pattern) */}
-        <div
-          className="hidden lg:flex items-center justify-end gap-1 px-4"
-          style={{
-            height: '52px',
-            borderBottom: '1px solid var(--color-border-muted)',
-          }}
-        >
-          <NavLink href="/">Home</NavLink>
-          <NavLink href="/contact">Contact</NavLink>
-          {isAdmin && <NavLink href="/admin">Admin</NavLink>}
-          {showDev && <NavLink href="/dev">Dev</NavLink>}
-        </div>
-
-        <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
-          {/* Page header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
-            <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
-              MY BRIEFS
-            </SectionHeading>
-            {briefs.length > 0 && (
-              <Button asChild style={{ whiteSpace: 'nowrap' }}>
-                <Link href="/app">+ New Brief</Link>
-              </Button>
-            )}
-          </div>
-
-          <DashboardAutoRefresh hasGenerating={hasGenerating} />
-          {briefs.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <BriefGrid briefs={briefs} total={total} page={page} />
+      <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
+          <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
+            MY BRIEFS
+          </SectionHeading>
+          {briefs.length > 0 && (
+            <Button asChild style={{ whiteSpace: 'nowrap' }}>
+              <Link href="/app">+ New Brief</Link>
+            </Button>
           )}
         </div>
-      </main>
-    </div>
+
+        <DashboardAutoRefresh hasGenerating={hasGenerating} />
+        {briefs.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <BriefGrid briefs={briefs} total={total} page={page} />
+        )}
+      </div>
+    </>
   );
 }
