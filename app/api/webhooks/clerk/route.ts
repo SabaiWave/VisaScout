@@ -52,9 +52,7 @@ export async function POST(req: Request) {
           html,
         });
       } catch (err) {
-        if (process.env.DEBUG_ALLOWED) {
-          console.error('[clerk-webhook] welcome email failed', { email, err });
-        }
+        console.error('[clerk-webhook] welcome email failed', { email, err });
       }
     }
   }

@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 
 export const runtime = 'nodejs';
@@ -12,7 +13,8 @@ function pick<T>(arr: T[]): T {
 }
 
 export async function GET(req: Request) {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 
@@ -22,8 +24,6 @@ export async function GET(req: Request) {
   if (scenario !== '2' && scenario !== '3') {
     return Response.json({ ok: false, error: 'scenario must be 2 or 3' }, { status: 400 });
   }
-
-  const { userId } = await auth();
   const supabase = getSupabase();
   const nationality = pick(NATIONALITIES);
   const destination = pick(DESTINATIONS);

@@ -9,7 +9,7 @@ export default async function DevShellLayout({ children }: { children: React.Rea
   if (!userId) redirect('/sign-in');
 
   const isAdmin = isAdminUser(userId);
-  const showDev = isAdmin && process.env.ENVIRONMENT === 'development';
+  const showDev = isAdmin;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-base)' }}>

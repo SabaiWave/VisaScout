@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { auth } from '@clerk/nextjs/server';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
@@ -9,7 +11,6 @@ export const runtime = 'nodejs';
 
 // Hardcoded test case: US → Thailand, tourist visa exemption, 28-day stay + border run.
 // Respects DRY_RUN — uses fixtures if true, makes real API calls if false.
-// Never set DEBUG_ALLOWED=true in Vercel production.
 const TEST_INPUT: VisaInput = {
   nationality: 'American',
   destination: 'Thailand',
@@ -19,7 +20,8 @@ const TEST_INPUT: VisaInput = {
 };
 
 export async function GET() {
-  if (!process.env.DEBUG_ALLOWED) {
+  const { userId } = await auth();
+  if (!userId || !isAdminUser(userId)) {
     return new Response('Not found', { status: 404 });
   }
 
