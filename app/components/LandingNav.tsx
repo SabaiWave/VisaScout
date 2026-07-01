@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
 import { Button } from './ui/Button';
@@ -12,12 +12,7 @@ import { VisaScoutUserButton } from './VisaScoutUserButton';
 
 export function LandingNav() {
   const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
   const [open, setOpen] = useState(false);
-
-  const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
-  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
-  const showDev = isAdmin || isDev;
 
   return (
     <>
@@ -34,9 +29,7 @@ export function LandingNav() {
               <div className="w-8 h-8" />
             ) : isSignedIn ? (
               <>
-                {(isAdmin || isDev) && <NavLink href="/admin">Admin</NavLink>}
-                {showDev && <NavLink href="/dev">Dev</NavLink>}
-                <NavLink href="/dashboard">My Briefs</NavLink>
+                <NavLink href="/dashboard">Dashboard</NavLink>
                 <Button asChild>
                   <Link href="/app">Generate Brief</Link>
                 </Button>
@@ -62,13 +55,7 @@ export function LandingNav() {
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         {isLoaded && (isSignedIn ? (
           <>
-            {(isAdmin || isDev) && (
-              <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>
-            )}
-            {showDev && (
-              <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>
-            )}
-            <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>My Briefs</Link>
+            <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dashboard</Link>
             <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Generate Brief</Link>
             <div style={{ flex: 1 }} />
             <SidebarAccount />

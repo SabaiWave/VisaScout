@@ -22,7 +22,7 @@ if (process.env.VERCEL === '1') {
     'NEXT_PUBLIC_APP_URL',
     'SUPPORT_EMAIL',
     // Phase 10 — admin dashboard
-    'ADMIN_USER_ID',
+    'ADMIN_USER_IDS',
   ];
   const missing = required.filter(k => !process.env[k]);
   if (missing.length > 0) {
