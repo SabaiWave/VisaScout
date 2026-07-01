@@ -1,14 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { Wordmark } from '@/app/components/ui/Wordmark';
-import { NavLink } from '@/app/components/ui/NavLink';
 import { DevButton } from '@/app/components/ui/DevButton';
-
-const ADMIN_USER_ID = process.env.NEXT_PUBLIC_ADMIN_USER_ID ?? '';
 
 // ─── Layout helpers ───────────────────────────────────────────────────────────
 
@@ -33,13 +28,7 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DevPage() {
-  const { userId, isLoaded } = useAuth();
-  const router = useRouter();
-
-  const isAdmin = !!ADMIN_USER_ID && userId === ADMIN_USER_ID;
-  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
-  const canAccess = isAdmin || isDev;
-
+  const { userId } = useAuth();
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -97,29 +86,8 @@ export default function DevPage() {
     }
   }
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    if (!canAccess) router.replace('/');
-  }, [isLoaded, canAccess, router]);
-
-  if (!isLoaded || !canAccess) return null;
-
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-      <nav
-        className="sticky top-0 z-50 border-b px-6 py-4"
-        style={{ background: 'var(--color-bg-base)', borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[960px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <div className="flex items-center gap-2">
-            <NavLink href="/app">Generate</NavLink>
-            <NavLink href="/admin">Admin</NavLink>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
+    <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
         <SectionHeading size="md" as="h1" className="mb-1">Dev Tools</SectionHeading>
         <p className="text-sm mb-8" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
           ADMIN GATED · SOME TOOLS REQUIRE DEBUG_ALLOWED=TRUE
@@ -451,6 +419,5 @@ export default function DevPage() {
           </DevGrid>
         </DevSection>
       </main>
-    </div>
   );
 }

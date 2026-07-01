@@ -24,7 +24,7 @@ export async function GET() {
     resend:      !!process.env.RESEND_API_KEY,
     appUrl:      !!process.env.NEXT_PUBLIC_APP_URL,
     // Admin (Phase 10)
-    adminUserId: !!process.env.ADMIN_USER_ID,
+    adminUserIds: !!process.env.ADMIN_USER_IDS,
     // Rate limiting (optional — graceful no-op when absent)
     upstash:     !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN,
   };
