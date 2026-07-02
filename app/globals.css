@@ -91,7 +91,7 @@
   --shadow-md:     0 4px 6px rgba(0,0,0,0.5);
   --shadow-lg:     0 10px 15px rgba(0,0,0,0.6);
   --shadow-indigo: 0 0 0 3px rgba(99, 102, 241, 0.2);
-  --shadow-card:       0 0 24px rgba(99,102,241,0.12);
+  --shadow-card:       none;
   --shadow-card-hover: 0 0 0 1px rgba(99,102,241,0.25), 0 0 32px rgba(99,102,241,0.22);
   --shadow-amber:      0 0 16px rgba(245,158,11,0.06);
   --shadow-dropdown:   0 8px 24px rgba(0,0,0,0.15);

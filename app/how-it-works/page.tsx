@@ -112,14 +112,16 @@ export default function HowItWorksPage() {
               <div
                 key={t.tier}
                 className="p-6"
-                style={{ borderLeft: `3px solid ${t.color}` }}
               >
-                <p
-                  className="text-xs font-bold uppercase mb-1"
-                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: t.color }}
-                >
-                  Tier {i + 1}
-                </p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="flex-shrink-0" style={{ width: 3, height: 14, borderRadius: 2, background: t.color, display: 'inline-block' }} />
+                  <p
+                    className="text-xs font-bold uppercase"
+                    style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: t.color }}
+                  >
+                    Tier {i + 1}
+                  </p>
+                </div>
                 <p
                   className="text-base font-bold uppercase mb-2"
                   style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
@@ -157,14 +159,16 @@ export default function HowItWorksPage() {
               <div
                 key={c.level}
                 className="p-6"
-                style={{ borderLeft: `3px solid ${c.color}` }}
               >
-                <p
-                  className="text-xs font-bold uppercase mb-1"
-                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: c.color }}
-                >
-                  {c.level}
-                </p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="flex-shrink-0" style={{ width: 3, height: 14, borderRadius: 2, background: c.color, display: 'inline-block' }} />
+                  <p
+                    className="text-xs font-bold uppercase"
+                    style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: c.color }}
+                  >
+                    {c.level}
+                  </p>
+                </div>
                 <p className="text-base font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
                   {c.meaning}
                 </p>

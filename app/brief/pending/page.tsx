@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
 
@@ -114,26 +115,22 @@ function SkeletonAgentRow({ label, index, done, completedCount }: { label: strin
     ? 'var(--color-border-muted)'
     : 'rgba(99,102,241,0.15)';
 
+  const iconColor = done ? 'var(--color-success)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary)';
+  const StatusIcon = done ? CheckCircle2 : isQueued ? Clock : Loader2;
+
   return (
     <div
-      className="flex items-center gap-2 px-4 py-3 rounded-lg border mb-1.5"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
       style={{
-        borderLeft: `3px solid ${done ? 'var(--color-secondary)' : isQueued ? 'var(--color-border-muted)' : 'var(--color-secondary)'}`,
-        borderTop: `1px solid ${borderColor}`,
-        borderRight: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
+        border: `1px solid ${borderColor}`,
         background: done ? 'var(--color-bg-elevated)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)',
       }}
     >
-      <span
-        className={`w-2 h-2 rounded-full flex-shrink-0 ${(isRunning || isResolving) ? 'animate-pulse' : ''}`}
-        style={{
-          background: done
-            ? 'var(--color-success)'
-            : isQueued
-            ? 'var(--color-border-strong)'
-            : 'var(--color-amber)',
-        }}
+      <StatusIcon
+        aria-hidden="true"
+        size={14}
+        className={(isRunning || isResolving) ? 'animate-spin' : ''}
+        style={{ color: iconColor, flexShrink: 0 }}
       />
       <span
         className="text-xs font-bold uppercase flex-1"

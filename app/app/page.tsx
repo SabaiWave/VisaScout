@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
+import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import BriefRenderer from '@/app/components/BriefRenderer';
@@ -117,31 +118,27 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
   const isQueued = entry.status === 'queued';
   const isDone = entry.status === 'complete';
   const isFailed = entry.status === 'failed';
+  const isRunning = entry.status === 'running';
 
-  const leftBorder = isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-border-muted)' : 'var(--color-secondary)';
   const borderColor = isDone ? 'var(--color-border)' : isFailed ? 'rgba(239,68,68,0.3)' : isQueued ? 'var(--color-border-muted)' : 'rgba(99,102,241,0.15)';
   const bg = isDone ? 'var(--color-bg-elevated)' : isFailed ? 'var(--color-error-bg)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)';
-
-  const dotColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-border-strong)' : 'var(--color-amber)';
   const isConflictResolver = entry.agent === 'conflictResolver';
   const runningLabel = isConflictResolver ? 'resolving' : 'scanning';
   const labelText = isDone ? 'complete' : isFailed ? 'failed' : isQueued ? 'queued' : runningLabel;
   const labelColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary-light)';
+  const iconColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary)';
+  const StatusIcon = isDone ? CheckCircle2 : isFailed ? XCircle : isQueued ? Clock : Loader2;
 
   return (
     <div
-      className="flex items-center gap-2 px-4 py-3 rounded-lg border mb-1.5"
-      style={{
-        borderLeft: `3px solid ${leftBorder}`,
-        borderTop: `1px solid ${borderColor}`,
-        borderRight: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
-        background: bg,
-      }}
+      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
+      style={{ border: `1px solid ${borderColor}`, background: bg }}
     >
-      <span
-        className={`w-2 h-2 rounded-full flex-shrink-0 ${entry.status === 'running' ? 'animate-pulse' : ''}`}
-        style={{ background: dotColor }}
+      <StatusIcon
+        aria-hidden="true"
+        size={14}
+        className={isRunning ? 'animate-spin' : ''}
+        style={{ color: iconColor, flexShrink: 0 }}
       />
       <span
         className="text-xs font-bold uppercase flex-1"
@@ -150,7 +147,7 @@ function AgentRow({ entry }: { entry: AgentStatusEntry }) {
         {AGENT_DISPLAY[entry.agent] ?? entry.agent}
       </span>
       <span className="text-xs uppercase" style={{ fontFamily: 'var(--font-mono)', color: labelColor }}>
-        {entry.status === 'running' ? <ScanningDots label={runningLabel} /> : labelText}
+        {isRunning ? <ScanningDots label={runningLabel} /> : labelText}
       </span>
     </div>
   );
@@ -166,7 +163,7 @@ function SignInPrompt() {
           className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
           style={{ background: 'var(--color-secondary-subtle)' }}
         >
-          <svg className="w-8 h-8" style={{ color: 'var(--color-secondary)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <svg aria-hidden="true" className="w-8 h-8" style={{ color: 'var(--color-secondary)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
         </div>
@@ -575,33 +572,39 @@ function AppContent() {
 
                 {/* Depth selector */}
                 <div>
-                  <label style={LABEL_STYLE}>Research Depth</label>
+                  <p style={LABEL_STYLE}>Research Depth</p>
                   <div
-                    className="flex p-1 gap-1 rounded-full"
-                    style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)' }}
+                    className="grid grid-cols-3 rounded-lg overflow-hidden"
+                    style={{ border: '1px solid var(--color-border-strong)' }}
                   >
-                    {(['quick', 'standard', 'deep'] as const).map(d => (
-                      <Button
+                    {(['quick', 'standard', 'deep'] as const).map((d, i) => (
+                      <button
                         key={d}
                         type="button"
-                        variant="ghost"
-                        size="sm"
+                        aria-pressed={depth === d}
                         onClick={() => setDepth(d)}
-                        className="flex-1 rounded-full border-0 transition-all"
+                        className="py-2.5 text-xs font-bold uppercase transition-colors"
                         style={{
-                          background: depth === d ? 'var(--color-secondary)' : 'transparent',
+                          fontFamily: 'var(--font-mono)',
+                          letterSpacing: '0.06em',
+                          background: depth === d ? 'var(--color-secondary)' : 'var(--color-bg-elevated)',
                           color: depth === d ? '#ffffff' : 'var(--color-text-tertiary)',
+                          borderLeft: i > 0 ? '1px solid var(--color-border-strong)' : 'none',
+                          cursor: 'pointer',
                         }}
                       >
                         {d === 'quick' ? 'Quick' : d === 'standard' ? 'Standard' : 'Deep'}
-                      </Button>
+                      </button>
                     ))}
                   </div>
-                  <p className="text-xs mt-1.5 text-center uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                    {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
-                    {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Options compared, recent policy changes verified`}
-                    {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Full conflict resolution, edge cases, contested items`}
-                  </p>
+                  <div className="mt-2 flex items-start gap-1.5">
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-secondary)', fontWeight: 700, flexShrink: 0 }}>//</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
+                      {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
+                      {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Options compared, recent policy changes verified`}
+                      {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Full conflict resolution, edge cases, contested items`}
+                    </span>
+                  </div>
                 </div>
 
                 {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (earlyAccess || depth === 'standard' || depth === 'deep') && (
