@@ -141,7 +141,7 @@ function Hero() {
               className="text-xs font-bold uppercase mb-7"
               style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-secondary)' }}
             >
-              <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}SOUTHEAST ASIA — VISA INTELLIGENCE
+              SOUTHEAST ASIA — VISA INTELLIGENCE
             </p>
 
             <h1
@@ -296,7 +296,7 @@ function Destinations() {
                 style={{ alignSelf: 'flex-start' }}
               >
                 <span
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse"
                   style={{ background: 'var(--color-success)' }}
                 />
                 <span
