@@ -497,7 +497,7 @@ function AppContent() {
             <div className="max-w-[560px] mx-auto">
               <SectionHeading as="h1" size="md" className="mb-4">Generate Brief</SectionHeading>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-                Official sources. Contradictions flagged. Confidence scored.
+                Tell us your situation. We'll cross-check official sources, recent policy changes, and real traveler reports. One clear brief with every claim sourced.
               </p>
 
               {error && !capReached && (
@@ -561,7 +561,7 @@ function AppContent() {
                     onChange={e => setFreeform(e.target.value)}
                     rows={4}
                     maxLength={2000}
-                    placeholder="e.g. Arriving March 15, staying 28 days, planning one border run to Malaysia, work remotely for US company."
+                    placeholder="I'm arriving in Thailand on March 15 and staying about 28 days. I work remotely for a US company and I'm thinking about a quick border run to Malaysia to reset my stay."
                     style={{ ...INPUT_STYLE, resize: 'vertical', lineHeight: 1.75, minHeight: 100, border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : 'var(--color-border)'}` }}
                   />
                   <p className="text-xs mt-1 text-right" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
