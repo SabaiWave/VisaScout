@@ -175,7 +175,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
             We&apos;re pulling from official immigration sources, recent enforcement reports, and what real travelers are seeing on the ground.
           </p>
           <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to My Briefs whenever and it&apos;ll be there when it&apos;s done.
+            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to your dashboard whenever and it&apos;ll be there when it&apos;s done.
           </p>
         </div>
         <div>
@@ -184,7 +184,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           ))}
         </div>
         <div className="mt-4 text-center">
-          <NavLink href="/dashboard">Go to My Briefs →</NavLink>
+          <NavLink href="/dashboard">Go to Dashboard →</NavLink>
         </div>
       </div>
     </PendingShell>
@@ -207,7 +207,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
           Your brief is still being put together. {depth === 'deep' ? 'Deep research can take a few minutes' : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-          You can head to My Briefs whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
+          You can head to your dashboard whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
         </p>
         {briefId && (
           <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -215,7 +215,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
           </p>
         )}
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
           <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
         </div>
       </div>
@@ -234,7 +234,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading color="var(--color-amber)">Taking Longer Than Expected</HudHeading>
         <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is taking longer than expected but it&apos;s still running. Check My Briefs in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
+          Your brief is taking longer than expected but it&apos;s still running. Check your dashboard in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
         </p>
         {briefId && (
           <p
@@ -245,7 +245,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
           </p>
         )}
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
           <Button variant="secondary" onClick={() => router.push(contactHref)}>Contact Us</Button>
         </div>
       </div>

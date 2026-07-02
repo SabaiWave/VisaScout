@@ -597,14 +597,11 @@ function AppContent() {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-2 flex items-start gap-1.5">
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-secondary)', fontWeight: 700, flexShrink: 0 }}>//</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-                      {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
-                      {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Options compared, recent policy changes verified`}
-                      {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Full conflict resolution, edge cases, contested items`}
-                    </span>
-                  </div>
+                  <p className="mt-2 text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
+                    {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
+                    {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Options compared, recent policy changes verified`}
+                    {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Full conflict resolution, edge cases, contested items`}
+                  </p>
                 </div>
 
                 {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (earlyAccess || depth === 'standard' || depth === 'deep') && (
