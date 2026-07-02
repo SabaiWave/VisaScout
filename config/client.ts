@@ -23,7 +23,7 @@ export const clientConfig = {
   landingPage: {
     hero: {
       eyebrow: 'Southeast Asia · Visa Intelligence',
-      h1: 'Know your visa situation. Before it becomes a problem.',
+      h1: "Know your visa situation. Before it's a problem.",
       subhead:
         'You found six answers. Three contradict each other. Two are from 2021. VisaScout cross-checks official immigration sources, recent enforcement data, and real traveler reports. One brief. Every claim sourced.',
       cta: 'Start free',

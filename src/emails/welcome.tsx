@@ -105,7 +105,7 @@ const styles = {
     fontWeight: '700',
     lineHeight: '1.2',
     margin: '0 0 12px',
-    fontFamily: "'Space Grotesk', Helvetica, Arial, sans-serif",
+    fontFamily: "'DM Serif Display', Georgia, 'Times New Roman', serif",
   },
   text: {
     color: '#52525b',
