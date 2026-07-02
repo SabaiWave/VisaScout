@@ -54,6 +54,7 @@ function CollapsibleCard({
     <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
       <Button
         variant="ghost"
+        aria-expanded={open}
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left normal-case tracking-normal border-0 rounded-none hover:opacity-100"
         style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}
@@ -73,28 +74,37 @@ function CollapsibleCard({
 // ─── Visa Option ─────────────────────────────────────────────────────────────
 
 function VisaOptionCard({ option }: { option: VisaOption }) {
-  const borderColor = {
-    best:       'var(--color-success)',
-    good:       'var(--color-secondary)',
-    acceptable: 'var(--color-border-strong)',
-  }[option.suitability];
   const bg = {
     best:       'rgba(34,197,94,0.06)',
     good:       'rgba(99,102,241,0.06)',
     acceptable: 'var(--color-bg-base)',
   }[option.suitability];
+  const suitabilityLabel = { best: 'Best Fit', good: 'Good Fit', acceptable: 'Acceptable' }[option.suitability];
+  const badgeColors = {
+    best:       { background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)' },
+    good:       { background: 'rgba(99,102,241,0.12)', color: 'var(--color-secondary-light)' },
+    acceptable: { background: 'var(--color-bg-overlay)', color: 'var(--color-text-tertiary)' },
+  }[option.suitability];
 
   return (
     <div
-      className="rounded-lg border-l-4 p-4 mb-3"
-      style={{ background: bg, borderTop: `1px solid var(--color-border)`, borderRight: `1px solid var(--color-border)`, borderBottom: `1px solid var(--color-border)`, borderLeft: `4px solid ${borderColor}` }}
+      className="rounded-lg p-4 mb-3 border"
+      style={{ background: bg, borderColor: 'var(--color-border)' }}
     >
-      <div className="mb-2">
-        <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
-        <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>Max Stay</span>
-          <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div>
+          <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>Max Stay</span>
+            <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
+          </div>
         </div>
+        <span
+          className="text-[0.65rem] font-bold uppercase px-2 py-0.5 flex-shrink-0"
+          style={{ ...badgeColors, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', borderRadius: '4px' }}
+        >
+          {suitabilityLabel}
+        </span>
       </div>
       <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{option.summary}</p>
       {(option.pros.length > 0 || option.cons.length > 0) && (
@@ -251,15 +261,18 @@ function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrin
         <div>
           <Label color="var(--color-amber)">Contested</Label>
           {report.contested.map((item, i) => (
-            <div key={i} className="mb-2 text-sm border-l-2 pl-3" style={{ borderColor: 'var(--color-amber)' }}>
-              <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
-              <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
-              {item.resolution && (
-                <div className="mt-2">
-                  <Label color="var(--color-amber)">Resolution</Label>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
-                </div>
-              )}
+            <div key={i} className="mb-3 text-sm flex gap-2.5">
+              <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
+              <div>
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
+                {item.resolution && (
+                  <div className="mt-2">
+                    <Label color="var(--color-amber)">Resolution</Label>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item.resolution}</p>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -324,35 +337,35 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
 
       {/* Recommended Action */}
       <div
-        className="brief-section border-l-4 rounded-r-lg px-5 py-4"
+        className="brief-section rounded-lg overflow-hidden"
         style={{
-          background: 'rgba(245,158,11,0.06)',
-          borderTop: '1px solid var(--color-border-amber)',
-          borderRight: '1px solid var(--color-border-amber)',
-          borderBottom: '1px solid var(--color-border-amber)',
-          borderLeft: '4px solid var(--color-amber)',
+          border: '1px solid var(--color-border-amber)',
           boxShadow: 'var(--shadow-amber)',
         }}
       >
-        <Label color="var(--color-amber)">Recommended Action</Label>
-        <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
-        {brief.recommendedAction.deadline && (
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
-        )}
-        <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
-        {brief.recommendedAction.stalePolicyWarning && (
-          <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--color-border-amber)' }}>
-            <p className="text-xs font-bold leading-relaxed" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>
-              {brief.recommendedAction.stalePolicyWarning}
-            </p>
-            {brief.metadata.depth === 'quick' && (
-              <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                Standard and Deep include a dedicated Recent Changes agent with retry.{' '}
-                <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Run Standard →</a>
+        <div className="px-5 py-2.5" style={{ background: 'rgba(245,158,11,0.14)', borderBottom: '1px solid var(--color-border-amber)' }}>
+          <Label color="var(--color-amber)">Recommended Action</Label>
+        </div>
+        <div className="px-5 py-4" style={{ background: 'rgba(245,158,11,0.06)' }}>
+          <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
+          {brief.recommendedAction.deadline && (
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
+          )}
+          <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
+          {brief.recommendedAction.stalePolicyWarning && (
+            <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--color-border-amber)' }}>
+              <p className="text-xs font-bold leading-relaxed" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>
+                {brief.recommendedAction.stalePolicyWarning}
               </p>
-            )}
-          </div>
-        )}
+              {brief.metadata.depth === 'quick' && (
+                <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                  Standard and Deep include a dedicated Recent Changes agent with retry.{' '}
+                  <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Run Standard →</a>
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <VisaOptionsSection options={brief.visaOptions} forPrint={forPrint} />

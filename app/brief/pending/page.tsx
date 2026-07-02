@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
 
@@ -114,26 +115,22 @@ function SkeletonAgentRow({ label, index, done, completedCount }: { label: strin
     ? 'var(--color-border-muted)'
     : 'rgba(99,102,241,0.15)';
 
+  const iconColor = done ? 'var(--color-success)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary)';
+  const StatusIcon = done ? CheckCircle2 : isQueued ? Clock : Loader2;
+
   return (
     <div
-      className="flex items-center gap-2 px-4 py-3 rounded-lg border mb-1.5"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
       style={{
-        borderLeft: `3px solid ${done ? 'var(--color-secondary)' : isQueued ? 'var(--color-border-muted)' : 'var(--color-secondary)'}`,
-        borderTop: `1px solid ${borderColor}`,
-        borderRight: `1px solid ${borderColor}`,
-        borderBottom: `1px solid ${borderColor}`,
+        border: `1px solid ${borderColor}`,
         background: done ? 'var(--color-bg-elevated)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)',
       }}
     >
-      <span
-        className={`w-2 h-2 rounded-full flex-shrink-0 ${(isRunning || isResolving) ? 'animate-pulse' : ''}`}
-        style={{
-          background: done
-            ? 'var(--color-success)'
-            : isQueued
-            ? 'var(--color-border-strong)'
-            : 'var(--color-amber)',
-        }}
+      <StatusIcon
+        aria-hidden="true"
+        size={14}
+        className={(isRunning || isResolving) ? 'animate-spin' : ''}
+        style={{ color: iconColor, flexShrink: 0 }}
       />
       <span
         className="text-xs font-bold uppercase flex-1"
@@ -178,7 +175,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
             We&apos;re pulling from official immigration sources, recent enforcement reports, and what real travelers are seeing on the ground.
           </p>
           <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to My Briefs whenever and it&apos;ll be there when it&apos;s done.
+            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to your dashboard whenever and it&apos;ll be there when it&apos;s done.
           </p>
         </div>
         <div>
@@ -187,7 +184,7 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           ))}
         </div>
         <div className="mt-4 text-center">
-          <NavLink href="/dashboard">Go to My Briefs →</NavLink>
+          <NavLink href="/dashboard">Go to Dashboard →</NavLink>
         </div>
       </div>
     </PendingShell>
@@ -210,7 +207,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
           Your brief is still being put together. {depth === 'deep' ? 'Deep research can take a few minutes' : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-          You can head to My Briefs whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
+          You can head to your dashboard whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
         </p>
         {briefId && (
           <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -218,7 +215,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
           </p>
         )}
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
           <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
         </div>
       </div>
@@ -237,7 +234,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
         </IconBox>
         <HudHeading color="var(--color-amber)">Taking Longer Than Expected</HudHeading>
         <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is taking longer than expected but it&apos;s still running. Check My Briefs in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
+          Your brief is taking longer than expected but it&apos;s still running. Check your dashboard in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
         </p>
         {briefId && (
           <p
@@ -248,7 +245,7 @@ function TimedOutState({ briefId }: { briefId: string | null }) {
           </p>
         )}
         <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to My Briefs</Button>
+          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
           <Button variant="secondary" onClick={() => router.push(contactHref)}>Contact Us</Button>
         </div>
       </div>
