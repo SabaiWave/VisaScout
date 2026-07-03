@@ -28,14 +28,14 @@ export default function PrivacyPage() {
       <main className="relative z-10 max-w-[760px] mx-auto px-6 py-16">
         <SectionHeading as="h1" size="md" className="mb-2">Privacy Policy</SectionHeading>
         <p className="text-sm mb-10" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          Last updated: June 2026
+          Last updated: July 2026
         </p>
 
         <div className="space-y-8" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75 }}>
 
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>1. Information We Collect</h2>
-            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Account information:</strong> Email address and name provided during sign-up via Clerk (our authentication provider). Clerk also collects IP address, device type, and browser information as part of the authentication process.</p>
+            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Account information:</strong> Email address and name provided during sign-up. We store your email to manage your account and send service-related communications. Our authentication provider also collects IP address, device type, and browser information as part of the sign-in process.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Report data:</strong> Nationality, destination country, visa type, and your freeform situation description — used to generate your visa brief.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Usage data:</strong> Pages visited and report generation events, collected anonymously. This data is not tied to your identity.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Error and performance data:</strong> When errors occur, diagnostic information (stack traces, request context, browser version, OS version) is collected for debugging. Server-side operational logs may include anonymized request metadata.</p>

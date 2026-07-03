@@ -95,22 +95,23 @@ interface StuckBrief {
   job: { id: string; status: string; started_at: string | null; error: string | null } | null;
 }
 
-interface EarlyAccessUser {
+interface InviteUser {
   id: string;
-  user_id: string;
-  code_used: string;
-  redeemed_at: string;
+  clerk_user_id: string;
+  invite_code: string;
+  invited_at: string;
   briefs_generated: number;
   last_brief_at: string | null;
-  revoked_at: string | null;
+  invite_revoked_at: string | null;
 }
 
-async function getEarlyAccessUsers(): Promise<EarlyAccessUser[]> {
+async function getInviteUsers(): Promise<InviteUser[]> {
   const { data } = await getSupabase()
-    .from('early_access_users')
-    .select('id, user_id, code_used, redeemed_at, briefs_generated, last_brief_at, revoked_at')
-    .order('redeemed_at', { ascending: false });
-  return (data ?? []) as EarlyAccessUser[];
+    .from('users')
+    .select('id, clerk_user_id, invite_code, invited_at, briefs_generated, last_brief_at, invite_revoked_at')
+    .not('invite_code', 'is', null)
+    .order('invited_at', { ascending: false });
+  return (data ?? []) as InviteUser[];
 }
 
 async function getStuckBriefs(): Promise<StuckBrief[]> {
@@ -149,12 +150,12 @@ export default async function AdminPage() {
   }
 
   const client = await clerkClient();
-  const [userCount, recentSignupsResult, metrics, stuckBriefs, earlyAccessUsers] = await Promise.all([
+  const [userCount, recentSignupsResult, metrics, stuckBriefs, inviteUsers] = await Promise.all([
     client.users.getCount(),
     client.users.getUserList({ limit: 10, orderBy: '-created_at' }),
     getAdminMetrics(),
     getStuckBriefs(),
-    getEarlyAccessUsers(),
+    getInviteUsers(),
   ]);
 
   const { briefs, ipLogs, jobs, freeTierToday, freeTierWeek, freeTierAllTime, subscriberCount } = metrics;
@@ -333,7 +334,7 @@ export default async function AdminPage() {
 
         {/* Invite code users */}
         <Section title="INVITE CODE USERS">
-          {earlyAccessUsers.length === 0 ? (
+          {inviteUsers.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No invite code users yet.</p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -346,13 +347,13 @@ export default async function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {earlyAccessUsers.map((u) => {
-                    const isRevoked = !!u.revoked_at;
+                  {inviteUsers.map((u) => {
+                    const isRevoked = !!u.invite_revoked_at;
                     return (
                       <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-muted)', color: isRevoked ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)' }}>
-                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>{u.user_id.slice(0, 18)}…</td>
-                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>{u.code_used.slice(0, 8)}…</td>
-                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>{new Date(u.redeemed_at).toLocaleDateString()}</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>{u.clerk_user_id.slice(0, 18)}…</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem', color: 'var(--color-text-tertiary)' }}>{u.invite_code.slice(0, 8)}…</td>
+                        <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>{new Date(u.invited_at).toLocaleDateString()}</td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}>{u.briefs_generated}</td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
                           {u.last_brief_at ? new Date(u.last_brief_at).toLocaleDateString() : '—'}
@@ -363,7 +364,7 @@ export default async function AdminPage() {
                           </span>
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
-                          {!isRevoked && <RevokeEarlyAccessButton userId={u.user_id} />}
+                          {!isRevoked && <RevokeEarlyAccessButton userId={u.clerk_user_id} />}
                         </td>
                       </tr>
                     );

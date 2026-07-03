@@ -9,6 +9,10 @@ jest.mock('@vercel/functions', () => ({
 }));
 
 jest.mock('@/src/lib/supabase', () => ({ getSupabase: jest.fn() }));
+jest.mock('@/src/lib/users', () => ({
+  getOrCreateUser: jest.fn().mockResolvedValue({ id: 'internal-uuid-test', clerk_user_id: 'user_test123', email: 'test@example.com', invite_code: null, invite_revoked_at: null, briefs_generated: 0 }),
+  incrementUserBriefCount: jest.fn().mockResolvedValue(undefined),
+}));
 import { getSupabase } from '@/src/lib/supabase';
 import { GET } from '@/app/api/brief/poll/route';
 

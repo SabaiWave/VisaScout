@@ -28,8 +28,8 @@ const VALID_EVENTS = [
   'poll.job_claimed',
   'free-cap.reached',
   'input.oversized',
-  'early-access.redeemed',
-  'early-access.invalid-code',
+  'invite.redeemed',
+  'invite.invalid-code',
 ];
 
 export async function GET(req: Request) {
@@ -197,20 +197,20 @@ export async function GET(req: Request) {
       break;
     }
 
-    case 'early-access.redeemed': {
+    case 'invite.redeemed': {
       const fakeCode = 'sim-code-aaaa-bbbb-cccc-000000000001';
       const data = { userId: FAKE_USER_ID, codeUsed: fakeCode, sim: true };
-      await trackEvent('early_access.redeemed', data);
-      log.info('early-access: code redeemed', data);
-      fired = { event: 'early_access.redeemed', ...data };
+      await trackEvent('invite.redeemed', data);
+      log.info('invite: code redeemed', data);
+      fired = { event: 'invite.redeemed', ...data };
       break;
     }
 
-    case 'early-access.invalid-code': {
+    case 'invite.invalid-code': {
       const fakeCode = 'sim-code-INVALID-0000-0000-000000000000';
       const data = { userId: FAKE_USER_ID, codeAttempted: fakeCode, reason: 'Invalid invite code.', sim: true };
-      await log.warn('early-access: redemption failed', data);
-      fired = { level: 'warn', message: 'early-access: redemption failed', ...data };
+      await log.warn('invite: redemption failed', data);
+      fired = { level: 'warn', message: 'invite: redemption failed', ...data };
       break;
     }
 

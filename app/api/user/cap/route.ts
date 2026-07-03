@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { checkFreeTierCap, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
-import { isEarlyAccessUser } from '@/src/lib/earlyAccess';
+import { hasInviteAccess } from '@/src/lib/inviteAccess';
 
 export const runtime = 'nodejs';
 
@@ -13,8 +13,8 @@ export async function GET() {
 
   const limit = isAdminUser(userId) ? getAdminDailyLimit() : getFreeDailyLimit();
 
-  if (await isEarlyAccessUser(userId)) {
-    return Response.json({ allowed: true, remaining: limit, earlyAccess: true });
+  if (await hasInviteAccess(userId)) {
+    return Response.json({ allowed: true, remaining: limit, inviteAccess: true });
   }
 
   const cap = await checkFreeTierCap(userId, limit);

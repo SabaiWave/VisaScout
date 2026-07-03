@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { isAdminUser } from '@/src/lib/adminAccess';
-import { revokeEarlyAccess } from '@/src/lib/earlyAccess';
+import { revokeInviteAccess } from '@/src/lib/inviteAccess';
 import { log } from '@/src/lib/logger';
 
 export const runtime = 'nodejs';
@@ -29,8 +29,8 @@ export async function POST(req: Request) {
   }
 
   const { userId } = parsed.data;
-  await revokeEarlyAccess(userId);
-  log.info('early-access: access revoked', { targetUserId: userId, adminId });
+  await revokeInviteAccess(userId);
+  log.info('invite: access revoked', { targetUserId: userId, adminId });
 
   return Response.json({ ok: true });
 }
