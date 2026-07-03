@@ -39,8 +39,8 @@
   --color-amber-dark:   #d97706;
   --color-amber-subtle: #2a1f00;
 
-  /* Hero bloom — positioned behind brief panel (right side, mid-height) */
-  --hero-bloom-bg: radial-gradient(ellipse 55% 65% at 72% 35%, rgba(99,102,241,0.32) 0%, transparent 65%);
+  /* Hero bloom — behind text column (left side); card floats in pure black */
+  --hero-bloom-bg: radial-gradient(ellipse 50% 60% at 22% 45%, rgba(99,102,241,0.20) 0%, transparent 70%);
   /* Ghost brief faded section opacities */
   --brief-faded-1: 0.58;
   --brief-faded-2: 0.44;
@@ -176,7 +176,7 @@ html[data-theme="light"] {
   --color-border-amber:      rgba(245,158,11,0.3);
 
   /* Hero bloom */
-  --hero-bloom-bg: radial-gradient(ellipse 55% 65% at 72% 35%, rgba(99,102,241,0.22) 0%, transparent 65%);
+  --hero-bloom-bg: radial-gradient(ellipse 50% 60% at 22% 45%, rgba(99,102,241,0.14) 0%, transparent 70%);
   /* Ghost brief — higher opacity in light mode for visibility */
   --brief-faded-1: 0.72;
   --brief-faded-2: 0.54;

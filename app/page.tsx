@@ -4,7 +4,7 @@ import { LandingNav } from './components/LandingNav';
 import { SectionHeading } from './components/ui/SectionHeading';
 import { FooterLink } from './components/ui/FooterLink';
 import { Button } from './components/ui/Button';
-import { TierLabel } from './components/ui/Badge';
+
 import { clientConfig } from '@/config/client';
 
 const { landingPage: copy } = clientConfig;
@@ -17,15 +17,33 @@ function BriefExcerptPanel() {
       style={{
         maskImage: 'linear-gradient(to bottom, transparent 0%, black 6%, black 42%, transparent 72%)',
         WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 6%, black 42%, transparent 72%)',
+        transform: 'perspective(1000px) rotateX(1.5deg) rotateY(-1deg)',
+        transformOrigin: 'center top',
+        filter: 'drop-shadow(0 48px 96px rgba(0,0,0,0.92)) drop-shadow(0 16px 32px rgba(0,0,0,0.65))',
       }}
     >
       <div
-        className="rounded-xl border p-5 flex flex-col gap-4"
+        className="rounded-xl border p-5 relative overflow-hidden"
         style={{
           background: 'var(--color-bg-elevated)',
-          borderColor: 'var(--color-border-strong)',
+          borderColor: 'rgba(255,255,255,0.07)',
+          borderTopColor: 'rgba(255,255,255,0.48)',
+          borderLeftColor: 'rgba(255,255,255,0.24)',
+          boxShadow: '0 1px 0 0 rgba(255,255,255,0.24) inset, 1px 0 0 0 rgba(255,255,255,0.10) inset',
         }}
       >
+        {/* Corner catch — tiny top-left light specular, like studio light on glass corner */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute rounded-xl"
+          style={{
+            top: 0, left: 0, width: '40%', height: '30%',
+            background: 'radial-gradient(ellipse at 0% 0%, rgba(255,255,255,0.06) 0%, transparent 70%)',
+            zIndex: 1,
+          }}
+        />
+        {/* All content sits above sheen */}
+        <div className="relative flex flex-col gap-4" style={{ zIndex: 2 }}>
         {/* Route header — faded context */}
         <div className="flex items-start justify-between gap-3 flex-wrap" style={{ opacity: 'var(--brief-faded-1)' }}>
           <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
@@ -35,7 +53,6 @@ function BriefExcerptPanel() {
             <span className="text-[0.65rem] font-bold uppercase px-2 py-0.5" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-confidence-high)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', borderRadius: '4px' }}>
               WELL SOURCED
             </span>
-            <TierLabel tier={1} />
           </div>
         </div>
 
@@ -44,8 +61,12 @@ function BriefExcerptPanel() {
           className="rounded-lg p-4 flex flex-col gap-2"
           style={{
             background: 'rgba(245,158,11,0.06)',
-            border: '1px solid rgba(245,158,11,0.25)',
-            boxShadow: '0 0 28px rgba(245,158,11,0.12), 0 4px 20px rgba(0,0,0,0.25)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'rgba(245,158,11,0.18)',
+            borderTopColor: 'rgba(245,158,11,0.55)',
+            borderLeftColor: 'rgba(245,158,11,0.32)',
+            boxShadow: '0 0 32px rgba(245,158,11,0.12), 0 4px 16px rgba(0,0,0,0.30)',
           }}
         >
           <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
@@ -60,7 +81,7 @@ function BriefExcerptPanel() {
           <div className="flex items-center gap-2 pt-2 mt-1 border-t" style={{ borderColor: 'rgba(245,158,11,0.15)' }}>
             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--color-success)' }} />
             <span className="text-[0.65rem] uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
-              THAI IMMIGRATION · CONSULATE.MFA.GO.TH · T1 CONFIRMED
+              THAI IMMIGRATION · TIER 1 CONFIRMED
             </span>
           </div>
         </div>
@@ -71,18 +92,19 @@ function BriefExcerptPanel() {
             VISA OPTIONS
           </p>
           <div className="flex flex-col gap-1.5">
-            <div className="rounded-lg p-3" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <div className="rounded-lg p-3" style={{ background: 'rgba(99,102,241,0.06)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(99,102,241,0.12)', borderTopColor: 'rgba(99,102,241,0.45)', borderLeftColor: 'rgba(99,102,241,0.25)' }}>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Visa Exemption (Tourist)</span>
                 <span className="text-[0.6rem] font-bold uppercase px-2 py-0.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(99,102,241,0.15)', borderRadius: '4px' }}>BEST FIT</span>
               </div>
-              <span className="text-[0.65rem] uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>MAX STAY 60 days (air) / 30 days (land)</span>
+              <span className="text-[0.65rem]" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-tertiary)' }}>Max stay 60 days (air) / 30 days (land)</span>
             </div>
-            <div className="rounded-lg p-3" style={{ border: '1px solid var(--color-border)' }}>
-              <div className="flex justify-between items-center">
+            <div className="rounded-lg p-3" style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.06)', borderTopColor: 'rgba(255,255,255,0.20)', borderLeftColor: 'rgba(255,255,255,0.11)' }}>
+              <div className="flex justify-between items-center mb-1">
                 <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Tourist Visa (TR)</span>
                 <span className="text-[0.6rem] font-bold uppercase px-2 py-0.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', background: 'var(--color-bg-overlay)', borderRadius: '4px' }}>ACCEPTABLE</span>
               </div>
+              <span className="text-[0.65rem]" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-text-tertiary)' }}>60 days · extendable +30 days at immigration</span>
             </div>
           </div>
         </div>
@@ -112,6 +134,7 @@ function BriefExcerptPanel() {
             <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Onward ticket enforcement inconsistently applied</span>
           </div>
         </div>
+        </div>{/* /relative content wrapper */}
       </div>
     </div>
   );
