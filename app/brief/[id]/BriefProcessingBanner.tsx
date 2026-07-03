@@ -8,7 +8,7 @@ const TIMEOUT_MS = 8 * 60 * 1000;
 // Minimum time skeleton is shown before content is revealed — ensures the
 // GENERATING card → skeleton → content sequence is always visible even when
 // the brief completes faster than the user can navigate.
-const MIN_DISPLAY_MS = 3000;
+const MIN_DISPLAY_MS = 10000;
 
 function SkeletonLine({ width = '100%', height = '14px' }: { width?: string; height?: string }) {
   return (

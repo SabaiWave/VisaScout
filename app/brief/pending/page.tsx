@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
@@ -9,7 +9,7 @@ import { NavLink } from '@/app/components/ui/NavLink';
 const MAX_WAIT_MS = 6 * 60 * 1000;
 const SOFT_HANDOFF_MS = 90 * 1000;
 const POLL_INTERVAL_MS = 3000;
-const MIN_DISPLAY_MS = 6000;
+const MIN_DISPLAY_MS = 10000;
 const DEV_MIN_DISPLAY_MS = 3000;
 
 // When brief is ready: stagger each agent green, then redirect after COMPLETION_ANIM_MS
@@ -309,6 +309,7 @@ function PendingContent() {
   );
   const [completedCount, setCompletedCount] = useState(0);
   const [startTime] = useState(() => Date.now());
+  const completionStartedRef = useRef(false);
 
   // Trigger rapid sequential completion animation, then redirect after animation finishes
   function triggerCompletionAndRedirect(redirectFn: (delay: number) => void) {
@@ -405,6 +406,8 @@ function PendingContent() {
         const data = await res.json() as { status: string };
 
         if (data.status === 'paid') {
+          if (completionStartedRef.current) return;
+          completionStartedRef.current = true;
           const elapsed = Date.now() - startTime;
           triggerCompletionAndRedirect((animDelay) => {
             const totalDelay = Math.max(animDelay, MIN_DISPLAY_MS - elapsed);

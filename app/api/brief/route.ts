@@ -216,14 +216,14 @@ async function briefHandler(req: Request) {
 
           if (resolvedDepth === 'quick') {
             if (earlyAccess) {
-              incrementInviteUsage(userId).catch((err) => {
+              await incrementInviteUsage(userId).catch((err) => {
                 log.error('invite usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
               });
             } else {
-              incrementFreeTierCount(userId).catch((err) => {
+              await incrementFreeTierCount(userId).catch((err) => {
                 log.error('free tier count increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
               });
-              incrementInviteUsage(userId).catch((err) => {
+              await incrementInviteUsage(userId).catch((err) => {
                 log.error('invite usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
               });
             }
@@ -307,14 +307,14 @@ async function briefHandler(req: Request) {
         // Increment usage counter after successful brief
         if (resolvedDepth === 'quick') {
           if (earlyAccess) {
-            incrementInviteUsage(userId).catch((err) => {
+            await incrementInviteUsage(userId).catch((err) => {
               log.error('invite usage increment failed', { error: err instanceof Error ? err.message : String(err) });
             });
           } else {
-            incrementFreeTierCount(userId).catch((err) => {
+            await incrementFreeTierCount(userId).catch((err) => {
               log.error('free tier count increment failed', { error: err instanceof Error ? err.message : String(err) });
             });
-            incrementInviteUsage(userId).catch((err) => {
+            await incrementInviteUsage(userId).catch((err) => {
               log.error('briefs_generated increment failed', { error: err instanceof Error ? err.message : String(err) });
             });
           }
