@@ -1,3 +1,7 @@
+'use client';
+
+import { useRef } from 'react';
+import { motion, useInView, MotionConfig } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, MessageSquare, Network, FileDown, AlertTriangle } from 'lucide-react';
 import { LandingNav } from './components/LandingNav';
@@ -8,6 +12,23 @@ import { Button } from './components/ui/Button';
 import { clientConfig } from '@/config/client';
 
 const { landingPage: copy } = clientConfig;
+
+const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+// Section-heading entrance — shared across all sections
+function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.5, ease: EXPO, delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 
@@ -207,30 +228,48 @@ function Hero() {
 // ─── Features ──────────────────────────────────────────────────────────────
 
 const featureTierAccents = [
-  { border: 'var(--color-secondary)', tagColor: 'var(--color-secondary-light)' },
-  { border: 'var(--color-amber)',     tagColor: 'var(--color-amber)' },
-  { border: 'var(--color-success)',   tagColor: 'var(--color-success)' },
+  { tagColor: 'var(--color-secondary-light)' },
+  { tagColor: 'var(--color-amber)' },
+  { tagColor: 'var(--color-success)' },
 ];
 
+const featContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+const featRow = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.45, ease: EXPO } },
+};
+
 function Features() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-10" subtitle={copy.features.subtitle}>
-          {copy.features.title}
-        </SectionHeading>
+        <FadeIn className="mb-10">
+          <SectionHeading subtitle={copy.features.subtitle}>
+            {copy.features.title}
+          </SectionHeading>
+        </FadeIn>
 
-        <div
+        <motion.div
+          ref={ref}
+          variants={featContainer}
+          initial="hidden"
+          animate={inView ? 'show' : 'hidden'}
           className="rounded-xl border divide-y overflow-hidden"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
         >
           {copy.features.cards.map((card, i) => {
             const accent = featureTierAccents[i];
             return (
-              <div
+              <motion.div
                 key={card.title}
+                variants={featRow}
                 className="px-5 py-6 flex flex-col gap-1"
-                style={{ borderLeft: `3px solid ${accent.border}` }}
               >
                 <p
                   className="text-xs font-bold uppercase mb-1"
@@ -247,10 +286,10 @@ function Features() {
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {card.body}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -279,21 +318,42 @@ const stepStyles = [
   },
 ];
 
+const stepContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
+};
+const stepCard = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EXPO } },
+};
+
 function HowItWorks() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle={copy.howItWorks.subtitle}>
-          {copy.howItWorks.title}
-        </SectionHeading>
+        <FadeIn className="mb-12">
+          <SectionHeading subtitle={copy.howItWorks.subtitle}>
+            {copy.howItWorks.title}
+          </SectionHeading>
+        </FadeIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div
+          ref={ref}
+          variants={stepContainer}
+          initial="hidden"
+          animate={inView ? 'show' : 'hidden'}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
           {copy.howItWorks.steps.map((step, i) => {
             const style = stepStyles[i];
             return (
-              <div
+              <motion.div
                 key={step.number}
-                className="brief-section p-6 rounded-xl border flex flex-col gap-4"
+                variants={stepCard}
+                className="p-6 rounded-xl border flex flex-col gap-4"
                 style={{
                   background: style.bg,
                   borderColor: style.borderColor,
@@ -320,10 +380,10 @@ function HowItWorks() {
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
                   {step.body}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -331,19 +391,44 @@ function HowItWorks() {
 
 // ─── Destinations ──────────────────────────────────────────────────────────
 
+const destContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+const destCard = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.4, ease: EXPO } },
+};
+const destDot = {
+  hidden: { scale: 0 },
+  show: { scale: 1, transition: { duration: 0.22, ease: EXPO, delay: 0.25 } },
+};
+
 function Destinations() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading subtitle={copy.destinations.subtitle} className="mb-12">
-          {copy.destinations.title}
-        </SectionHeading>
+        <FadeIn className="mb-12">
+          <SectionHeading subtitle={copy.destinations.subtitle}>
+            {copy.destinations.title}
+          </SectionHeading>
+        </FadeIn>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <motion.div
+          ref={ref}
+          variants={destContainer}
+          initial="hidden"
+          animate={inView ? 'show' : 'hidden'}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
+        >
           {clientConfig.supportedDestinations.map(name => (
-            <div
+            <motion.div
               key={name}
-              className="brief-section p-4 rounded-lg border flex flex-col gap-2"
+              variants={destCard}
+              className="p-4 rounded-lg border flex flex-col gap-2"
               style={{
                 background: 'var(--color-bg-base)',
                 borderColor: 'var(--color-border)',
@@ -360,9 +445,10 @@ function Destinations() {
                 className="flex items-center gap-1.5"
                 style={{ alignSelf: 'flex-start' }}
               >
-                <span
+                <motion.span
+                  variants={destDot}
                   className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse"
-                  style={{ background: 'var(--color-success)' }}
+                  style={{ background: 'var(--color-success)', transformOrigin: 'center' }}
                 />
                 <span
                   className="text-[0.65rem] font-bold uppercase"
@@ -371,9 +457,9 @@ function Destinations() {
                   Live
                 </span>
               </span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -406,21 +492,30 @@ function SourceDepthBars({ count, color }: { count: number; color: string }) {
   );
 }
 
+// Pricing cards enter simultaneously — they're comparison peers, not a sequence
+const PRICING_TRANSITION = { duration: 0.55, ease: EXPO };
+
 function Pricing() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <SectionHeading className="mb-12" subtitle={copy.pricing.subtitle}>
-          {copy.pricing.title}
-        </SectionHeading>
+        <FadeIn className="mb-12">
+          <SectionHeading subtitle={copy.pricing.subtitle}>
+            {copy.pricing.title}
+          </SectionHeading>
+        </FadeIn>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {copy.pricing.plans.map((plan, i) => {
             const depth = planDepth[i];
             return (
-              <div
+              <motion.div
                 key={plan.name}
-                className={`brief-section p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={PRICING_TRANSITION}
+                className={`p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
                 style={{
                   background: 'var(--color-bg-elevated)',
                   borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
@@ -496,7 +591,7 @@ function Pricing() {
                 <Button asChild variant={plan.highlight ? 'primary' : 'secondary'} className="w-full">
                   <Link href={plan.href}>{plan.cta}</Link>
                 </Button>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -544,14 +639,16 @@ function Footer() {
 
 export default function LandingPage() {
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-      <LandingNav />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Destinations />
-      <Pricing />
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        <LandingNav />
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <Destinations />
+        <Pricing />
+        <Footer />
+      </div>
+    </MotionConfig>
   );
 }
