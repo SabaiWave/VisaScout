@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { ArrowRight, MessageSquare, Network, FileDown } from 'lucide-react';
+import { ArrowRight, MessageSquare, Network, FileDown, AlertTriangle } from 'lucide-react';
 import { LandingNav } from './components/LandingNav';
 import { SectionHeading } from './components/ui/SectionHeading';
-import { Wordmark } from './components/ui/Wordmark';
 import { FooterLink } from './components/ui/FooterLink';
 import { Button } from './components/ui/Button';
 import { TierLabel } from './components/ui/Badge';
@@ -50,7 +49,7 @@ function BriefExcerptPanel() {
           }}
         >
           <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
-            <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}RECOMMENDED ACTION
+            RECOMMENDED ACTION
           </p>
           <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
             Apply online or at a Thai consulate for a 60-day Tourist Visa (TR) before your 30-day VOA expires.
@@ -69,7 +68,7 @@ function BriefExcerptPanel() {
         {/* Visa options — faded */}
         <div style={{ opacity: 'var(--brief-faded-1)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
-            // VISA OPTIONS
+            VISA OPTIONS
           </p>
           <div className="flex flex-col gap-1.5">
             <div className="rounded-lg p-3" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
@@ -91,7 +90,7 @@ function BriefExcerptPanel() {
         {/* Entry requirements — more faded, deeper in document */}
         <div style={{ opacity: 'var(--brief-faded-2)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
-            // ENTRY REQUIREMENTS
+            ENTRY REQUIREMENTS
           </p>
           {['Valid passport (6+ months validity)', 'Return or onward ticket required', 'Proof of funds: 20,000 THB per person', 'Proof of accommodation (first night)'].map(item => (
             <div key={item} className="flex items-start gap-2 py-1">
@@ -104,7 +103,7 @@ function BriefExcerptPanel() {
         {/* Conflict report — most faded, bottom of document */}
         <div style={{ opacity: 'var(--brief-faded-3)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
-            // CONFLICT REPORT: 3 ITEMS
+            CONFLICT REPORT: 3 ITEMS
           </p>
           <div className="rounded-lg p-3 flex flex-col gap-1" style={{ border: '1px solid var(--color-border)' }}>
             <span className="text-[0.65rem] font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-success)' }}>● Confirmed</span>
@@ -488,35 +487,29 @@ function Pricing() {
 function Footer() {
   return (
     <footer
-      className="border-t px-6 py-8"
+      className="border-t px-6 py-6"
       style={{ background: 'var(--color-bg-subtle)', borderColor: 'var(--color-border-muted)' }}
     >
       <div className="max-w-[1120px] mx-auto">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-4">
-          <div>
-            <Wordmark className="block mb-1" />
-            <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              {clientConfig.tagline}
-            </span>
-          </div>
-
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-6">
             <FooterLink href="/how-it-works">How It Works</FooterLink>
             <FooterLink href="/privacy">Privacy</FooterLink>
             <FooterLink href="/terms">Terms</FooterLink>
             <FooterLink href="/contact">Contact</FooterLink>
           </div>
-        </div>
-
-        <div className="border-t pt-4" style={{ borderColor: 'var(--color-border-muted)' }}>
-          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
-            ⚠ {clientConfig.disclaimerText}
-          </p>
           <p
             className="text-xs uppercase tracking-wider"
             style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
           >
             © {new Date().getFullYear()} {clientConfig.brandName} · All rights reserved.
+          </p>
+        </div>
+
+        <div className="border-t pt-3" style={{ borderColor: 'var(--color-border-muted)' }}>
+          <p className="text-xs leading-relaxed flex items-center gap-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
+            <AlertTriangle size={12} className="shrink-0" />
+            {clientConfig.disclaimerText}
           </p>
         </div>
       </div>

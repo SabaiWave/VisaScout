@@ -760,7 +760,6 @@ function AppContent() {
                     className="text-2xl font-bold uppercase mb-4"
                     style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '0.04em' }}
                   >
-                    <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
                     Agents Deployed
                   </h2>
                   <p className="text-base mb-3" style={{ color: 'var(--color-text-secondary)' }}>

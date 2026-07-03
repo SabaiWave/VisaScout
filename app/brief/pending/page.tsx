@@ -79,7 +79,6 @@ function HudHeading({ children, color = 'var(--color-text-primary)' }: { childre
         className="text-2xl font-bold mb-2"
         style={{ fontFamily: 'var(--font-mono)', color, textTransform: 'uppercase', letterSpacing: '0.04em' }}
       >
-        <span style={{ color: 'var(--color-secondary)', marginRight: '0.5rem' }}>//</span>
         {children}
       </h1>
       <div

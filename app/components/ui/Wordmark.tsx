@@ -12,7 +12,7 @@ export function Wordmark({ className = '', style }: WordmarkProps) {
       className={`text-base font-bold uppercase tracking-widest whitespace-nowrap ${className}`}
       style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', textDecoration: 'none', ...style }}
     >
-      <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}VisaScout
+      VisaScout
     </Link>
   );
 }

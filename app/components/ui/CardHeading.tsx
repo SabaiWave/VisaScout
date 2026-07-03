@@ -9,7 +9,6 @@ export function CardHeading({ children, badge }: CardHeadingProps) {
       className="font-bold text-base uppercase tracking-wide"
       style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
     >
-      <span style={{ color: 'var(--color-secondary)', marginRight: '0.4rem' }}>//</span>
       {children}
       {badge && <span className="ml-2 text-sm normal-case tracking-normal">{badge}</span>}
     </span>
