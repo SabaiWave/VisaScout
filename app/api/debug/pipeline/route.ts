@@ -4,8 +4,9 @@ import { isAdminUser } from '@/src/lib/adminAccess';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
+import { saveBrief } from '@/src/lib/saveBrief';
 import { log } from '@/src/lib/logger';
-import type { VisaInput, AgentStatus } from '@/src/types/index';
+import type { VisaInput, AgentStatus, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
 
@@ -34,18 +35,22 @@ export async function GET() {
 
       const { runDryPipeline } = await import('@/src/lib/dryRun');
       const events: unknown[] = [];
-      await runDryPipeline((event) => events.push(event));
+      const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline((event) => events.push(event));
 
-      const completeEvent = events.find(
-        (e) => (e as Record<string, unknown>).type === 'complete'
-      ) as { type: 'complete'; brief: unknown } | undefined;
+      let briefId: string | undefined;
+      try {
+        briefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: 'standard', userId, fundedBy: 'free' });
+      } catch (saveErr) {
+        log.error('debug/pipeline saveBrief failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+      }
 
       return Response.json({
         ok: true,
         dry_run: true,
+        briefId: briefId ?? null,
         durationMs: Date.now() - startTime,
         agentStatuses: [],
-        brief: completeEvent?.brief ?? null,
+        brief: dryBrief,
         events,
       });
     }
@@ -54,11 +59,13 @@ export async function GET() {
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+    let capturedVisaRequest: VisaRequest | null = null;
     const envelope = await runOrchestrator(
       TEST_INPUT,
       client,
       'standard',
       (visaRequest) => {
+        capturedVisaRequest = visaRequest;
         log.info('debug/pipeline parsed', { parsedSummary: visaRequest.parsedSummary });
       },
       (event) => {
@@ -86,12 +93,22 @@ export async function GET() {
     const conflictReport = await resolveConflicts(envelope, client);
     const brief = await synthesizeBrief(envelope, conflictReport, client, 'standard', startTime);
 
+    let briefId: string | undefined;
+    if (capturedVisaRequest) {
+      try {
+        briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: 'standard', userId, fundedBy: 'free' });
+      } catch (saveErr) {
+        log.error('debug/pipeline saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+      }
+    }
+
     const durationMs = Date.now() - startTime;
-    log.info('debug/pipeline complete', { durationMs, degraded: brief.metadata.degraded });
+    log.info('debug/pipeline complete', { durationMs, degraded: brief.metadata.degraded, briefId });
 
     return Response.json({
       ok: true,
       dry_run: false,
+      briefId: briefId ?? null,
       durationMs,
       agentStatuses,
       brief,

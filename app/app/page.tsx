@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
-import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Clock, ArrowRight } from 'lucide-react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import BriefRenderer from '@/app/components/BriefRenderer';
@@ -270,7 +270,7 @@ function AppContent() {
     setPhase('generating');
     setAgentsVisible(false);
     if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
-    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 2500);
+    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 8000);
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
@@ -309,6 +309,9 @@ function AppContent() {
           try { data = JSON.parse(line.slice(6)) as Record<string, unknown>; } catch { continue; }
 
           switch (data.type) {
+            case 'brief_id':
+              if (data.briefId) setBriefId(data.briefId as string);
+              break;
             case 'parsed':
               setParsedSituation(data.data as VisaRequest);
               break;
@@ -689,13 +692,20 @@ function AppContent() {
                     We&apos;re pulling from official immigration sources, recent enforcement reports, and what travelers are actually seeing on the ground.
                   </p>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    This usually takes about a minute. Your brief will appear here when it&apos;s ready.
+                    This usually takes about a minute. Your brief will appear here when it&apos;s ready — or head to your dashboard and it&apos;ll be there when done.
                   </p>
                   {nationality && destination && (
                     <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                      {nationality} → {destination}
+                      {nationality} <ArrowRight size={11} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {destination}
                     </p>
                   )}
+                  <a
+                    href="/dashboard"
+                    className="inline-flex items-center gap-1.5 text-xs mt-3"
+                    style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}
+                  >
+                    Go to Dashboard <ArrowRight size={13} />
+                  </a>
                 </div>
               )}
 
@@ -734,6 +744,14 @@ function AppContent() {
                       <AgentRow key={entry.agent} entry={entry} />
                     ))}
                   </div>
+                  {phase === 'generating' && (
+                    <p className="text-xs mt-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Need to step away?{' '}
+                      <a href="/dashboard" className="inline-flex items-center gap-1" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>
+                        Your brief will be in your dashboard when it&apos;s done <ArrowRight size={12} />
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
 
