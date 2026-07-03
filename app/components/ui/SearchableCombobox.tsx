@@ -171,6 +171,8 @@ export function SearchableCombobox({
             right: 0,
             maxHeight: 'min(240px, 40vh)',
             overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            WebkitOverflowScrolling: 'touch',
             background: 'var(--color-bg-elevated)',
             border: '1px solid var(--color-border-strong)',
             borderRadius: 'var(--radius-md)',
@@ -195,7 +197,10 @@ export function SearchableCombobox({
                 key={option}
                 role="option"
                 aria-selected={option === value}
-                onPointerDown={e => { e.preventDefault(); selectOption(option); }}
+                // onMouseDown prevents the search input from blurring on desktop (closing dropdown before onClick fires).
+                // onClick handles selection on both desktop and mobile/touch without blocking touch-scroll.
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => selectOption(option)}
                 style={{
                   padding: '9px 12px',
                   fontSize: '0.875rem',

@@ -205,11 +205,12 @@ const INPUT_STYLE: React.CSSProperties = {
   border: '1px solid var(--color-border-strong)',
   borderRadius: 'var(--radius-md)',
   padding: '10px 14px',
-  fontSize: '1rem',
+  fontSize: '1rem', // must stay ≥16px — iOS Safari auto-zooms on focus if smaller
   fontFamily: 'var(--font-body)',
   color: 'var(--color-text-primary)',
   background: 'var(--color-bg-elevated)',
   outline: 'none',
+  touchAction: 'manipulation', // prevent double-tap zoom on mobile inputs
 };
 
 const LABEL_STYLE: React.CSSProperties = {
