@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
+import { getOrCreateUser } from '@/src/lib/users';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
@@ -21,14 +22,14 @@ interface BriefRow {
   degraded: boolean;
 }
 
-async function getUserBriefs(userId: string, page: number): Promise<{ briefs: BriefRow[]; total: number }> {
+async function getUserBriefs(internalUserId: string, page: number): Promise<{ briefs: BriefRow[]; total: number }> {
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const { data, count, error } = await getSupabase()
     .from('briefs')
     .select('id, created_at, nationality, destination, depth, overall_confidence, payment_status, degraded', { count: 'exact' })
-    .eq('user_id', userId)
+    .eq('user_id', internalUserId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .range(from, to);
@@ -67,15 +68,22 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const user = await currentUser();
-  if (!user) redirect('/sign-in');
+  const clerkUser = await currentUser();
+  if (!clerkUser) redirect('/sign-in');
+
+  // briefs.user_id is the internal UUID from visascout.users, not the Clerk user ID
+  const userRecord = await getOrCreateUser(clerkUser.id).catch(() => null);
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10));
 
-  const { briefs, total } = await getUserBriefs(user.id, page);
+  const { briefs, total } = await getUserBriefs(userRecord?.id ?? '', page);
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const hasGenerating = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
+  // Keep polling if any brief was created recently — BriefCard shows minimum generating pulse
+  // for 8s even on fast completions, so the auto-refresh must fire during that window.
+  const hasRecentBriefs = briefs.some(b => Date.now() - new Date(b.created_at).getTime() < 15000);
+  const hasActiveGeneration = hasGenerating || hasRecentBriefs;
 
   return (
     <>
@@ -103,7 +111,7 @@ export default async function DashboardPage({
           )}
         </div>
 
-        <DashboardAutoRefresh hasGenerating={hasGenerating} />
+        <DashboardAutoRefresh hasGenerating={hasActiveGeneration} />
         {briefs.length === 0 ? (
           <EmptyState />
         ) : (

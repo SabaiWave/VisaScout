@@ -7,6 +7,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 
+// Minimum time to show "Generating" pulse after brief creation.
+// Prevents jarring instant-complete flash when user navigates to dashboard
+// while a brief is still in-flight or just finished.
+const GENERATING_MIN_MS = 8000;
+
 interface BriefRow {
   id: string;
   created_at: string;
@@ -22,6 +27,12 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
+
+  // Show generating pulse for at least GENERATING_MIN_MS after creation,
+  // even if the server already marked it complete. Prevents awkward instant-done flash.
+  const ageMs = Date.now() - new Date(brief.created_at).getTime();
+  const serverIsGenerating = ['queued', 'processing', 'pending'].includes(brief.payment_status);
+  const isGenerating = serverIsGenerating || ageMs < GENERATING_MIN_MS;
 
   async function handleDelete() {
     setDeleting(true);
@@ -115,7 +126,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
             <DepthBadge depth={brief.depth as 'quick' | 'standard' | 'deep'} />
-            {(brief.payment_status === 'queued' || brief.payment_status === 'processing' || brief.payment_status === 'pending') && (
+            {isGenerating && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-amber)' }}>
                 <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-amber)', display: 'inline-block', flexShrink: 0 }} />
                 Generating

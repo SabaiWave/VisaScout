@@ -8,7 +8,8 @@ import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
-import { saveBrief } from '@/src/lib/saveBrief';
+import { updateBriefWithContent, saveBrief } from '@/src/lib/saveBrief';
+import { getSupabase } from '@/src/lib/supabase';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
@@ -150,12 +151,48 @@ async function briefHandler(req: Request) {
     nationality,
   });
 
+  // Create shell brief so dashboard shows pending card immediately.
+  // Non-fatal — if this fails, pipeline continues and saveBrief handles the insert at the end.
+  let shellBriefId: string | undefined;
+  if (user) {
+    try {
+      const { data: shellRow } = await getSupabase()
+        .from('briefs')
+        .insert({
+          nationality,
+          destination,
+          visa_type: visaType || null,
+          freeform_input: freeform,
+          depth: resolvedDepth,
+          user_id: user.id,
+          payment_status: 'pending',
+          is_dry_run: dryRun,
+          degraded: false,
+        })
+        .select('id')
+        .single();
+      shellBriefId = (shellRow as { id: string } | null)?.id;
+    } catch (shellErr) {
+      log.error('shell brief creation failed — continuing without shell', { error: shellErr instanceof Error ? shellErr.message : String(shellErr) });
+    }
+  }
+
   const stream = new ReadableStream({
     async start(controller) {
       await withUsageTracking(async () => {
+      // Client may navigate away (disconnect) mid-stream — swallow enqueue errors so the
+      // pipeline continues and saves the brief to DB. The outer catch must only fire on
+      // real pipeline failures, not client disconnects.
       const send = (data: unknown) => {
-        controller.enqueue(new TextEncoder().encode(sseEvent(data)));
+        try {
+          controller.enqueue(new TextEncoder().encode(sseEvent(data)));
+        } catch {
+          // Stream cancelled — client disconnected. Continue pipeline; brief will still be saved.
+        }
       };
+
+      // Send briefId early so client can show dashboard link before pipeline completes
+      if (shellBriefId) send({ type: 'brief_id', briefId: shellBriefId });
 
       try {
         if (dryRun) {
@@ -164,9 +201,14 @@ async function briefHandler(req: Request) {
 
           let dryBriefId: string | undefined;
           try {
-            dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId, fundedBy: earlyAccess ? 'invite' : 'free' });
+            if (shellBriefId) {
+              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: dryVisaRequest, brief: dryBrief, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+              dryBriefId = shellBriefId;
+            } else {
+              dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+            }
           } catch (saveErr) {
-            log.error('saveBrief failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+            log.error('brief save failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
 
           if (resolvedDepth === 'quick') {
@@ -226,9 +268,14 @@ async function briefHandler(req: Request) {
         let briefId: string | undefined;
         if (capturedVisaRequest) {
           try {
-            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId, cost, fundedBy: earlyAccess ? 'invite' : 'free' });
+            if (shellBriefId) {
+              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: capturedVisaRequest, brief, fundedBy: earlyAccess ? 'invite' : 'free', cost, isDryRun: false });
+              briefId = shellBriefId;
+            } else {
+              briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId, cost, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: false });
+            }
           } catch (saveErr) {
-            log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+            log.error('brief save failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
         }
 
@@ -272,6 +319,10 @@ async function briefHandler(req: Request) {
           estimatedCostUsd: cost.estimatedCostUsd.toFixed(4),
         });
       } catch (err) {
+        // Mark shell brief as errored so dashboard doesn't show stuck pending card
+        if (shellBriefId) {
+          getSupabase().from('briefs').update({ payment_status: 'error' }).eq('id', shellBriefId).then(() => {});
+        }
         if (err instanceof OffTopicError) {
           send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported SEA destination. Please describe your nationality, destination country, and visa situation.' });
           return;
@@ -287,7 +338,7 @@ async function briefHandler(req: Request) {
         send({ type: 'error', message: 'Something went wrong generating your brief. Please try again or contact support.' });
       } finally {
         Sentry.setUser(null);
-        controller.close();
+        try { controller.close(); } catch { /* already closed by client disconnect */ }
       }
       });
     },

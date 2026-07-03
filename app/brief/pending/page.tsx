@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
 
@@ -184,7 +184,13 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           ))}
         </div>
         <div className="mt-4 text-center">
-          <NavLink href="/dashboard">Go to Dashboard →</NavLink>
+          <a
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm"
+            style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
+          >
+            Go to Dashboard <ArrowRight size={14} />
+          </a>
         </div>
       </div>
     </PendingShell>
