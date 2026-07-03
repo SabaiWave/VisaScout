@@ -26,7 +26,7 @@ Return ONLY valid JSON (no markdown fences):
   "defaultStayDuration": "<default duration for this nationality>",
   "extensionRules": "<general extension rules>",
   "fees": "<fee summary>",
-  "applicationProcess": "<how to apply>",
+  "applicationProcess": "<how to apply — include official online/e-visa portal URL if one exists for this nationality, then embassy/consulate as secondary option>",
   "notes": ["<important note>"],
   "confidence": "<high|medium|low>",
   "gaps": ["<what information was missing>"],

@@ -11,6 +11,7 @@ export function buildSynthesisPrompt(
 SYNTHESIS RULES:
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
 - Recommended action must be specific, actionable, and include a deadline if applicable
+- If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
 - Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
 - Confidence scores must be honest — do not uniformly set to "high". Calibrate as follows:
   - high: all major facts confirmed by Tier 1-2 sources; no agent failures; conflict report shows mostly confirmed items

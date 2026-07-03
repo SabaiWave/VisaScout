@@ -39,8 +39,12 @@
   --color-amber-dark:   #d97706;
   --color-amber-subtle: #2a1f00;
 
-  /* Hero bloom */
-  --hero-bloom-bg: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.35) 0%, transparent 70%);
+  /* Hero bloom — positioned behind brief panel (right side, mid-height) */
+  --hero-bloom-bg: radial-gradient(ellipse 55% 65% at 72% 35%, rgba(99,102,241,0.32) 0%, transparent 65%);
+  /* Ghost brief faded section opacities */
+  --brief-faded-1: 0.58;
+  --brief-faded-2: 0.44;
+  --brief-faded-3: 0.35;
   /* App page bloom — same shape, reduced intensity for inner pages */
   --bloom-app-bg:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 70%);
 
@@ -172,7 +176,11 @@ html[data-theme="light"] {
   --color-border-amber:      rgba(245,158,11,0.3);
 
   /* Hero bloom */
-  --hero-bloom-bg: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.28) 0%, transparent 70%);
+  --hero-bloom-bg: radial-gradient(ellipse 55% 65% at 72% 35%, rgba(99,102,241,0.22) 0%, transparent 65%);
+  /* Ghost brief — higher opacity in light mode for visibility */
+  --brief-faded-1: 0.72;
+  --brief-faded-2: 0.54;
+  --brief-faded-3: 0.43;
   --bloom-app-bg:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%);
 }
 

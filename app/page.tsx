@@ -13,8 +13,6 @@ const { landingPage: copy } = clientConfig;
 // ─── Hero ──────────────────────────────────────────────────────────────────
 
 function BriefExcerptPanel() {
-  const FADED_SECTION = 0.22;
-
   return (
     <div
       style={{
@@ -30,7 +28,7 @@ function BriefExcerptPanel() {
         }}
       >
         {/* Route header — faded context */}
-        <div className="flex items-start justify-between gap-3 flex-wrap" style={{ opacity: FADED_SECTION }}>
+        <div className="flex items-start justify-between gap-3 flex-wrap" style={{ opacity: 'var(--brief-faded-1)' }}>
           <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
             US CITIZEN <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> THAILAND
           </span>
@@ -55,7 +53,7 @@ function BriefExcerptPanel() {
             <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}RECOMMENDED ACTION
           </p>
           <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-            Apply for a 60-day tourist visa (TR) at a Thai consulate before your 30-day VOA expires.
+            Apply online or at a Thai consulate for a 60-day Tourist Visa (TR) before your 30-day VOA expires.
           </p>
           <p className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-error)', letterSpacing: '0.04em' }}>
             DEADLINE: 15 DAYS
@@ -69,7 +67,7 @@ function BriefExcerptPanel() {
         </div>
 
         {/* Visa options — faded */}
-        <div style={{ opacity: FADED_SECTION }}>
+        <div style={{ opacity: 'var(--brief-faded-1)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
             // VISA OPTIONS
           </p>
@@ -91,7 +89,7 @@ function BriefExcerptPanel() {
         </div>
 
         {/* Entry requirements — more faded, deeper in document */}
-        <div style={{ opacity: FADED_SECTION * 0.75 }}>
+        <div style={{ opacity: 'var(--brief-faded-2)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
             // ENTRY REQUIREMENTS
           </p>
@@ -104,7 +102,7 @@ function BriefExcerptPanel() {
         </div>
 
         {/* Conflict report — most faded, bottom of document */}
-        <div style={{ opacity: FADED_SECTION * 0.6 }}>
+        <div style={{ opacity: 'var(--brief-faded-3)' }}>
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}>
             // CONFLICT REPORT: 3 ITEMS
           </p>
@@ -123,7 +121,7 @@ function BriefExcerptPanel() {
 function Hero() {
   return (
     <section
-      className="relative overflow-hidden px-6 py-24"
+      className="relative overflow-hidden px-6 pt-12 pb-24"
       style={{ background: 'var(--color-bg-base)' }}
     >
       {/* Radiant Bloom */}
@@ -168,8 +166,13 @@ function Hero() {
 
           {/* Brief — absolutely positioned, out of flow, never inflates section height */}
           <div
-            className="hidden md:block absolute top-12 right-0 overflow-hidden"
-            style={{ width: '46%' }}
+            className="hidden md:block absolute top-0 right-0"
+            style={{
+              width: '46%',
+              transform: 'perspective(1200px) rotateX(2deg) rotateY(-9deg)',
+              transformOrigin: 'left center',
+
+            }}
           >
             <BriefExcerptPanel />
           </div>
