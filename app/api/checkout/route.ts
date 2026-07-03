@@ -2,11 +2,12 @@ import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { getStripe, PRICES } from '@/src/lib/stripe';
 import { createShellBrief } from '@/src/lib/saveBrief';
-import { isEarlyAccessUser, redeemEarlyAccessCode, incrementEarlyAccessUsage } from '@/src/lib/earlyAccess';
+import { hasInviteAccess, redeemInviteCode, incrementInviteUsage } from '@/src/lib/inviteAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { checkRateLimit } from '@/src/lib/rateLimit';
+import { getOrCreateUser } from '@/src/lib/users';
 
 const CheckoutSchema = z.object({
   nationality: z.string().min(1).max(100),
@@ -38,6 +39,8 @@ export async function POST(req: Request) {
       },
     });
   }
+
+  const user = await getOrCreateUser(userId).catch(() => null);
 
   let body: unknown;
   try {
@@ -82,9 +85,9 @@ export async function POST(req: Request) {
   // Early access: redeem code at checkout if provided, or detect returning early access user
   let earlyAccess = false;
   if (inviteCode?.trim()) {
-    const redeemResult = await redeemEarlyAccessCode(userId, inviteCode.trim());
+    const redeemResult = await redeemInviteCode(userId, inviteCode.trim());
     if (!redeemResult.ok) {
-      await log.warn('checkout: early access code rejected', { userId, codeAttempted: inviteCode.trim(), reason: redeemResult.error });
+      await log.warn('checkout: invite code rejected', { userId, userEmail: user?.email ?? null, codeAttempted: inviteCode.trim(), reason: redeemResult.error });
       return new Response(JSON.stringify({ error: redeemResult.error }), {
         status: redeemResult.status,
         headers: { 'Content-Type': 'application/json' },
@@ -92,7 +95,7 @@ export async function POST(req: Request) {
     }
     earlyAccess = true;
   } else {
-    earlyAccess = await isEarlyAccessUser(userId);
+    earlyAccess = await hasInviteAccess(userId);
   }
 
   if (earlyAccess) {
@@ -105,20 +108,20 @@ export async function POST(req: Request) {
 
       await getSupabase()
         .from('briefs')
-        .update({ payment_status: 'queued' })
+        .update({ payment_status: 'queued', funded_by: 'invite' })
         .eq('id', briefId);
 
-      await incrementEarlyAccessUsage(userId);
+      await incrementInviteUsage(userId);
 
-      await trackEvent('early_access.brief_started', { userId, briefId, depth, destination, nationality });
-      log.info('checkout: early access bypass', { briefId, depth, userId, codeUsed: inviteCode?.trim() || 'returning_user' });
+      await trackEvent('invite.brief_started', { userId, briefId, depth, destination, nationality });
+      log.info('checkout: invite bypass', { briefId, depth, userId, userEmail: user?.email ?? null, codeUsed: inviteCode?.trim() || 'returning_user' });
 
       return new Response(
         JSON.stringify({ checkoutUrl: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}` }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       );
     } catch (err) {
-      log.error('checkout: early access job queue failed', { briefId, error: err instanceof Error ? err.message : String(err) });
+      log.error('checkout: invite job queue failed', { briefId, error: err instanceof Error ? err.message : String(err) });
       return new Response(JSON.stringify({ error: 'Failed to queue brief. Please try again.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -151,7 +154,7 @@ export async function POST(req: Request) {
       nationality,
       priceUsd: PRICES[depth].amount / 100,
     });
-    log.info('checkout session created', { briefId, depth, destination });
+    log.info('checkout session created', { briefId, depth, destination, userEmail: user?.email ?? null });
     return new Response(JSON.stringify({ checkoutUrl: session.url }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

@@ -99,8 +99,7 @@ export async function GET(req: Request) {
         briefId: job.brief_id,
         visaRequest: visaRequest!,
         brief,
-        stripeSessionId: briefRow.stripe_session_id ?? '',
-        paymentStatus: 'paid',
+        fundedBy: 'stripe',
         cost,
       });
 

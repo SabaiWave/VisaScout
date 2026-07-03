@@ -1,4 +1,5 @@
 import { getSupabase } from './supabase';
+import { getOrCreateUser } from './users';
 import type { VisaBrief, VisaRequest } from '../types/index';
 import type { ReportCost } from './cost';
 
@@ -8,6 +9,7 @@ export interface SaveBriefInput {
   depth: 'quick' | 'standard' | 'deep';
   userId?: string;
   cost?: ReportCost;
+  fundedBy?: 'stripe' | 'invite' | 'free';
 }
 
 export interface ShellBriefInput {
@@ -20,6 +22,8 @@ export interface ShellBriefInput {
 }
 
 export async function createShellBrief(input: ShellBriefInput): Promise<string> {
+  const { id: internalUserId } = await getOrCreateUser(input.userId);
+
   const { data, error } = await getSupabase()
     .from('briefs')
     .insert({
@@ -28,7 +32,7 @@ export async function createShellBrief(input: ShellBriefInput): Promise<string> 
       visa_type: input.visaType ?? null,
       freeform_input: input.freeform,
       depth: input.depth,
-      user_id: input.userId,
+      user_id: internalUserId,
       payment_status: 'pending',
       degraded: false,
     })
@@ -43,12 +47,13 @@ export interface UpdateBriefContentInput {
   briefId: string;
   visaRequest: VisaRequest;
   brief: VisaBrief;
-  stripeSessionId: string;
-  paymentStatus: 'paid' | 'error';
+  fundedBy: 'stripe' | 'invite' | 'free';
   cost?: ReportCost;
 }
 
 export async function updateBriefWithContent(input: UpdateBriefContentInput): Promise<void> {
+  const paymentStatus = input.fundedBy === 'stripe' ? 'paid' : 'unpaid';
+
   const { error } = await getSupabase()
     .from('briefs')
     .update({
@@ -60,8 +65,8 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
       agent_statuses: input.brief.metadata.agentStatuses,
       overall_confidence: input.brief.confidenceScore.overall,
       degraded: input.brief.metadata.degraded,
-      stripe_session_id: input.stripeSessionId,
-      payment_status: input.paymentStatus,
+      payment_status: paymentStatus,
+      funded_by: input.fundedBy,
       ...(input.cost && {
         total_tokens_input:  input.cost.totalInputTokens,
         total_tokens_output: input.cost.totalOutputTokens,
@@ -74,7 +79,16 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
   if (error) throw new Error(`Failed to update brief: ${error.message}`);
 }
 
-export async function saveBrief({ visaRequest, brief, depth, userId, cost }: SaveBriefInput): Promise<string> {
+export async function saveBrief({ visaRequest, brief, depth, userId, cost, fundedBy }: SaveBriefInput): Promise<string> {
+  let internalUserId: string | null = null;
+  if (userId) {
+    try {
+      internalUserId = (await getOrCreateUser(userId)).id;
+    } catch {
+      // Non-fatal — brief saved without user association; caller logs saveBrief failures
+    }
+  }
+
   const { data, error } = await getSupabase()
     .from('briefs')
     .insert({
@@ -89,7 +103,8 @@ export async function saveBrief({ visaRequest, brief, depth, userId, cost }: Sav
       overall_confidence: brief.confidenceScore.overall,
       degraded: brief.metadata.degraded,
       depth,
-      user_id: userId ?? null,
+      user_id: internalUserId ?? null,
+      funded_by: fundedBy ?? null,
       ...(cost && {
         total_tokens_input:  cost.totalInputTokens,
         total_tokens_output: cost.totalOutputTokens,

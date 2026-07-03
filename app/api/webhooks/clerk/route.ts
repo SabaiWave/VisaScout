@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { render } from '@react-email/render';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import { trackEvent } from '@/src/lib/analytics';
+import { getSupabase } from '@/src/lib/supabase';
 import WelcomeEmail from '@/src/emails/welcome';
 
 export async function POST(req: Request) {
@@ -32,14 +33,12 @@ export async function POST(req: Request) {
     return new Response('Invalid signature', { status: 400 });
   }
 
-  if (event.type === 'user.created') {
-    const emailAddresses = event.data.email_addresses as Array<{ email_address: string }> | undefined;
-    const email = emailAddresses?.[0]?.email_address;
+  const clerkUserId = event.data.id as string;
+  const emailAddresses = event.data.email_addresses as Array<{ email_address: string }> | undefined;
+  const email = emailAddresses?.[0]?.email_address ?? null;
 
-    await trackEvent('user.signup', {
-      userId: event.data.id as string,
-      email: email ?? null,
-    });
+  if (event.type === 'user.created') {
+    await trackEvent('user.signup', { userId: clerkUserId, email });
 
     if (email) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';
@@ -55,6 +54,13 @@ export async function POST(req: Request) {
         console.error('[clerk-webhook] welcome email failed', { email, err });
       }
     }
+  }
+
+  if (event.type === 'user.updated' && email) {
+    await getSupabase()
+      .from('users')
+      .update({ email })
+      .eq('clerk_user_id', clerkUserId);
   }
 
   return new Response('ok', { status: 200 });

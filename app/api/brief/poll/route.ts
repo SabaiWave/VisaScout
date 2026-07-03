@@ -6,6 +6,7 @@ import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
 import { synthesizeBrief } from '@/src/synthesis/synthesize';
 import { updateBriefWithContent } from '@/src/lib/saveBrief';
+import { incrementUserBriefCount, getOrCreateUser } from '@/src/lib/users';
 import { runDryPipeline } from '@/src/lib/dryRun';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { log } from '@/src/lib/logger';
@@ -18,7 +19,7 @@ export const maxDuration = 300;
 async function runPipeline(jobId: string, briefId: string) {
   const { data: briefRow, error: briefFetchError } = await getSupabase()
     .from('briefs')
-    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id, user_id')
+    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id, user_id, funded_by')
     .eq('id', briefId)
     .single();
 
@@ -60,8 +61,7 @@ async function runPipeline(jobId: string, briefId: string) {
         briefId,
         visaRequest: visaRequest!,
         brief,
-        stripeSessionId: briefRow.stripe_session_id ?? '',
-        paymentStatus: 'paid',
+        fundedBy: (briefRow.funded_by as 'stripe' | 'invite' | 'free') ?? 'stripe',
         cost,
       });
 
@@ -69,6 +69,14 @@ async function runPipeline(jobId: string, briefId: string) {
         .from('brief_jobs')
         .update({ status: 'done', completed_at: new Date().toISOString() })
         .eq('id', jobId);
+
+      // briefs_generated for invite is counted at checkout; count Stripe briefs here at completion
+      const fundedBy = briefRow.funded_by as string | null;
+      if (fundedBy === 'stripe' && briefRow.user_id) {
+        incrementUserBriefCount(briefRow.user_id as string).catch((err: unknown) => {
+          log.error('poll: briefs_generated increment failed', { jobId, briefId, error: err instanceof Error ? err.message : String(err) });
+        });
+      }
 
       const agentStatuses = brief.metadata?.agentStatuses ?? [];
       const pipelineDurationMs = Date.now() - pipelineStart;
@@ -124,11 +132,19 @@ export async function GET(req: Request) {
     });
   }
 
+  const user = await getOrCreateUser(userId).catch(() => null);
+  if (!user) {
+    return new Response(JSON.stringify({ error: 'User lookup failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const { data, error } = await getSupabase()
     .from('briefs')
     .select('id, payment_status, depth, destination, nationality')
     .eq('id', briefId)
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
     .single();
 
   if (error || !data) {
@@ -157,7 +173,7 @@ export async function GET(req: Request) {
 
       if (claimed && claimed.length > 0) {
         const row = data as typeof data & { depth: string; destination: string; nationality: string };
-        log.info('poll: claimed job, firing pipeline', { jobId: job.id, briefId, depth: row.depth });
+        log.info('poll: claimed job, firing pipeline', { jobId: job.id, briefId, depth: row.depth, userEmail: user.email });
         void trackEvent('poll.job_claimed', { briefId, jobId: job.id, depth: row.depth, destination: row.destination, nationality: row.nationality });
         waitUntil(runPipeline(job.id, briefId));
       }

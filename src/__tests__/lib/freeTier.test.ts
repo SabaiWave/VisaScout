@@ -1,13 +1,18 @@
 import { getFreeDailyLimit, checkFreeTierCap, incrementFreeTierCount, logIpAbuse } from '../../lib/freeTier';
 
-// Mock getSupabase
 jest.mock('../../lib/supabase', () => ({
   getSupabase: jest.fn(),
+}));
+
+jest.mock('../../lib/users', () => ({
+  getOrCreateUser: jest.fn().mockResolvedValue({ id: 'internal-uuid-123', clerk_user_id: 'user_test123', email: 'test@example.com', invite_code: null, invite_revoked_at: null, briefs_generated: 0 }),
 }));
 
 import { getSupabase } from '../../lib/supabase';
 
 const mockGetSupabase = getSupabase as jest.Mock;
+
+const INTERNAL_UUID = 'internal-uuid-123';
 
 function makeSupabaseMock(overrides: Record<string, unknown> = {}) {
   const mock = {
@@ -40,6 +45,7 @@ describe('freeTier', () => {
       const result = await checkFreeTierCap('user_abc');
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(1);
+      expect(mock.eq).toHaveBeenCalledWith('user_id', INTERNAL_UUID);
     });
 
     it('allows when count is below limit', async () => {
@@ -71,14 +77,14 @@ describe('freeTier', () => {
   });
 
   describe('incrementFreeTierCount', () => {
-    it('calls the rpc function with user_id and today date', async () => {
+    it('resolves clerk id to internal uuid and calls RPC with uuid', async () => {
       const mock = makeSupabaseMock();
       const today = new Date().toISOString().split('T')[0];
 
       await incrementFreeTierCount('user_xyz');
 
       expect(mock.rpc).toHaveBeenCalledWith('increment_free_daily_count', {
-        p_user_id: 'user_xyz',
+        p_user_id: INTERNAL_UUID,
         p_date: today,
       });
     });

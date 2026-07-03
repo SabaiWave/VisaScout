@@ -12,7 +12,8 @@ import { saveBrief } from '@/src/lib/saveBrief';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
-import { isEarlyAccessUser, incrementEarlyAccessUsage } from '@/src/lib/earlyAccess';
+import { hasInviteAccess, incrementInviteUsage } from '@/src/lib/inviteAccess';
+import { getOrCreateUser } from '@/src/lib/users';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
@@ -57,6 +58,7 @@ async function briefHandler(req: Request) {
     });
   }
 
+  const user = await getOrCreateUser(userId).catch(() => null);
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
 
   let body: unknown;
@@ -88,7 +90,7 @@ async function briefHandler(req: Request) {
 
   const rateCheck = await checkRateLimit(userId);
   if (!rateCheck.allowed) {
-    await log.warn('rate.limit.exceeded', { userId, ip });
+    await log.warn('rate.limit.exceeded', { userId, userEmail: user?.email ?? null, ip });
     return new Response(
       JSON.stringify({ error: 'Too many requests. Please wait a moment before trying again.' }),
       {
@@ -109,7 +111,7 @@ async function briefHandler(req: Request) {
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
   // Invite code users bypass Quick cap — check once here, reuse at completion for usage tracking
-  const earlyAccess = resolvedDepth === 'quick' ? await isEarlyAccessUser(userId).catch(() => false) : false;
+  const earlyAccess = resolvedDepth === 'quick' ? await hasInviteAccess(userId).catch(() => false) : false;
 
   // Free tier daily cap — Supabase op, runs in DRY_RUN too (CLAUDE.md: Supabase saves run in DRY_RUN)
   if (resolvedDepth === 'quick' && !earlyAccess) {
@@ -133,7 +135,7 @@ async function briefHandler(req: Request) {
     }
   }
 
-  Sentry.setUser({ id: userId });
+  Sentry.setUser({ id: userId, email: user?.email ?? undefined });
   Sentry.setTag('destination', destination);
   Sentry.setTag('nationality', nationality);
   Sentry.setTag('depth', resolvedDepth);
@@ -157,24 +159,27 @@ async function briefHandler(req: Request) {
 
       try {
         if (dryRun) {
-          log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth });
+          log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
           const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development');
 
           let dryBriefId: string | undefined;
           try {
-            dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId });
+            dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId, fundedBy: earlyAccess ? 'invite' : 'free' });
           } catch (saveErr) {
             log.error('saveBrief failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
 
           if (resolvedDepth === 'quick') {
             if (earlyAccess) {
-              incrementEarlyAccessUsage(userId).catch((err) => {
-                log.error('early access usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
+              incrementInviteUsage(userId).catch((err) => {
+                log.error('invite usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
               });
             } else {
               incrementFreeTierCount(userId).catch((err) => {
                 log.error('free tier count increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
+              });
+              incrementInviteUsage(userId).catch((err) => {
+                log.error('invite usage increment failed [DRY_RUN]', { error: err instanceof Error ? err.message : String(err) });
               });
             }
           }
@@ -200,7 +205,7 @@ async function briefHandler(req: Request) {
         const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
         const startTime = Date.now();
 
-        log.info('pipeline start', { destination, depth: resolvedDepth });
+        log.info('pipeline start', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
 
         let capturedVisaRequest: VisaRequest | null = null;
         const envelope = await runOrchestrator(
@@ -221,7 +226,7 @@ async function briefHandler(req: Request) {
         let briefId: string | undefined;
         if (capturedVisaRequest) {
           try {
-            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId, cost });
+            briefId = await saveBrief({ visaRequest: capturedVisaRequest, brief, depth: resolvedDepth, userId, cost, fundedBy: earlyAccess ? 'invite' : 'free' });
           } catch (saveErr) {
             log.error('saveBrief failed', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
           }
@@ -230,12 +235,15 @@ async function briefHandler(req: Request) {
         // Increment usage counter after successful brief
         if (resolvedDepth === 'quick') {
           if (earlyAccess) {
-            incrementEarlyAccessUsage(userId).catch((err) => {
-              log.error('early access usage increment failed', { error: err instanceof Error ? err.message : String(err) });
+            incrementInviteUsage(userId).catch((err) => {
+              log.error('invite usage increment failed', { error: err instanceof Error ? err.message : String(err) });
             });
           } else {
             incrementFreeTierCount(userId).catch((err) => {
               log.error('free tier count increment failed', { error: err instanceof Error ? err.message : String(err) });
+            });
+            incrementInviteUsage(userId).catch((err) => {
+              log.error('briefs_generated increment failed', { error: err instanceof Error ? err.message : String(err) });
             });
           }
         }

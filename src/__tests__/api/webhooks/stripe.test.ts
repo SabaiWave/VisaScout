@@ -153,8 +153,8 @@ describe('POST /api/webhooks/stripe', () => {
     expect(res.status).toBe(200);
     // Job inserted into brief_jobs
     expect(mock.insert).toHaveBeenCalledWith({ brief_id: TEST_BRIEF_ID });
-    // Brief status updated to queued
-    expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({ payment_status: 'queued' }));
+    // Brief status updated to queued with funded_by set
+    expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({ payment_status: 'queued', funded_by: 'stripe' }));
   });
 
   it('returns 200 when job already queued (unique constraint — Stripe retry)', async () => {

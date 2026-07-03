@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
-import { redeemEarlyAccessCode } from '@/src/lib/earlyAccess';
+import { redeemInviteCode } from '@/src/lib/inviteAccess';
+import { getOrCreateUser } from '@/src/lib/users';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
 import { checkRateLimit } from '@/src/lib/rateLimit';
@@ -41,15 +42,16 @@ export async function POST(req: Request) {
   }
 
   const { code } = parsed.data;
-  const result = await redeemEarlyAccessCode(userId, code);
+  const user = await getOrCreateUser(userId).catch(() => null);
+  const result = await redeemInviteCode(userId, code);
 
   if (!result.ok) {
-    await log.warn('early-access: redemption failed', { userId, codeAttempted: code, reason: result.error });
+    await log.warn('invite: redemption failed', { userId, userEmail: user?.email ?? null, codeAttempted: code, reason: result.error });
     return Response.json({ error: result.error }, { status: result.status });
   }
 
-  await trackEvent('early_access.redeemed', { userId, codeUsed: code });
-  log.info('early-access: code redeemed', { userId, codeUsed: code });
+  await trackEvent('invite.redeemed', { userId, codeUsed: code });
+  log.info('invite: code redeemed', { userId, userEmail: user?.email ?? null, codeUsed: code });
 
   return Response.json({ ok: true });
 }

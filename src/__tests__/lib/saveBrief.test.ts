@@ -5,6 +5,8 @@ import visaRequestFixture from '../../__fixtures__/agents/visaRequest.json';
 import visaBriefFixture from '../../__fixtures__/visaBrief.json';
 
 jest.mock('../../lib/supabase', () => ({ getSupabase: jest.fn() }));
+jest.mock('../../lib/users', () => ({ getOrCreateUser: jest.fn().mockResolvedValue({ id: 'internal-uuid-123', clerk_user_id: 'user_test123', email: 'test@example.com', invite_code: null, invite_revoked_at: null, briefs_generated: 0 }) }));
+
 import { getSupabase } from '../../lib/supabase';
 const mockGetSupabase = getSupabase as jest.MockedFunction<typeof getSupabase>;
 
@@ -25,19 +27,12 @@ function makeUpdateChain(result: { error: unknown }) {
   return { update, eq, from: jest.fn(() => ({ update })) };
 }
 
-function makeSelectChain(result: { data: unknown; error: unknown }) {
-  const single = jest.fn().mockResolvedValue(result);
-  const eq = jest.fn(() => ({ single }));
-  const select = jest.fn(() => ({ eq }));
-  return { select, eq, single, from: jest.fn(() => ({ select })) };
-}
-
 describe('saveBrief', () => {
   it('inserts brief and returns the id', async () => {
     const chain = makeInsertChain({ data: { id: TEST_ID }, error: null });
     mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);
 
-    const id = await saveBrief({ visaRequest: VISA_REQUEST, brief: VISA_BRIEF, depth: 'standard', userId: 'user-1' });
+    const id = await saveBrief({ visaRequest: VISA_REQUEST, brief: VISA_BRIEF, depth: 'standard', userId: 'user-1', fundedBy: 'free' });
 
     expect(id).toBe(TEST_ID);
     expect(chain.from).toHaveBeenCalledWith('briefs');
@@ -45,6 +40,7 @@ describe('saveBrief', () => {
       nationality: VISA_REQUEST.normalizedNationality,
       destination: VISA_REQUEST.normalizedDestination,
       depth: 'standard',
+      funded_by: 'free',
     }));
   });
 
@@ -77,6 +73,7 @@ describe('createShellBrief', () => {
       destination: 'Thailand',
       payment_status: 'pending',
       degraded: false,
+      user_id: 'internal-uuid-123',
     }));
   });
 
@@ -110,7 +107,7 @@ describe('createShellBrief', () => {
 });
 
 describe('updateBriefWithContent', () => {
-  it('updates all content fields and sets payment_status', async () => {
+  it('derives payment_status=paid for stripe and sets funded_by', async () => {
     const chain = makeUpdateChain({ error: null });
     mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);
 
@@ -118,18 +115,17 @@ describe('updateBriefWithContent', () => {
       briefId: TEST_ID,
       visaRequest: VISA_REQUEST,
       brief: VISA_BRIEF,
-      stripeSessionId: 'cs_test_abc',
-      paymentStatus: 'paid',
+      fundedBy: 'stripe',
     });
 
     expect(chain.update).toHaveBeenCalledWith(expect.objectContaining({
-      stripe_session_id: 'cs_test_abc',
       payment_status: 'paid',
+      funded_by: 'stripe',
     }));
     expect(chain.eq).toHaveBeenCalledWith('id', TEST_ID);
   });
 
-  it('can set payment_status to error', async () => {
+  it('derives payment_status=unpaid for invite', async () => {
     const chain = makeUpdateChain({ error: null });
     mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);
 
@@ -137,11 +133,13 @@ describe('updateBriefWithContent', () => {
       briefId: TEST_ID,
       visaRequest: VISA_REQUEST,
       brief: VISA_BRIEF,
-      stripeSessionId: 'cs_test_abc',
-      paymentStatus: 'error',
+      fundedBy: 'invite',
     });
 
-    expect(chain.update).toHaveBeenCalledWith(expect.objectContaining({ payment_status: 'error' }));
+    expect(chain.update).toHaveBeenCalledWith(expect.objectContaining({
+      payment_status: 'unpaid',
+      funded_by: 'invite',
+    }));
   });
 
   it('throws when Supabase returns an error', async () => {
@@ -152,8 +150,7 @@ describe('updateBriefWithContent', () => {
       briefId: TEST_ID,
       visaRequest: VISA_REQUEST,
       brief: VISA_BRIEF,
-      stripeSessionId: 'cs_test_abc',
-      paymentStatus: 'paid',
+      fundedBy: 'stripe',
     })).rejects.toThrow('update failed');
   });
 });
