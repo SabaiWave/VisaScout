@@ -7,11 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 
-// Minimum time to show "Generating" pulse after brief creation.
-// Prevents jarring instant-complete flash when user navigates to dashboard
-// while a brief is still in-flight or just finished.
-const GENERATING_MIN_MS = 8000;
-
 interface BriefRow {
   id: string;
   created_at: string;
@@ -28,11 +23,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
-  // Show generating pulse for at least GENERATING_MIN_MS after creation,
-  // even if the server already marked it complete. Prevents awkward instant-done flash.
-  const ageMs = Date.now() - new Date(brief.created_at).getTime();
-  const serverIsGenerating = ['queued', 'processing', 'pending'].includes(brief.payment_status);
-  const isGenerating = serverIsGenerating || ageMs < GENERATING_MIN_MS;
+  const isGenerating = ['queued', 'processing', 'pending'].includes(brief.payment_status);
 
   async function handleDelete() {
     setDeleting(true);
@@ -66,7 +57,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             exit={{ opacity: 0, scale: 0.94 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
           >
-            <Link href={`/brief/${brief.id}`} style={{ textDecoration: 'none' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
+            <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
               <div
           className="visa-track-card"
           style={{

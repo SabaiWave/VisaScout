@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MessageSquare, Network, FileDown } from 'lucide-react';
 import { LandingNav } from './components/LandingNav';
 import { SectionHeading } from './components/ui/SectionHeading';
 import { Wordmark } from './components/ui/Wordmark';
@@ -181,6 +181,12 @@ function Hero() {
 
 // ─── Features ──────────────────────────────────────────────────────────────
 
+const featureTierAccents = [
+  { border: 'var(--color-secondary)', tagColor: 'var(--color-secondary-light)' },
+  { border: 'var(--color-amber)',     tagColor: 'var(--color-amber)' },
+  { border: 'var(--color-success)',   tagColor: 'var(--color-success)' },
+];
+
 function Features() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
@@ -190,31 +196,35 @@ function Features() {
         </SectionHeading>
 
         <div
-          className="rounded-xl border divide-y"
+          className="rounded-xl border divide-y overflow-hidden"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
         >
-          {copy.features.cards.map((card) => (
-            <div
-              key={card.title}
-              className="px-5 py-5 flex flex-col gap-1"
-            >
-              <p
-                className="text-xs font-bold uppercase mb-1"
-                style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)' }}
+          {copy.features.cards.map((card, i) => {
+            const accent = featureTierAccents[i];
+            return (
+              <div
+                key={card.title}
+                className="px-5 py-6 flex flex-col gap-1"
+                style={{ borderLeft: `3px solid ${accent.border}` }}
               >
-                {card.tag}
-              </p>
-              <p
-                className="text-base font-bold uppercase"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
-              >
-                {card.title}
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {card.body}
-              </p>
-            </div>
-          ))}
+                <p
+                  className="text-xs font-bold uppercase mb-1"
+                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: accent.tagColor }}
+                >
+                  {card.tag}
+                </p>
+                <p
+                  className="text-base font-bold uppercase"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
+                >
+                  {card.title}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {card.body}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -222,6 +232,27 @@ function Features() {
 }
 
 // ─── How It Works ──────────────────────────────────────────────────────────
+
+const stepStyles = [
+  {
+    numberColor: 'var(--color-secondary)',
+    borderColor: 'var(--color-border)',
+    bg: 'var(--color-bg-elevated)',
+    icon: <MessageSquare size={15} aria-hidden />,
+  },
+  {
+    numberColor: 'var(--color-secondary)',
+    borderColor: 'var(--color-border)',
+    bg: 'var(--color-bg-elevated)',
+    icon: <Network size={15} aria-hidden />,
+  },
+  {
+    numberColor: 'var(--color-secondary)',
+    borderColor: 'var(--color-border)',
+    bg: 'var(--color-bg-elevated)',
+    icon: <FileDown size={15} aria-hidden />,
+  },
+];
 
 function HowItWorks() {
   return (
@@ -232,33 +263,41 @@ function HowItWorks() {
         </SectionHeading>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {copy.howItWorks.steps.map(step => (
-            <div
-              key={step.number}
-              className="brief-section p-6 rounded-xl border flex flex-col gap-4"
-              style={{
-                background: 'var(--color-bg-elevated)',
-                borderColor: 'var(--color-border)',
-                boxShadow: 'var(--shadow-card)',
-              }}
-            >
+          {copy.howItWorks.steps.map((step, i) => {
+            const style = stepStyles[i];
+            return (
               <div
-                className="text-3xl font-bold"
-                style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}
+                key={step.number}
+                className="brief-section p-6 rounded-xl border flex flex-col gap-4"
+                style={{
+                  background: style.bg,
+                  borderColor: style.borderColor,
+                  boxShadow: 'var(--shadow-card)',
+                }}
               >
-                {step.number}
+                <div className="flex items-start justify-between">
+                  <div
+                    className="text-4xl font-bold"
+                    style={{ color: style.numberColor, fontFamily: 'var(--font-mono)' }}
+                  >
+                    {step.number}
+                  </div>
+                  <span style={{ color: 'var(--color-secondary)', opacity: 0.35 }}>
+                    {style.icon}
+                  </span>
+                </div>
+                <h3
+                  className="text-sm font-bold uppercase"
+                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {step.body}
+                </p>
               </div>
-              <h3
-                className="text-sm font-bold uppercase"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
-              >
-                {step.title}
-              </h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {step.body}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -287,7 +326,7 @@ function Destinations() {
               }}
             >
               <span
-                className="text-base font-bold uppercase tracking-wider"
+                className="text-base font-bold uppercase leading-tight"
                 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
               >
                 {name}
@@ -317,6 +356,31 @@ function Destinations() {
 
 // ─── Pricing ───────────────────────────────────────────────────────────────
 
+const planDepth = [
+  { count: 3, color: 'var(--color-depth-quick)' },
+  { count: 5, color: 'var(--color-depth-standard)' },
+  { count: 8, color: 'var(--color-depth-deep)' },
+];
+
+function SourceDepthBars({ count, color }: { count: number; color: string }) {
+  const max = 8;
+  return (
+    <div className="flex items-end gap-0.5">
+      {Array.from({ length: max }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: '5px',
+            height: `${5 + (i / (max - 1)) * 10}px`,
+            background: i < count ? color : 'var(--color-border-strong)',
+            borderRadius: '1px',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Pricing() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
@@ -326,73 +390,90 @@ function Pricing() {
         </SectionHeading>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {copy.pricing.plans.map(plan => (
-            <div
-              key={plan.name}
-              className={`brief-section p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
-              style={{
-                background: 'var(--color-bg-elevated)',
-                borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
-                boxShadow: plan.highlight ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
-              }}
-            >
-              {/* Plan header */}
-              <div className="flex items-center justify-between mb-4">
-                <span
-                  className="text-sm font-bold uppercase"
-                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}
+          {copy.pricing.plans.map((plan, i) => {
+            const depth = planDepth[i];
+            return (
+              <div
+                key={plan.name}
+                className={`brief-section p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
+                style={{
+                  background: 'var(--color-bg-elevated)',
+                  borderColor: plan.highlight ? 'var(--color-secondary)' : 'var(--color-border)',
+                  boxShadow: plan.highlight ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
+                }}
+              >
+                {/* Plan header */}
+                <div className="flex items-center justify-between mb-4">
+                  <span
+                    className="text-sm font-bold uppercase"
+                    style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}
+                  >
+                    {plan.name}
+                  </span>
+                  <span
+                    className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                    style={{
+                      background: plan.highlight ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
+                      color: plan.highlight ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    {plan.tag}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span
+                    className="text-3xl font-bold"
+                    style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    {plan.price}
+                  </span>
+                  <span
+                    className="text-sm"
+                    style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
+                  >
+                    {plan.priceNote}
+                  </span>
+                </div>
+                {/* Source depth visual */}
+                <div
+                  className="flex items-center justify-between mb-5 pb-5 border-b"
+                  style={{ borderColor: 'var(--color-border-muted)' }}
                 >
-                  {plan.name}
-                </span>
-                <span
-                  className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                  style={{
-                    background: plan.highlight ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
-                    color: plan.highlight ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
-                    fontFamily: 'var(--font-mono)',
-                  }}
-                >
-                  {plan.tag}
-                </span>
+                  <SourceDepthBars count={depth.count} color={depth.color} />
+                  <span
+                    className="text-[0.65rem] font-bold uppercase"
+                    style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}
+                  >
+                    {depth.count} sources / agent
+                  </span>
+                </div>
+
+                <p className="text-sm mb-5 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  {plan.description}
+                </p>
+
+                {/* Features */}
+                <ul className="space-y-2 mb-8 flex-1">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <svg aria-hidden="true" className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-success)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <Button asChild variant={plan.highlight ? 'primary' : 'secondary'} className="w-full">
+                  <Link href={plan.href}>{plan.cta}</Link>
+                </Button>
               </div>
-
-              {/* Price */}
-              <div className="flex items-baseline gap-2 mb-3">
-                <span
-                  className="text-3xl font-bold"
-                  style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  {plan.price}
-                </span>
-                <span
-                  className="text-sm"
-                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
-                >
-                  {plan.priceNote}
-                </span>
-              </div>
-              <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {plan.description}
-              </p>
-
-              {/* Features */}
-              <ul className="space-y-2 mb-8 flex-1">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    <svg aria-hidden="true" className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-success)' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <Button asChild variant={plan.highlight ? 'primary' : 'secondary'} className="w-full">
-                <Link href={plan.href}>{plan.cta}</Link>
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

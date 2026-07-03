@@ -177,6 +177,9 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
           <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
             Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to your dashboard whenever and it&apos;ll be there when it&apos;s done.
           </p>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+            We&apos;ll send you an email when it&apos;s ready.
+          </p>
         </div>
         <div>
           {SKELETON_AGENTS.map((label, i) => (
@@ -213,7 +216,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
           Your brief is still being put together. {depth === 'deep' ? 'Deep research can take a few minutes' : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-          You can head to your dashboard whenever and it will show up there as soon as it&apos;s done. No need to stay on this page.
+          You can head to your dashboard whenever — we&apos;ll email you when it&apos;s ready. No need to stay on this page.
         </p>
         {briefId && (
           <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
