@@ -32,7 +32,7 @@ export async function officialPolicyAgent(
 
   // Country-specific Tier 1 official immigration domains
   const officialDomains: Record<string, string[]> = {
-    Thailand:    ['immigration.go.th', 'mfa.go.th', 'thaigov.go.th', 'consular.go.th'],
+    Thailand:    ['thaievisa.go.th', 'immigration.go.th', 'mfa.go.th', 'thaigov.go.th', 'consular.go.th'],
     Vietnam:     ['immigration.gov.vn', 'evisa.gov.vn', 'xuatnhapcanh.gov.vn', 'mofa.gov.vn'],
     Indonesia:   ['imigrasi.go.id', 'kemlu.go.id', 'evisa.imigrasi.go.id'],
     Malaysia:    ['imi.gov.my', 'kln.gov.my', 'motac.gov.my'],
@@ -47,7 +47,7 @@ export async function officialPolicyAgent(
 
   try {
     const results = await tavilySearch(
-      `${request.normalizedDestination} visa ${request.normalizedNationality} official immigration rules requirements 2024 2025`,
+      `${request.normalizedDestination} visa ${request.normalizedNationality} official immigration rules requirements e-visa online application 2024 2025`,
       {
         maxResults,
         domainBias: destDomains,

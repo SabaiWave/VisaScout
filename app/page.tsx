@@ -53,7 +53,7 @@ function BriefExcerptPanel() {
             <span style={{ color: 'var(--color-secondary)' }}>//</span>{' '}RECOMMENDED ACTION
           </p>
           <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-            Apply for a 60-day tourist visa (TR) at a Thai consulate before your 30-day VOA expires.
+            Apply online or at a Thai consulate for a 60-day Tourist Visa (TR) before your 30-day VOA expires.
           </p>
           <p className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-error)', letterSpacing: '0.04em' }}>
             DEADLINE: 15 DAYS
