@@ -35,7 +35,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>1. Information We Collect</h2>
-            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Account information:</strong> Email address and name provided during sign-up. We store your email to manage your account and send service-related communications. Our authentication provider also collects IP address, device type, and browser information as part of the sign-in process.</p>
+            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Account information:</strong> Email address provided during sign-up. We store your email to manage your account and send service-related communications. Our authentication provider also collects IP address, device type, and browser information as part of the sign-in process.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Report data:</strong> Nationality, destination country, visa type, and your freeform situation description — used to generate your visa brief.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Usage data:</strong> Pages visited and report generation events, collected anonymously. This data is not tied to your identity.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Error and performance data:</strong> When errors occur, diagnostic information (stack traces, request context, browser version, OS version) is collected for debugging. Server-side operational logs may include anonymized request metadata.</p>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
             <p className="mb-3">We do not sell your personal data. We share data only with service providers necessary to operate VisaScout. These providers process data under their own privacy policies and are not permitted to use your data for other purposes.</p>
             <ul className="space-y-1 list-none">
               <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Anthropic</strong> — AI processing (your report data is sent to generate briefs)</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Clerk</strong> — authentication (email, name, device info, IP address)</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Clerk</strong> — authentication (email, device info, IP address)</li>
               <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Stripe</strong> — payment processing</li>
               <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Supabase</strong> — database storage (report data and account records)</li>
               <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Web search services</strong> — destination and visa type are passed to search queries to gather immigration data</li>
