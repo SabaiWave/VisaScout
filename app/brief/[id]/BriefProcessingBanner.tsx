@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 8 * 60 * 1000;
+// Minimum time skeleton is shown before content is revealed — ensures the
+// GENERATING card → skeleton → content sequence is always visible even when
+// the brief completes faster than the user can navigate.
+const MIN_DISPLAY_MS = 3000;
 
 function SkeletonLine({ width = '100%', height = '14px' }: { width?: string; height?: string }) {
   return (
@@ -39,12 +43,23 @@ function SkeletonCard({ lines = 3, headingWidth = '40%' }: { lines?: number; hea
   );
 }
 
-export function BriefProcessingBanner({ briefId }: { briefId: string }) {
+export function BriefProcessingBanner({ briefId, isActuallyDone = false }: { briefId: string; isActuallyDone?: boolean }) {
   const router = useRouter();
   const [timedOut, setTimedOut] = useState(false);
   const [startTime] = useState(() => Date.now());
 
   useEffect(() => {
+    if (isActuallyDone) {
+      // Brief is ready — enforce minimum skeleton display time before revealing content
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
+      const t = setTimeout(() => {
+        router.replace(`/brief/${briefId}`);
+      }, remaining);
+      return () => clearTimeout(t);
+    }
+
+    // Brief still running — poll until done
     const id = setInterval(() => {
       if (Date.now() - startTime > TIMEOUT_MS) {
         setTimedOut(true);
@@ -54,7 +69,7 @@ export function BriefProcessingBanner({ briefId }: { briefId: string }) {
       router.refresh();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [router, startTime]);
+  }, [isActuallyDone, briefId, router, startTime]);
 
   if (timedOut) {
     return (

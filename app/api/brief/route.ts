@@ -17,6 +17,9 @@ import { hasInviteAccess, incrementInviteUsage } from '@/src/lib/inviteAccess';
 import { getOrCreateUser } from '@/src/lib/users';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
+import { render } from '@react-email/components';
+import { getResend, getFromAddress } from '@/src/lib/email';
+import BriefReadyEmail from '@/src/emails/brief-ready';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 const BriefInputSchema = z.object({
@@ -227,6 +230,28 @@ async function briefHandler(req: Request) {
           }
 
           send({ type: 'complete', brief: dryBrief, briefId: dryBriefId });
+
+          // Send brief-ready email in DRY_RUN — DRY_RUN only skips Anthropic/Tavily, not email
+          if (dryBriefId && user?.email) {
+            const _briefId = dryBriefId;
+            const _email = user.email;
+            void (async () => {
+              try {
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.visascout.io';
+                const briefUrl = `${appUrl}/brief/${_briefId}`;
+                const html = await render(BriefReadyEmail({ destination, briefUrl }));
+                await getResend().emails.send({
+                  from: getFromAddress(),
+                  to: _email,
+                  subject: `Your ${destination} visa brief is ready`,
+                  html,
+                });
+              } catch (emailErr) {
+                void log.error('brief-ready email failed [DRY_RUN]', { briefId: _briefId, error: emailErr instanceof Error ? emailErr.message : String(emailErr) });
+              }
+            })();
+          }
+
           await trackEvent('brief.generated', {
             userId,
             briefId: dryBriefId ?? null,
@@ -296,6 +321,27 @@ async function briefHandler(req: Request) {
         }
 
         send({ type: 'complete', brief, briefId });
+
+        // Send brief-ready email (fire-and-forget — non-critical)
+        if (briefId && user?.email) {
+          const _briefId = briefId;
+          const _email = user.email;
+          void (async () => {
+            try {
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.visascout.io';
+              const briefUrl = `${appUrl}/brief/${_briefId}`;
+              const html = await render(BriefReadyEmail({ destination, briefUrl }));
+              await getResend().emails.send({
+                from: getFromAddress(),
+                to: _email,
+                subject: `Your ${destination} visa brief is ready`,
+                html,
+              });
+            } catch (emailErr) {
+              void log.error('brief-ready email failed', { briefId: _briefId, error: emailErr instanceof Error ? emailErr.message : String(emailErr) });
+            }
+          })();
+        }
 
         const agentStatuses = brief.metadata?.agentStatuses ?? [];
         await trackEvent('brief.generated', {

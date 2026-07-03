@@ -692,7 +692,7 @@ function AppContent() {
                     We&apos;re pulling from official immigration sources, recent enforcement reports, and what travelers are actually seeing on the ground.
                   </p>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    This usually takes about a minute. Your brief will appear here when it&apos;s ready — or head to your dashboard and it&apos;ll be there when done.
+                    This usually takes about a minute. Your brief will appear here when it&apos;s ready — we&apos;ll send you an email when it&apos;s done.
                   </p>
                   {nationality && destination && (
                     <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
@@ -746,9 +746,9 @@ function AppContent() {
                   </div>
                   {phase === 'generating' && (
                     <p className="text-xs mt-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                      Need to step away?{' '}
+                      We&apos;ll email you when it&apos;s ready —{' '}
                       <a href="/dashboard" className="inline-flex items-center gap-1" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                        Your brief will be in your dashboard when it&apos;s done <ArrowRight size={12} />
+                        or check your dashboard <ArrowRight size={12} />
                       </a>
                     </p>
                   )}

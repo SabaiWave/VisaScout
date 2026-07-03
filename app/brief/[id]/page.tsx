@@ -32,6 +32,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
   const { id } = await params;
   const sp = await searchParams;
   const simPdfError = sp?.sim === 'pdf-error';
+  const pendingParam = sp?.pending === '1';
 
   const { userId } = await auth();
   const isAdmin = isAdminUser(userId ?? '');
@@ -112,7 +113,10 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     }
   }
 
-  const isProcessing = !brief && (row.payment_status === 'queued' || row.payment_status === 'pending');
+  const isStillPending = !['unpaid', 'paid', 'error'].includes(row.payment_status);
+  // pendingParam: user navigated from a GENERATING card — enforce skeleton gate even if brief is already done
+  const isProcessing = pendingParam || (!brief && isStillPending);
+  const isActuallyDone = pendingParam && !isStillPending;
 
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
@@ -129,7 +133,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
           <div className="mt-8">
             {isProcessing ? (
-              <BriefProcessingBanner briefId={row.id} />
+              <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} />
             ) : brief ? (
               <BriefRenderer brief={brief} hideMetadata />
             ) : (

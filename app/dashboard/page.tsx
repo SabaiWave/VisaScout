@@ -79,11 +79,7 @@ export default async function DashboardPage({
 
   const { briefs, total } = await getUserBriefs(userRecord?.id ?? '', page);
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const hasGenerating = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
-  // Keep polling if any brief was created recently — BriefCard shows minimum generating pulse
-  // for 8s even on fast completions, so the auto-refresh must fire during that window.
-  const hasRecentBriefs = briefs.some(b => Date.now() - new Date(b.created_at).getTime() < 15000);
-  const hasActiveGeneration = hasGenerating || hasRecentBriefs;
+  const hasActiveGeneration = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
 
   return (
     <>
