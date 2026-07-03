@@ -72,7 +72,7 @@ export async function POST(req: Request) {
   // Mark brief as queued so the pending page shows the right state
   await getSupabase()
     .from('briefs')
-    .update({ payment_status: 'queued', stripe_session_id: session.id })
+    .update({ payment_status: 'queued', stripe_session_id: session.id, funded_by: 'stripe' })
     .eq('id', briefId);
 
   await trackEvent('payment.completed', {

@@ -263,7 +263,7 @@ function AppContent() {
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingCap, setIsCheckingCap] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
-  const [earlyAccess, setEarlyAccess] = useState(false);
+  const [inviteAccess, setInviteAccess] = useState(false);
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
@@ -446,14 +446,14 @@ function AppContent() {
 
   useEffect(() => {
     if (devSim !== 'invalid-code' && devSim !== 'code-already-used') return;
-    fetch('/api/debug/sim?event=early-access.invalid-code').catch(() => {});
+    fetch('/api/debug/sim?event=invite.invalid-code').catch(() => {});
   }, [devSim]);
 
   useEffect(() => {
     if (!isSignedIn || !isLoaded) return;
     fetch('/api/user/cap')
       .then(r => r.ok ? r.json() : null)
-      .then((data: { earlyAccess?: boolean } | null) => { if (data?.earlyAccess) setEarlyAccess(true); })
+      .then((data: { inviteAccess?: boolean } | null) => { if (data?.inviteAccess) setInviteAccess(true); })
       .catch(() => {});
   }, [isSignedIn, isLoaded]);
 
@@ -604,9 +604,9 @@ function AppContent() {
                   </p>
                 </div>
 
-                {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (earlyAccess || depth === 'standard' || depth === 'deep') && (
+                {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (inviteAccess || depth === 'standard' || depth === 'deep') && (
                   <div>
-                    {earlyAccess ? (
+                    {inviteAccess ? (
                       <p className="text-xs font-bold uppercase flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-success)' }}>
                         <span>✓</span> Invite access active
                       </p>
@@ -656,7 +656,7 @@ function AppContent() {
                     ? 'Checking…'
                     : phase === 'redirecting'
                       ? 'Starting…'
-                      : depth === 'quick' || earlyAccess
+                      : depth === 'quick' || inviteAccess
                         ? 'Generate Brief · Free'
                         : depth === 'standard'
                           ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`

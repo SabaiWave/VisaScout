@@ -202,7 +202,7 @@ export default function DevPage() {
             <DevButton
               label="▲ Invalid Invite Code ↗"
               sublabel="level:warn · bad invite code"
-              href="/api/debug/sim?event=early-access.invalid-code"
+              href="/api/debug/sim?event=invite.invalid-code"
               newTab
               accent
             />
@@ -239,8 +239,8 @@ export default function DevPage() {
             />
             <DevButton
               label="Invite Code Redeemed ↗"
-              sublabel="event:early_access.redeemed + log:info"
-              href="/api/debug/sim?event=early-access.redeemed"
+              sublabel="event:invite.redeemed + log:info"
+              href="/api/debug/sim?event=invite.redeemed"
               newTab
             />
           </DevGrid>
