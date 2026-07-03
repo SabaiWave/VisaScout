@@ -10,6 +10,7 @@ export interface SaveBriefInput {
   userId?: string;
   cost?: ReportCost;
   fundedBy?: 'stripe' | 'invite' | 'free';
+  isDryRun?: boolean;
 }
 
 export interface ShellBriefInput {
@@ -17,7 +18,7 @@ export interface ShellBriefInput {
   destination: string;
   visaType?: string;
   freeform: string;
-  depth: 'standard' | 'deep';
+  depth: 'quick' | 'standard' | 'deep';
   userId: string;
 }
 
@@ -49,6 +50,7 @@ export interface UpdateBriefContentInput {
   brief: VisaBrief;
   fundedBy: 'stripe' | 'invite' | 'free';
   cost?: ReportCost;
+  isDryRun?: boolean;
 }
 
 export async function updateBriefWithContent(input: UpdateBriefContentInput): Promise<void> {
@@ -67,6 +69,7 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
       degraded: input.brief.metadata.degraded,
       payment_status: paymentStatus,
       funded_by: input.fundedBy,
+      ...(input.isDryRun !== undefined && { is_dry_run: input.isDryRun }),
       ...(input.cost && {
         total_tokens_input:  input.cost.totalInputTokens,
         total_tokens_output: input.cost.totalOutputTokens,
@@ -79,7 +82,7 @@ export async function updateBriefWithContent(input: UpdateBriefContentInput): Pr
   if (error) throw new Error(`Failed to update brief: ${error.message}`);
 }
 
-export async function saveBrief({ visaRequest, brief, depth, userId, cost, fundedBy }: SaveBriefInput): Promise<string> {
+export async function saveBrief({ visaRequest, brief, depth, userId, cost, fundedBy, isDryRun }: SaveBriefInput): Promise<string> {
   let internalUserId: string | null = null;
   if (userId) {
     try {
@@ -105,6 +108,7 @@ export async function saveBrief({ visaRequest, brief, depth, userId, cost, funde
       depth,
       user_id: internalUserId ?? null,
       funded_by: fundedBy ?? null,
+      is_dry_run: isDryRun ?? false,
       ...(cost && {
         total_tokens_input:  cost.totalInputTokens,
         total_tokens_output: cost.totalOutputTokens,

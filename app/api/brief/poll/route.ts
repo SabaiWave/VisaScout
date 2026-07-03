@@ -1,6 +1,7 @@
 import { waitUntil } from '@vercel/functions';
 import Anthropic from '@anthropic-ai/sdk';
 import { auth } from '@clerk/nextjs/server';
+import { render } from '@react-email/components';
 import { getSupabase } from '@/src/lib/supabase';
 import { runOrchestrator } from '@/src/orchestrator';
 import { resolveConflicts } from '@/src/synthesis/conflictResolver';
@@ -11,6 +12,8 @@ import { runDryPipeline } from '@/src/lib/dryRun';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
+import { getResend, getFromAddress } from '@/src/lib/email';
+import BriefReadyEmail from '@/src/emails/brief-ready';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
 
 export const runtime = 'nodejs';
@@ -63,12 +66,38 @@ async function runPipeline(jobId: string, briefId: string) {
         brief,
         fundedBy: (briefRow.funded_by as 'stripe' | 'invite' | 'free') ?? 'stripe',
         cost,
+        isDryRun: process.env.DRY_RUN === 'true',
       });
 
       await getSupabase()
         .from('brief_jobs')
         .update({ status: 'done', completed_at: new Date().toISOString() })
         .eq('id', jobId);
+
+      // Send brief-ready email (fire-and-forget — non-critical)
+      if (briefRow.user_id) {
+        void (async () => {
+          try {
+            const { data: userRow } = await getSupabase()
+              .from('users')
+              .select('email')
+              .eq('id', briefRow.user_id)
+              .single();
+            if (!userRow?.email) return;
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.visascout.io';
+            const briefUrl = `${appUrl}/brief/${briefId}`;
+            const html = await render(BriefReadyEmail({ destination: briefRow.destination, briefUrl }));
+            await getResend().emails.send({
+              from: getFromAddress(),
+              to: userRow.email,
+              subject: `Your ${briefRow.destination} visa brief is ready`,
+              html,
+            });
+          } catch (emailErr) {
+            log.error('brief-ready email failed', { briefId, error: emailErr instanceof Error ? emailErr.message : String(emailErr) });
+          }
+        })();
+      }
 
       // briefs_generated for invite is counted at checkout; count Stripe briefs here at completion
       const fundedBy = briefRow.funded_by as string | null;

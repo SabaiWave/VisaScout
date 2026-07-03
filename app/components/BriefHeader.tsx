@@ -25,7 +25,7 @@ export function BriefHeader() {
 
           {/* Desktop nav (md+) */}
           <div className="hidden md:flex items-center gap-2">
-            {isSignedIn && <NavLink href="/dashboard">My Briefs</NavLink>}
+            {isSignedIn && <NavLink href="/dashboard">Dashboard</NavLink>}
             <Button asChild>
               <Link href="/app">Generate Brief</Link>
             </Button>
@@ -42,7 +42,7 @@ export function BriefHeader() {
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Generate Brief</Link>
         {isLoaded && isSignedIn && (
-          <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>My Briefs</Link>
+          <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dashboard</Link>
         )}
         {isLoaded && (isSignedIn ? (
           <>

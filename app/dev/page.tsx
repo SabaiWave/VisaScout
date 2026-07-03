@@ -104,8 +104,8 @@ export default function DevPage() {
             />
             <DevButton
               label="Paid Flow"
-              sublabel="Pending page · skeleton rows"
-              href="/brief/pending?dev=true"
+              sublabel="Real pipeline: shell + brief_jobs + poll route"
+              href="/api/debug/sim-paid-flow"
               accent
             />
           </DevGrid>

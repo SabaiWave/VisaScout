@@ -18,7 +18,7 @@ export function VisaScoutUserButton() {
     <UserButton>
       <UserButton.MenuItems>
         {!onDashboard && (
-          <UserButton.Link label="My Briefs" labelIcon={<Archive size={14} />} href="/dashboard" />
+          <UserButton.Link label="Dashboard" labelIcon={<Archive size={14} />} href="/dashboard" />
         )}
         {!onApp && (
           <UserButton.Link label="Generate Brief" labelIcon={<Zap size={14} />} href="/app" />

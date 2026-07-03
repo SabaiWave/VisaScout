@@ -33,7 +33,7 @@ export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boo
           style={{ ...navDrawerLinkStyle, color: 'var(--color-secondary-light)', background: 'var(--color-secondary-subtle)', border: 'none' }}
         >
           <Archive size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
-          My Briefs
+          Dashboard
         </Link>
         {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>}
         {showDev && <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>}

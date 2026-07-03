@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
+import { ArrowRight } from 'lucide-react';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefActions from '@/app/components/BriefActions';
@@ -52,7 +53,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-[760px] mx-auto">
             <div className="mb-8">
-              <SectionHeading size="md" as="h1">American → Thailand</SectionHeading>
+              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Thailand</SectionHeading>
               <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
             </div>
             <div className="mt-8">
@@ -76,7 +77,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-[760px] mx-auto">
             <div className="mb-8">
-              <SectionHeading size="md" as="h1">American → Thailand</SectionHeading>
+              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Thailand</SectionHeading>
               <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
             </div>
             <div className="mt-8">
@@ -121,7 +122,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         <div className="max-w-[760px] mx-auto">
           <div className="mb-8">
             <SectionHeading size="md" as="h1">
-              {row.nationality} → {row.destination}
+              {row.nationality} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {row.destination}
             </SectionHeading>
             <BriefMeta depth={row.depth} generatedAt={row.created_at} className="mt-3" />
           </div>
@@ -134,7 +135,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
             ) : (
               <div
                 className="px-4 py-3 rounded"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-error)' }}
+                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
               >
                 Brief content unavailable.{' '}
                 <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { LandingNav } from './components/LandingNav';
 import { SectionHeading } from './components/ui/SectionHeading';
 import { Wordmark } from './components/ui/Wordmark';
@@ -31,7 +32,7 @@ function BriefExcerptPanel() {
         {/* Route header — faded context */}
         <div className="flex items-start justify-between gap-3 flex-wrap" style={{ opacity: FADED_SECTION }}>
           <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
-            US CITIZEN → THAILAND
+            US CITIZEN <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> THAILAND
           </span>
           <div className="flex items-center gap-1.5">
             <span className="text-[0.65rem] font-bold uppercase px-2 py-0.5" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-confidence-high)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', borderRadius: '4px' }}>
