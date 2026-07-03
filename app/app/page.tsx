@@ -235,6 +235,10 @@ function AppContent() {
   );
   const [agentsVisible, setAgentsVisible] = useState(false);
   const agentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const agentsVisibleRef = useRef(false);
+  const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const pendingBriefRef = useRef<VisaBrief | null>(null);
+  const pendingBriefIdRef = useRef<string | null>(null);
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
   const [visaType, setVisaType] = useState('');
@@ -266,11 +270,56 @@ function AppContent() {
   const [inviteCode, setInviteCode] = useState('');
   const [inviteAccess, setInviteAccess] = useState(false);
 
+  const STAGGER_MS = 800;
+
+  useEffect(() => {
+    agentsVisibleRef.current = agentsVisible;
+    if (!agentsVisible) {
+      revealTimersRef.current.forEach(t => clearTimeout(t));
+      revealTimersRef.current = [];
+      return;
+    }
+
+    revealTimersRef.current.forEach(t => clearTimeout(t));
+    revealTimersRef.current = [];
+    setAgentStatuses(INITIAL_AGENT_STATUSES);
+
+    AGENT_DISPLAY_ORDER.forEach((agentName, idx) => {
+      const status = backendStatusRef.current.get(agentName);
+      if (!status) return;
+      const t = setTimeout(() => {
+        setAgentStatuses(prev => {
+          let updated = prev.map(a => a.agent === agentName ? { ...a, status } : a);
+          const fiveParallelDone = AGENT_DISPLAY_ORDER.slice(0, 5).every(a => backendStatusRef.current.has(a));
+          if (fiveParallelDone) {
+            updated = updated.map(a =>
+              a.agent === 'conflictResolver' && a.status === 'queued' ? { ...a, status: 'running' as const } : a
+            );
+          }
+          return withOrderedCompletions(updated, backendStatusRef.current);
+        });
+      }, (idx + 1) * STAGGER_MS);
+      revealTimersRef.current.push(t);
+    });
+
+    const totalRevealMs = AGENT_DISPLAY_ORDER.length * STAGGER_MS + 400;
+    const briefTimer = setTimeout(() => {
+      if (pendingBriefRef.current) {
+        setBrief(pendingBriefRef.current);
+        if (pendingBriefIdRef.current) setBriefId(pendingBriefIdRef.current);
+        setPhase('complete');
+        pendingBriefRef.current = null;
+        pendingBriefIdRef.current = null;
+      }
+    }, totalRevealMs);
+    revealTimersRef.current.push(briefTimer);
+  }, [agentsVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
     setAgentsVisible(false);
     if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
-    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 8000);
+    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 10000);
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
@@ -320,31 +369,48 @@ function AppContent() {
               if (entry.status === 'complete' || entry.status === 'failed') {
                 backendStatusRef.current = new Map([...backendStatusRef.current, [entry.agent, entry.status]]);
               }
-              setAgentStatuses(prev => {
-                const idx = prev.findIndex(a => a.agent === entry.agent);
-                const raw = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
-                const allFiveBackendDone = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun']
-                  .every(a => backendStatusRef.current.has(a));
-                const resolver = raw.find(a => a.agent === 'conflictResolver');
-                const withResolver = allFiveBackendDone && resolver?.status === 'queued'
-                  ? raw.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a)
-                  : raw;
-                return withOrderedCompletions(withResolver, backendStatusRef.current);
-              });
+              if (!agentsVisibleRef.current) break; // splash still showing — stagger useEffect handles display
+
+              const applyStatusUpdate = () => {
+                setAgentStatuses(prev => {
+                  const idx = prev.findIndex(a => a.agent === entry.agent);
+                  const raw = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
+                  const allFiveBackendDone = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun']
+                    .every(a => backendStatusRef.current.has(a));
+                  const resolver = raw.find(a => a.agent === 'conflictResolver');
+                  const withResolver = allFiveBackendDone && resolver?.status === 'queued'
+                    ? raw.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a)
+                    : raw;
+                  return withOrderedCompletions(withResolver, backendStatusRef.current);
+                });
+              };
+              if (entry.status === 'complete' || entry.status === 'failed') {
+                const t = setTimeout(applyStatusUpdate, 600);
+                revealTimersRef.current.push(t);
+              } else {
+                applyStatusUpdate();
+              }
               break;
             }
             case 'complete':
-              setAgentsVisible(true);
-              setBrief(data.brief as VisaBrief);
-              if (data.briefId) setBriefId(data.briefId as string);
               backendStatusRef.current = new Map([...backendStatusRef.current, ['conflictResolver', 'complete']]);
-              setAgentStatuses(prev => {
-                const idx = prev.findIndex(a => a.agent === 'conflictResolver');
-                const completed = { agent: 'conflictResolver', status: 'complete' as const };
-                const raw = idx >= 0 ? prev.map((a, i) => i === idx ? completed : a) : [...prev, completed];
-                return withOrderedCompletions(raw, backendStatusRef.current);
-              });
-              setPhase('complete');
+              if (agentsVisibleRef.current) {
+                // Agents already visible (production path) — small delay then reveal
+                const t = setTimeout(() => {
+                  setAgentStatuses(prev => withOrderedCompletions(
+                    prev.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'complete' as const } : a),
+                    backendStatusRef.current
+                  ));
+                  setBrief(data.brief as VisaBrief);
+                  if (data.briefId) setBriefId(data.briefId as string);
+                  setPhase('complete');
+                }, 600);
+                revealTimersRef.current.push(t);
+              } else {
+                // Still in splash — store brief; stagger useEffect will reveal it after all agents animate
+                pendingBriefRef.current = data.brief as VisaBrief;
+                if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
+              }
               break;
             case 'error':
               throw new Error(data.message as string);
@@ -464,6 +530,10 @@ function AppContent() {
   function handleReset() {
     if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
     agentTimerRef.current = null;
+    revealTimersRef.current.forEach(t => clearTimeout(t));
+    revealTimersRef.current = [];
+    pendingBriefRef.current = null;
+    pendingBriefIdRef.current = null;
     setAgentsVisible(false);
     setPhase('idle');
     setBrief(null);
@@ -473,6 +543,11 @@ function AppContent() {
     backendStatusRef.current = new Map();
     setError(null);
     setSubmitted(false);
+    setNationality('');
+    setDestination('');
+    setVisaType('');
+    setFreeform('');
+    setDepth('standard');
   }
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
@@ -676,7 +751,7 @@ function AppContent() {
 
               {/* Splash — shown for 2.5s before agent table appears */}
               {phase === 'generating' && !agentsVisible && (
-                <div className="flex flex-col items-center py-32 text-center">
+                <div className="flex flex-col items-center pt-12 pb-24 text-center">
                   <div
                     className="w-20 h-20 rounded-full animate-spin mb-8"
                     style={{ border: '3px solid rgba(99,102,241,0.2)', borderTopColor: 'var(--color-secondary)' }}
@@ -692,7 +767,7 @@ function AppContent() {
                     We&apos;re pulling from official immigration sources, recent enforcement reports, and what travelers are actually seeing on the ground.
                   </p>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    This usually takes about a minute. Your brief will appear here when it&apos;s ready — we&apos;ll send you an email when it&apos;s done.
+                    This usually takes about a minute. Your brief will appear here when it&apos;s ready. We&apos;ll send you an email when it&apos;s done.
                   </p>
                   {nationality && destination && (
                     <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
@@ -746,9 +821,9 @@ function AppContent() {
                   </div>
                   {phase === 'generating' && (
                     <p className="text-xs mt-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                      We&apos;ll email you when it&apos;s ready —{' '}
-                      <a href="/dashboard" className="inline-flex items-center gap-1" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                        or check your dashboard <ArrowRight size={12} />
+                      We&apos;ll email you when it&apos;s ready or check your{' '}
+                      <a href="/dashboard" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>
+                        dashboard
                       </a>
                     </p>
                   )}
