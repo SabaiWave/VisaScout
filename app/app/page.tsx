@@ -1,18 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
-import { Loader2, CheckCircle2, XCircle, Clock, ArrowRight } from 'lucide-react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
-import { useSearchParams } from 'next/navigation';
-import BriefRenderer from '@/app/components/BriefRenderer';
-import type { VisaBrief, VisaRequest } from '@/src/types/index';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
 import { Button } from '@/app/components/ui/Button';
-import { DownloadPdfButton } from '@/app/components/ui/DownloadPdfButton';
-import { ShareButton } from '@/app/components/ui/ShareButton';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { CardHeading } from '@/app/components/ui/CardHeading';
+import { AgentsDeployedScreen, AgentRowList, AGENT_DISPLAY_ORDER } from '@/app/components/AgentsDeployedScreen';
+
 import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
 // ─── Static data ───────────────────────────────────────────────────────────
@@ -49,6 +45,7 @@ const NATIONALITIES = [
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
+// Used only for typing SSE event data — display model uses agentDisplayCount instead.
 type AgentStatusEntry = {
   agent: string;
   status: 'queued' | 'running' | 'complete' | 'failed';
@@ -58,100 +55,11 @@ type AgentStatusEntry = {
   error?: string;
 };
 
-const INITIAL_AGENT_STATUSES: AgentStatusEntry[] = [
-  { agent: 'officialPolicy',    status: 'running' },
-  { agent: 'recentChanges',     status: 'running' },
-  { agent: 'communityIntel',    status: 'running' },
-  { agent: 'entryRequirements', status: 'running' },
-  { agent: 'borderRun',         status: 'running' },
-  { agent: 'conflictResolver',  status: 'queued' },
-];
+type Phase = 'idle' | 'generating' | 'redirecting' | 'error';
 
-const AGENT_DISPLAY_ORDER = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun', 'conflictResolver'];
-
-// Only show an agent as complete/failed once all agents above it have displayed as complete.
-// Uses a Map of authoritative backend statuses — avoids a race where the ref is updated for a
-// later event before React runs an earlier event's setState, causing stale 'running' to slip through.
-function withOrderedCompletions(statuses: AgentStatusEntry[], backendStatus: Map<string, 'complete' | 'failed'>): AgentStatusEntry[] {
-  let prevDone = true;
-  return AGENT_DISPLAY_ORDER.map(agentName => {
-    const entry = statuses.find(s => s.agent === agentName) ?? { agent: agentName, status: 'queued' as const };
-    const finalStatus = backendStatus.get(agentName);
-    if (prevDone && finalStatus) {
-      return { ...entry, status: finalStatus };
-    }
-    prevDone = false;
-    return finalStatus ? { ...entry, status: 'running' as const } : entry;
-  });
-}
-
-type Phase = 'idle' | 'generating' | 'redirecting' | 'complete' | 'error';
-
-const AGENT_DISPLAY: Record<string, string> = {
-  officialPolicy:    'Official Policy',
-  recentChanges:     'Recent Changes',
-  communityIntel:    'Community Intel',
-  entryRequirements: 'Entry Requirements',
-  borderRun:         'Border Run',
-  conflictResolver:  'Conflict Resolver',
-};
-
-// ─── Agent row ─────────────────────────────────────────────────────────────
-
-function ScanningDots({ label }: { label: string }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => (t + 1) % 3), 450);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <span>
-      {label}
-      <span style={{ display: 'inline-block', width: '3ch', textAlign: 'left' }}>
-        {'...'.slice(0, tick + 1)}
-      </span>
-    </span>
-  );
-}
-
-function AgentRow({ entry }: { entry: AgentStatusEntry }) {
-  const isQueued = entry.status === 'queued';
-  const isDone = entry.status === 'complete';
-  const isFailed = entry.status === 'failed';
-  const isRunning = entry.status === 'running';
-
-  const borderColor = isDone ? 'var(--color-border)' : isFailed ? 'rgba(239,68,68,0.3)' : isQueued ? 'var(--color-border-muted)' : 'rgba(99,102,241,0.15)';
-  const bg = isDone ? 'var(--color-bg-elevated)' : isFailed ? 'var(--color-error-bg)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)';
-  const isConflictResolver = entry.agent === 'conflictResolver';
-  const runningLabel = isConflictResolver ? 'resolving' : 'scanning';
-  const labelText = isDone ? 'complete' : isFailed ? 'failed' : isQueued ? 'queued' : runningLabel;
-  const labelColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary-light)';
-  const iconColor = isDone ? 'var(--color-success)' : isFailed ? 'var(--color-error)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary)';
-  const StatusIcon = isDone ? CheckCircle2 : isFailed ? XCircle : isQueued ? Clock : Loader2;
-
-  return (
-    <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
-      style={{ border: `1px solid ${borderColor}`, background: bg }}
-    >
-      <StatusIcon
-        aria-hidden="true"
-        size={14}
-        className={isRunning ? 'animate-spin' : ''}
-        style={{ color: iconColor, flexShrink: 0 }}
-      />
-      <span
-        className="text-xs font-bold uppercase flex-1"
-        style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)' }}
-      >
-        {AGENT_DISPLAY[entry.agent] ?? entry.agent}
-      </span>
-      <span className="text-xs uppercase" style={{ fontFamily: 'var(--font-mono)', color: labelColor }}>
-        {isRunning ? <ScanningDots label={runningLabel} /> : labelText}
-      </span>
-    </div>
-  );
-}
+// Minimum ms between sequential agent reveal steps. Prevents instant cascade when agents
+// complete near-simultaneously (DRY_RUN / fast pipeline). Matches paid flow stagger feel.
+const MIN_REVEAL_STAGGER_MS = 400;
 
 // ─── Sign-in prompt ────────────────────────────────────────────────────────
 
@@ -229,16 +137,23 @@ const LABEL_STYLE: React.CSSProperties = {
 function AppContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>(
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('trigger') === 'quick' ? 'generating' :
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
   );
-  const [agentsVisible, setAgentsVisible] = useState(false);
-  const agentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [agentsVisible, setAgentsVisible] = useState(
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('trigger') === 'quick'
+  );
   const agentsVisibleRef = useRef(false);
   const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const pendingBriefRef = useRef<VisaBrief | null>(null);
   const pendingBriefIdRef = useRef<string | null>(null);
+  // Sequential reveal model: agents complete visually top-to-bottom, one at a time.
+  const [agentDisplayCount, setAgentDisplayCount] = useState(0);
+  const agentDisplayCountRef = useRef(0);
+  const lastRevealRef = useRef(0);       // timestamp of last reveal (for min-stagger enforcement)
+  const revealScheduledRef = useRef(-1); // which idx currently has a pending reveal timer (-1 = none)
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
   const [visaType, setVisaType] = useState('');
@@ -247,11 +162,7 @@ function AppContent() {
   const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>(
     depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard'
   );
-  const [parsedSituation, setParsedSituation] = useState<VisaRequest | null>(null);
-  const [agentStatuses, setAgentStatuses] = useState<AgentStatusEntry[]>([]);
   const backendStatusRef = useRef<Map<string, 'complete' | 'failed'>>(new Map());
-  const [brief, setBrief] = useState<VisaBrief | null>(null);
-  const [briefId, setBriefId] = useState<string | null>(null);
   const wasCancelled = searchParams.get('cancelled') === 'true';
   const devSim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
   const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
@@ -270,56 +181,67 @@ function AppContent() {
   const [inviteCode, setInviteCode] = useState('');
   const [inviteAccess, setInviteAccess] = useState(false);
 
-  const STAGGER_MS = 800;
+  // Advance display count by one step, respecting MIN_REVEAL_STAGGER_MS between reveals.
+  // Cascades automatically — after revealing idx N, immediately checks if N+1 is ready.
+  // Only one reveal timer is active at a time (guarded by revealScheduledRef).
+  function scheduleNextReveal() {
+    const idx = agentDisplayCountRef.current;
+    if (idx >= AGENT_DISPLAY_ORDER.length) return;
+    if (revealScheduledRef.current === idx) return; // already scheduled
+
+    const nextAgent = AGENT_DISPLAY_ORDER[idx];
+    if (!backendStatusRef.current.has(nextAgent)) return; // not done yet — will be called again on completion
+
+    revealScheduledRef.current = idx;
+    const now = Date.now();
+    const delay = Math.max(0, lastRevealRef.current + MIN_REVEAL_STAGGER_MS - now);
+
+    const t = setTimeout(() => {
+      revealScheduledRef.current = -1;
+      lastRevealRef.current = Date.now();
+      agentDisplayCountRef.current = idx + 1;
+      setAgentDisplayCount(idx + 1);
+      scheduleNextReveal(); // cascade to next agent if already completed
+    }, delay);
+    revealTimersRef.current.push(t);
+  }
 
   useEffect(() => {
     agentsVisibleRef.current = agentsVisible;
     if (!agentsVisible) {
       revealTimersRef.current.forEach(t => clearTimeout(t));
       revealTimersRef.current = [];
+      revealScheduledRef.current = -1;
       return;
     }
-
-    revealTimersRef.current.forEach(t => clearTimeout(t));
-    revealTimersRef.current = [];
-    setAgentStatuses(INITIAL_AGENT_STATUSES);
-
-    AGENT_DISPLAY_ORDER.forEach((agentName, idx) => {
-      const status = backendStatusRef.current.get(agentName);
-      if (!status) return;
-      const t = setTimeout(() => {
-        setAgentStatuses(prev => {
-          let updated = prev.map(a => a.agent === agentName ? { ...a, status } : a);
-          const fiveParallelDone = AGENT_DISPLAY_ORDER.slice(0, 5).every(a => backendStatusRef.current.has(a));
-          if (fiveParallelDone) {
-            updated = updated.map(a =>
-              a.agent === 'conflictResolver' && a.status === 'queued' ? { ...a, status: 'running' as const } : a
-            );
-          }
-          return withOrderedCompletions(updated, backendStatusRef.current);
-        });
-      }, (idx + 1) * STAGGER_MS);
-      revealTimersRef.current.push(t);
-    });
-
-    const totalRevealMs = AGENT_DISPLAY_ORDER.length * STAGGER_MS + 400;
-    const briefTimer = setTimeout(() => {
-      if (pendingBriefRef.current) {
-        setBrief(pendingBriefRef.current);
-        if (pendingBriefIdRef.current) setBriefId(pendingBriefIdRef.current);
-        setPhase('complete');
-        pendingBriefRef.current = null;
-        pendingBriefIdRef.current = null;
-      }
-    }, totalRevealMs);
-    revealTimersRef.current.push(briefTimer);
+    // agentsVisible just became true — reset display state and start cascading reveals
+    agentDisplayCountRef.current = 0;
+    setAgentDisplayCount(0);
+    lastRevealRef.current = 0;
+    revealScheduledRef.current = -1;
+    scheduleNextReveal(); // cascade through any agents already completed (DRY_RUN / fast pipeline)
   }, [agentsVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When all 6 agents have revealed, pause briefly so the resolver row stays green,
+  // then redirect to the brief page. Matches the paid flow redirect behavior.
+  useEffect(() => {
+    if (agentDisplayCount < AGENT_DISPLAY_ORDER.length) return;
+    if (!pendingBriefIdRef.current) return;
+    const id = pendingBriefIdRef.current;
+    pendingBriefIdRef.current = null;
+    const t = setTimeout(() => {
+      router.push(`/brief/${id}`);
+    }, 600);
+    revealTimersRef.current.push(t);
+  }, [agentDisplayCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
     setPhase('generating');
-    setAgentsVisible(false);
-    if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
-    agentTimerRef.current = setTimeout(() => setAgentsVisible(true), 10000);
+    setAgentsVisible(true);
+    agentDisplayCountRef.current = 0;
+    setAgentDisplayCount(0);
+    lastRevealRef.current = 0;
+    revealScheduledRef.current = -1;
     try {
       const response = await fetch('/api/brief', {
         method: 'POST',
@@ -359,58 +281,20 @@ function AppContent() {
 
           switch (data.type) {
             case 'brief_id':
-              if (data.briefId) setBriefId(data.briefId as string);
-              break;
-            case 'parsed':
-              setParsedSituation(data.data as VisaRequest);
+              if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
               break;
             case 'status': {
               const entry = data as AgentStatusEntry;
               if (entry.status === 'complete' || entry.status === 'failed') {
                 backendStatusRef.current = new Map([...backendStatusRef.current, [entry.agent, entry.status]]);
-              }
-              if (!agentsVisibleRef.current) break; // splash still showing — stagger useEffect handles display
-
-              const applyStatusUpdate = () => {
-                setAgentStatuses(prev => {
-                  const idx = prev.findIndex(a => a.agent === entry.agent);
-                  const raw = idx >= 0 ? prev.map((a, i) => i === idx ? entry : a) : [...prev, entry];
-                  const allFiveBackendDone = ['officialPolicy', 'recentChanges', 'communityIntel', 'entryRequirements', 'borderRun']
-                    .every(a => backendStatusRef.current.has(a));
-                  const resolver = raw.find(a => a.agent === 'conflictResolver');
-                  const withResolver = allFiveBackendDone && resolver?.status === 'queued'
-                    ? raw.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'running' as const } : a)
-                    : raw;
-                  return withOrderedCompletions(withResolver, backendStatusRef.current);
-                });
-              };
-              if (entry.status === 'complete' || entry.status === 'failed') {
-                const t = setTimeout(applyStatusUpdate, 600);
-                revealTimersRef.current.push(t);
-              } else {
-                applyStatusUpdate();
+                if (agentsVisibleRef.current) scheduleNextReveal();
               }
               break;
             }
             case 'complete':
               backendStatusRef.current = new Map([...backendStatusRef.current, ['conflictResolver', 'complete']]);
-              if (agentsVisibleRef.current) {
-                // Agents already visible (production path) — small delay then reveal
-                const t = setTimeout(() => {
-                  setAgentStatuses(prev => withOrderedCompletions(
-                    prev.map(a => a.agent === 'conflictResolver' ? { ...a, status: 'complete' as const } : a),
-                    backendStatusRef.current
-                  ));
-                  setBrief(data.brief as VisaBrief);
-                  if (data.briefId) setBriefId(data.briefId as string);
-                  setPhase('complete');
-                }, 600);
-                revealTimersRef.current.push(t);
-              } else {
-                // Still in splash — store brief; stagger useEffect will reveal it after all agents animate
-                pendingBriefRef.current = data.brief as VisaBrief;
-                if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
-              }
+              if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
+              if (agentsVisibleRef.current) scheduleNextReveal();
               break;
             case 'error':
               throw new Error(data.message as string);
@@ -427,11 +311,7 @@ function AppContent() {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
-    setAgentStatuses(INITIAL_AGENT_STATUSES);
     backendStatusRef.current = new Map();
-    setParsedSituation(null);
-    setBrief(null);
-    setBriefId(null);
     setError(null);
     setCapReached(false);
 
@@ -492,11 +372,7 @@ function AppContent() {
   // Dev: auto-fire quick brief when navigated from /dev with ?trigger=quick
   useEffect(() => {
     if (devTrigger !== 'quick' || !isSignedIn || !isLoaded) return;
-    setAgentStatuses(INITIAL_AGENT_STATUSES);
     backendStatusRef.current = new Map();
-    setParsedSituation(null);
-    setBrief(null);
-    setBriefId(null);
     setError(null);
     setSubmitted(false);
     void runBriefStream({
@@ -504,7 +380,7 @@ function AppContent() {
       destination: 'Thailand',
       visaType: 'Visa Exemption',
       freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
-      depth: 'quick',
+      depth: (depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard') as 'quick' | 'standard' | 'deep',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devTrigger, isSignedIn, isLoaded]);
@@ -528,18 +404,15 @@ function AppContent() {
   }, [isSignedIn, isLoaded]);
 
   function handleReset() {
-    if (agentTimerRef.current) clearTimeout(agentTimerRef.current);
-    agentTimerRef.current = null;
     revealTimersRef.current.forEach(t => clearTimeout(t));
     revealTimersRef.current = [];
-    pendingBriefRef.current = null;
     pendingBriefIdRef.current = null;
+    agentDisplayCountRef.current = 0;
+    lastRevealRef.current = 0;
+    revealScheduledRef.current = -1;
+    setAgentDisplayCount(0);
     setAgentsVisible(false);
     setPhase('idle');
-    setBrief(null);
-    setBriefId(null);
-    setParsedSituation(null);
-    setAgentStatuses([]);
     backendStatusRef.current = new Map();
     setError(null);
     setSubmitted(false);
@@ -550,9 +423,12 @@ function AppContent() {
     setDepth('standard');
   }
 
+  // handleReset kept for future use (e.g. error state "Try again" button)
+  void handleReset;
+
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
 
-  if (!isLoaded) {
+  if (!isLoaded && phase !== 'generating' && phase !== 'redirecting') {
     return (
       <div className="flex items-center justify-center py-20">
         <div
@@ -567,7 +443,7 @@ function AppContent() {
     <div className="relative">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
     <main className="relative z-10 max-w-[1120px] mx-auto px-6 py-12">
-      {!isSignedIn ? (
+      {(!isSignedIn && isLoaded) ? (
         <SignInPrompt />
       ) : (
         <>
@@ -745,133 +621,20 @@ function AppContent() {
             </div>
           )}
 
-          {/* ── Generating / Complete output ── */}
-          {(phase === 'generating' || phase === 'complete') && (
+          {/* ── Generating ── */}
+          {phase === 'generating' && (
             <div className="max-w-[760px] mx-auto">
-
-              {/* Splash — shown for 2.5s before agent table appears */}
-              {phase === 'generating' && !agentsVisible && (
-                <div className="flex flex-col items-center pt-12 pb-24 text-center">
-                  <div
-                    className="w-20 h-20 rounded-full animate-spin mb-8"
-                    style={{ border: '3px solid rgba(99,102,241,0.2)', borderTopColor: 'var(--color-secondary)' }}
+              {agentsVisible && (
+                <AgentsDeployedScreen>
+                  <AgentRowList
+                    displayCount={agentDisplayCount}
+                    failedAgents={Object.fromEntries(
+                      Array.from(backendStatusRef.current.entries())
+                        .filter(([, v]) => v === 'failed')
+                        .map(([k]) => [k, true])
+                    )}
                   />
-                  <h2
-                    className="text-2xl font-bold uppercase mb-4"
-                    style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '0.04em' }}
-                  >
-                    Agents Deployed
-                  </h2>
-                  <p className="text-base mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-                    We&apos;re pulling from official immigration sources, recent enforcement reports, and what travelers are actually seeing on the ground.
-                  </p>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                    This usually takes about a minute. Your brief will appear here when it&apos;s ready. We&apos;ll send you an email when it&apos;s done.
-                  </p>
-                  {nationality && destination && (
-                    <p className="text-xs mt-4 uppercase" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                      {nationality} <ArrowRight size={11} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {destination}
-                    </p>
-                  )}
-                  <a
-                    href="/dashboard"
-                    className="inline-flex items-center gap-1.5 text-xs mt-3"
-                    style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}
-                  >
-                    Go to Dashboard <ArrowRight size={13} />
-                  </a>
-                </div>
-              )}
-
-              {/* We Understood — skeleton + live text during generation; BriefRenderer owns it once complete */}
-              {phase === 'generating' && agentsVisible && (
-                <div className="mb-6">
-                  <div
-                    className="brief-section rounded-xl px-4 py-3 border"
-                    style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
-                  >
-                    <p className="mb-1"><CardHeading>We Understood</CardHeading></p>
-                    {parsedSituation ? (
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                        {parsedSituation.parsedSummary}
-                      </p>
-                    ) : (
-                      <div className="space-y-2 mt-2">
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '85%' }} />
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '72%' }} />
-                        <div className="h-3 rounded animate-pulse" style={{ background: 'rgba(99,102,241,0.2)', width: '60%' }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Agent Status */}
-              {agentsVisible && agentStatuses.length > 0 && (
-                <div className="mb-8">
-                  <div
-                    className="brief-section rounded-xl p-5 border"
-                    style={{ background: 'var(--color-bg-elevated)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
-                  >
-                    <p className="mb-3"><CardHeading>Agent Status</CardHeading></p>
-                    {agentStatuses.map(entry => (
-                      <AgentRow key={entry.agent} entry={entry} />
-                    ))}
-                  </div>
-                  {phase === 'generating' && (
-                    <p className="text-xs mt-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                      We&apos;ll email you when it&apos;s ready or check your{' '}
-                      <a href="/dashboard" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>
-                        dashboard
-                      </a>
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {brief && (
-                <div>
-                  <div id="brief-content">
-                    <BriefRenderer brief={brief} forPrint={false} />
-                  </div>
-
-                  {brief.metadata.depth === 'quick' && (brief.conflictReport.contested.length + brief.conflictReport.unverified.length) > 0 && (
-                    <div
-                      className="mt-3 rounded-lg px-4 py-3 border"
-                      style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)' }}
-                    >
-                      <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary-light)' }}>
-                        {brief.conflictReport.contested.length + brief.conflictReport.unverified.length} contested policy items detected
-                      </p>
-                      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                        Standard and Deep include full conflict resolution with source-tier weighting.{' '}
-                        <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Upgrade.</a>
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex justify-center items-start gap-4 mt-4">
-                    {briefId && (
-                      <DownloadPdfButton briefId={briefId} depth={depth} className="px-8 py-3" />
-                    )}
-                    {briefId && (
-                      <ShareButton
-                        url={`${window.location.origin}/brief/${briefId}`}
-                        briefId={briefId}
-                        className="px-8 py-3"
-                      />
-                    )}
-                    <Button variant="ghost" onClick={handleReset} className="px-8 py-3">
-                      New Brief
-                    </Button>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--color-border-muted)' }}>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-tertiary)', textWrap: 'pretty' } as React.CSSProperties}>
-                      ⚠ {brief.disclaimer}
-                    </p>
-                  </div>
-                </div>
+                </AgentsDeployedScreen>
               )}
             </div>
           )}

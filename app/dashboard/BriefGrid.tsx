@@ -3,9 +3,21 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { LayoutGroup } from 'framer-motion';
+import { LayoutGroup, motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/Button';
 import { BriefCard } from './BriefCard';
+
+const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const gridContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
+};
+
+export const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EXPO } },
+};
 
 const PAGE_SIZE = 12;
 
@@ -39,16 +51,21 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
   return (
     <>
       <LayoutGroup>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}>
+        <motion.div
+          variants={gridContainer}
+          initial="hidden"
+          animate="show"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '1rem',
+            marginBottom: '2rem',
+          }}
+        >
           {briefs.map((brief) => (
             <BriefCard key={brief.id} brief={brief} onDelete={() => handleDelete(brief.id)} />
           ))}
-        </div>
+        </motion.div>
       </LayoutGroup>
 
       {totalPages > 1 && (

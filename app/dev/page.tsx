@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { ArrowRight } from 'lucide-react';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { DevButton } from '@/app/components/ui/DevButton';
 
@@ -29,6 +30,7 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 
 export default function DevPage() {
   const { userId } = useAuth();
+  const [devBriefDepth, setDevBriefDepth] = useState<'quick' | 'standard' | 'deep'>('quick');
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -95,20 +97,49 @@ export default function DevPage() {
 
         {/* Brief Flows */}
         <DevSection title="Brief Flows">
-          <DevGrid>
-            <DevButton
-              label="Quick Flow"
-              sublabel="Stays on /app · live agent table"
-              href="/app?trigger=quick"
-              accent
-            />
-            <DevButton
-              label="Paid Flow"
-              sublabel="Real pipeline: shell + brief_jobs + poll route"
-              href="/api/debug/sim-paid-flow"
-              accent
-            />
-          </DevGrid>
+          <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
+            Fixed data (DRY_RUN). Depth affects pipeline config + downstream logs.
+          </p>
+          <div className="mb-3">
+            <div
+              className="inline-grid grid-cols-3 rounded overflow-hidden"
+              style={{ border: '1px solid var(--color-border-strong)' }}
+            >
+              {(['quick', 'standard', 'deep'] as const).map((d, i) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDevBriefDepth(d)}
+                  className="py-2 px-4 text-xs font-bold uppercase transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.06em',
+                    background: devBriefDepth === d ? 'var(--color-secondary)' : 'var(--color-bg-base)',
+                    color: devBriefDepth === d ? '#fff' : 'var(--color-text-tertiary)',
+                    borderLeft: i > 0 ? '1px solid var(--color-border-strong)' : 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+          <a
+            href={`/app?trigger=quick&depth=${devBriefDepth}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-colors"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.06em',
+              background: 'var(--color-secondary)',
+              color: '#fff',
+              textDecoration: 'none',
+            }}
+          >
+            Generate Brief <ArrowRight size={14} />
+          </a>
         </DevSection>
 
         {/* State simulation */}

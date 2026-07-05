@@ -1,12 +1,11 @@
-import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { AppSidebar } from '@/app/components/AppSidebar';
 import { MobileNav } from '@/app/dashboard/MobileNav';
 
-export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
+export default async function BriefIdLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
+  if (!userId) return <>{children}</>;
 
   const isAdmin = isAdminUser(userId);
   const showDev = isAdmin;

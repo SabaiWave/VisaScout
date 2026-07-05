@@ -1,10 +1,8 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
 import { getSupabase } from '@/src/lib/supabase';
 import { getOrCreateUser } from '@/src/lib/users';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
 import { BriefGrid } from './BriefGrid';
 import { DashboardAutoRefresh } from './DashboardAutoRefresh';
@@ -56,9 +54,9 @@ function EmptyState() {
       <p className="uppercase" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: 0 }}>
         No briefs saved yet.
       </p>
-      <Button asChild>
-        <Link href="/app">+ New Brief</Link>
-      </Button>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', margin: 0 }}>
+        Use <strong>GENERATE BRIEF</strong> in the sidebar to get started.
+      </p>
     </div>
   );
 }
@@ -100,11 +98,6 @@ export default async function DashboardPage({
           <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
             MY BRIEFS
           </SectionHeading>
-          {briefs.length > 0 && (
-            <Button asChild style={{ whiteSpace: 'nowrap' }}>
-              <Link href="/app">+ New Brief</Link>
-            </Button>
-          )}
         </div>
 
         <DashboardAutoRefresh hasGenerating={hasActiveGeneration} />

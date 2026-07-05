@@ -4,7 +4,7 @@ import { isAdminUser } from '@/src/lib/adminAccess';
 import { AppSidebar } from '@/app/components/AppSidebar';
 import { MobileNav } from '@/app/dashboard/MobileNav';
 
-export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
+export default async function BriefPendingLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
 
