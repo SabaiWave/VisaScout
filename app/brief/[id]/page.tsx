@@ -36,6 +36,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
   const { userId } = await auth();
   const isAdmin = isAdminUser(userId ?? '');
+  const showHeader = !userId;
 
   // Dev sim sentinels — confidence label states (no DB lookup, overrides fixture confidence fields)
   if ((CONFIDENCE_SIM_IDS as readonly string[]).includes(id)) {
@@ -50,7 +51,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-        <BriefHeader />
+        {showHeader && <BriefHeader />}
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-[760px] mx-auto">
             <div className="mb-8">
@@ -74,7 +75,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-        <BriefHeader />
+        {showHeader && <BriefHeader />}
         <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="max-w-[760px] mx-auto">
             <div className="mb-8">
@@ -120,7 +121,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
   return (
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
-      <BriefHeader />
+      {showHeader && <BriefHeader />}
 
       <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-[760px] mx-auto">

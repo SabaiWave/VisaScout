@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Archive, ShieldCheck, Terminal } from 'lucide-react';
+import { Archive, ShieldCheck, Terminal, Zap } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
 import { SidebarAccount } from './SidebarAccount';
 
@@ -16,6 +16,7 @@ export function AppSidebar({ isAdmin, showDev }: AppSidebarProps) {
 
   const navItems = [
     { href: '/dashboard', label: 'MY BRIEFS', icon: Archive },
+    { href: '/app', label: 'GENERATE BRIEF', icon: Zap },
     ...(isAdmin ? [{ href: '/admin', label: 'ADMIN', icon: ShieldCheck }] : []),
     ...(showDev ? [{ href: '/dev', label: 'DEV', icon: Terminal }] : []),
   ];

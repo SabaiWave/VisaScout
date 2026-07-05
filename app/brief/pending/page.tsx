@@ -2,9 +2,9 @@
 
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { NavLink } from '@/app/components/ui/NavLink';
+import { AgentsDeployedScreen, AgentRowList } from '@/app/components/AgentsDeployedScreen';
 
 const MAX_WAIT_MS = 6 * 60 * 1000;
 const SOFT_HANDOFF_MS = 90 * 1000;
@@ -24,47 +24,12 @@ const DEV_BRIEF_INPUTS = {
   depth: 'quick',
 };
 
-const SKELETON_AGENTS = [
-  'Official Policy',
-  'Recent Changes',
-  'Community Intel',
-  'Entry Requirements',
-  'Border Run',
-  'Conflict Resolver',
-];
-
-// ─── Scanning dots ────────────────────────────────────────────────────────────
-
-function ScanningDots({ label }: { label: string }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => (t + 1) % 3), 450);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <span>
-      {label}
-      <span style={{ display: 'inline-block', width: '3ch', textAlign: 'left' }}>
-        {'...'.slice(0, tick + 1)}
-      </span>
-    </span>
-  );
-}
 
 // ─── Shared layout shell ──────────────────────────────────────────────────────
 
 function PendingShell({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: 'var(--color-bg-base)',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '4rem 1.5rem',
-      }}
-    >
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 1.5rem' }}>
       <div className="w-full max-w-md">
         {children}
       </div>
@@ -102,100 +67,13 @@ function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
 
 // ─── States ───────────────────────────────────────────────────────────────────
 
-function SkeletonAgentRow({ label, index, done, completedCount }: { label: string; index: number; done: boolean; completedCount: number }) {
-  const isResolver = index === 5;
-  const isResolving = isResolver && completedCount >= 5 && !done;
-  const isQueued = isResolver && completedCount < 5 && !done;
-  const isRunning = !done && !isQueued && !isResolving;
-
-  const borderColor = done
-    ? 'var(--color-border)'
-    : isQueued
-    ? 'var(--color-border-muted)'
-    : 'rgba(99,102,241,0.15)';
-
-  const iconColor = done ? 'var(--color-success)' : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary)';
-  const StatusIcon = done ? CheckCircle2 : isQueued ? Clock : Loader2;
-
-  return (
-    <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
-      style={{
-        border: `1px solid ${borderColor}`,
-        background: done ? 'var(--color-bg-elevated)' : isQueued ? 'transparent' : 'var(--color-secondary-subtle)',
-      }}
-    >
-      <StatusIcon
-        aria-hidden="true"
-        size={14}
-        className={(isRunning || isResolving) ? 'animate-spin' : ''}
-        style={{ color: iconColor, flexShrink: 0 }}
-      />
-      <span
-        className="text-xs font-bold uppercase flex-1"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          letterSpacing: '0.04em',
-          color: isQueued ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
-        }}
-      >
-        {label}
-      </span>
-      <span
-        className="text-xs uppercase"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          color: done
-            ? 'var(--color-success)'
-            : isQueued
-            ? 'var(--color-text-tertiary)'
-            : 'var(--color-secondary-light)',
-        }}
-      >
-        {done ? 'complete' : isQueued ? 'queued' : <ScanningDots label={isResolving ? 'resolving' : 'scanning'} />}
-      </span>
-    </div>
-  );
-}
-
 function GeneratingState({ completedCount }: { completedCount: number }) {
   return (
-    <PendingShell>
-      <div>
-        <div className="text-center mb-6">
-          <IconBox bg="var(--color-secondary-subtle)">
-            <div
-              className="w-10 h-10 rounded-full animate-spin"
-              style={{ border: '3px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
-            />
-          </IconBox>
-          <HudHeading>Agents Deployed</HudHeading>
-          <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-            We&apos;re pulling from official immigration sources, recent enforcement reports, and what real travelers are seeing on the ground.
-          </p>
-          <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-            Standard research takes about 1 to 3 minutes, deep research a bit longer. Your brief is generating in the background so you can head to your dashboard whenever and it&apos;ll be there when it&apos;s done.
-          </p>
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            We&apos;ll send you an email when it&apos;s ready.
-          </p>
-        </div>
-        <div>
-          {SKELETON_AGENTS.map((label, i) => (
-            <SkeletonAgentRow key={label} label={label} index={i} done={i < completedCount} completedCount={completedCount} />
-          ))}
-        </div>
-        <div className="mt-4 text-center">
-          <a
-            href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm"
-            style={{ color: 'var(--color-text-secondary)', textDecoration: 'none' }}
-          >
-            Go to Dashboard <ArrowRight size={14} />
-          </a>
-        </div>
-      </div>
-    </PendingShell>
+    <div style={{ padding: '4rem 1.5rem 4rem' }}>
+      <AgentsDeployedScreen>
+        <AgentRowList displayCount={completedCount} />
+      </AgentsDeployedScreen>
+    </div>
   );
 }
 

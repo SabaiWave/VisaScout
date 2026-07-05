@@ -6,6 +6,7 @@ import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 export function SidebarAccount() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress ?? '';
+  const displayName = email ? email.split('@')[0] : 'My Account';
 
   return (
     <div
@@ -36,7 +37,7 @@ export function SidebarAccount() {
         minWidth: 0,
         flex: 1,
       }}>
-        {email || 'My Account'}
+        {displayName}
       </span>
     </div>
   );
