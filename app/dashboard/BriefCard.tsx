@@ -56,8 +56,9 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             initial={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.94 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
+            style={{ height: '100%' }}
           >
-            <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
+            <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
               <div
           className="visa-track-card"
           style={{
@@ -67,6 +68,9 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             padding: '20px',
             cursor: 'pointer',
             position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
           }}
         >
           <button
@@ -143,7 +147,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
               {new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
               {' · '}
