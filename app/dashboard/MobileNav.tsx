@@ -28,7 +28,7 @@ export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boo
         <VisaScoutUserButton />
       </nav>
 
-      <NavDrawer open={open} onClose={() => setOpen(false)}>
+      <NavDrawer open={open} onClose={() => setOpen(false)} side="left">
         <Link
           href="/dashboard"
           onClick={() => setOpen(false)}

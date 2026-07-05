@@ -187,38 +187,6 @@ html[data-theme="light"] {
 /* Light mode — replace neon hover glows with crisp shadows */
 /* (hover values come from --shadow-card-hover token override in html[data-theme="light"] block) */
 
-/* Light mode — Clerk nuclear text override (beats the dark-mode forced white) */
-html[data-theme="light"] .cl-card, html[data-theme="light"] .cl-card *,
-html[data-theme="light"] .cl-modalContent, html[data-theme="light"] .cl-modalContent *,
-html[data-theme="light"] .cl-modal, html[data-theme="light"] .cl-modal *,
-html[data-theme="light"] [class*="cl-userProfile"], html[data-theme="light"] [class*="cl-userProfile"] *,
-html[data-theme="light"] [class*="cl-navbar"], html[data-theme="light"] [class*="cl-navbar"] *,
-html[data-theme="light"] .cl-userButtonPopoverCard, html[data-theme="light"] .cl-userButtonPopoverCard * {
-  color: #0A0A0A !important;
-}
-html[data-theme="light"] .cl-navbarButton,
-html[data-theme="light"] .cl-navbarButton *,
-html[data-theme="light"] .cl-closeButton,
-html[data-theme="light"] .cl-modalCloseButton,
-html[data-theme="light"] .cl-profileSectionContent,
-html[data-theme="light"] .cl-profileSectionContent *,
-html[data-theme="light"] .cl-activeDevice,
-html[data-theme="light"] .cl-activeDevice *,
-html[data-theme="light"] .cl-userButtonPopoverCard [class*="SecondaryIdentifier"],
-html[data-theme="light"] .cl-userButtonPopoverCard [class*="secondaryIdentifier"] {
-  color: #4B5563 !important;
-}
-html[data-theme="light"] .cl-navbarButton:hover,
-html[data-theme="light"] .cl-navbarButton:hover * {
-  color: #0A0A0A !important;
-  background-color: rgba(79, 70, 229, 0.08) !important;
-}
-html[data-theme="light"] .cl-activeDevice [data-device-name],
-html[data-theme="light"] .cl-activeDevice strong,
-html[data-theme="light"] .cl-profileSectionTitle,
-html[data-theme="light"] .cl-profileSectionTitle * {
-  color: #0A0A0A !important;
-}
 
 /* Light mode — SectionHeading gradient: visible line on light backgrounds */
 html[data-theme="light"] .section-heading-line {
