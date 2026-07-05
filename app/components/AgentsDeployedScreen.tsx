@@ -35,8 +35,8 @@ const rowContainer = {
 };
 
 const rowVariant = {
-  hidden: { opacity: 0, x: -10 },
-  show: { opacity: 1, x: 0, transition: { duration: 0.35, ease: EXPO } },
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EXPO } },
 };
 
 function ScanningDots({ label }: { label: string }) {
@@ -87,7 +87,7 @@ function AgentDisplayRow({ label, index, displayCount, failed = false }: {
     <motion.div
       variants={rowVariant}
       className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
-      style={{ border: `1px solid ${borderColor}`, background: bg }}
+      style={{ border: `1px solid ${borderColor}`, background: bg, willChange: 'transform, opacity' }}
     >
       <StatusIcon
         aria-hidden="true"
@@ -166,7 +166,7 @@ export function AgentsDeployedScreen({ children }: { children: React.ReactNode }
             Pulling from official sources, recent enforcement data, and real traveler reports.
           </p>
           <p className="text-sm mb-5" style={{ color: 'var(--color-text-tertiary)' }}>
-            Takes 1–3 minutes depending on depth. Feel free to navigate away. We&apos;ll email you when it&apos;s ready.
+            Takes a few minutes depending on depth. Feel free to navigate away. We&apos;ll email you when it&apos;s ready.
           </p>
         </div>
         {children}

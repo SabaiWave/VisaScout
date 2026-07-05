@@ -32,9 +32,10 @@ interface NavDrawerProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
+  side?: 'left' | 'right';
 }
 
-export function NavDrawer({ open, onClose, children }: NavDrawerProps) {
+export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawerProps) {
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
@@ -72,22 +73,22 @@ export function NavDrawer({ open, onClose, children }: NavDrawerProps) {
         style={{
           position: 'fixed',
           top: 0,
-          right: 0,
+          [side]: 0,
           bottom: 0,
           zIndex: 50,
           width: '260px',
           background: 'var(--color-bg-subtle)',
-          borderLeft: '1px solid var(--color-border-muted)',
+          [side === 'left' ? 'borderRight' : 'borderLeft']: '1px solid var(--color-border-muted)',
           display: 'flex',
           flexDirection: 'column',
           padding: '1.25rem 1rem',
           gap: '0.5rem',
-          transform: open ? 'translateX(0)' : 'translateX(100%)',
+          transform: open ? 'translateX(0)' : `translateX(${side === 'left' ? '-100%' : '100%'})`,
           transition: 'transform 0.25s ease',
           willChange: 'transform',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: side === 'left' ? 'flex-start' : 'flex-end', marginBottom: '0.75rem' }}>
           <button
             onClick={onClose}
             aria-label="Close menu"
