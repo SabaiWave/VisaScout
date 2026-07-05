@@ -47,8 +47,7 @@ function label(text: string, color = C.indigoDeep): string {
 }
 
 function sectionHeading(title: string): string {
-  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid ${C.border};">
-    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${C.indigo};">//</span>
+  return `<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid ${C.border};">
     <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${C.textPrimary};text-transform:uppercase;letter-spacing:0.05em;">${esc(title)}</span>
   </div>`;
 }
@@ -208,8 +207,8 @@ export function generateBriefHtml(brief: VisaBrief, meta: PdfMeta): string {
     <div style="display:flex;justify-content:space-between;align-items:flex-end;">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${C.indigo};text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px;">VisaScout · Visa Intelligence</div>
-        <h1 style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:${C.textPrimary};text-transform:uppercase;letter-spacing:0.04em;">
-          <span style="color:${C.indigo};margin-right:8px;">//</span>${esc(nationality.toUpperCase())} <span style="color:${C.textTertiary};">→</span> ${esc(destination.toUpperCase())}
+        <h1 style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:${C.textPrimary};text-transform:uppercase;letter-spacing:0.04em;display:flex;align-items:center;gap:10px;">
+          ${esc(nationality.toUpperCase())} <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${C.indigo}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> ${esc(destination.toUpperCase())}
         </h1>
       </div>
       <div style="text-align:right;">
@@ -222,10 +221,7 @@ export function generateBriefHtml(brief: VisaBrief, meta: PdfMeta): string {
 
   <!-- We Understood -->
   <div style="background:${C.indigoSubtle};border:1px solid rgba(99,102,241,0.25);border-radius:8px;padding:12px 16px;margin-bottom:16px;page-break-inside:avoid;">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:${C.indigo};">//</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${C.indigoDeep};text-transform:uppercase;letter-spacing:0.05em;">We Understood</span>
-    </div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${C.indigoDeep};text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">We Understood</p>
     <p style="font-size:12px;color:${C.textPrimary};line-height:1.55;">${esc(brief.parsedSituation)}</p>
   </div>
 

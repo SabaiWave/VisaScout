@@ -53,10 +53,9 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
       <AnimatePresence>
         {!deleted && (
           <motion.div
-            layout
             variants={cardVariants}
             exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18, ease: 'easeOut' } }}
-            style={{ height: '100%' }}
+            style={{ height: '100%', willChange: 'transform, opacity' }}
           >
             <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
               <div
