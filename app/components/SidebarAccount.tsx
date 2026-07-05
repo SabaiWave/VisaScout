@@ -16,13 +16,7 @@ export function SidebarAccount() {
         gap: '0.6rem',
         padding: '0.75rem 1rem',
         borderTop: '1px solid var(--color-border-muted)',
-        cursor: 'pointer',
         minWidth: 0,
-      }}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) return;
-        const btn = (e.currentTarget as HTMLElement).querySelector('button');
-        btn?.click();
       }}
     >
       <VisaScoutUserButton />

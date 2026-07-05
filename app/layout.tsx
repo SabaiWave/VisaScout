@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 import { Geist, DM_Serif_Display, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
@@ -25,6 +25,11 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://visascout.io';
