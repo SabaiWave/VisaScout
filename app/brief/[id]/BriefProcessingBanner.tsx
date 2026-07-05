@@ -14,7 +14,7 @@ function SkeletonLine({ width = '100%', height = '14px' }: { width?: string; hei
   return (
     <div
       className="skeleton-shimmer"
-      style={{ width, height, borderRadius: '4px', background: 'var(--color-bg-subtle)' }}
+      style={{ width, height, borderRadius: '4px' }}
     />
   );
 }

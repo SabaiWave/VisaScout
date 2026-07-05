@@ -179,46 +179,69 @@ function Hero() {
         <div className="relative">
           {/* Left col — sole flow element, constrains section height */}
           <div className="max-w-[520px] flex flex-col">
-            <p
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EXPO, delay: 0 }}
               className="text-xs font-bold uppercase mb-7"
               style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-secondary)' }}
             >
               SOUTHEAST ASIA — VISA INTELLIGENCE
-            </p>
+            </motion.p>
 
-            <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] mb-6 text-balance"
-              style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
-            >
-              {copy.hero.h1}
-            </h1>
+            {/* overflow:hidden masks the h1 so it rises from below the clip boundary */}
+            <div className="mb-6" style={{ overflow: 'hidden' }}>
+              <motion.h1
+                initial={{ y: '110%' }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.78, ease: EXPO, delay: 0.12 }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] text-balance"
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
+              >
+                {copy.hero.h1}
+              </motion.h1>
+            </div>
 
-            <p
+            <motion.p
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: EXPO, delay: 0.28 }}
               className="text-base sm:text-lg mb-10 leading-relaxed max-w-lg"
               style={{ color: 'var(--color-text-secondary)' }}
             >
               {copy.hero.subhead}
-            </p>
+            </motion.p>
 
-            <div className="flex">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EXPO, delay: 0.42 }}
+              className="flex"
+            >
               <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
                 <Link href={copy.hero.ctaHref}>{copy.hero.cta}</Link>
               </Button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Brief — absolutely positioned, out of flow, never inflates section height */}
-          <div
+          {/* motion.div handles opacity/y; inner div owns the 3D transform to avoid framer conflict */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.85, ease: EXPO, delay: 0.38 }}
             className="hidden md:block absolute top-0 right-0"
-            style={{
-              width: '46%',
-              transform: 'perspective(1200px) rotateX(2deg) rotateY(-9deg)',
-              transformOrigin: 'left center',
-
-            }}
+            style={{ width: '46%' }}
           >
-            <BriefExcerptPanel />
-          </div>
+            <div
+              style={{
+                transform: 'perspective(1200px) rotateX(2deg) rotateY(-9deg)',
+                transformOrigin: 'left center',
+              }}
+            >
+              <BriefExcerptPanel />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

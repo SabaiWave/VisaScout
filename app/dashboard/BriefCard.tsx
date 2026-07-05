@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Trash2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { cardVariants } from './BriefGrid';
 import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 
@@ -53,9 +54,8 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         {!deleted && (
           <motion.div
             layout
-            initial={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            variants={cardVariants}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18, ease: 'easeOut' } }}
             style={{ height: '100%' }}
           >
             <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
