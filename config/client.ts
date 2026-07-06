@@ -127,5 +127,36 @@ export const clientConfig = {
         },
       ],
     },
+
+    faq: {
+      title: 'Common Questions',
+      subtitle: 'Everything travelers ask before running their first brief.',
+      items: [
+        {
+          q: 'Is this legal advice?',
+          a: 'No. VisaScout aggregates publicly available immigration information and pulls it into a sourced brief. Every brief includes a disclaimer and links to its sources. For personal legal decisions, consult an immigration lawyer.',
+        },
+        {
+          q: 'How current is the data?',
+          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, so stale travel blog posts from 2021 never make it into your brief.',
+        },
+        {
+          q: 'What if official sources contradict each other?',
+          a: "That's exactly what the Conflict Report is for. Every brief shows what's confirmed (two or more official sources agree), what's contested, and what's unverified. You always know where the uncertainty is, not just what the average answer is.",
+        },
+        {
+          q: 'How long does a brief take to generate?',
+          a: `Most briefs are ready in under two minutes. ${DEPTH_LABEL.quick} is fastest. ${DEPTH_LABEL.deep} runs deeper and takes a bit longer. You'll get an email when it's ready if you want to step away.`,
+        },
+        {
+          q: 'Can I share my brief with someone?',
+          a: "Yes. Every brief gets a permanent shareable link. Send it to a travel partner, a visa agent, or keep it for your embassy appointment prep. No account needed to view a shared brief.",
+        },
+        {
+          q: 'What if my brief fails to generate?',
+          a: "If a technical failure interrupts your brief, we'll re-run it or refund the charge. Every brief cites its sources. If something looks off, the source link is right there to verify.",
+        },
+      ],
+    },
   },
 };
