@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { ArrowRight } from 'lucide-react';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { DevButton } from '@/app/components/ui/DevButton';
+import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
 
 // ─── Layout helpers ───────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 
 export default function DevPage() {
   const { userId } = useAuth();
-  const [devBriefDepth, setDevBriefDepth] = useState<'quick' | 'standard' | 'deep'>('quick');
+  const [devBriefDepth, setDevBriefDepth] = useState<typeof BRIEF_DEPTHS[number]>('quick');
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -105,7 +106,7 @@ export default function DevPage() {
               className="inline-grid grid-cols-3 rounded overflow-hidden"
               style={{ border: '1px solid var(--color-border-strong)' }}
             >
-              {(['quick', 'standard', 'deep'] as const).map((d, i) => (
+              {BRIEF_DEPTHS.map((d, i) => (
                 <button
                   key={d}
                   type="button"
@@ -120,7 +121,7 @@ export default function DevPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {d}
+                  {DEPTH_LABEL[d]}
                 </button>
               ))}
             </div>

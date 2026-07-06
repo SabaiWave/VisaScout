@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
+import { DEPTH_LABEL } from '@/src/lib/depth';
 import { NavLink } from '@/app/components/ui/NavLink';
 import { AgentsDeployedScreen, AgentRowList } from '@/app/components/AgentsDeployedScreen';
 
@@ -90,7 +91,7 @@ function HandoffState({ briefId, depth }: { briefId: string | null; depth: strin
         </IconBox>
         <HudHeading>Still Working</HudHeading>
         <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is still being put together. {depth === 'deep' ? 'Deep research can take a few minutes' : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
+          Your brief is still being put together. {depth === 'deep' ? `${DEPTH_LABEL.deep} research can take a few minutes` : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
           You can head to your dashboard whenever — we&apos;ll email you when it&apos;s ready. No need to stay on this page.
