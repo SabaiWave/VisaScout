@@ -348,6 +348,13 @@ h1, h2, h3 {
   color: #F4F4F5 !important;
   opacity: 1 !important;
 }
+/* Kill transition/animation on popover — global * { transition-duration: 150ms } intercepts
+   Clerk's JS-based positioning (transform/top/left), causing a slide from (0,0) on first render */
+.cl-userButtonPopover,
+.cl-userButtonPopoverCard {
+  animation: none !important;
+  transition: none !important;
+}
 /* Secondary text (email identifier) */
 .cl-userButtonPopoverCard [class*="SecondaryIdentifier"],
 .cl-userButtonPopoverCard [class*="secondaryIdentifier"] {

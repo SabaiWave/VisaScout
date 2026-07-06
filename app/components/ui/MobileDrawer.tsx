@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 export const navDrawerLinkStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
+  gap: '10px',
   padding: '12px 14px',
   borderRadius: '8px',
   fontSize: '0.8rem',
@@ -20,12 +21,32 @@ export const navDrawerLinkStyle: CSSProperties = {
   border: '1px solid var(--color-border)',
 };
 
+// Borderless secondary nav link — for non-CTA items (Home, Dashboard, How It Works)
+export const navDrawerSecondaryStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '10px 14px',
+  borderRadius: '8px',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  color: 'var(--color-text-secondary)',
+  textDecoration: 'none',
+  fontFamily: 'var(--font-mono)',
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  minHeight: '44px',
+  border: 'none',
+  background: 'transparent',
+};
+
 export const navDrawerPrimaryStyle: CSSProperties = {
   ...navDrawerLinkStyle,
   background: 'var(--color-secondary)',
   color: '#ffffff',
   border: 'none',
   justifyContent: 'center',
+  gap: '8px',
 };
 
 interface NavDrawerProps {

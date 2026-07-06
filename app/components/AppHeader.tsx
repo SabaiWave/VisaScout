@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
+import { Home, LayoutDashboard, Zap } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
-import { NavDrawer, HamburgerButton, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
+import { NavDrawer, HamburgerButton, navDrawerSecondaryStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
 import { VisaScoutUserButton } from './VisaScoutUserButton';
 
@@ -40,10 +41,18 @@ export function AppHeader() {
       </header>
 
       <NavDrawer open={open} onClose={() => setOpen(false)}>
-        <Link href="/" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Home</Link>
-        <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dashboard</Link>
+        <Link href="/" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+          <Home size={16} aria-hidden /> Home
+        </Link>
+        <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+          <LayoutDashboard size={16} aria-hidden /> Dashboard
+        </Link>
+        <div style={{ borderTop: '1px solid var(--color-border-muted)', margin: '4px 0' }} />
         {isLoaded && (isSignedIn ? (
           <>
+            <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>
+              <Zap size={15} aria-hidden /> Generate Brief
+            </Link>
             <div style={{ flex: 1 }} />
             <SidebarAccount />
           </>
