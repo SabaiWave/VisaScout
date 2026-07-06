@@ -393,6 +393,24 @@ h1, h2, h3 {
   box-shadow: var(--shadow-card-hover) !important;
 }
 
+/* FAQ row hover — CSS-driven, no inline style overrides needed */
+.faq-question {
+  color: var(--color-text-primary);
+  transition: color 0.2s ease;
+}
+.faq-chevron {
+  color: var(--color-text-tertiary);
+  transition: color 0.2s ease;
+}
+.faq-btn:hover .faq-question,
+.faq-btn--open .faq-question {
+  color: var(--color-secondary-light);
+}
+.faq-btn:hover .faq-chevron,
+.faq-btn--open .faq-chevron {
+  color: var(--color-secondary);
+}
+
 /* Countries covered + How It Works card hover */
 .country-card,
 .hiw-card {
