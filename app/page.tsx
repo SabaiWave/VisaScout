@@ -199,7 +199,9 @@ function Hero() {
                 className="text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] text-balance"
                 style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
               >
-                {copy.hero.h1}
+                Know your visa situation.{' '}
+                <span style={{ color: 'var(--color-amber)' }}>Before</span>
+                {" it's a problem."}
               </motion.h1>
             </div>
 
