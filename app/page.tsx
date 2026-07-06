@@ -381,7 +381,7 @@ function HowItWorks({ isMobile }: { isMobile: boolean }) {
               <motion.div
                 key={step.number}
                 variants={isMobile ? {} : stepCard}
-                className="p-6 rounded-xl border flex flex-col gap-4"
+                className="hiw-card p-6 rounded-xl border flex flex-col gap-4"
                 style={{
                   background: style.bg,
                   borderColor: style.borderColor,
@@ -457,7 +457,7 @@ function Destinations({ isMobile }: { isMobile: boolean }) {
             <motion.div
               key={name}
               variants={isMobile ? {} : destCard}
-              className="p-4 rounded-lg border flex flex-col gap-2"
+              className="country-card p-4 rounded-lg border flex flex-col gap-2"
               style={{
                 background: 'var(--color-bg-base)',
                 borderColor: 'var(--color-border)',
