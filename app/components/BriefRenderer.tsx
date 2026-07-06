@@ -1,6 +1,7 @@
 'use client';
 
 import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
+import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
 import { useState } from 'react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
 import { BriefMeta } from './ui/BriefMeta';
@@ -359,8 +360,8 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
               </p>
               {brief.metadata.depth === 'quick' && (
                 <p className="text-xs mt-1.5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                  Standard and Deep include a dedicated Recent Changes agent with retry.{' '}
-                  <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>Run Standard →</a>
+                  {DEPTH_LABEL.standard} and {DEPTH_LABEL.deep} include a dedicated Recent Changes agent with retry.{' '}
+                  <a href="/app?depth=standard" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>{DEPTH_CTA.standard} →</a>
                 </p>
               )}
             </div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useInView, MotionConfig } from 'framer-motion';
+import { motion, useInView, MotionConfig, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, MessageSquare, Network, FileDown, AlertTriangle } from 'lucide-react';
+import { ArrowRight, MessageSquare, Network, FileDown, AlertTriangle, ChevronDown } from 'lucide-react';
 import { LandingNav } from './components/LandingNav';
 import { SectionHeading } from './components/ui/SectionHeading';
 import { FooterLink } from './components/ui/FooterLink';
@@ -629,6 +629,101 @@ function Pricing({ isMobile }: { isMobile: boolean }) {
   );
 }
 
+// ─── FAQ ───────────────────────────────────────────────────────────────────
+
+const faqContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+const faqItem = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EXPO } },
+};
+
+function FAQ({ isMobile }: { isMobile: boolean }) {
+  const [open, setOpen] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+  const items = copy.faq.items;
+
+  return (
+    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
+      <div className="max-w-[1120px] mx-auto">
+        <FadeIn className="mb-12" noAnimation={isMobile}>
+          <SectionHeading subtitle={copy.faq.subtitle}>
+            {copy.faq.title}
+          </SectionHeading>
+        </FadeIn>
+
+        <motion.div
+          key={isMobile ? 'mobile' : 'desktop'}
+          ref={ref}
+          variants={isMobile ? {} : faqContainer}
+          initial={isMobile ? false : 'hidden'}
+          animate={isMobile ? undefined : (inView ? 'show' : 'hidden')}
+          className="max-w-2xl mx-auto"
+        >
+          {items.map((item, i) => {
+            const isOpen = open === i;
+            return (
+              <motion.div
+                key={i}
+                variants={isMobile ? {} : faqItem}
+                className="border-b"
+                style={{ borderColor: 'var(--color-border-muted)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 py-5 text-left"
+                  aria-expanded={isOpen}
+                >
+                  <span
+                    className="text-sm font-semibold leading-snug"
+                    style={{
+                      color: isOpen ? 'var(--color-secondary-light)' : 'var(--color-text-primary)',
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {item.q}
+                  </span>
+                  <motion.span
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.25, ease: EXPO }}
+                    className="flex-shrink-0"
+                    style={{ color: isOpen ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}
+                  >
+                    <ChevronDown size={16} aria-hidden />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: EXPO }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <p
+                        className="text-sm leading-relaxed pb-5"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        {item.a}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Footer ────────────────────────────────────────────────────────────────
 
 function Footer() {
@@ -681,6 +776,7 @@ export default function LandingPage() {
         <HowItWorks isMobile={isMobile} />
         <Destinations isMobile={isMobile} />
         <Pricing isMobile={isMobile} />
+        <FAQ isMobile={isMobile} />
         <Footer />
       </div>
     </MotionConfig>

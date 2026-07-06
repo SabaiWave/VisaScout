@@ -1,3 +1,5 @@
+import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
+
 export const clientConfig = {
   brandName: 'VisaScout',
   tagline: 'Visa intelligence for digital nomads.',
@@ -91,37 +93,68 @@ export const clientConfig = {
       subtitle: 'Less than a visa agency consultation. Far less than an overstay fine.',
       plans: [
         {
-          name: 'Quick',
+          name: DEPTH_LABEL.quick,
           tag: 'Free',
           price: '$0',
           priceNote: 'No credit card',
-          description: 'Good for a short trip or a quick check. Full brief, every claim cited.',
+          description: 'Surface scan before you commit. Full brief from all 5 agents, every claim sourced.',
           features: ['Full brief from all 5 agents', '3 sources per agent', 'Every claim cited', 'Shareable link'],
-          cta: 'Start free',
+          cta: DEPTH_CTA.quick,
           href: '/app?depth=quick',
           highlight: false,
         },
         {
-          name: 'Standard',
+          name: DEPTH_LABEL.standard,
           tag: 'Popular',
           price: '$5.99',
           priceNote: 'Per report',
-          description: 'For longer stays and real decisions. More sources, full conflict report, PDF you can keep.',
-          features: ['Everything in Quick', '5 sources per agent', 'Full conflict report', 'PDF download'],
-          cta: 'Run Standard',
+          description: 'Full intelligence brief for real decisions. Deeper source coverage, complete conflict report, PDF on file.',
+          features: [`Everything in ${DEPTH_LABEL.quick}`, '5 sources per agent', 'Full conflict report', 'PDF download'],
+          cta: DEPTH_CTA.standard,
           href: '/app?depth=standard',
           highlight: true,
         },
         {
-          name: 'Deep',
+          name: DEPTH_LABEL.deep,
           tag: 'Max Intel',
           price: '$11.99',
           priceNote: 'Per report',
-          description: 'For complex situations. Maximum sources, full border run analysis, every contradiction explained.',
-          features: ['Everything in Standard', '8 sources per agent', 'Wider community search', 'Full border run analysis', 'Every contradiction explained'],
-          cta: 'Go Deep',
+          description: 'The complete file on your situation. Maximum sources, full border run analysis, every contradiction resolved.',
+          features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Full border run analysis', 'Every contradiction resolved'],
+          cta: DEPTH_CTA.deep,
           href: '/app?depth=deep',
           highlight: false,
+        },
+      ],
+    },
+
+    faq: {
+      title: 'Common Questions',
+      subtitle: 'Everything travelers ask before running their first brief.',
+      items: [
+        {
+          q: 'Is this legal advice?',
+          a: 'No. VisaScout aggregates publicly available immigration information and pulls it into a sourced brief. Every brief includes a disclaimer and links to its sources. For personal legal decisions, consult an immigration lawyer.',
+        },
+        {
+          q: 'How current is the data?',
+          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, so stale travel blog posts from 2021 never make it into your brief.',
+        },
+        {
+          q: 'What if official sources contradict each other?',
+          a: "That's exactly what the Conflict Report is for. Every brief shows what's confirmed (two or more official sources agree), what's contested, and what's unverified. You always know where the uncertainty is, not just what the average answer is.",
+        },
+        {
+          q: 'How long does a brief take to generate?',
+          a: `Most briefs are ready in under two minutes. ${DEPTH_LABEL.quick} is fastest. ${DEPTH_LABEL.deep} runs deeper and takes a bit longer. You'll get an email when it's ready if you want to step away.`,
+        },
+        {
+          q: 'Can I share my brief with someone?',
+          a: "Yes. Every brief gets a permanent shareable link. Send it to a travel partner, a visa agent, or keep it for your embassy appointment prep. No account needed to view a shared brief.",
+        },
+        {
+          q: 'What if my brief fails to generate?',
+          a: "If a technical failure interrupts your brief, we'll re-run it or refund the charge. Every brief cites its sources. If something looks off, the source link is right there to verify.",
         },
       ],
     },
