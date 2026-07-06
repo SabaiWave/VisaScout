@@ -679,7 +679,7 @@ function FAQ({ isMobile }: { isMobile: boolean }) {
                   aria-expanded={isOpen}
                 >
                   <span
-                    className="text-sm font-semibold leading-snug"
+                    className="text-sm font-bold leading-snug"
                     style={{
                       color: isOpen ? 'var(--color-secondary-light)' : 'var(--color-text-primary)',
                       transition: 'color 0.2s ease',
