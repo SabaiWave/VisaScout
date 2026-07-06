@@ -1,6 +1,6 @@
 'use client';
 
-import { CSSProperties, ReactNode, useEffect } from 'react';
+import { CSSProperties, ReactNode, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 // Shared style constants for drawer nav links — use these in every page's drawer
@@ -36,14 +36,25 @@ interface NavDrawerProps {
 }
 
 export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawerProps) {
+  // Block pointer events during the open transition so Clerk's UserButton doesn't
+  // receive a click mid-animation. getBoundingClientRect() returns the in-progress
+  // position when clicked during transition — Clerk places the popover there, then
+  // the drawer finishes moving and the popover appears displaced. 270ms > transition.
+  const [interactive, setInteractive] = useState(false);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setInteractive(false);
+      return;
+    }
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    const t = setTimeout(() => setInteractive(true), 270);
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      clearTimeout(t);
     };
   }, [open, onClose]);
 
@@ -66,6 +77,9 @@ export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawer
       />
 
       {/* Panel */}
+      {/* Animate left/right offset instead of transform — CSS transform creates a new containing
+          block for position:fixed descendants (e.g. Clerk UserButton popover), causing
+          incorrect popover positioning. left/right animation avoids this stacking context issue. */}
       <div
         role="dialog"
         aria-modal="true"
@@ -73,7 +87,9 @@ export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawer
         style={{
           position: 'fixed',
           top: 0,
-          [side]: 0,
+          ...(side === 'left'
+            ? { left: open ? 0 : '-260px' }
+            : { right: open ? 0 : '-260px' }),
           bottom: 0,
           zIndex: 50,
           width: '260px',
@@ -83,9 +99,8 @@ export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawer
           flexDirection: 'column',
           padding: '1.25rem 1rem',
           gap: '0.5rem',
-          transform: open ? 'translateX(0)' : `translateX(${side === 'left' ? '-100%' : '100%'})`,
-          transition: 'transform 0.25s ease',
-          willChange: 'transform',
+          transition: `${side === 'left' ? 'left' : 'right'} 0.25s ease`,
+          pointerEvents: open && interactive ? 'auto' : 'none',
         }}
       >
         <div style={{ display: 'flex', justifyContent: side === 'left' ? 'flex-start' : 'flex-end', marginBottom: '0.75rem' }}>

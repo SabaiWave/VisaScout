@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, MotionConfig } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, MessageSquare, Network, FileDown, AlertTriangle } from 'lucide-react';
@@ -16,7 +16,8 @@ const { landingPage: copy } = clientConfig;
 const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 // Section-heading entrance — shared across all sections
-function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function FadeIn({ children, className, delay = 0, noAnimation = false }: { children: React.ReactNode; className?: string; delay?: number; noAnimation?: boolean }) {
+  if (noAnimation) return <div className={className}>{children}</div>;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -265,14 +266,14 @@ const featRow = {
   show: { opacity: 1, transition: { duration: 0.45, ease: EXPO } },
 };
 
-function Features() {
+function Features({ isMobile }: { isMobile: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px 0px' });
 
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <FadeIn className="mb-10">
+        <FadeIn className="mb-10" noAnimation={isMobile}>
           <SectionHeading subtitle={copy.features.subtitle}>
             {copy.features.title}
           </SectionHeading>
@@ -280,9 +281,9 @@ function Features() {
 
         <motion.div
           ref={ref}
-          variants={featContainer}
-          initial="hidden"
-          animate={inView ? 'show' : 'hidden'}
+          variants={isMobile ? {} : featContainer}
+          initial={isMobile ? false : 'hidden'}
+          animate={isMobile ? undefined : (inView ? 'show' : 'hidden')}
           className="rounded-xl border divide-y overflow-hidden"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}
         >
@@ -291,7 +292,7 @@ function Features() {
             return (
               <motion.div
                 key={card.title}
-                variants={featRow}
+                variants={isMobile ? {} : featRow}
                 className="px-5 py-6 flex flex-col gap-1"
               >
                 <p
@@ -350,14 +351,14 @@ const stepCard = {
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EXPO } },
 };
 
-function HowItWorks() {
+function HowItWorks({ isMobile }: { isMobile: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px 0px' });
 
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <FadeIn className="mb-12">
+        <FadeIn className="mb-12" noAnimation={isMobile}>
           <SectionHeading subtitle={copy.howItWorks.subtitle}>
             {copy.howItWorks.title}
           </SectionHeading>
@@ -365,9 +366,9 @@ function HowItWorks() {
 
         <motion.div
           ref={ref}
-          variants={stepContainer}
-          initial="hidden"
-          animate={inView ? 'show' : 'hidden'}
+          variants={isMobile ? {} : stepContainer}
+          initial={isMobile ? false : 'hidden'}
+          animate={isMobile ? undefined : (inView ? 'show' : 'hidden')}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {copy.howItWorks.steps.map((step, i) => {
@@ -375,7 +376,7 @@ function HowItWorks() {
             return (
               <motion.div
                 key={step.number}
-                variants={stepCard}
+                variants={isMobile ? {} : stepCard}
                 className="p-6 rounded-xl border flex flex-col gap-4"
                 style={{
                   background: style.bg,
@@ -427,14 +428,14 @@ const destDot = {
   show: { scale: 1, transition: { duration: 0.22, ease: EXPO, delay: 0.25 } },
 };
 
-function Destinations() {
+function Destinations({ isMobile }: { isMobile: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px 0px' });
 
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <FadeIn className="mb-12">
+        <FadeIn className="mb-12" noAnimation={isMobile}>
           <SectionHeading subtitle={copy.destinations.subtitle}>
             {copy.destinations.title}
           </SectionHeading>
@@ -442,15 +443,15 @@ function Destinations() {
 
         <motion.div
           ref={ref}
-          variants={destContainer}
-          initial="hidden"
-          animate={inView ? 'show' : 'hidden'}
+          variants={isMobile ? {} : destContainer}
+          initial={isMobile ? false : 'hidden'}
+          animate={isMobile ? undefined : (inView ? 'show' : 'hidden')}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
         >
           {clientConfig.supportedDestinations.map(name => (
             <motion.div
               key={name}
-              variants={destCard}
+              variants={isMobile ? {} : destCard}
               className="p-4 rounded-lg border flex flex-col gap-2"
               style={{
                 background: 'var(--color-bg-base)',
@@ -469,7 +470,7 @@ function Destinations() {
                 style={{ alignSelf: 'flex-start' }}
               >
                 <motion.span
-                  variants={destDot}
+                  variants={isMobile ? {} : destDot}
                   className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse"
                   style={{ background: 'var(--color-success)', transformOrigin: 'center' }}
                 />
@@ -518,11 +519,11 @@ function SourceDepthBars({ count, color }: { count: number; color: string }) {
 // Pricing cards enter simultaneously — they're comparison peers, not a sequence
 const PRICING_TRANSITION = { duration: 0.55, ease: EXPO };
 
-function Pricing() {
+function Pricing({ isMobile }: { isMobile: boolean }) {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-base)' }}>
       <div className="max-w-[1120px] mx-auto">
-        <FadeIn className="mb-12">
+        <FadeIn className="mb-12" noAnimation={isMobile}>
           <SectionHeading subtitle={copy.pricing.subtitle}>
             {copy.pricing.title}
           </SectionHeading>
@@ -534,10 +535,12 @@ function Pricing() {
             return (
               <motion.div
                 key={plan.name}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={PRICING_TRANSITION}
+                {...(!isMobile && {
+                  initial: { opacity: 0, y: 14 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true, margin: '-60px' },
+                  transition: PRICING_TRANSITION,
+                })}
                 className={`p-6 rounded-xl border flex flex-col ${plan.highlight ? 'pricing-card-highlight' : 'pricing-card'}`}
                 style={{
                   background: 'var(--color-bg-elevated)',
@@ -661,15 +664,20 @@ function Footer() {
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+  }, []);
+
   return (
     <MotionConfig reducedMotion="user">
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         <LandingNav />
         <Hero />
-        <Features />
-        <HowItWorks />
-        <Destinations />
-        <Pricing />
+        <Features isMobile={isMobile} />
+        <HowItWorks isMobile={isMobile} />
+        <Destinations isMobile={isMobile} />
+        <Pricing isMobile={isMobile} />
         <Footer />
       </div>
     </MotionConfig>
