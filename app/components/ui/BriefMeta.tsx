@@ -1,3 +1,5 @@
+import { DEPTH_LABEL, type BriefDepth } from '@/src/lib/depth';
+
 interface BriefMetaProps {
   depth: string;
   generatedAt: string;
@@ -25,7 +27,7 @@ export function BriefMeta({ depth, generatedAt, degraded, center, className = ''
         textTransform: 'uppercase',
       }}
     >
-      {depth} depth · Generated {date} · {time} UTC
+      {DEPTH_LABEL[depth as BriefDepth] ?? depth} depth · Generated {date} · {time} UTC
       {degraded && <span style={{ color: 'var(--color-amber)' }}> · degraded output</span>}
     </p>
   );

@@ -1,3 +1,5 @@
+import { DEPTH_LABEL } from '@/src/lib/depth';
+
 const badgeBase: React.CSSProperties = {
   fontFamily: 'var(--font-mono)',
   fontSize: '0.7rem',
@@ -49,7 +51,7 @@ const depthMap = {
 
 export function DepthBadge({ depth }: { depth: 'quick' | 'standard' | 'deep' }) {
   const style = depthMap[depth] ?? depthMap.quick;
-  return <span style={{ ...badgeBase, ...style }}>{depth}</span>;
+  return <span style={{ ...badgeBase, ...style }}>{DEPTH_LABEL[depth]}</span>;
 }
 
 // ─── Tier ────────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
+import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { AgentsDeployedScreen, AgentRowList, AGENT_DISPLAY_ORDER } from '@/app/components/AgentsDeployedScreen';
@@ -168,7 +169,7 @@ function AppContent() {
   const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
-    devSim === 'free-cap' ? 'Daily free brief limit reached. Upgrade to Standard or Deep for unlimited research.' :
+    devSim === 'free-cap' ? `Daily free brief limit reached. Upgrade to ${DEPTH_LABEL.standard} or ${DEPTH_LABEL.deep} for unlimited research.` :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
   const [inviteCodeError, setInviteCodeError] = useState<string | null>(
@@ -532,7 +533,7 @@ function AppContent() {
                     className="grid grid-cols-3 rounded-lg overflow-hidden"
                     style={{ border: '1px solid var(--color-border-strong)' }}
                   >
-                    {(['quick', 'standard', 'deep'] as const).map((d, i) => (
+                    {BRIEF_DEPTHS.map((d, i) => (
                       <button
                         key={d}
                         type="button"
@@ -548,7 +549,7 @@ function AppContent() {
                           cursor: 'pointer',
                         }}
                       >
-                        {d === 'quick' ? 'Quick' : d === 'standard' ? 'Standard' : 'Deep'}
+                        {DEPTH_LABEL[d]}
                       </button>
                     ))}
                   </div>
@@ -597,7 +598,7 @@ function AppContent() {
                       Daily free brief limit reached
                     </p>
                     <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                      You&apos;ve used your free brief. Select Standard or Deep above to continue with unlimited research.
+                      You&apos;ve used your free brief. Select {DEPTH_LABEL.standard} or {DEPTH_LABEL.deep} above to continue with unlimited research.
                     </p>
                   </div>
                 )}

@@ -1,4 +1,5 @@
 import type { VisaBrief, VisaOption, ConflictItem } from '@/src/types/index';
+import { DEPTH_LABEL, type BriefDepth } from '@/src/lib/depth';
 
 function esc(s: string): string {
   return s
@@ -212,7 +213,7 @@ export function generateBriefHtml(brief: VisaBrief, meta: PdfMeta): string {
         </h1>
       </div>
       <div style="text-align:right;">
-        ${mono(esc(depth.toUpperCase()) + ' DEPTH', { size: 9.5, color: C.textTertiary, tracking: '0.07em' })}
+        ${mono(esc((DEPTH_LABEL[depth as BriefDepth] ?? depth).toUpperCase()) + ' DEPTH', { size: 9.5, color: C.textTertiary, tracking: '0.07em' })}
         <br>
         ${mono('Generated ' + esc(generatedDate) + ' · ' + esc(generatedTime) + ' UTC', { size: 9, color: C.textTertiary, tracking: '0.05em' })}
       </div>
