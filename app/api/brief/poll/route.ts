@@ -38,7 +38,7 @@ async function runPipeline(jobId: string, briefId: string) {
       const pipelineStart = Date.now();
 
       if (process.env.DRY_RUN === 'true') {
-        const result = await runDryPipeline(() => {});
+        const result = await runDryPipeline(() => {}, false, (briefRow.depth as 'quick' | 'standard' | 'deep') ?? 'standard');
         brief = result.brief;
         visaRequest = result.visaRequest;
       } else {
