@@ -13,6 +13,7 @@ SYNTHESIS RULES:
 - Recommended action must be specific, actionable, and include a deadline if applicable
 - If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
 - Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
+- For each visa type requiring pre-travel application (consulate, e-visa portal), populate applicationDocs with the required documents to submit and applicationUrl with the official portal URL. For on-arrival/visa-free options requiring no pre-application, omit both fields.
 - Confidence scores must be honest — do not uniformly set to "high". Calibrate as follows:
   - high: all major facts confirmed by Tier 1-2 sources; no agent failures; conflict report shows mostly confirmed items
   - medium: primary claims (eligibility, stay duration) have Tier 1-2 support even if secondary details are contested; OR 1-2 agents failed but core sourcing is solid
@@ -40,7 +41,9 @@ Return ONLY valid JSON (no markdown fences):
       "maxStay": "<max stay duration>",
       "summary": "<one sentence summary>",
       "pros": ["<pro>"],
-      "cons": ["<con>"]
+      "cons": ["<con>"],
+      "applicationDocs": ["<document required to apply — omit field entirely for on-arrival/visa-free>"],
+      "applicationUrl": "<official application portal URL — omit field if none>"
     }
   ],
   "recommendedAction": {

@@ -200,7 +200,7 @@ async function briefHandler(req: Request) {
       try {
         if (dryRun) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
-          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development');
+          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development', resolvedDepth);
 
           let dryBriefId: string | undefined;
           try {

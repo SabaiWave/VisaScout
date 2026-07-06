@@ -139,6 +139,8 @@ export interface VisaOption {
   summary: string;
   pros: string[];
   cons: string[];
+  applicationDocs?: string[];
+  applicationUrl?: string;
 }
 
 export interface RecommendedAction {

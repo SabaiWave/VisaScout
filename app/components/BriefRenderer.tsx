@@ -124,6 +124,34 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
           ))}
         </ul>
       )}
+      {option.applicationDocs && option.applicationDocs.length > 0 && (
+        <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--color-border-muted)' }}>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
+              Application Documents
+            </span>
+            {option.applicationUrl && (
+              <a
+                href={option.applicationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[0.65rem] font-bold uppercase px-2 py-0.5"
+                style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(99,102,241,0.10)', borderRadius: '4px' }}
+              >
+                Apply Online ↗
+              </a>
+            )}
+          </div>
+          <ul className="space-y-1">
+            {option.applicationDocs.map((doc, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                <span className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-secondary)', opacity: 0.6 }}>•</span>
+                {doc}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

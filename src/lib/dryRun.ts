@@ -21,7 +21,39 @@ const AGENT_SEQUENCE: Array<{
   { agent: 'borderRun',         fastDelay: 950,  slowDelay: 7000, confidence: 'medium', sourceTier: 2, durationMs: 1050 },
 ];
 
-export async function runDryPipeline(send: (data: unknown) => void, slow = false): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
+type Depth = 'quick' | 'standard' | 'deep';
+
+// Strips the deep fixture down to match what each depth tier actually produces
+export function stripToDepth(brief: VisaBrief, depth: Depth): VisaBrief {
+  if (depth === 'deep') return brief;
+  const b = JSON.parse(JSON.stringify(brief)) as VisaBrief;
+
+  if (depth === 'quick') {
+    // Quick: 1 visa option, no applicationDocs, minimal conflict + notes
+    b.visaOptions = b.visaOptions.slice(0, 1).map(opt => {
+      const { applicationDocs: _d, applicationUrl: _u, ...rest } = opt;
+      void _d; void _u;
+      return rest;
+    });
+    b.entryRequirements.notes = [];
+    b.conflictReport.contested = [];
+    b.conflictReport.unverified = [];
+    b.borderRunAnalysis.recommendedCrossings = b.borderRunAnalysis.recommendedCrossings.slice(0, 1);
+    b.metadata.depth = 'quick';
+  } else {
+    // Standard: 2 visa options, applicationDocs included
+    b.visaOptions = b.visaOptions.slice(0, 2);
+    b.metadata.depth = 'standard';
+  }
+
+  return b;
+}
+
+export async function runDryPipeline(
+  send: (data: unknown) => void,
+  slow = false,
+  depth: Depth = 'standard',
+): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
   // Step 1: emit parsed situation
   await delay(slow ? 800 : 400);
   send({ type: 'parsed', data: visaRequestFixture as VisaRequest });
@@ -49,10 +81,11 @@ export async function runDryPipeline(send: (data: unknown) => void, slow = false
 
   // Step 4: conflict resolution
   await delay(slow ? 1500 : 600);
-  const brief = visaBriefFixture as unknown as VisaBrief;
-  send({ type: 'conflict', data: brief.conflictReport as ConflictReport });
+  const fullBrief = visaBriefFixture as unknown as VisaBrief;
+  send({ type: 'conflict', data: fullBrief.conflictReport as ConflictReport });
 
-  // Step 5: return fixtures — caller sends complete event with briefId after saving
+  // Step 5: return depth-stripped fixture — caller sends complete event with briefId after saving
   await delay(slow ? 1000 : 800);
+  const brief = stripToDepth(fullBrief, depth);
   return { brief, visaRequest: visaRequestFixture as VisaRequest };
 }
