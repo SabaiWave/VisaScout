@@ -677,23 +677,16 @@ function FAQ({ isMobile }: { isMobile: boolean }) {
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="w-full flex items-center justify-between gap-4 py-5 text-left"
+                  className={`faq-btn w-full flex items-center justify-between gap-4 py-5 text-left${isOpen ? ' faq-btn--open' : ''}`}
                   aria-expanded={isOpen}
                 >
-                  <span
-                    className="text-sm font-bold leading-snug"
-                    style={{
-                      color: isOpen ? 'var(--color-secondary-light)' : 'var(--color-text-primary)',
-                      transition: 'color 0.2s ease',
-                    }}
-                  >
+                  <span className="faq-question text-sm font-bold leading-snug">
                     {item.q}
                   </span>
                   <motion.span
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.25, ease: EXPO }}
-                    className="flex-shrink-0"
-                    style={{ color: isOpen ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}
+                    className="faq-chevron flex-shrink-0"
                   >
                     <ChevronDown size={16} aria-hidden />
                   </motion.span>
