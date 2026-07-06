@@ -230,9 +230,9 @@ function Hero() {
           {/* Brief — absolutely positioned, out of flow, never inflates section height */}
           {/* motion.div handles opacity/y; inner div owns the 3D transform to avoid framer conflict */}
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, ease: EXPO, delay: 0.38 }}
+            initial={{ opacity: 0, x: 60, y: 12 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 1.05, ease: EXPO, delay: 0.52 }}
             className="hidden md:block absolute top-0 right-0"
             style={{ width: '46%' }}
           >
