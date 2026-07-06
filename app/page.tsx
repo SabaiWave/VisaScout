@@ -280,6 +280,7 @@ function Features({ isMobile }: { isMobile: boolean }) {
         </FadeIn>
 
         <motion.div
+          key={isMobile ? 'mobile' : 'desktop'}
           ref={ref}
           variants={isMobile ? {} : featContainer}
           initial={isMobile ? false : 'hidden'}
@@ -365,6 +366,7 @@ function HowItWorks({ isMobile }: { isMobile: boolean }) {
         </FadeIn>
 
         <motion.div
+          key={isMobile ? 'mobile' : 'desktop'}
           ref={ref}
           variants={isMobile ? {} : stepContainer}
           initial={isMobile ? false : 'hidden'}
@@ -442,6 +444,7 @@ function Destinations({ isMobile }: { isMobile: boolean }) {
         </FadeIn>
 
         <motion.div
+          key={isMobile ? 'mobile' : 'desktop'}
           ref={ref}
           variants={isMobile ? {} : destContainer}
           initial={isMobile ? false : 'hidden'}
@@ -534,7 +537,7 @@ function Pricing({ isMobile }: { isMobile: boolean }) {
             const depth = planDepth[i];
             return (
               <motion.div
-                key={plan.name}
+                key={isMobile ? `m-${plan.name}` : plan.name}
                 {...(!isMobile && {
                   initial: { opacity: 0, y: 14 },
                   whileInView: { opacity: 1, y: 0 },
