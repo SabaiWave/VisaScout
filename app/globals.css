@@ -393,6 +393,16 @@ h1, h2, h3 {
   box-shadow: var(--shadow-card-hover) !important;
 }
 
+/* Countries covered + How It Works card hover */
+.country-card,
+.hiw-card {
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+.country-card:hover,
+.hiw-card:hover {
+  box-shadow: var(--shadow-card-hover) !important;
+}
+
 /* Dashboard brief cards */
 .visa-track-card {
   transition: border-color 150ms ease, box-shadow 150ms ease;
