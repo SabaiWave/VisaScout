@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
+import { Home, LayoutDashboard, HelpCircle, Zap } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
 import { Button } from './ui/Button';
-import { NavDrawer, HamburgerButton, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
+import { NavDrawer, HamburgerButton, navDrawerSecondaryStyle, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
 import { VisaScoutUserButton } from './VisaScoutUserButton';
 
@@ -55,13 +56,31 @@ export function LandingNav() {
       <NavDrawer open={open} onClose={() => setOpen(false)}>
         {isLoaded && (isSignedIn ? (
           <>
-            <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dashboard</Link>
-            <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Generate Brief</Link>
+            <Link href="/" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+              <Home size={16} aria-hidden /> Home
+            </Link>
+            <Link href="/dashboard" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+              <LayoutDashboard size={16} aria-hidden /> Dashboard
+            </Link>
+            <Link href="/how-it-works" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+              <HelpCircle size={16} aria-hidden /> How It Works
+            </Link>
+            <div style={{ borderTop: '1px solid var(--color-border-muted)', margin: '4px 0' }} />
+            <Link href="/app" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>
+              <Zap size={15} aria-hidden /> Generate Brief
+            </Link>
             <div style={{ flex: 1 }} />
             <SidebarAccount />
           </>
         ) : (
           <>
+            <Link href="/" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+              <Home size={16} aria-hidden /> Home
+            </Link>
+            <Link href="/how-it-works" onClick={() => setOpen(false)} style={navDrawerSecondaryStyle}>
+              <HelpCircle size={16} aria-hidden /> How It Works
+            </Link>
+            <div style={{ borderTop: '1px solid var(--color-border-muted)', margin: '4px 0' }} />
             <Link href="/sign-in" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Sign in</Link>
             <Link href="/sign-up" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Get Started</Link>
           </>
