@@ -35,7 +35,7 @@ export async function GET() {
 
       const { runDryPipeline } = await import('@/src/lib/dryRun');
       const events: unknown[] = [];
-      const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline((event) => events.push(event));
+      const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline((event) => events.push(event), false, 'deep');
 
       let briefId: string | undefined;
       try {

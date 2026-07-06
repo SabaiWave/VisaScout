@@ -15,7 +15,34 @@
       "maxStay": "60 days, extendable once for 30 days",
       "summary": "Overkill for 28 days but useful if you plan multiple trips and want a visa in your passport for cleaner entry.",
       "pros": ["Cleaner at immigration", "Fewer questions on entry"],
-      "cons": ["~$40 fee", "Must apply at consulate before travel", "No practical advantage over exemption for short stays"]
+      "cons": ["~$40 fee", "Must apply at consulate before travel", "No practical advantage over exemption for short stays"],
+      "applicationDocs": [
+        "Valid passport (6+ months validity beyond date of last intended entry)",
+        "Completed TR visa application form (downloadable from thaievisa.go.th)",
+        "1 passport photo (4×6 cm, white background, taken within 6 months)",
+        "Bank statement (3 months, minimum 20,000 THB balance)",
+        "Proof of accommodation (hotel booking or letter of invitation)",
+        "Return or onward ticket"
+      ],
+      "applicationUrl": "https://www.thaievisa.go.th"
+    },
+    {
+      "name": "METV (Multiple Entry Tourist Visa)",
+      "suitability": "good",
+      "maxStay": "60 days per entry, valid 6 months from issue",
+      "summary": "Best if you plan multiple Thailand visits within 6 months. Each entry allows 60 days with one 30-day extension. Higher cost and consulate requirement make it overkill for a single trip.",
+      "pros": ["Unlimited entries over 6 months", "60 days per entry", "Extendable once per entry", "Fewer border hassles on repeat visits"],
+      "cons": ["~$200 fee", "Must apply at consulate before travel", "6-month validity starts at issue date, not first entry"],
+      "applicationDocs": [
+        "Valid passport (6+ months validity from date of last intended entry)",
+        "Completed METV application form",
+        "2 passport photos (4×6 cm, white background)",
+        "Bank statement (6 months, minimum 200,000 THB balance)",
+        "Evidence of previous travel (prior visas or entry stamps)",
+        "Proof of accommodation and onward tickets covering planned entries",
+        "Application fee: ~6,000 THB (~$165 USD)"
+      ],
+      "applicationUrl": "https://www.thaievisa.go.th"
     }
   ],
   "recommendedAction": {
@@ -42,7 +69,7 @@
   "borderRunAnalysis": {
     "eligible": true,
     "limitsPerYear": "2 land border crossings per calendar year on visa exemption",
-    "recommendedCrossings": ["Padang Besar (Hat Yai → Padang Besar, train available)"],
+    "recommendedCrossings": ["Padang Besar (Hat Yai → Padang Besar, train available)", "Mae Sai (Chiang Rai → Tachileik, Myanmar — check current status)"],
     "enforcementPosture": "Moderate — officers have discretion. Repeat crossings within same year may trigger questioning.",
     "warnings": [
       "Exceeding 2 land crossings per year may result in denial of entry",
@@ -135,6 +162,6 @@
     "model": "claude-sonnet-4-6",
     "generatedAt": "2026-04-30T00:00:00.000Z",
     "degraded": false,
-    "depth": "quick"
+    "depth": "deep"
   }
 }
