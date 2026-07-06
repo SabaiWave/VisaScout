@@ -27,7 +27,7 @@ export const clientConfig = {
       eyebrow: 'Southeast Asia · Visa Intelligence',
       h1: "Know your visa situation. Before it's a problem.",
       subhead:
-        'You found six answers. Three contradict each other. Two are from 2021. VisaScout cross-checks official immigration sources, recent enforcement data, and real traveler reports. One brief. Every claim sourced.',
+        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
       cta: 'Start free',
       ctaHref: '/app?depth=quick',
       metrics: [
@@ -138,7 +138,7 @@ export const clientConfig = {
         },
         {
           q: 'How current is the data?',
-          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, so stale travel blog posts from 2021 never make it into your brief.',
+          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, so outdated travel blog posts never make it into your brief.',
         },
         {
           q: 'What if official sources contradict each other?',
@@ -150,11 +150,11 @@ export const clientConfig = {
         },
         {
           q: 'Can I share my brief with someone?',
-          a: "Yes. Every brief gets a permanent shareable link. Send it to a travel partner, a visa agent, or keep it for your embassy appointment prep. No account needed to view a shared brief.",
+          a: "Yes. Every brief has a permanent shareable link and a PDF download. Send it to a travel partner, a visa agent, or save it for your embassy appointment. No account needed to view a shared brief.",
         },
         {
           q: 'What if my brief fails to generate?',
-          a: "If a technical failure interrupts your brief, we'll re-run it or refund the charge. Every brief cites its sources. If something looks off, the source link is right there to verify.",
+          a: "If a technical failure interrupts your brief, reach out and we'll re-run it or refund the charge. Every brief cites its sources. If something looks off, the source link is right there to verify.",
         },
       ],
     },
