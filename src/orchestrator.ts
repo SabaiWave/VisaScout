@@ -4,6 +4,7 @@ import { parseJSON } from './lib/parseJSON';
 import { recordUsage } from './lib/cost';
 import { log } from './lib/logger';
 import { OffTopicError } from './lib/errors';
+import { DESTINATIONS } from './config/destinations';
 import { officialPolicyAgent } from './agents/officialPolicy';
 import { recentChangesAgent } from './agents/recentChanges';
 import { communityIntelAgent } from './agents/communityIntel';
@@ -89,6 +90,14 @@ export async function runOrchestrator(
     if (visaRequest.offTopic) {
       throw new OffTopicError();
     }
+  }
+
+  // Enrich with region + schengenMember from destinations config
+  const destConfig = DESTINATIONS.find(
+    (d) => d.name.toLowerCase() === visaRequest.normalizedDestination.toLowerCase()
+  );
+  if (destConfig) {
+    visaRequest = { ...visaRequest, region: destConfig.region, schengenMember: destConfig.schengenMember ?? false };
   }
 
   onParsed?.(visaRequest);

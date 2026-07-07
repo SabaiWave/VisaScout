@@ -1,3 +1,4 @@
+import { getRegionContext } from './regionContext';
 import type { AgentResultEnvelope, ConflictReport, PromptResult } from '../types/index';
 
 export function buildSynthesisPrompt(
@@ -5,6 +6,7 @@ export function buildSynthesisPrompt(
   conflictReport: ConflictReport,
   degradedContext: string
 ): PromptResult {
+  const regionContext = getRegionContext(envelope.visaRequest);
   return {
     system: `You are a visa intelligence analyst. Synthesize all agent outputs into a comprehensive, actionable visa intelligence brief.
 
@@ -96,7 +98,9 @@ Return ONLY valid JSON (no markdown fences):
     "emergencyContacts": ["<relevant embassy or hotline>"]
   },
   "disclaimer": "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice."
-}`,
+}
+
+${regionContext}`,
 
     user: `TRAVELER SITUATION:
 Nationality: ${envelope.visaRequest.normalizedNationality}

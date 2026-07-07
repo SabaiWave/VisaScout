@@ -21,6 +21,7 @@ import { render } from '@react-email/components';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import BriefReadyEmail from '@/src/emails/brief-ready';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
+import { SUPPORTED_DESTINATION_NAMES } from '@/src/config/destinations';
 
 const BriefInputSchema = z.object({
   nationality: z.string().min(1).max(100),
@@ -30,10 +31,7 @@ const BriefInputSchema = z.object({
   depth: z.enum(['quick', 'standard', 'deep']).optional(),
 });
 
-const SUPPORTED_DESTINATIONS = new Set([
-  'thailand', 'vietnam', 'indonesia', 'malaysia', 'philippines',
-  'cambodia', 'laos', 'myanmar', 'singapore', 'brunei',
-]);
+const SUPPORTED_DESTINATIONS = new Set(SUPPORTED_DESTINATION_NAMES.map((n: string) => n.toLowerCase()));
 
 export const runtime = 'nodejs';
 
@@ -370,7 +368,7 @@ async function briefHandler(req: Request) {
           getSupabase().from('briefs').update({ payment_status: 'error' }).eq('id', shellBriefId).then(() => {});
         }
         if (err instanceof OffTopicError) {
-          send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported SEA destination. Please describe your nationality, destination country, and visa situation.' });
+          send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported destination. Please describe your nationality, destination country, and visa situation.' });
           return;
         }
         const internalMessage = err instanceof Error ? err.message : 'Pipeline failed';

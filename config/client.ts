@@ -1,4 +1,5 @@
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
+import { DESTINATIONS, coverageLabel, destinationCount } from '@/src/config/destinations';
 
 export const clientConfig = {
   brandName: 'VisaScout',
@@ -9,29 +10,18 @@ export const clientConfig = {
   disclaimerText:
     'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.',
   supportEmail: 'hello@visascout.io',
-  supportedDestinations: [
-    'Thailand',
-    'Vietnam',
-    'Indonesia',
-    'Malaysia',
-    'Philippines',
-    'Cambodia',
-    'Laos',
-    'Myanmar',
-    'Singapore',
-    'Brunei',
-  ],
+  supportedDestinations: DESTINATIONS.map((d) => d.name),
 
   landingPage: {
     hero: {
-      eyebrow: 'Southeast Asia · Visa Intelligence',
+      eyebrow: `${coverageLabel} · Visa Intelligence`,
       h1: "Know your visa situation. Before it's a problem.",
       subhead:
         'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
       cta: 'Start free',
       ctaHref: '/app?depth=quick',
       metrics: [
-        { value: '10', label: 'Countries' },
+        { value: String(destinationCount), label: 'Countries' },
         { value: 'Official', label: 'Sources first' },
         { value: 'Cited', label: 'Every claim' },
         { value: 'Per report', label: 'No subscription' },
