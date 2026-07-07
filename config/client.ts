@@ -1,9 +1,9 @@
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
-import { DESTINATIONS, coverageLabel, destinationCount } from '@/src/config/destinations';
+import { DESTINATIONS, ENABLED_REGIONS, REGION_LABELS, coverageLabel, destinationCount } from '@/src/config/destinations';
 
 export const clientConfig = {
   brandName: 'VisaScout',
-  tagline: 'Visa intelligence for digital nomads.',
+  tagline: 'Visa intelligence, every claim sourced.',
   primaryColor: '#1e3a5f',
   accentColor: '#f59e0b',
   logoUrl: '/logo.svg',
@@ -11,10 +11,12 @@ export const clientConfig = {
     'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.',
   supportEmail: 'hello@visascout.io',
   supportedDestinations: DESTINATIONS.map((d) => d.name),
+  // Flat list for the marquee — excludes the "Schengen" meta-entry (individual countries shown instead)
+  marqueeDestinations: DESTINATIONS.filter((d) => d.name !== 'Schengen').map((d) => d.name),
 
   landingPage: {
     hero: {
-      eyebrow: `${coverageLabel} · Visa Intelligence`,
+      eyebrow: 'Visa intelligence, every claim sourced.',
       h1: "Know your visa situation. Before it's a problem.",
       subhead:
         'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
@@ -58,7 +60,7 @@ export const clientConfig = {
         {
           number: '01',
           title: 'Describe your situation',
-          body: 'Your nationality, destination, how long you\'re staying, and anything specific: visa run history, current visa type, prior overstays. Plain English, not a form.',
+          body: 'Your nationality, destination, how long you\'re staying, and anything specific: entry history, current visa status, prior overstays or extensions. Plain English, not a form.',
         },
         {
           number: '02',
@@ -75,7 +77,7 @@ export const clientConfig = {
 
     destinations: {
       title: 'Countries Covered',
-      subtitle: 'Top visa types covered per country. If we don\'t support it, we say so. We never guess.',
+      subtitle: `${coverageLabel}. The destinations nomads and long-stay travelers actually go. Top visa types per country. We never guess.`,
     },
 
     pricing: {
@@ -141,6 +143,10 @@ export const clientConfig = {
         {
           q: 'Can I share my brief with someone?',
           a: "Yes. Every brief has a permanent shareable link and a PDF download. Send it to a travel partner, a visa agent, or save it for your embassy appointment. No account needed to view a shared brief.",
+        },
+        {
+          q: 'Which countries do you cover?',
+          a: `${destinationCount} destinations across Southeast Asia, East Asia, Europe, and Latin America. The places nomads and long-stay travelers actually go. We cover the most common visa types per country. If we don't support a specific visa type yet, we say so clearly and point you to the right official source.`,
         },
         {
           q: 'What if my brief fails to generate?',

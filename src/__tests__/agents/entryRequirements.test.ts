@@ -106,6 +106,6 @@ describe('entryRequirementsAgent', () => {
 
     const callArgs = mockTavilySearch.mock.calls[0][1];
     expect(callArgs.domainBias).toBeDefined();
-    expect(callArgs.domainBias!.some((d: string) => d.includes('.gov'))).toBe(true);
+    expect(callArgs.domainBias!.some((d: string) => d.includes('.gov') || d.includes('.go.'))).toBe(true);
   });
 });

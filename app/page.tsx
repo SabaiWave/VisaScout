@@ -187,7 +187,7 @@ function Hero() {
               className="text-xs font-bold uppercase mb-7"
               style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-secondary)' }}
             >
-              SOUTHEAST ASIA — VISA INTELLIGENCE
+              {copy.hero.eyebrow}
             </motion.p>
 
             {/* overflow:hidden masks the h1 so it rises from below the clip boundary */}
@@ -470,7 +470,7 @@ function RegionDivider({ label }: { label: string }) {
 }
 
 function Destinations({ isMobile }: { isMobile: boolean }) {
-  const destinations = clientConfig.supportedDestinations;
+  const destinations = clientConfig.marqueeDestinations;
   const items = [...destinations, ...destinations];
 
   return (
@@ -492,9 +492,7 @@ function Destinations({ isMobile }: { isMobile: boolean }) {
       >
         <div className="marquee-track gap-4 py-1">
           {items.map((name, i) => (
-            i === destinations.length
-              ? <RegionDivider key={`div-${i}`} label="Southeast Asia" />
-              : <DestinationPill key={`${name}-${i}`} name={name} />
+            <DestinationPill key={`${name}-${i}`} name={name} />
           ))}
         </div>
       </div>
