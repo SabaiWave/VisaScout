@@ -4,20 +4,36 @@ import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Lock, RefreshCw } from 'lucide-react';
+import { ArrowRight, Lock, RefreshCw, Flag, ExternalLink, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
 import { BriefMeta } from './ui/BriefMeta';
 import { CardHeading } from './ui/CardHeading';
 import { Button } from './ui/Button';
 import { AGENT_DISPLAY_LABELS } from './AgentsDeployedScreen';
 
+// Strip em dashes from LLM-generated brief content — UI copy rule applies to rendered output too
+function noDash(text: string): string {
+  return text.replace(/ — /g, '. ').replace(/—/g, '. ');
+}
+
+// Render text with URLs as clickable links
+function renderWithLinks(text: string): React.ReactNode {
+  const clean = noDash(text);
+  const parts = clean.split(/(https?:\/\/[^\s<>"()\[\]{};,]+)/g);
+  return parts.map((part, i) =>
+    /^https?:\/\//.test(part)
+      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-secondary)', textDecoration: 'underline', wordBreak: 'break-all' }}>{part}</a>
+      : part
+  );
+}
+
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
-function Label({ children, color, size = 'sm' }: { children: React.ReactNode; color?: string; size?: 'xs' | 'sm' | 'xl' }) {
+function Label({ children, color, size = 'xs' }: { children: React.ReactNode; color?: string; size?: 'xs' | 'sm' | 'xl' }) {
   return (
     <p
-      className={`text-${size} font-bold uppercase tracking-wider mb-1`}
-      style={{ color: color ?? 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}
+      className={`text-${size} font-bold uppercase mb-2`}
+      style={{ color: color ?? 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}
     >
       {children}
     </p>
@@ -53,7 +69,7 @@ function WarningBox({ header, items }: { header: string; items: string[] }) {
       <Label color="var(--color-amber)">{header}</Label>
       {items.map((w, i) => (
         <p key={i} className="text-sm flex items-start gap-2" style={{ color: 'var(--color-text-secondary)' }}>
-          <span className="flex-shrink-0" style={{ color: 'var(--color-amber)' }}>⚠</span><span>{w}</span>
+          <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-amber)' }} /><span>{noDash(w)}</span>
         </p>
       ))}
     </div>
@@ -79,11 +95,11 @@ function CollapsibleCard({
         variant="ghost"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-3 transition-colors text-left normal-case tracking-normal border-0 rounded-none hover:opacity-100"
+        className="w-full flex items-center justify-between px-5 py-3 min-h-[44px] transition-colors text-left normal-case tracking-normal border-0 rounded-none hover:opacity-100"
         style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}
       >
         {header}
-        <span className="text-sm flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }}>{open ? '▲' : '▼'}</span>
+        {open ? <ChevronUp size={14} className="flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }} /> : <ChevronDown size={14} className="flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }} />}
       </Button>
       {showContent && (
         <div className="px-5 py-5 space-y-4" style={{ background: 'var(--color-bg-base)' }}>
@@ -96,7 +112,7 @@ function CollapsibleCard({
 
 // ─── Visa Option ─────────────────────────────────────────────────────────────
 
-function VisaOptionCard({ option }: { option: VisaOption }) {
+function VisaOptionCard({ option, depth }: { option: VisaOption; depth: string }) {
   const bg = {
     best:       'rgba(34,197,94,0.06)',
     good:       'rgba(99,102,241,0.06)',
@@ -111,17 +127,12 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
 
   return (
     <div
-      className="rounded-lg p-4 mb-3 border"
+      className="rounded-lg p-5 mb-4 border"
       style={{ background: bg, borderColor: 'var(--color-border)' }}
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div>
-          <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-xs font-bold uppercase flex-shrink-0" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>Max Stay</span>
-            <span className="text-xs" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)' }}>{option.maxStay}</span>
-          </div>
-        </div>
+      {/* Name + suitability badge */}
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <span className="font-bold leading-snug" style={{ color: 'var(--color-text-primary)' }}>{option.name}</span>
         <span
           className="text-[0.65rem] font-bold uppercase px-2 py-0.5 flex-shrink-0"
           style={{ ...badgeColors, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', borderRadius: '4px' }}
@@ -129,61 +140,78 @@ function VisaOptionCard({ option }: { option: VisaOption }) {
           {suitabilityLabel}
         </span>
       </div>
-      <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>{option.summary}</p>
+
+      {/* Max stay — stacked, label above value */}
+      <div className="mb-4">
+        <span className="text-xs font-bold uppercase block mb-0.5" style={{ color: 'var(--color-secondary-light)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>Max Stay</span>
+        <span className="text-sm leading-snug" style={{ color: 'var(--color-text-primary)' }}>{noDash(option.maxStay)}</span>
+      </div>
+
+      <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--color-text-secondary)', textWrap: 'pretty' } as React.CSSProperties}>{noDash(option.summary)}</p>
+
       {(option.pros.length > 0 || option.cons.length > 0) && (
-        <ul className="text-sm space-y-1.5 mt-2">
+        <ul className="text-sm space-y-2 mt-3">
           {option.pros.map((p, i) => (
             <li key={`pro-${i}`} className="flex items-start gap-2">
               <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}>Pro</span>
-              <span style={{ color: 'var(--color-text-secondary)' }}>{p}</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{noDash(p)}</span>
             </li>
           ))}
           {option.cons.map((c, i) => (
             <li key={`con-${i}`} className="flex items-start gap-2">
               <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>Con</span>
-              <span style={{ color: 'var(--color-text-secondary)' }}>{c}</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{noDash(c)}</span>
             </li>
           ))}
         </ul>
       )}
-      {option.applicationDocs && option.applicationDocs.length > 0 && (
-        <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--color-border-muted)' }}>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
-              Application Documents
-            </span>
-            {option.applicationUrl && (
-              <a
-                href={option.applicationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[0.65rem] font-bold uppercase px-2 py-0.5"
-                style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(99,102,241,0.10)', borderRadius: '4px' }}
-              >
-                Apply Online ↗
-              </a>
-            )}
-          </div>
-          <ul className="space-y-1">
+
+      {/* Application docs — gated for Scout */}
+      <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--color-border-muted)' }}>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)' }}>
+            Application Documents
+          </span>
+          {depth !== 'quick' && option.applicationUrl && (
+            <a
+              href={option.applicationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[0.65rem] font-bold uppercase px-2 py-0.5"
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(99,102,241,0.10)', borderRadius: '4px' }}
+            >
+              Apply Online <ExternalLink size={9} />
+            </a>
+          )}
+        </div>
+        {depth === 'quick' ? (
+          <p className="text-sm flex items-center gap-1.5 flex-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+            <Lock size={12} style={{ flexShrink: 0 }} />
+            Available in Intel and Dossier.{' '}
+            <a href="/app?depth=standard" className="inline-flex items-center gap-0.5" style={{ color: 'var(--color-secondary)', textDecoration: 'underline' }}>
+              Upgrade <ArrowRight size={11} />
+            </a>
+          </p>
+        ) : option.applicationDocs && option.applicationDocs.length > 0 ? (
+          <ul className="list-disc pl-4 space-y-1.5">
             {option.applicationDocs.map((doc, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                <span className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-secondary)', opacity: 0.6 }}>•</span>
-                {doc}
+              <li key={i} className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                {noDash(doc)}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : null}
+      </div>
     </div>
   );
 }
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
 
-function VisaOptionsSection({ options, forPrint }: { options: VisaOption[]; forPrint: boolean }) {
+function VisaOptionsSection({ options, forPrint, depth }: { options: VisaOption[]; forPrint: boolean; depth: string }) {
   return (
     <CollapsibleCard header={<CardHeader title="Visa Options" />} forPrint={forPrint}>
-      {options.map((opt, i) => <VisaOptionCard key={i} option={opt} />)}
+      {options.map((opt, i) => <VisaOptionCard key={i} option={opt} depth={depth} />)}
     </CollapsibleCard>
   );
 }
@@ -194,15 +222,15 @@ function EntryRequirementsSection({ req, forPrint }: { req: VisaBrief['entryRequ
       {req.documents.length > 0 && (
         <div>
           <Label>Required Documents</Label>
-          <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-            {req.documents.map((d, i) => <li key={i}>• {d}</li>)}
+          <ul className="list-disc pl-4 text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+            {req.documents.map((d, i) => <li key={i}>{noDash(d)}</li>)}
           </ul>
         </div>
       )}
       {req.proofOfFunds && (
         <div>
           <Label>Proof of Funds</Label>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{req.proofOfFunds}</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{noDash(req.proofOfFunds)}</p>
         </div>
       )}
       <div>
@@ -210,8 +238,8 @@ function EntryRequirementsSection({ req, forPrint }: { req: VisaBrief['entryRequ
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{req.onwardTicket ? 'Required' : 'Not required'}</p>
       </div>
       {req.notes.length > 0 && (
-        <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-          {req.notes.map((n, i) => <li key={i}>• {n}</li>)}
+        <ul className="list-disc pl-4 text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+          {req.notes.map((n, i) => <li key={i}>{noDash(n)}</li>)}
         </ul>
       )}
     </CollapsibleCard>
@@ -221,7 +249,7 @@ function EntryRequirementsSection({ req, forPrint }: { req: VisaBrief['entryRequ
 function BorderRunSection({ analysis, forPrint }: { analysis: VisaBrief['borderRunAnalysis']; forPrint: boolean }) {
   return (
     <CollapsibleCard header={<CardHeader title="Border Run Analysis" />} forPrint={forPrint}>
-      <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         <div>
           <Label>Eligible</Label>
           <p style={{ color: 'var(--color-text-secondary)' }}>{analysis.eligible ? 'Yes' : 'No'}</p>
@@ -235,7 +263,7 @@ function BorderRunSection({ analysis, forPrint }: { analysis: VisaBrief['borderR
       </div>
       <div>
         <Label>Enforcement Posture</Label>
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{analysis.enforcementPosture}</p>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{noDash(analysis.enforcementPosture)}</p>
       </div>
       {analysis.warnings.length > 0 && (
         <WarningBox header="Warnings" items={analysis.warnings} />
@@ -248,8 +276,8 @@ function RecentChangesSection({ changes, forPrint }: { changes: VisaBrief['recen
   if (!changes.hasChanges) return null;
   return (
     <CollapsibleCard header={<CardHeader title="Recent Changes & Watch Items" />} forPrint={forPrint}>
-      <ul className="text-sm space-y-2" style={{ color: 'var(--color-text-secondary)' }}>
-        {changes.items.map((item, i) => <li key={i}>• {item}</li>)}
+      <ul className="list-disc pl-4 text-sm space-y-2" style={{ color: 'var(--color-text-secondary)' }}>
+        {changes.items.map((item, i) => <li key={i}>{noDash(item)}</li>)}
       </ul>
       {changes.watchItems.length > 0 && (
         <WarningBox header="Watch Items" items={changes.watchItems} />
@@ -302,7 +330,7 @@ function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrin
           <Label color="var(--color-success)">Confirmed</Label>
           {report.confirmed.map((item, i) => (
             <div key={i} className="mb-2 text-sm">
-              <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
               <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
             </div>
           ))}
@@ -315,7 +343,7 @@ function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrin
             <div key={i} className="mb-3 text-sm flex gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: 'var(--color-amber)' }} />
               <div>
-                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+                <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
                 <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
                 {item.resolution && (
                   <div className="mt-2">
@@ -333,7 +361,7 @@ function ConflictSection({ report, forPrint }: { report: ConflictReport; forPrin
           <Label color="var(--color-error)">Unverified</Label>
           {report.unverified.map((item, i) => (
             <div key={i} className="mb-2 text-sm">
-              <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item.topic}</span>
               <p style={{ color: 'var(--color-text-secondary)' }}>{item.description}</p>
             </div>
           ))}
@@ -349,20 +377,20 @@ function ContingencySection({ contingency, forPrint }: { contingency: VisaBrief[
       {contingency.deniedEntrySteps.length > 0 && (
         <div>
           <Label>If Denied Entry</Label>
-          <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-            {contingency.deniedEntrySteps.map((s, i) => <li key={i}>• {s}</li>)}
+          <ul className="list-disc pl-4 text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+            {contingency.deniedEntrySteps.map((s, i) => <li key={i}>{noDash(s)}</li>)}
           </ul>
         </div>
       )}
       <div>
         <Label>Overstay Scenario</Label>
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{contingency.overstayScenario}</p>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{noDash(contingency.overstayScenario)}</p>
       </div>
       {contingency.emergencyContacts.length > 0 && (
         <div>
           <Label>Emergency Contacts</Label>
-          <ul className="text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
-            {contingency.emergencyContacts.map((c, i) => <li key={i}>• {c}</li>)}
+          <ul className="list-disc pl-4 text-sm space-y-1" style={{ color: 'var(--color-text-secondary)' }}>
+            {contingency.emergencyContacts.map((c, i) => <li key={i}>{noDash(c)}</li>)}
           </ul>
         </div>
       )}
@@ -407,10 +435,10 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
       {/* Degraded notice */}
       {failedAgents.length > 0 && (
         <div
-          className="rounded-lg px-4 py-4 border"
+          className="rounded-lg px-5 py-4 border"
           style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.25)' }}
         >
-          <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-amber)' }}>
+          <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
             {isPaidBrief ? 'Limited Data' : 'Data Note'}
           </p>
           {isPaidBrief && canRerun && briefId && !forPrint ? (
@@ -421,10 +449,10 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
               <button
                 onClick={handleRerun}
                 disabled={rerunLoading}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-opacity disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 min-h-[44px] rounded text-xs font-bold uppercase transition-opacity disabled:opacity-50"
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.04em',
                   background: 'rgba(245,158,11,0.15)',
                   border: '1px solid rgba(245,158,11,0.4)',
                   color: 'var(--color-amber)',
@@ -455,7 +483,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
       {/* We Understood */}
       {!hideParsedSituation && brief.parsedSituation && (
         <div
-          className="brief-section rounded-xl px-4 py-3 border"
+          className="brief-section rounded-lg px-5 py-4 border"
           style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
         >
           <CardHeading>We Understood</CardHeading>
@@ -474,16 +502,35 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
         <div className="px-5 py-2.5" style={{ background: 'rgba(245,158,11,0.14)', borderBottom: '1px solid var(--color-border-amber)' }}>
           <Label color="var(--color-amber)">Recommended Action</Label>
         </div>
-        <div className="px-5 py-4" style={{ background: 'rgba(245,158,11,0.06)' }}>
-          <p className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{brief.recommendedAction.action}</p>
+        <div className="px-5 py-5" style={{ background: 'rgba(245,158,11,0.06)' }}>
+          {/* Deadline callout — most urgent, show first */}
           {brief.recommendedAction.deadline && (
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-error)' }}>Deadline: {brief.recommendedAction.deadline}</p>
+            <div
+              className="flex items-start gap-2.5 rounded px-3.5 py-3 mb-4"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
+            >
+              <Flag size={12} style={{ color: 'var(--color-error)', flexShrink: 0, marginTop: '3px' }} />
+              <div>
+                <p className="text-xs font-bold uppercase mb-0.5" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Deadline</p>
+                <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-error)' }}>{noDash(brief.recommendedAction.deadline)}</p>
+              </div>
+            </div>
           )}
-          <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>{brief.recommendedAction.rationale}</p>
+
+          {/* Action */}
+          <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>{renderWithLinks(brief.recommendedAction.action)}</p>
+
+          {/* Rationale */}
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(245,158,11,0.18)' }}>
+            <p className="text-xs font-bold uppercase mb-1.5" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', opacity: 0.7 }}>Why</p>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)', textWrap: 'pretty' } as React.CSSProperties}>{renderWithLinks(brief.recommendedAction.rationale)}</p>
+          </div>
+
+          {/* Stale policy warning */}
           {brief.recommendedAction.stalePolicyWarning && (
-            <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--color-border-amber)' }}>
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border-amber)' }}>
               <p className="text-xs font-bold leading-relaxed" style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)' }}>
-                {brief.recommendedAction.stalePolicyWarning}
+                {noDash(brief.recommendedAction.stalePolicyWarning)}
               </p>
               {brief.metadata.depth === 'quick' && (
                 <p className="text-xs mt-1.5 flex items-center gap-1" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -498,7 +545,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
         </div>
       </div>
 
-      <VisaOptionsSection options={brief.visaOptions} forPrint={forPrint} />
+      <VisaOptionsSection options={brief.visaOptions} forPrint={forPrint} depth={brief.metadata.depth} />
       <EntryRequirementsSection req={brief.entryRequirements} forPrint={forPrint} />
       {brief.metadata.depth === 'quick' ? (
         <DepthGateTeaser
