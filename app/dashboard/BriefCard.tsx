@@ -17,6 +17,7 @@ interface BriefRow {
   overall_confidence: string | null;
   payment_status: string;
   degraded: boolean;
+  rerun_count: number;
 }
 
 export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () => void }) {
@@ -123,13 +124,13 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             {isGenerating && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-amber)' }}>
                 <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-amber)', display: 'inline-block', flexShrink: 0 }} />
-                Generating
+                {(brief.rerun_count ?? 0) > 0 ? 'Regenerating' : 'Generating'}
               </span>
             )}
-            {brief.overall_confidence && (
+            {!isGenerating && brief.overall_confidence && (
               <ConfidenceBadge level={brief.overall_confidence as 'high' | 'medium' | 'low'} />
             )}
-            {brief.degraded && (
+            {!isGenerating && brief.degraded && (
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.7rem',

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Clock } from 'lucide-react';
+import { Button } from '@/app/components/ui/Button';
 
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 8 * 60 * 1000;
@@ -43,7 +45,7 @@ function SkeletonCard({ lines = 3, headingWidth = '40%' }: { lines?: number; hea
   );
 }
 
-export function BriefProcessingBanner({ briefId, isActuallyDone = false }: { briefId: string; isActuallyDone?: boolean }) {
+export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollForJob = false }: { briefId: string; isActuallyDone?: boolean; pollForJob?: boolean }) {
   const router = useRouter();
   const [timedOut, setTimedOut] = useState(false);
   const [startTime] = useState(() => Date.now());
@@ -59,29 +61,47 @@ export function BriefProcessingBanner({ briefId, isActuallyDone = false }: { bri
       return () => clearTimeout(t);
     }
 
-    // Brief still running — poll until done
-    const id = setInterval(() => {
+    // Brief still running — claim the job (if queued) and poll for completion
+    const tick = () => {
       if (Date.now() - startTime > TIMEOUT_MS) {
         setTimedOut(true);
-        clearInterval(id);
-        return;
+        return false;
+      }
+      if (pollForJob) {
+        // Triggers job claim + pipeline start in poll route; fire-and-forget
+        void fetch(`/api/brief/poll?brief_id=${briefId}`);
       }
       router.refresh();
+      return true;
+    };
+
+    if (!tick()) return;
+    const id = setInterval(() => {
+      if (!tick()) clearInterval(id);
     }, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [isActuallyDone, briefId, router, startTime]);
+  }, [isActuallyDone, briefId, pollForJob, router, startTime]);
 
   if (timedOut) {
     return (
-      <div
-        className="px-4 py-3 rounded"
-        style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-error)', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-      >
-        BRIEF GENERATION TOOK LONGER THAN EXPECTED.{' '}
-        <a href={`/contact?ref=${briefId}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
-          CONTACT US
-        </a>{' '}
-        WITH REF: {briefId}
+      <div className="rounded-lg border text-center px-5 py-10" style={{ background: 'var(--color-bg-elevated)', borderColor: 'rgba(245,158,11,0.3)' }}>
+        <div className="inline-flex items-center justify-center w-16 h-16 mb-5 mx-auto" style={{ background: 'rgba(245,158,11,0.1)', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.2)' }}>
+          <Clock size={28} style={{ color: 'var(--color-amber)' }} />
+        </div>
+        <h2 className="text-lg font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-amber)', letterSpacing: '0.04em' }}>
+          Taking Longer Than Expected
+        </h2>
+        <div className="mb-5 mx-auto" style={{ height: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(245,158,11,0.3), transparent)' }} />
+        <p className="text-sm leading-relaxed mb-4 mx-auto" style={{ color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
+          Your brief is still running. Check your dashboard in a few minutes. If it doesn&apos;t appear, get in touch and we&apos;ll sort it out.
+        </p>
+        <p className="text-xs mb-6" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+          Ref: {briefId}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
+          <Button variant="secondary" onClick={() => router.push(`/contact?ref=${briefId}`)}>Contact Us</Button>
+        </div>
       </div>
     );
   }

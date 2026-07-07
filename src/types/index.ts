@@ -1,3 +1,5 @@
+import type { Region } from '../config/destinations';
+
 export interface PromptResult {
   system: string;
   user: string;
@@ -20,6 +22,8 @@ export interface VisaRequest extends VisaInput {
   accommodationType?: string;
   parsedSummary: string;
   offTopic?: boolean;
+  schengenMember?: boolean;
+  region?: Region;
 }
 
 export interface AgentResult<T> {

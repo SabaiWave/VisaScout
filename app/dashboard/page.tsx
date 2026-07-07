@@ -18,6 +18,7 @@ interface BriefRow {
   overall_confidence: string | null;
   payment_status: string;
   degraded: boolean;
+  rerun_count: number;
 }
 
 async function getUserBriefs(internalUserId: string, page: number): Promise<{ briefs: BriefRow[]; total: number }> {
@@ -26,7 +27,7 @@ async function getUserBriefs(internalUserId: string, page: number): Promise<{ br
 
   const { data, count, error } = await getSupabase()
     .from('briefs')
-    .select('id, created_at, nationality, destination, depth, overall_confidence, payment_status, degraded', { count: 'exact' })
+    .select('id, created_at, nationality, destination, depth, overall_confidence, payment_status, degraded, rerun_count', { count: 'exact' })
     .eq('user_id', internalUserId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })

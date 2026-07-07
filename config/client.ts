@@ -1,37 +1,29 @@
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
+import { DESTINATIONS, ENABLED_REGIONS, REGION_LABELS, coverageLabel, destinationCount } from '@/src/config/destinations';
 
 export const clientConfig = {
   brandName: 'VisaScout',
-  tagline: 'Visa intelligence for digital nomads.',
+  tagline: 'Visa intelligence, every claim sourced.',
   primaryColor: '#1e3a5f',
   accentColor: '#f59e0b',
   logoUrl: '/logo.svg',
   disclaimerText:
     'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.',
   supportEmail: 'hello@visascout.io',
-  supportedDestinations: [
-    'Thailand',
-    'Vietnam',
-    'Indonesia',
-    'Malaysia',
-    'Philippines',
-    'Cambodia',
-    'Laos',
-    'Myanmar',
-    'Singapore',
-    'Brunei',
-  ],
+  supportedDestinations: DESTINATIONS.map((d) => d.name),
+  // Flat list for the marquee — excludes the "Schengen" meta-entry (individual countries shown instead)
+  marqueeDestinations: DESTINATIONS.filter((d) => d.name !== 'Schengen').map((d) => d.name),
 
   landingPage: {
     hero: {
-      eyebrow: 'Southeast Asia · Visa Intelligence',
+      eyebrow: 'Visa intelligence, every claim sourced.',
       h1: "Know your visa situation. Before it's a problem.",
       subhead:
         'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
       cta: 'Start free',
       ctaHref: '/app?depth=quick',
       metrics: [
-        { value: '10', label: 'Countries' },
+        { value: String(destinationCount), label: 'Countries' },
         { value: 'Official', label: 'Sources first' },
         { value: 'Cited', label: 'Every claim' },
         { value: 'Per report', label: 'No subscription' },
@@ -68,7 +60,7 @@ export const clientConfig = {
         {
           number: '01',
           title: 'Describe your situation',
-          body: 'Your nationality, destination, how long you\'re staying, and anything specific: visa run history, current visa type, prior overstays. Plain English, not a form.',
+          body: 'Your nationality, destination, how long you\'re staying, and anything specific: entry history, current visa status, prior overstays or extensions. Plain English, not a form.',
         },
         {
           number: '02',
@@ -85,7 +77,7 @@ export const clientConfig = {
 
     destinations: {
       title: 'Countries Covered',
-      subtitle: 'Top visa types covered per country. If we don\'t support it, we say so. We never guess.',
+      subtitle: `${coverageLabel}. The destinations nomads and long-stay travelers actually go. Top visa types per country. We never guess.`,
     },
 
     pricing: {
@@ -97,8 +89,8 @@ export const clientConfig = {
           tag: 'Free',
           price: '$0',
           priceNote: 'No credit card',
-          description: 'Surface scan before you commit. Full brief from all 5 agents, every claim sourced.',
-          features: ['Full brief from all 5 agents', '3 sources per agent', 'Every claim cited', 'Shareable link'],
+          description: 'Surface scan before you commit. Core recommendation, key visa options, every claim sourced.',
+          features: ['Core recommendation + key visa options', '3 sources per agent', 'Every claim cited', 'Shareable link'],
           cta: DEPTH_CTA.quick,
           href: '/app?depth=quick',
           highlight: false,
@@ -108,8 +100,8 @@ export const clientConfig = {
           tag: 'Popular',
           price: '$5.99',
           priceNote: 'Per report',
-          description: 'Full intelligence brief for real decisions. Deeper source coverage, complete conflict report, PDF on file.',
-          features: [`Everything in ${DEPTH_LABEL.quick}`, '5 sources per agent', 'Full conflict report', 'PDF download'],
+          description: 'Full picture for real decisions. Options compared, conflicts flagged, recent policy changes verified.',
+          features: [`Everything in ${DEPTH_LABEL.quick}`, '5 sources per agent', 'Full conflict report', 'Full border run analysis', 'Contingency planning'],
           cta: DEPTH_CTA.standard,
           href: '/app?depth=standard',
           highlight: true,
@@ -119,8 +111,8 @@ export const clientConfig = {
           tag: 'Max Intel',
           price: '$11.99',
           priceNote: 'Per report',
-          description: 'The complete file on your situation. Maximum sources, full border run analysis, every contradiction resolved.',
-          features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Full border run analysis', 'Every contradiction resolved'],
+          description: 'For complex situations where being wrong is not an option. Every contradiction resolved, edge cases covered.',
+          features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Nationality-specific edge cases', 'Every contradiction resolved'],
           cta: DEPTH_CTA.deep,
           href: '/app?depth=deep',
           highlight: false,
@@ -151,6 +143,10 @@ export const clientConfig = {
         {
           q: 'Can I share my brief with someone?',
           a: "Yes. Every brief has a permanent shareable link and a PDF download. Send it to a travel partner, a visa agent, or save it for your embassy appointment. No account needed to view a shared brief.",
+        },
+        {
+          q: 'Which countries do you cover?',
+          a: `${destinationCount} destinations across Southeast Asia, East Asia, Europe, and Latin America. The places nomads and long-stay travelers actually go. We cover the most common visa types per country. If we don't support a specific visa type yet, we say so clearly and point you to the right official source.`,
         },
         {
           q: 'What if my brief fails to generate?',

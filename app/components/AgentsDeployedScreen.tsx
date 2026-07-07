@@ -81,7 +81,7 @@ function AgentDisplayRow({ label, index, displayCount, failed = false }: {
     : isQueued ? 'var(--color-text-tertiary)' : 'var(--color-secondary-light)';
   const StatusIcon = done ? (failed ? XCircle : CheckCircle2) : isQueued ? Clock : Loader2;
   const statusKey = done ? (failed ? 'failed' : 'complete') : isQueued ? 'queued' : isResolving ? 'resolving' : 'scanning';
-  const statusLabel = done ? (failed ? 'failed' : 'complete') : isQueued ? 'queued' : null;
+  const statusLabel = done ? (failed ? 'unavailable' : 'complete') : isQueued ? 'queued' : null;
 
   return (
     <motion.div

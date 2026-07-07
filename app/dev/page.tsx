@@ -32,6 +32,8 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 export default function DevPage() {
   const { userId } = useAuth();
   const [devBriefDepth, setDevBriefDepth] = useState<typeof BRIEF_DEPTHS[number]>('quick');
+  const [devBriefDegraded, setDevBriefDegraded] = useState(false);
+  const [devForceDryRun, setDevForceDryRun] = useState(true);
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -99,9 +101,9 @@ export default function DevPage() {
         {/* Brief Flows */}
         <DevSection title="Brief Flows">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            Fixed data (DRY_RUN). Depth affects pipeline config + downstream logs.
+            Depth affects pipeline config + downstream logs. Dry Run defaults on — toggle off to burn real API calls.
           </p>
-          <div className="mb-3">
+          <div className="mb-3 flex items-center gap-4 flex-wrap">
             <div
               className="inline-grid grid-cols-3 rounded overflow-hidden"
               style={{ border: '1px solid var(--color-border-strong)' }}
@@ -125,9 +127,39 @@ export default function DevPage() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setDevBriefDegraded(d => !d)}
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.06em',
+                border: '1px solid var(--color-border-strong)',
+                background: devBriefDegraded ? 'rgba(245,158,11,0.15)' : 'var(--color-bg-base)',
+                color: devBriefDegraded ? 'var(--color-amber)' : 'var(--color-text-tertiary)',
+                cursor: 'pointer',
+              }}
+            >
+              {devBriefDegraded ? 'Degraded: On' : 'Degraded: Off'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDevForceDryRun(d => !d)}
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.06em',
+                border: '1px solid var(--color-border-strong)',
+                background: devForceDryRun ? 'rgba(99,102,241,0.15)' : 'rgba(239,68,68,0.1)',
+                color: devForceDryRun ? 'var(--color-secondary-light)' : 'var(--color-error)',
+                cursor: 'pointer',
+              }}
+            >
+              {devForceDryRun ? 'Dry Run: On' : 'Dry Run: Off'}
+            </button>
           </div>
           <a
-            href={`/app?trigger=quick&depth=${devBriefDepth}`}
+            href={`/app?trigger=quick&depth=${devBriefDepth}${devBriefDegraded ? '&sim_degraded=true' : ''}${devForceDryRun ? '&force_dry_run=true' : ''}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-colors"
@@ -153,8 +185,7 @@ export default function DevPage() {
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
             <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
-            <DevButton label="Pending: Handoff ↗"        sublabel="/brief/pending?sim=handoff" href="/brief/pending?sim=handoff" newTab />
-            <DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
+<DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
             <DevButton label="Main: Invalid Code ↗"       sublabel="/app?sim=invalid-code"      href="/app?sim=invalid-code"      newTab />
             <DevButton label="Main: Code Already Used ↗"  sublabel="/app?sim=code-already-used" href="/app?sim=code-already-used" newTab />
           </DevGrid>
@@ -168,6 +199,8 @@ export default function DevPage() {
             <DevButton label="Brief: Well Sourced ↗"             sublabel="/brief/sim-confidence-high"   href="/brief/sim-confidence-high"   newTab />
             <DevButton label="Brief: Verify Key Details ↗"       sublabel="/brief/sim-confidence-medium" href="/brief/sim-confidence-medium" newTab />
             <DevButton label="Brief: Verify Before Travel ↗"     sublabel="/brief/sim-confidence-low"    href="/brief/sim-confidence-low"    newTab />
+            <DevButton label="Brief: Degraded + Re-run ↗"        sublabel="/brief/sim-degraded"          href="/brief/sim-degraded"          newTab />
+            <DevButton label="Brief: Degraded + Cap Hit ↗"       sublabel="/brief/sim-rerun-cap"         href="/brief/sim-rerun-cap"         newTab />
           </DevGrid>
         </DevSection>
 

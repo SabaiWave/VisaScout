@@ -3,13 +3,14 @@ import { auth } from '@clerk/nextjs/server';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { log } from '@/src/lib/logger';
 import { trackEvent } from '@/src/lib/analytics';
+import { SUPPORTED_DESTINATION_NAMES } from '@/src/config/destinations';
 
 export const runtime = 'nodejs';
 
 const FAKE_BRIEF_ID = 'dev-sim-00000000-0000-0000-0000-000000000001';
 const FAKE_USER_ID = 'dev-sim-user_2abc123';
 
-const DESTINATIONS = ['Thailand', 'Vietnam', 'Indonesia', 'Malaysia', 'Singapore'];
+const DESTINATIONS = SUPPORTED_DESTINATION_NAMES;
 const NATIONALITIES = ['American', 'British', 'Australian', 'German', 'French'];
 
 function pick<T>(arr: T[]): T {

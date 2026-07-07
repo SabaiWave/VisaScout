@@ -4,6 +4,7 @@ import { buildBorderRunPrompt } from '../prompts/borderRun';
 import { parseJSON } from '../lib/parseJSON';
 import { highestTier } from '../lib/sourceTier';
 import { recordUsage } from '../lib/cost';
+import { getGovDomains } from '../config/destinations';
 import type { AgentResult, BorderRunOutput, VisaRequest } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -36,7 +37,7 @@ export async function borderRunAgent(
         `${request.normalizedDestination} border run visa run land border limit official policy 2025`,
         {
           maxResults: Math.ceil(maxResults / 2),
-          domainBias: ['.gov', '.go.th', '.go.vn', 'immigration.go.th'],
+          domainBias: getGovDomains(request.normalizedDestination),
         }
       ),
       tavilySearch(

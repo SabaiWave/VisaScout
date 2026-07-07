@@ -4,6 +4,8 @@ import { buildOfficialPolicyPrompt } from '../prompts/officialPolicy';
 import { parseJSON } from '../lib/parseJSON';
 import { highestTier } from '../lib/sourceTier';
 import { recordUsage } from '../lib/cost';
+import { getGovDomains, DESTINATIONS } from '../config/destinations';
+import { buildAgentContext, getRegionContext } from '../prompts/regionContext';
 import type { AgentResult, OfficialPolicyOutput, VisaRequest } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -30,21 +32,11 @@ export async function officialPolicyAgent(
   const maxResults = depth === 'quick' ? 3 : depth === 'standard' ? 5 : 8;
   const agentMaxTokens = depth === 'quick' ? 2048 : depth === 'standard' ? 4096 : 6144;
 
-  // Country-specific Tier 1 official immigration domains
-  const officialDomains: Record<string, string[]> = {
-    Thailand:    ['thaievisa.go.th', 'immigration.go.th', 'mfa.go.th', 'thaigov.go.th', 'consular.go.th'],
-    Vietnam:     ['immigration.gov.vn', 'evisa.gov.vn', 'xuatnhapcanh.gov.vn', 'mofa.gov.vn'],
-    Indonesia:   ['imigrasi.go.id', 'kemlu.go.id', 'evisa.imigrasi.go.id'],
-    Malaysia:    ['imi.gov.my', 'kln.gov.my', 'motac.gov.my'],
-    Philippines: ['immigration.gov.ph', 'dfa.gov.ph', 'evisa.gov.ph'],
-    Cambodia:    ['evisa.gov.kh', 'mfaic.gov.kh', 'immigration.gov.kh'],
-    Singapore:   ['ica.gov.sg', 'mfa.gov.sg', 'mom.gov.sg'],
-    Laos:        ['laoevisa.gov.la', 'mofa.gov.la', 'immigration.gov.la'],
-    Myanmar:     ['evisa.moip.gov.mm', 'mofa.gov.mm', 'mip.gov.mm'],
-    Brunei:      ['immigration.gov.bn', 'mfa.gov.bn'],
-  };
-  const destDomains = officialDomains[request.normalizedDestination] ?? ['.gov'];
+  const destDomains = getGovDomains(request.normalizedDestination);
 
+  let attempt = 0;
+  while (attempt < 2) {
+    attempt++;
   try {
     const results = await tavilySearch(
       `${request.normalizedDestination} visa ${request.normalizedNationality} official immigration rules requirements e-visa online application 2024 2025`,
@@ -61,12 +53,15 @@ export async function officialPolicyAgent(
       .map((r) => `[${r.url}]\nTitle: ${r.title}\n${r.content}`)
       .join('\n\n---\n\n');
 
+    const destConfig = DESTINATIONS.find((d) => d.name.toLowerCase() === request.normalizedDestination.toLowerCase());
+    const agentContext = destConfig ? buildAgentContext(request, destConfig) : getRegionContext(request);
+
     const { system, user } = buildOfficialPolicyPrompt(request, searchText || 'No results found.');
 
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: agentMaxTokens,
-      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: `${system}\n\n${agentContext}`, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: user }],
     });
 
@@ -106,6 +101,10 @@ export async function officialPolicyAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
+    if (attempt < 2) {
+      await new Promise(r => setTimeout(r, 1000));
+      continue;
+    }
     return {
       status: 'failed',
       data: null,
@@ -118,4 +117,7 @@ export async function officialPolicyAgent(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+  } // end while
+  // unreachable — while loop always returns
+  throw new Error('officialPolicy: retry loop exited without returning');
 }

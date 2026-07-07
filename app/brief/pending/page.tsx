@@ -3,12 +3,9 @@
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
-import { DEPTH_LABEL } from '@/src/lib/depth';
-import { NavLink } from '@/app/components/ui/NavLink';
 import { AgentsDeployedScreen, AgentRowList } from '@/app/components/AgentsDeployedScreen';
 
 const MAX_WAIT_MS = 6 * 60 * 1000;
-const SOFT_HANDOFF_MS = 90 * 1000;
 const POLL_INTERVAL_MS = 3000;
 const MIN_DISPLAY_MS = 10000;
 const DEV_MIN_DISPLAY_MS = 3000;
@@ -78,38 +75,6 @@ function GeneratingState({ completedCount }: { completedCount: number }) {
   );
 }
 
-function HandoffState({ briefId, depth }: { briefId: string | null; depth: string }) {
-  const router = useRouter();
-  return (
-    <PendingShell>
-      <div className="text-center">
-        <IconBox bg="var(--color-secondary-subtle)">
-          <div
-            className="w-10 h-10 rounded-full animate-spin"
-            style={{ border: '3px solid rgba(99,102,241,0.25)', borderTopColor: 'var(--color-secondary)' }}
-          />
-        </IconBox>
-        <HudHeading>Still Working</HudHeading>
-        <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is still being put together. {depth === 'deep' ? `${DEPTH_LABEL.deep} research can take a few minutes` : 'This one is taking a little longer than usual'}, and that&apos;s completely normal.
-        </p>
-        <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-          You can head to your dashboard whenever — we&apos;ll email you when it&apos;s ready. No need to stay on this page.
-        </p>
-        {briefId && (
-          <p className="text-xs mb-5" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-            Ref: {briefId}
-          </p>
-        )}
-        <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
-          <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
-        </div>
-      </div>
-    </PendingShell>
-  );
-}
-
 function TimedOutState({ briefId }: { briefId: string | null }) {
   const router = useRouter();
   const contactHref = `/contact${briefId ? `?ref=${briefId}` : ''}`;
@@ -176,14 +141,13 @@ function PendingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const briefId = searchParams.get('brief_id');
-  const depth = searchParams.get('depth') ?? 'standard';
 
   const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('dev') === 'true';
   // dev-only error simulation via ?sim=error or ?sim=timeout
   const sim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
 
-  const [state, setState] = useState<'generating' | 'handoff' | 'error' | 'timeout'>(
-    sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : sim === 'handoff' ? 'handoff' : 'generating',
+  const [state, setState] = useState<'generating' | 'error' | 'timeout'>(
+    sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : 'generating',
   );
   const [completedCount, setCompletedCount] = useState(0);
   const [startTime] = useState(() => Date.now());
@@ -274,9 +238,6 @@ function PendingContent() {
         setState('timeout');
         return;
       }
-      if (elapsed > SOFT_HANDOFF_MS) {
-        setState((prev) => prev === 'generating' ? 'handoff' : prev);
-      }
 
       try {
         const res = await fetch(`/api/brief/poll?brief_id=${briefId}`);
@@ -308,7 +269,6 @@ function PendingContent() {
 
   if (state === 'timeout') return <TimedOutState briefId={briefId} />;
   if (state === 'error')   return <ErrorState briefId={briefId} />;
-  if (state === 'handoff') return <HandoffState briefId={briefId} depth={depth} />;
   return <GeneratingState completedCount={completedCount} />;
 }
 

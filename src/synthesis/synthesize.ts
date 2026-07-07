@@ -43,7 +43,7 @@ export async function synthesizeBrief(
   startTime: number = Date.now()
 ): Promise<VisaBrief> {
   const degradedContext = buildDegradedContext(envelope);
-  const { system, user } = buildSynthesisPrompt(envelope, conflictReport, degradedContext);
+  const { system, user } = buildSynthesisPrompt(envelope, conflictReport, degradedContext, depth);
 
   const response = await client.messages.create({
     model: MODEL,

@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import * as Sentry from '@sentry/nextjs';
+import { FileDown } from 'lucide-react';
 import { Button } from './Button';
 
 interface DownloadPdfButtonProps {
@@ -103,7 +104,10 @@ export function DownloadPdfButton({ briefId, depth, className, forceError }: Dow
   return (
     <div className="flex flex-col gap-3">
       <Button onClick={handleClick} disabled={loading} className={className}>
-        {loading ? 'Preparing PDF…' : 'Download PDF'}
+        <span className="inline-flex items-center gap-2">
+          <FileDown size={14} />
+          {loading ? 'Preparing PDF…' : 'Download PDF'}
+        </span>
       </Button>
       {error && (
         <div

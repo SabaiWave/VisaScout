@@ -1,14 +1,42 @@
+import { getRegionContext } from './regionContext';
 import type { AgentResultEnvelope, ConflictReport, PromptResult } from '../types/index';
 
 export function buildSynthesisPrompt(
   envelope: AgentResultEnvelope,
   conflictReport: ConflictReport,
-  degradedContext: string
+  degradedContext: string,
+  depth: 'quick' | 'standard' | 'deep' = 'standard'
 ): PromptResult {
+  const regionContext = getRegionContext(envelope.visaRequest);
+  const depthInstructions = depth === 'quick'
+    ? `DEPTH: SCOUT (quick)
+- Visa options: 1-2 maximum — best fit only, concise pros/cons (2-3 items each)
+- All array fields: 2-3 items max. Prose fields: 1-2 sentences max.
+- Entry requirements: essential docs only — no full application portal walkthrough
+- Border run and contingency: omit detailed analysis (these sections are gated at this tier)
+- Do not produce exhaustive coverage — surface the critical facts only`
+    : depth === 'standard'
+    ? `DEPTH: INTEL (standard)
+- Visa options: 2-3 options, full pros/cons, include applicationDocs/applicationUrl where applicable
+- Full entry requirements including application process
+- Full border run analysis
+- Full contingency planning
+- Standard array lengths (up to 5 items), complete prose`
+    : `DEPTH: DOSSIER (deep)
+- Visa options: all relevant options — no cap. Cover edge cases and less common paths.
+- Exhaustive entry requirements, full application walkthrough
+- Full border run: enforcement posture, community intel on crossings, seasonal patterns
+- Full contingency: denied entry, overstay, emergency contacts
+- Deep-dive every contested item in the conflict report
+- Include nationality-specific quirks and edge cases`;
+
   return {
     system: `You are a visa intelligence analyst. Synthesize all agent outputs into a comprehensive, actionable visa intelligence brief.
 
+${depthInstructions}
+
 SYNTHESIS RULES:
+- Do not use em dashes (—) in any field. Use a period or comma instead.
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
 - Recommended action must be specific, actionable, and include a deadline if applicable
 - If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
@@ -96,7 +124,9 @@ Return ONLY valid JSON (no markdown fences):
     "emergencyContacts": ["<relevant embassy or hotline>"]
   },
   "disclaimer": "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice."
-}`,
+}
+
+${regionContext}`,
 
     user: `TRAVELER SITUATION:
 Nationality: ${envelope.visaRequest.normalizedNationality}

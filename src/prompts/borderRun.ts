@@ -1,9 +1,11 @@
+import { getRegionContext } from './regionContext';
 import type { VisaRequest, PromptResult } from '../types/index';
 
 export function buildBorderRunPrompt(
   request: VisaRequest,
   searchResults: string
 ): PromptResult {
+  const regionContext = getRegionContext(request);
   return {
     system: `You are a visa analyst specializing in border crossing and visa run strategies.
 Extract border run / visa run information. Be specific and honest about enforcement posture.
@@ -43,7 +45,9 @@ Return ONLY valid JSON (no markdown fences):
 Confidence calibration (be decisive — do not default to low):
 - high: border run limits and enforcement posture confirmed by Tier 1 official sources with specific values (exact annual crossing limits, official policy statements)
 - medium: Tier 1 source found but enforcement posture relies on community; OR multiple consistent Tier 3-4 community reports agree on enforcement reality with no Tier 1 contradicting them
-- low: NO Tier 1-2 source found for any claim — relying entirely on community anecdote with no official corroboration`,
+- low: NO Tier 1-2 source found for any claim — relying entirely on community anecdote with no official corroboration
+
+${regionContext}`,
 
     user: `Analyzing border run options for ${request.normalizedNationality} passport holders in ${request.normalizedDestination}.
 

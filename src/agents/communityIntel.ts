@@ -4,6 +4,8 @@ import { buildCommunityIntelPrompt } from '../prompts/communityIntel';
 import { parseJSON } from '../lib/parseJSON';
 import { recordUsage } from '../lib/cost';
 import type { AgentResult, CommunityIntelOutput, VisaRequest } from '../types/index';
+import { DESTINATIONS } from '../config/destinations';
+import { buildAgentContext, getRegionContext } from '../prompts/regionContext';
 
 const MODEL = 'claude-sonnet-4-6';
 
@@ -48,12 +50,14 @@ export async function communityIntelAgent(
       .map((r) => `[${r.url}]\nPublished: ${r.publishedDate ?? 'unknown'}\nTitle: ${r.title}\n${r.content}`)
       .join('\n\n---\n\n');
 
+    const destConfig = DESTINATIONS.find((d) => d.name.toLowerCase() === request.normalizedDestination.toLowerCase());
+    const agentContext = destConfig ? buildAgentContext(request, destConfig) : getRegionContext(request);
     const { system, user } = buildCommunityIntelPrompt(request, searchText || 'No community results found.');
 
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: agentMaxTokens,
-      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: `${system}\n\n${agentContext}`, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: user }],
     });
 
