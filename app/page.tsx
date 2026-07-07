@@ -419,76 +419,84 @@ function HowItWorks({ isMobile }: { isMobile: boolean }) {
 
 // ─── Destinations ──────────────────────────────────────────────────────────
 
-const destContainer = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
-const destCard = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.4, ease: EXPO } },
-};
-const destDot = {
-  hidden: { scale: 0 },
-  show: { scale: 1, transition: { duration: 0.22, ease: EXPO, delay: 0.25 } },
-};
+function DestinationPill({ name }: { name: string }) {
+  return (
+    <div
+      className="marquee-pill flex-shrink-0 flex items-center gap-3 px-5 py-3 rounded-xl border"
+      style={{
+        background: 'var(--color-bg-base)',
+        borderColor: 'var(--color-border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
+      <span
+        className="text-sm font-bold uppercase whitespace-nowrap"
+        style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
+      >
+        {name}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span
+          className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse"
+          style={{ background: 'var(--color-success)' }}
+        />
+        <span
+          className="text-[0.65rem] font-bold uppercase"
+          style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)' }}
+        >
+          Live
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function RegionDivider({ label }: { label: string }) {
+  return (
+    <div className="flex-shrink-0 flex items-center px-8">
+      <span
+        className="uppercase whitespace-nowrap"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.7rem',
+          letterSpacing: '0.1em',
+          color: 'var(--color-text-tertiary)',
+        }}
+      >
+        · {label} ·
+      </span>
+    </div>
+  );
+}
 
 function Destinations({ isMobile }: { isMobile: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-60px 0px' });
+  const destinations = clientConfig.supportedDestinations;
+  const items = [...destinations, ...destinations];
 
   return (
-    <section className="px-4 sm:px-6 py-12 sm:py-20" style={{ background: 'var(--color-bg-elevated)' }}>
-      <div className="max-w-[1120px] mx-auto">
-        <FadeIn className="mb-12" noAnimation={isMobile}>
+    <section className="py-12 sm:py-20 overflow-hidden" style={{ background: 'var(--color-bg-elevated)' }}>
+      <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
+        <FadeIn className="mb-10" noAnimation={isMobile}>
           <SectionHeading subtitle={copy.destinations.subtitle}>
             {copy.destinations.title}
           </SectionHeading>
         </FadeIn>
+      </div>
 
-        <motion.div
-          key={isMobile ? 'mobile' : 'desktop'}
-          ref={ref}
-          variants={isMobile ? {} : destContainer}
-          initial={isMobile ? false : 'hidden'}
-          animate={isMobile ? undefined : (inView ? 'show' : 'hidden')}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
-        >
-          {clientConfig.supportedDestinations.map(name => (
-            <motion.div
-              key={name}
-              variants={isMobile ? {} : destCard}
-              className="country-card p-4 rounded-lg border flex flex-col gap-2"
-              style={{
-                background: 'var(--color-bg-base)',
-                borderColor: 'var(--color-border)',
-                boxShadow: 'var(--shadow-card)',
-              }}
-            >
-              <span
-                className="text-base font-bold uppercase leading-tight"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-              >
-                {name}
-              </span>
-              <span
-                className="flex items-center gap-1.5"
-                style={{ alignSelf: 'flex-start' }}
-              >
-                <motion.span
-                  variants={isMobile ? {} : destDot}
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0 animate-pulse"
-                  style={{ background: 'var(--color-success)', transformOrigin: 'center' }}
-                />
-                <span
-                  className="text-[0.65rem] font-bold uppercase"
-                  style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)' }}
-                >
-                  Live
-                </span>
-              </span>
-            </motion.div>
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+        }}
+      >
+        <div className="marquee-track gap-4 py-1">
+          {items.map((name, i) => (
+            i === destinations.length
+              ? <RegionDivider key={`div-${i}`} label="Southeast Asia" />
+              : <DestinationPill key={`${name}-${i}`} name={name} />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
