@@ -412,12 +412,35 @@ h1, h2, h3 {
 }
 
 /* Countries covered + How It Works card hover */
-.country-card,
 .hiw-card {
   transition: box-shadow 200ms ease, border-color 200ms ease;
 }
-.country-card:hover,
 .hiw-card:hover {
+  box-shadow: var(--shadow-card-hover) !important;
+}
+
+/* Destinations marquee */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-pill {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.marquee-pill:hover {
+  border-color: rgba(99, 102, 241, 0.4) !important;
   box-shadow: var(--shadow-card-hover) !important;
 }
 
