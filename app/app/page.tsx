@@ -27,6 +27,16 @@ const VISA_TYPES: Record<string, string[]> = {
   Myanmar: ['e-Visa', 'Visa on Arrival', 'Tourist Visa', 'Business Visa', 'Social Visa'],
   Singapore: ['Visa Free', 'Social Visit Pass', 'Employment Pass', "Dependant's Pass", 'Long-Term Visit Pass'],
   Brunei: ['Visa Free', 'Tourist Visa', 'Business Visa', 'Social Visit Pass'],
+  Japan: ['Visa Exemption', 'Tourist Visa (C-3)', 'Work Visa', 'Specified Skilled Worker Visa', 'Student Visa'],
+  'South Korea': ['Visa Exemption', 'K-ETA', 'Tourist Visa (C-3)', 'Digital Nomad Visa (F-1-D)', 'Working Holiday Visa (H-1)', 'Work Visa'],
+  Germany: ['Schengen Visa (C)', 'National Visa (D)', 'Freelance Visa', 'Job Seeker Visa', 'EU Blue Card'],
+  Portugal: ['Schengen Visa (C)', 'National Visa (D)', 'Digital Nomad Visa (D8)', 'Non-Habitual Resident (NHR)', 'Golden Visa'],
+  Spain: ['Schengen Visa (C)', 'National Visa (D)', 'Digital Nomad Visa', 'Non-Lucrative Residency Visa', 'Golden Visa'],
+  Netherlands: ['Schengen Visa (C)', 'National Visa (D)', 'Highly Skilled Migrant Permit', 'Orientation Year Visa'],
+  France: ['Schengen Visa (C)', 'National Visa (D)', 'Talent Passport', 'Freelancer / Self-Employed Visa'],
+  Mexico: ['FMM Tourist Card', 'Temporary Resident Visa', 'Permanent Resident Visa', 'Work Visa'],
+  Colombia: ['Tourist Visa (90 days)', 'Digital Nomad Visa (M-10)', 'Temporary Resident (Migrant)', 'Permanent Resident'],
+  Schengen: ['Schengen Visa (C)', 'National Visa (D)'],
 };
 
 const NATIONALITIES = [
@@ -555,8 +565,8 @@ function AppContent() {
                   </div>
                   <p className="mt-2 text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
                     {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
-                    {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Options compared, recent policy changes verified`}
-                    {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Full conflict resolution, edge cases, contested items`}
+                    {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Booking soon. Need all options on the table.`}
+                    {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Complex situation or can't afford to be wrong.`}
                   </p>
                 </div>
 

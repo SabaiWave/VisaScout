@@ -85,7 +85,7 @@ async function briefHandler(req: Request) {
 
   if (!SUPPORTED_DESTINATIONS.has(destination.trim().toLowerCase())) {
     return new Response(
-      JSON.stringify({ error: 'Destination not yet supported. VisaScout covers Thailand, Vietnam, Indonesia, Malaysia, Philippines, Cambodia, Laos, Myanmar, Singapore, and Brunei.' }),
+      JSON.stringify({ error: `Destination not yet supported. VisaScout currently covers: ${SUPPORTED_DESTINATION_NAMES.join(', ')}.` }),
       { status: 422, headers: { 'Content-Type': 'application/json' } }
     );
   }
