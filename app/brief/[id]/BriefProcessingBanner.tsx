@@ -43,7 +43,7 @@ function SkeletonCard({ lines = 3, headingWidth = '40%' }: { lines?: number; hea
   );
 }
 
-export function BriefProcessingBanner({ briefId, isActuallyDone = false }: { briefId: string; isActuallyDone?: boolean }) {
+export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollForJob = false }: { briefId: string; isActuallyDone?: boolean; pollForJob?: boolean }) {
   const router = useRouter();
   const [timedOut, setTimedOut] = useState(false);
   const [startTime] = useState(() => Date.now());
@@ -59,17 +59,26 @@ export function BriefProcessingBanner({ briefId, isActuallyDone = false }: { bri
       return () => clearTimeout(t);
     }
 
-    // Brief still running — poll until done
-    const id = setInterval(() => {
+    // Brief still running — claim the job (if queued) and poll for completion
+    const tick = () => {
       if (Date.now() - startTime > TIMEOUT_MS) {
         setTimedOut(true);
-        clearInterval(id);
-        return;
+        return false;
+      }
+      if (pollForJob) {
+        // Triggers job claim + pipeline start in poll route; fire-and-forget
+        void fetch(`/api/brief/poll?brief_id=${briefId}`);
       }
       router.refresh();
+      return true;
+    };
+
+    if (!tick()) return;
+    const id = setInterval(() => {
+      if (!tick()) clearInterval(id);
     }, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [isActuallyDone, briefId, router, startTime]);
+  }, [isActuallyDone, briefId, pollForJob, router, startTime]);
 
   if (timedOut) {
     return (

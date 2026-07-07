@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { ClerkFontFix } from '@/app/components/ClerkFontFix';
 import { ThemeProvider } from '@/app/components/ThemeProvider';
 import { ClerkThemeProvider } from '@/app/components/ClerkThemeProvider';
+import { clientConfig } from '@/config/client';
 import './globals.css';
 
 const geist = Geist({
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://visascout.io';
   const APP_URL = rawAppUrl.startsWith('http') ? rawAppUrl : `https://${rawAppUrl}`;
   return {
-    title: 'VisaScout — Visa intelligence for digital nomads',
+    title: `VisaScout — ${clientConfig.tagline}`,
     description:
       'Know exactly what to do about your visa — sourced, confidence-scored, in under 60 seconds. Official policy + recent enforcement changes + real traveler experience.',
     metadataBase: new URL(APP_URL),
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: 'VisaScout — Visa intelligence for digital nomads',
+          alt: `VisaScout — ${clientConfig.tagline}`,
         },
       ],
       type: 'website',
@@ -59,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: 'VisaScout — Stop guessing. Know exactly where you stand.',
       description:
-        'Sourced, confidence-scored visa intelligence for SEA. In under 60 seconds.',
+        'Sourced, confidence-scored visa intelligence. Official policy + recent enforcement + real traveler experience. First brief free.',
       images: ['/og-image.png'],
     },
     icons: {

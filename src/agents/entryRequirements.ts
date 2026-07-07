@@ -4,6 +4,8 @@ import { buildEntryRequirementsPrompt } from '../prompts/entryRequirements';
 import { parseJSON } from '../lib/parseJSON';
 import { highestTier } from '../lib/sourceTier';
 import { recordUsage } from '../lib/cost';
+import { getGovDomains, DESTINATIONS } from '../config/destinations';
+import { buildAgentContext, getRegionContext } from '../prompts/regionContext';
 import type { AgentResult, EntryRequirementsOutput, VisaRequest } from '../types/index';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -35,10 +37,7 @@ export async function entryRequirementsAgent(
       `${request.normalizedDestination} entry requirements ${request.normalizedNationality} documents proof of funds onward ticket 2025`,
       {
         maxResults,
-        domainBias: [
-          '.gov', '.go.th', '.go.vn', '.gov.sg', '.gov.ph', '.gov.my',
-          'immigration.go.th', 'evisa.gov.vn',
-        ],
+        domainBias: getGovDomains(request.normalizedDestination),
       }
     );
 
@@ -49,12 +48,15 @@ export async function entryRequirementsAgent(
       .map((r) => `[${r.url}]\nTitle: ${r.title}\n${r.content}`)
       .join('\n\n---\n\n');
 
+    const destConfig = DESTINATIONS.find((d) => d.name.toLowerCase() === request.normalizedDestination.toLowerCase());
+    const agentContext = destConfig ? buildAgentContext(request, destConfig) : getRegionContext(request);
+
     const { system, user } = buildEntryRequirementsPrompt(request, searchText || 'No results found.');
 
     const response = await client.messages.create({
       model: MODEL,
       max_tokens: agentMaxTokens,
-      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: `${system}\n\n${agentContext}`, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: user }],
     });
 

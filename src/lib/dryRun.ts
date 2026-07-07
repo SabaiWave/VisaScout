@@ -53,6 +53,7 @@ export async function runDryPipeline(
   send: (data: unknown) => void,
   slow = false,
   depth: Depth = 'standard',
+  simDegraded = false,
 ): Promise<{ brief: VisaBrief; visaRequest: VisaRequest }> {
   // Step 1: emit parsed situation
   await delay(slow ? 800 : 400);
@@ -68,13 +69,12 @@ export async function runDryPipeline(
   await Promise.all(
     AGENT_SEQUENCE.map(async (entry) => {
       await delay(slow ? entry.slowDelay : entry.fastDelay);
+      const failed = simDegraded && entry.agent === 'officialPolicy';
       send({
         type: 'status',
         agent: entry.agent,
-        status: 'complete',
-        confidence: entry.confidence,
-        sourceTier: entry.sourceTier,
-        durationMs: entry.durationMs,
+        status: failed ? 'failed' : 'complete',
+        ...(failed ? {} : { confidence: entry.confidence, sourceTier: entry.sourceTier, durationMs: entry.durationMs }),
       });
     })
   );
@@ -87,5 +87,18 @@ export async function runDryPipeline(
   // Step 5: return depth-stripped fixture — caller sends complete event with briefId after saving
   await delay(slow ? 1000 : 800);
   const brief = stripToDepth(fullBrief, depth);
+
+  if (simDegraded) {
+    brief.metadata = {
+      ...brief.metadata,
+      degraded: true,
+      agentStatuses: brief.metadata.agentStatuses.map(s =>
+        s.agent === 'OfficialPolicy'
+          ? { ...s, status: 'failed' as const, confidence: 'low' as const, sourceTier: 4 as const }
+          : s
+      ),
+    };
+  }
+
   return { brief, visaRequest: visaRequestFixture as VisaRequest };
 }

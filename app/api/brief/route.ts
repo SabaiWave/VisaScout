@@ -21,6 +21,7 @@ import { render } from '@react-email/components';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import BriefReadyEmail from '@/src/emails/brief-ready';
 import type { VisaInput, VisaRequest } from '@/src/types/index';
+import { SUPPORTED_DESTINATION_NAMES } from '@/src/config/destinations';
 
 const BriefInputSchema = z.object({
   nationality: z.string().min(1).max(100),
@@ -30,10 +31,7 @@ const BriefInputSchema = z.object({
   depth: z.enum(['quick', 'standard', 'deep']).optional(),
 });
 
-const SUPPORTED_DESTINATIONS = new Set([
-  'thailand', 'vietnam', 'indonesia', 'malaysia', 'philippines',
-  'cambodia', 'laos', 'myanmar', 'singapore', 'brunei',
-]);
+const SUPPORTED_DESTINATIONS = new Set(SUPPORTED_DESTINATION_NAMES.map((n: string) => n.toLowerCase()));
 
 export const runtime = 'nodejs';
 
@@ -87,7 +85,7 @@ async function briefHandler(req: Request) {
 
   if (!SUPPORTED_DESTINATIONS.has(destination.trim().toLowerCase())) {
     return new Response(
-      JSON.stringify({ error: 'Destination not yet supported. VisaScout covers Thailand, Vietnam, Indonesia, Malaysia, Philippines, Cambodia, Laos, Myanmar, Singapore, and Brunei.' }),
+      JSON.stringify({ error: `Destination not yet supported. VisaScout currently covers: ${SUPPORTED_DESTINATION_NAMES.join(', ')}.` }),
       { status: 422, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -109,8 +107,12 @@ async function briefHandler(req: Request) {
 
   const resolvedDepth = depth ?? 'standard';
 
-  const dryRun = process.env.DRY_RUN === 'true';
   const isAdmin = isAdminUser(userId);
+  const rawBody = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
+  // forceDryRun: admin-only flag from dev page — overrides DRY_RUN env var so real API calls are never made during dev testing
+  const dryRun = process.env.DRY_RUN === 'true' || (isAdmin && rawBody.forceDryRun === true);
+  // simDegraded: dev-only flag — forces OfficialPolicy to fail in DRY_RUN to test degraded brief flow
+  const simDegraded = dryRun && rawBody.simDegraded === true;
 
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
@@ -200,18 +202,35 @@ async function briefHandler(req: Request) {
       try {
         if (dryRun) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
-          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development', resolvedDepth);
+          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development', resolvedDepth, simDegraded);
+
+          // Dry run non-quick briefs simulate a paid brief: payment_status='paid' + brief_jobs row
+          const dryRunPaymentStatus = resolvedDepth !== 'quick' ? 'paid' : undefined;
 
           let dryBriefId: string | undefined;
           try {
             if (shellBriefId) {
-              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: dryVisaRequest, brief: dryBrief, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: dryVisaRequest, brief: dryBrief, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true, paymentStatus: dryRunPaymentStatus });
               dryBriefId = shellBriefId;
             } else {
               dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+              // saveBrief path doesn't support paymentStatus override — update separately
+              if (dryBriefId && resolvedDepth !== 'quick') {
+                await getSupabase().from('briefs').update({ payment_status: 'paid' }).eq('id', dryBriefId);
+              }
             }
           } catch (saveErr) {
             log.error('brief save failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+          }
+
+          // Insert a done brief_jobs row so the re-run mechanism can find it (mirrors paid flow)
+          if (dryBriefId && resolvedDepth !== 'quick') {
+            await getSupabase()
+              .from('brief_jobs')
+              .insert({ brief_id: dryBriefId, status: 'done', started_at: new Date().toISOString(), completed_at: new Date().toISOString() })
+              .then(({ error }) => {
+                if (error) log.error('dry run brief_jobs insert failed', { briefId: dryBriefId, error: error.message });
+              });
           }
 
           if (resolvedDepth === 'quick') {
@@ -261,8 +280,8 @@ async function briefHandler(req: Request) {
             nationality,
             durationMs: null,
             estimatedCostUsd: null,
-            failedAgents: 0,
-            degraded: false,
+            failedAgents: dryBrief.metadata.agentStatuses.filter((s: { status: string }) => s.status === 'failed').length,
+            degraded: dryBrief.metadata.degraded,
           });
           log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth, briefId: dryBriefId });
           return;
@@ -370,7 +389,7 @@ async function briefHandler(req: Request) {
           getSupabase().from('briefs').update({ payment_status: 'error' }).eq('id', shellBriefId).then(() => {});
         }
         if (err instanceof OffTopicError) {
-          send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported SEA destination. Please describe your nationality, destination country, and visa situation.' });
+          send({ type: 'error', message: 'Your input doesn\'t appear to be about visa travel to a supported destination. Please describe your nationality, destination country, and visa situation.' });
           return;
         }
         const internalMessage = err instanceof Error ? err.message : 'Pipeline failed';

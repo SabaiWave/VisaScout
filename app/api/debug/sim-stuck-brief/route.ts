@@ -1,11 +1,12 @@
 import { auth } from '@clerk/nextjs/server';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
+import { SUPPORTED_DESTINATION_NAMES } from '@/src/config/destinations';
 
 export const runtime = 'nodejs';
 
 const NATIONALITIES = ['American', 'British', 'Australian', 'German', 'French'];
-const DESTINATIONS = ['Thailand', 'Vietnam', 'Indonesia', 'Malaysia', 'Singapore'];
+const DESTINATIONS = SUPPORTED_DESTINATION_NAMES;
 const DEPTHS = ['quick', 'standard'];
 
 function pick<T>(arr: T[]): T {
