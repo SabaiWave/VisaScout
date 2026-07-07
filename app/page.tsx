@@ -185,7 +185,7 @@ function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: EXPO, delay: 0 }}
               className="text-xs font-bold uppercase mb-7"
-              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-secondary)' }}
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-secondary)', willChange: 'transform, opacity' }}
             >
               {copy.hero.eyebrow}
             </motion.p>
@@ -197,7 +197,7 @@ function Hero() {
                 animate={{ y: 0 }}
                 transition={{ duration: 0.78, ease: EXPO, delay: 0.12 }}
                 className="text-4xl sm:text-5xl lg:text-6xl font-normal leading-[1.1] text-balance"
-                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)' }}
+                style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-display)', willChange: 'transform' }}
               >
                 Know your visa situation.{' '}
                 <span style={{ color: 'var(--color-amber)' }}>Before</span>
@@ -210,7 +210,7 @@ function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: EXPO, delay: 0.28 }}
               className="text-base sm:text-lg mb-10 leading-relaxed max-w-lg"
-              style={{ color: 'var(--color-text-secondary)' }}
+              style={{ color: 'var(--color-text-secondary)', willChange: 'transform, opacity' }}
             >
               {copy.hero.subhead}
             </motion.p>
@@ -220,6 +220,7 @@ function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: EXPO, delay: 0.42 }}
               className="flex"
+              style={{ willChange: 'transform, opacity' }}
             >
               <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
                 <Link href={copy.hero.ctaHref}>{copy.hero.cta}</Link>
@@ -234,7 +235,7 @@ function Hero() {
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 1.05, ease: EXPO, delay: 0.52 }}
             className="hidden md:block absolute top-0 right-0"
-            style={{ width: '46%' }}
+            style={{ width: '46%', willChange: 'transform, opacity' }}
           >
             <div
               style={{
