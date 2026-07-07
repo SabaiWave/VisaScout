@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft } from 'lucide-react';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefActions from '@/app/components/BriefActions';
 import BriefRenderer from '@/app/components/BriefRenderer';
 import { BriefHeader } from '@/app/components/BriefHeader';
+import { BriefCopyLink } from '@/app/components/BriefCopyLink';
 import type { VisaBrief } from '@/src/types/index';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { BriefMeta } from '@/app/components/ui/BriefMeta';
@@ -206,21 +207,34 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
       <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-[760px] mx-auto">
-          <div className="mb-8">
+          <div className="mb-6">
+            {userId && (
+              <a
+                href="/dashboard"
+                className="inline-flex items-center gap-1 mb-4 text-xs font-bold uppercase"
+                style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textDecoration: 'none' }}
+              >
+                <ChevronLeft size={12} />
+                Dashboard
+              </a>
+            )}
             <SectionHeading size="md" as="h1">
               {row.nationality} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {row.destination}
             </SectionHeading>
-            <BriefMeta depth={row.depth} generatedAt={row.created_at} className="mt-3" />
+            <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+              <BriefMeta depth={row.depth} generatedAt={row.created_at} />
+              {brief && <BriefCopyLink url={shareUrl} />}
+            </div>
           </div>
 
-          <div className="mt-8">
+          <div>
             {isProcessing ? (
               <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} pollForJob={row.payment_status === 'queued'} />
             ) : brief ? (
               <BriefRenderer brief={brief} hideMetadata briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
               <div
-                className="px-4 py-3 rounded"
+                className="px-4 py-3 rounded-lg"
                 style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
               >
                 Brief content unavailable.{' '}

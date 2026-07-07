@@ -20,17 +20,17 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'text-center font-bold uppercase tracking-wider rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   secondary:
-    'text-center font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   ghost:
-    'text-center font-bold uppercase tracking-wider rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   danger:
-    'text-center font-bold uppercase tracking-wider rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   warning:
-    'text-center font-bold uppercase tracking-wider rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   admin:
-    'text-center font-bold uppercase tracking-wider rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
 };
 
 const variantStyles: Record<Variant, CSSProperties> = {
@@ -38,36 +38,42 @@ const variantStyles: Record<Variant, CSSProperties> = {
     background: 'var(--color-secondary)',
     color: '#ffffff',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
   secondary: {
     background: 'transparent',
     color: 'var(--color-text-primary)',
     borderColor: 'var(--color-border-strong)',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
   ghost: {
     background: 'transparent',
     color: 'var(--color-text-secondary)',
     borderColor: 'var(--color-border)',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
   danger: {
     background: 'rgba(239,68,68,0.08)',
     color: 'var(--color-error)',
     borderColor: 'rgba(239,68,68,0.4)',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
   warning: {
     background: 'rgba(245,158,11,0.08)',
     color: 'var(--color-amber)',
     borderColor: 'rgba(245,158,11,0.4)',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
   admin: {
     background: 'rgba(99,102,241,0.08)',
     color: 'var(--color-secondary-light)',
     borderColor: 'rgba(99,102,241,0.3)',
     fontFamily: 'var(--font-mono)',
+    letterSpacing: '0.04em',
   },
 };
 

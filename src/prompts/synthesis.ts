@@ -36,6 +36,7 @@ export function buildSynthesisPrompt(
 ${depthInstructions}
 
 SYNTHESIS RULES:
+- Do not use em dashes (—) in any field. Use a period or comma instead.
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
 - Recommended action must be specific, actionable, and include a deadline if applicable
 - If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
