@@ -3,11 +3,13 @@
 import type { VisaBrief, VisaOption, ConflictReport } from '@/src/types/index';
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
 import { useState } from 'react';
-import { ArrowRight, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowRight, Lock, RefreshCw } from 'lucide-react';
 import { ConfidenceBadge, TierLabel } from './ui/Badge';
 import { BriefMeta } from './ui/BriefMeta';
 import { CardHeading } from './ui/CardHeading';
 import { Button } from './ui/Button';
+import { AGENT_DISPLAY_LABELS } from './AgentsDeployedScreen';
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -370,9 +372,86 @@ function ContingencySection({ contingency, forPrint }: { contingency: VisaBrief[
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export default function BriefRenderer({ brief, forPrint = false, hideMetadata = false, hideParsedSituation = false }: { brief: VisaBrief; forPrint?: boolean; hideMetadata?: boolean; hideParsedSituation?: boolean }) {
+export default function BriefRenderer({ brief, forPrint = false, hideMetadata = false, hideParsedSituation = false, briefId, isPaidBrief = false, canRerun = false }: { brief: VisaBrief; forPrint?: boolean; hideMetadata?: boolean; hideParsedSituation?: boolean; briefId?: string; isPaidBrief?: boolean; canRerun?: boolean }) {
+  const failedAgents = brief.metadata?.agentStatuses?.filter(s => s.status === 'failed') ?? [];
+  const router = useRouter();
+  const [rerunLoading, setRerunLoading] = useState(false);
+  const [rerunError, setRerunError] = useState<string | null>(null);
+
+  async function handleRerun() {
+    if (!briefId) return;
+    setRerunLoading(true);
+    setRerunError(null);
+    try {
+      const res = await fetch(`/api/brief/${briefId}/rerun`, { method: 'POST' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setRerunError((body as { error?: string }).error ?? 'Re-run failed. Contact support.');
+        return;
+      }
+      router.push(`/brief/${briefId}?pending=1`);
+    } catch {
+      setRerunError('Network error. Try again.');
+    } finally {
+      setRerunLoading(false);
+    }
+  }
+
+  const failedAgentNames = failedAgents.map(s => {
+    const key = (s.agent.charAt(0).toLowerCase() + s.agent.slice(1)) as keyof typeof AGENT_DISPLAY_LABELS;
+    return AGENT_DISPLAY_LABELS[key] ?? s.agent;
+  });
+
   return (
     <div className="space-y-6 max-w-[760px] mx-auto">
+      {/* Degraded notice */}
+      {failedAgents.length > 0 && (
+        <div
+          className="rounded-lg px-4 py-4 border"
+          style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.25)' }}
+        >
+          <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', color: 'var(--color-amber)' }}>
+            {isPaidBrief ? 'Limited Data' : 'Data Note'}
+          </p>
+          {isPaidBrief && canRerun && briefId && !forPrint ? (
+            <>
+              <p className="text-sm mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                {failedAgentNames.join(', ')}{' '}{failedAgents.length === 1 ? 'was' : 'were'}{' '}unavailable during generation. Re-run to fetch fresh data. No additional charge. Takes a few minutes.
+              </p>
+              <button
+                onClick={handleRerun}
+                disabled={rerunLoading}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-opacity disabled:opacity-50"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.06em',
+                  background: 'rgba(245,158,11,0.15)',
+                  border: '1px solid rgba(245,158,11,0.4)',
+                  color: 'var(--color-amber)',
+                  cursor: rerunLoading ? 'default' : 'pointer',
+                }}
+              >
+                <RefreshCw size={12} className={rerunLoading ? 'animate-spin' : ''} />
+                {rerunLoading ? 'Queuing Re-run...' : 'Re-run Brief'}
+              </button>
+              {rerunError && (
+                <p className="text-xs mt-1.5" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-body)' }}>
+                  {rerunError}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {failedAgentNames.join(', ')}{' '}{failedAgents.length === 1 ? 'was' : 'were'}{' '}
+              {isPaidBrief
+                ? 'unavailable. Confidence is reduced for affected sections. Verify with official immigration sources before travel.'
+                : 'unavailable. Recommendations are based on available sources. Verify directly with official immigration portals before travel.'
+              }
+            </p>
+          )}
+        </div>
+      )}
+
       {/* We Understood */}
       {!hideParsedSituation && brief.parsedSituation && (
         <div

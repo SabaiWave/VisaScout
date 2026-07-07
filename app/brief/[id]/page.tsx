@@ -16,6 +16,8 @@ const SIM_PDF_ERROR_ID = 'sim-pdf-error';
 const SIM_CONFIDENCE_HIGH_ID   = 'sim-confidence-high';
 const SIM_CONFIDENCE_MEDIUM_ID = 'sim-confidence-medium';
 const SIM_CONFIDENCE_LOW_ID    = 'sim-confidence-low';
+const SIM_DEGRADED_ID          = 'sim-degraded';
+const SIM_RERUN_CAP_ID         = 'sim-rerun-cap';
 const CONFIDENCE_SIM_IDS = [SIM_CONFIDENCE_HIGH_ID, SIM_CONFIDENCE_MEDIUM_ID, SIM_CONFIDENCE_LOW_ID] as const;
 
 interface BriefRow {
@@ -26,6 +28,7 @@ interface BriefRow {
   depth: string;
   brief_markdown: string | null;
   payment_status: string;
+  rerun_count: number;
 }
 
 export default async function BriefPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string>> }) {
@@ -68,6 +71,84 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     );
   }
 
+  // Dev sim sentinel — degraded brief with cap hit (no Re-run button, no DB lookup)
+  if (id === SIM_RERUN_CAP_ID) {
+    if (!isAdmin) notFound();
+    const base = visaBriefFixture as unknown as VisaBrief;
+    const brief: VisaBrief = {
+      ...base,
+      metadata: {
+        ...base.metadata,
+        depth: 'standard',
+        degraded: true,
+        agentStatuses: [
+          { agent: 'OfficialPolicy',    status: 'failed',  confidence: 'low',    sourceTier: 4, durationMs: 3200 },
+          { agent: 'RecentChanges',     status: 'success', confidence: 'high',   sourceTier: 1, durationMs: 980  },
+          { agent: 'CommunityIntel',    status: 'success', confidence: 'medium', sourceTier: 4, durationMs: 1100 },
+          { agent: 'EntryRequirements', status: 'success', confidence: 'high',   sourceTier: 1, durationMs: 870  },
+          { agent: 'BorderRun',         status: 'success', confidence: 'medium', sourceTier: 2, durationMs: 1050 },
+        ],
+      },
+    };
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+    return (
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        {showHeader && <BriefHeader />}
+        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="max-w-[760px] mx-auto">
+            <div className="mb-8">
+              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Portugal</SectionHeading>
+              <BriefMeta depth="standard" generatedAt={new Date().toISOString()} degraded className="mt-3" />
+            </div>
+            <div className="mt-8">
+              <BriefRenderer brief={brief} hideMetadata briefId={SIM_RERUN_CAP_ID} isPaidBrief canRerun={false} />
+            </div>
+            <BriefActions url={`${appUrl}/brief/${SIM_RERUN_CAP_ID}`} briefId={SIM_RERUN_CAP_ID} depth="standard" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Dev sim sentinel — degraded brief with Re-run button (no DB lookup)
+  if (id === SIM_DEGRADED_ID) {
+    if (!isAdmin) notFound();
+    const base = visaBriefFixture as unknown as VisaBrief;
+    const brief: VisaBrief = {
+      ...base,
+      metadata: {
+        ...base.metadata,
+        depth: 'standard',
+        degraded: true,
+        agentStatuses: [
+          { agent: 'OfficialPolicy',    status: 'failed',  confidence: 'low',    sourceTier: 4, durationMs: 3200 },
+          { agent: 'RecentChanges',     status: 'success', confidence: 'high',   sourceTier: 1, durationMs: 980  },
+          { agent: 'CommunityIntel',    status: 'success', confidence: 'medium', sourceTier: 4, durationMs: 1100 },
+          { agent: 'EntryRequirements', status: 'success', confidence: 'high',   sourceTier: 1, durationMs: 870  },
+          { agent: 'BorderRun',         status: 'success', confidence: 'medium', sourceTier: 2, durationMs: 1050 },
+        ],
+      },
+    };
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+    return (
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        {showHeader && <BriefHeader />}
+        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="max-w-[760px] mx-auto">
+            <div className="mb-8">
+              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Portugal</SectionHeading>
+              <BriefMeta depth="standard" generatedAt={new Date().toISOString()} degraded className="mt-3" />
+            </div>
+            <div className="mt-8">
+              <BriefRenderer brief={brief} hideMetadata briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
+            </div>
+            <BriefActions url={`${appUrl}/brief/${SIM_DEGRADED_ID}`} briefId={SIM_DEGRADED_ID} depth="standard" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // Dev sim sentinel — no DB lookup, uses fixture brief
   if (id === SIM_PDF_ERROR_ID) {
     if (!isAdmin) notFound();
@@ -94,7 +175,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
   const { data, error } = await getSupabase()
     .from('briefs')
-    .select('id, created_at, nationality, destination, depth, brief_markdown, payment_status')
+    .select('id, created_at, nationality, destination, depth, brief_markdown, payment_status, rerun_count')
     .eq('id', id)
     .single();
 
@@ -134,9 +215,9 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
           <div className="mt-8">
             {isProcessing ? (
-              <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} />
+              <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} pollForJob={row.payment_status === 'queued'} />
             ) : brief ? (
-              <BriefRenderer brief={brief} hideMetadata />
+              <BriefRenderer brief={brief} hideMetadata briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
               <div
                 className="px-4 py-3 rounded"

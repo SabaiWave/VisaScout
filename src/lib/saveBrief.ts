@@ -51,10 +51,11 @@ export interface UpdateBriefContentInput {
   fundedBy: 'stripe' | 'invite' | 'free';
   cost?: ReportCost;
   isDryRun?: boolean;
+  paymentStatus?: 'paid' | 'unpaid';
 }
 
 export async function updateBriefWithContent(input: UpdateBriefContentInput): Promise<void> {
-  const paymentStatus = input.fundedBy === 'stripe' ? 'paid' : 'unpaid';
+  const paymentStatus = input.paymentStatus ?? (input.fundedBy === 'stripe' ? 'paid' : 'unpaid');
 
   const { error } = await getSupabase()
     .from('briefs')

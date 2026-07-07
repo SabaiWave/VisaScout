@@ -34,6 +34,9 @@ export async function officialPolicyAgent(
 
   const destDomains = getGovDomains(request.normalizedDestination);
 
+  let attempt = 0;
+  while (attempt < 2) {
+    attempt++;
   try {
     const results = await tavilySearch(
       `${request.normalizedDestination} visa ${request.normalizedNationality} official immigration rules requirements e-visa online application 2024 2025`,
@@ -98,6 +101,10 @@ export async function officialPolicyAgent(
       durationMs: Date.now() - start,
     };
   } catch (err) {
+    if (attempt < 2) {
+      await new Promise(r => setTimeout(r, 1000));
+      continue;
+    }
     return {
       status: 'failed',
       data: null,
@@ -110,4 +117,7 @@ export async function officialPolicyAgent(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+  } // end while
+  // unreachable — while loop always returns
+  throw new Error('officialPolicy: retry loop exited without returning');
 }

@@ -107,8 +107,12 @@ async function briefHandler(req: Request) {
 
   const resolvedDepth = depth ?? 'standard';
 
-  const dryRun = process.env.DRY_RUN === 'true';
   const isAdmin = isAdminUser(userId);
+  const rawBody = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
+  // forceDryRun: admin-only flag from dev page — overrides DRY_RUN env var so real API calls are never made during dev testing
+  const dryRun = process.env.DRY_RUN === 'true' || (isAdmin && rawBody.forceDryRun === true);
+  // simDegraded: dev-only flag — forces OfficialPolicy to fail in DRY_RUN to test degraded brief flow
+  const simDegraded = dryRun && rawBody.simDegraded === true;
 
   const dailyLimit = isAdmin ? getAdminDailyLimit() : getFreeDailyLimit();
 
@@ -198,18 +202,35 @@ async function briefHandler(req: Request) {
       try {
         if (dryRun) {
           log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
-          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development', resolvedDepth);
+          const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(send, process.env.NODE_ENV === 'development', resolvedDepth, simDegraded);
+
+          // Dry run non-quick briefs simulate a paid brief: payment_status='paid' + brief_jobs row
+          const dryRunPaymentStatus = resolvedDepth !== 'quick' ? 'paid' : undefined;
 
           let dryBriefId: string | undefined;
           try {
             if (shellBriefId) {
-              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: dryVisaRequest, brief: dryBrief, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+              await updateBriefWithContent({ briefId: shellBriefId, visaRequest: dryVisaRequest, brief: dryBrief, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true, paymentStatus: dryRunPaymentStatus });
               dryBriefId = shellBriefId;
             } else {
               dryBriefId = await saveBrief({ visaRequest: dryVisaRequest, brief: dryBrief, depth: resolvedDepth, userId, fundedBy: earlyAccess ? 'invite' : 'free', isDryRun: true });
+              // saveBrief path doesn't support paymentStatus override — update separately
+              if (dryBriefId && resolvedDepth !== 'quick') {
+                await getSupabase().from('briefs').update({ payment_status: 'paid' }).eq('id', dryBriefId);
+              }
             }
           } catch (saveErr) {
             log.error('brief save failed [DRY_RUN]', { error: saveErr instanceof Error ? saveErr.message : String(saveErr) });
+          }
+
+          // Insert a done brief_jobs row so the re-run mechanism can find it (mirrors paid flow)
+          if (dryBriefId && resolvedDepth !== 'quick') {
+            await getSupabase()
+              .from('brief_jobs')
+              .insert({ brief_id: dryBriefId, status: 'done', started_at: new Date().toISOString(), completed_at: new Date().toISOString() })
+              .then(({ error }) => {
+                if (error) log.error('dry run brief_jobs insert failed', { briefId: dryBriefId, error: error.message });
+              });
           }
 
           if (resolvedDepth === 'quick') {
@@ -259,8 +280,8 @@ async function briefHandler(req: Request) {
             nationality,
             durationMs: null,
             estimatedCostUsd: null,
-            failedAgents: 0,
-            degraded: false,
+            failedAgents: dryBrief.metadata.agentStatuses.filter((s: { status: string }) => s.status === 'failed').length,
+            degraded: dryBrief.metadata.degraded,
           });
           log.info('pipeline complete [DRY_RUN]', { destination, depth: resolvedDepth, briefId: dryBriefId });
           return;

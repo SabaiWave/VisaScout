@@ -30,6 +30,7 @@ interface BriefRow {
   overall_confidence: string | null;
   payment_status: string;
   degraded: boolean;
+  rerun_count: number;
 }
 
 interface BriefGridProps {

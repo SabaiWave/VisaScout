@@ -22,7 +22,7 @@ export const maxDuration = 300;
 async function runPipeline(jobId: string, briefId: string) {
   const { data: briefRow, error: briefFetchError } = await getSupabase()
     .from('briefs')
-    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id, user_id, funded_by')
+    .select('nationality, destination, visa_type, freeform_input, depth, stripe_session_id, user_id, funded_by, is_dry_run')
     .eq('id', briefId)
     .single();
 
@@ -31,13 +31,16 @@ async function runPipeline(jobId: string, briefId: string) {
     return;
   }
 
+  // Prefer DB flag (accurate for re-runs); fall back to env var so local dev (DRY_RUN=true) always stays dry
+  const isDryRun = briefRow.is_dry_run === true || process.env.DRY_RUN === 'true';
+
   try {
     await withUsageTracking(async () => {
       let brief;
       let visaRequest: VisaRequest | undefined;
       const pipelineStart = Date.now();
 
-      if (process.env.DRY_RUN === 'true') {
+      if (isDryRun) {
         const result = await runDryPipeline(() => {}, false, (briefRow.depth as 'quick' | 'standard' | 'deep') ?? 'standard');
         brief = result.brief;
         visaRequest = result.visaRequest;
@@ -66,7 +69,9 @@ async function runPipeline(jobId: string, briefId: string) {
         brief,
         fundedBy: (briefRow.funded_by as 'stripe' | 'invite' | 'free') ?? 'stripe',
         cost,
-        isDryRun: process.env.DRY_RUN === 'true',
+        isDryRun,
+        // Dry run non-quick briefs simulate paid flow — keep payment_status='paid' after re-run
+        ...(isDryRun && briefRow.depth !== 'quick' && { paymentStatus: 'paid' }),
       });
 
       await getSupabase()

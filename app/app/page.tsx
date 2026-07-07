@@ -177,6 +177,8 @@ function AppContent() {
   const wasCancelled = searchParams.get('cancelled') === 'true';
   const devSim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
   const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
+  const devSimDegraded = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('sim_degraded') === 'true';
+  const devForceDryRun = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('force_dry_run') === 'true';
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     devSim === 'free-cap' ? `Daily free brief limit reached. Upgrade to ${DEPTH_LABEL.standard} or ${DEPTH_LABEL.deep} for unlimited research.` :
@@ -246,7 +248,7 @@ function AppContent() {
     revealTimersRef.current.push(t);
   }, [agentDisplayCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }) {
+  async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep'; simDegraded?: boolean; forceDryRun?: boolean }) {
     setPhase('generating');
     setAgentsVisible(true);
     agentDisplayCountRef.current = 0;
@@ -392,6 +394,8 @@ function AppContent() {
       visaType: 'Visa Exemption',
       freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
       depth: (depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard') as 'quick' | 'standard' | 'deep',
+      simDegraded: devSimDegraded,
+      forceDryRun: devForceDryRun,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devTrigger, isSignedIn, isLoaded]);
