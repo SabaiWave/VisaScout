@@ -54,6 +54,8 @@ STRATEGY.md
 !handoffs/.gitkeep
 /docs/*
 !docs/.gitkeep
+/todo/*
+!todo/.gitkeep
 
 .claude/
 
