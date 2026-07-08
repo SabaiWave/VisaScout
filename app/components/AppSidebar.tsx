@@ -9,13 +9,14 @@ import { SidebarAccount } from './SidebarAccount';
 interface AppSidebarProps {
   isAdmin: boolean;
   showDev: boolean;
+  isSignedIn?: boolean;
 }
 
-export function AppSidebar({ isAdmin, showDev }: AppSidebarProps) {
+export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarProps) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/dashboard', label: 'MY BRIEFS', icon: Archive },
+    ...(isSignedIn ? [{ href: '/dashboard', label: 'MY BRIEFS', icon: Archive }] : []),
     { href: '/app', label: 'GENERATE BRIEF', icon: Zap },
     ...(isAdmin ? [{ href: '/admin', label: 'ADMIN', icon: ShieldCheck }] : []),
     ...(showDev ? [{ href: '/dev', label: 'DEV', icon: Terminal }] : []),
@@ -69,7 +70,49 @@ export function AppSidebar({ isAdmin, showDev }: AppSidebarProps) {
       })}
 
       <div style={{ flex: 1 }} />
-      <SidebarAccount />
+      {isSignedIn ? (
+        <SidebarAccount />
+      ) : (
+        <div style={{ borderTop: '1px solid var(--color-border-muted)', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <Link
+            href="/sign-in"
+            style={{
+              display: 'block',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              textAlign: 'center',
+            }}
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/sign-up"
+            style={{
+              display: 'block',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              color: 'var(--color-secondary-light)',
+              background: 'var(--color-secondary-subtle)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              textAlign: 'center',
+            }}
+          >
+            Get Started
+          </Link>
+        </div>
+      )}
     </aside>
   );
 }
