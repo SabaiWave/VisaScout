@@ -71,8 +71,8 @@ const DEPTH_CONFIG = {
     label: 'Intel',
     price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
     description: 'Booking soon. Need all options on the table.',
-    color: 'var(--color-depth-standard)',
-    colorRgb: '192,132,252',
+    color: '#6366F1',
+    colorRgb: '99,102,241',
   },
   deep: {
     icon: FileText,
@@ -193,6 +193,7 @@ function AppContent() {
   const [inviteAccess, setInviteAccess] = useState(false);
   const [showInviteInput, setShowInviteInput] = useState(false);
   const [textareaFocused, setTextareaFocused] = useState(false);
+  const [inviteInputFocused, setInviteInputFocused] = useState(false);
 
   // Advance display count by one step, respecting MIN_REVEAL_STAGGER_MS between reveals.
   // Cascades automatically — after revealing idx N, immediately checks if N+1 is ready.
@@ -639,11 +640,13 @@ function AppContent() {
                     disabled={phase === 'redirecting' || isCheckingCap}
                     className="w-full py-3"
                     style={
-                      inviteAccess || depth === 'quick'
+                      inviteAccess
                         ? {}
-                        : depth === 'standard'
-                          ? { background: 'var(--color-depth-standard)', color: '#ffffff', boxShadow: '0 0 0 1px rgba(192,132,252,0.4), 0 0 24px rgba(192,132,252,0.2)' }
-                          : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
+                        : depth === 'quick'
+                          ? { background: '#818cf8', color: '#ffffff', boxShadow: '0 0 0 1px rgba(129,140,248,0.4), 0 0 24px rgba(129,140,248,0.2)' }
+                          : depth === 'standard'
+                            ? { background: '#6366F1', color: '#ffffff', boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 0 24px rgba(99,102,241,0.2)' }
+                            : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
                     }
                   >
                     {isCheckingCap
@@ -686,7 +689,13 @@ function AppContent() {
                               value={inviteCode}
                               onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
                               placeholder="Enter invite code"
-                              style={{ ...INPUT_STYLE, border: `1px solid ${inviteCodeError ? 'var(--color-error)' : 'var(--color-border-strong)'}` }}
+                              onFocus={() => setInviteInputFocused(true)}
+                              onBlur={() => setInviteInputFocused(false)}
+                              style={{
+                                ...INPUT_STYLE,
+                                border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? 'var(--color-secondary)' : 'var(--color-border-strong)'}`,
+                                boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
+                              }}
                             />
                             {inviteCodeError && (
                               <p className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
