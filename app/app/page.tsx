@@ -694,8 +694,8 @@ function AppContent() {
                               onBlur={() => setInviteInputFocused(false)}
                               style={{
                                 ...INPUT_STYLE,
-                                border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? `rgba(${DEPTH_CONFIG[depth].colorRgb},0.8)` : 'var(--color-border-strong)'}`,
-                                boxShadow: inviteInputFocused && !inviteCodeError ? `0 0 0 3px rgba(${DEPTH_CONFIG[depth].colorRgb},0.18)` : 'none',
+                                border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? 'var(--color-secondary)' : 'var(--color-border-strong)'}`,
+                                boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
                               }}
                             />
                             {inviteCodeError && (
