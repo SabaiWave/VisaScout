@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { ChevronRight, Check, ChevronDown, Zap, Search, FileText } from 'lucide-react';
-import { useAuth, SignInButton } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
@@ -101,38 +101,6 @@ type Phase = 'idle' | 'generating' | 'redirecting' | 'error';
 // Minimum ms between sequential agent reveal steps. Prevents instant cascade when agents
 // complete near-simultaneously (DRY_RUN / fast pipeline). Matches paid flow stagger feel.
 const MIN_REVEAL_STAGGER_MS = 400;
-
-// ─── Sign-in prompt ────────────────────────────────────────────────────────
-
-function SignInPrompt() {
-  return (
-    <div className="max-w-[560px] mx-auto text-center py-20">
-      <div className="mb-6">
-        <div
-          className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-          style={{ background: 'var(--color-secondary-subtle)' }}
-        >
-          <svg aria-hidden="true" className="w-8 h-8" style={{ color: 'var(--color-secondary)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-          </svg>
-        </div>
-        <SectionHeading as="h1" size="sm" className="mb-2">Sign in to generate briefs</SectionHeading>
-        <p className="text-sm leading-relaxed max-w-sm mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
-          VisaScout cross-checks official sources, recent enforcement, and community ground truth to build your visa brief.
-        </p>
-      </div>
-      <SignInButton mode="modal">
-        <Button>Sign in to get started</Button>
-      </SignInButton>
-      <p className="mt-4 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-        No account?{' '}
-        <a href="/sign-up" className="font-medium transition-colors" style={{ color: 'var(--color-secondary-light)' }}>
-          Create one free
-        </a>
-      </p>
-    </div>
-  );
-}
 
 // ─── Field error ───────────────────────────────────────────────────────────
 
@@ -356,6 +324,15 @@ function AppContent() {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
+
+    if (!isSignedIn) {
+      try {
+        sessionStorage.setItem('visascout_form_state', JSON.stringify({ nationality, destination, visaType, freeform, depth }));
+      } catch { /* ignore storage errors */ }
+      router.push('/sign-in');
+      return;
+    }
+
     backendStatusRef.current = new Map();
     setError(null);
     setCapReached(false);
@@ -450,6 +427,22 @@ function AppContent() {
       .catch(() => {});
   }, [isSignedIn, isLoaded]);
 
+  // Restore form state saved before auth redirect
+  useEffect(() => {
+    if (!isSignedIn || !isLoaded) return;
+    try {
+      const saved = sessionStorage.getItem('visascout_form_state');
+      if (!saved) return;
+      sessionStorage.removeItem('visascout_form_state');
+      const state = JSON.parse(saved) as Partial<{ nationality: string; destination: string; visaType: string; freeform: string; depth: 'quick' | 'standard' | 'deep' }>;
+      if (state.nationality) setNationality(state.nationality);
+      if (state.destination) setDestination(state.destination);
+      if (state.visaType) setVisaType(state.visaType);
+      if (state.freeform) setFreeform(state.freeform);
+      if (state.depth && ['quick', 'standard', 'deep'].includes(state.depth)) setDepth(state.depth);
+    } catch { /* corrupt state — ignore */ }
+  }, [isSignedIn, isLoaded]);
+
   function handleReset() {
     revealTimersRef.current.forEach(t => clearTimeout(t));
     revealTimersRef.current = [];
@@ -490,10 +483,7 @@ function AppContent() {
     <div className="relative">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
     <main className="relative z-10 max-w-[1120px] mx-auto px-6 py-12">
-      {(!isSignedIn && isLoaded) ? (
-        <SignInPrompt />
-      ) : (
-        <>
+      <>
           {/* ── Form ── */}
           {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
             <div className="max-w-[560px] mx-auto">
@@ -660,11 +650,13 @@ function AppContent() {
                       ? 'Checking…'
                       : phase === 'redirecting'
                         ? 'Starting…'
-                        : depth === 'quick' || inviteAccess
-                          ? 'Generate Brief · Free'
-                          : depth === 'standard'
-                            ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
-                            : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
+                        : !isSignedIn
+                          ? 'Sign In to Generate'
+                          : depth === 'quick' || inviteAccess
+                            ? 'Generate Brief · Free'
+                            : depth === 'standard'
+                              ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
+                              : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
                   </Button>
 
                   {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (
@@ -729,7 +721,6 @@ function AppContent() {
             </div>
           )}
         </>
-      )}
     </main>
     </div>
   );
