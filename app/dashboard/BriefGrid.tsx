@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import { Button } from '@/app/components/ui/Button';
 import { BriefCard } from './BriefCard';
 
@@ -50,7 +50,7 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
   const totalPages = Math.max(1, Math.ceil(effectiveTotal / PAGE_SIZE));
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <motion.div
         variants={gridContainer}
         initial="hidden"
@@ -102,6 +102,6 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
           )}
         </div>
       )}
-    </>
+    </MotionConfig>
   );
 }

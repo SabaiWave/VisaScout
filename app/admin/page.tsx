@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation';
 import { auth, clerkClient } from '@clerk/nextjs/server';
+import { Check, X, ArrowRight, AlertTriangle } from 'lucide-react';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { NavLink } from '@/app/components/ui/NavLink';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
 import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
@@ -184,10 +186,15 @@ export default async function AdminPage() {
   const recentUsers = recentSignupsResult.data ?? [];
 
   return (
-    <main className="px-4 sm:px-8 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <>
+      <div className="hidden lg:flex items-center justify-end gap-1 px-4" style={{ height: '52px', borderBottom: '1px solid var(--color-border-muted)' }}>
+        <NavLink href="/">Home</NavLink>
+        <NavLink href="/contact">Contact</NavLink>
+      </div>
+      <main className="px-4 sm:px-6 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
+        <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
         <SectionHeading size="md" as="h1" className="mb-8">
-          Operations Dashboard
+          OPERATIONS DASHBOARD
         </SectionHeading>
 
         {/* Summary row — users + revenue */}
@@ -201,7 +208,7 @@ export default async function AdminPage() {
             <div key={label} style={{
               background: 'var(--color-bg-elevated)',
               border: '1px solid var(--color-border)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-lg)',
               padding: '1rem',
               boxShadow: 'var(--shadow-card)',
             }}>
@@ -225,7 +232,7 @@ export default async function AdminPage() {
             <div key={label} style={{
               background: 'var(--color-bg-elevated)',
               border: '1px solid var(--color-border)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-lg)',
               padding: '1rem',
               boxShadow: 'var(--shadow-card)',
             }}>
@@ -240,24 +247,25 @@ export default async function AdminPage() {
         </div>
 
         {/* Support — stuck briefs */}
-        <Section title="SUPPORT — STUCK BRIEFS">
+        <Section title="STUCK BRIEFS">
           <div className="mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[
-              { n: '①', label: 'No Stripe session', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
-              { n: '②', label: 'Session exists, no job', action: 'Force Queue', color: 'var(--color-secondary-light)' },
-              { n: '③', label: 'Job stuck or failed', action: 'Retry', color: 'var(--color-amber)' },
+              { n: '1', label: 'No Stripe session', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
+              { n: '2', label: 'Session exists, no job', action: 'Force Queue', color: 'var(--color-secondary-light)' },
+              { n: '3', label: 'Job stuck or failed', action: 'Retry', color: 'var(--color-amber)' },
             ].map(({ n, label, action, color }) => (
               <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
                 <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{n}</span>
                 <span style={{ color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
-                <span style={{ color: 'var(--color-border-strong)', flexShrink: 0 }}>→</span>
+                <ArrowRight size={10} style={{ color: 'var(--color-border-strong)', flexShrink: 0 }} />
                 <span style={{ color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{action}</span>
               </div>
             ))}
           </div>
           {stuckBriefs.length === 0 ? (
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-success)' }}>
-              ✓ All clear — no stuck briefs in the last 7 days.
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Check size={14} />
+              All clear. No stuck briefs in the last 7 days.
             </p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -302,16 +310,16 @@ export default async function AdminPage() {
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>
                           {hasSession
-                            ? <span style={{ color: 'var(--color-success)' }}>✓ {b.stripe_session_id!.slice(0, 14)}…</span>
-                            : <span style={{ color: 'var(--color-error)' }}>✗ None</span>
+                            ? <span style={{ color: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Check size={12} />{b.stripe_session_id!.slice(0, 14)}&hellip;</span>
+                            : <span style={{ color: 'var(--color-error)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><X size={12} />None</span>
                           }
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-                          {!job ? '—' : jobRunning ? <span style={{ color: 'var(--color-secondary-light)' }}>Running</span> : <span style={{ color: jobFailed ? 'var(--color-error)' : 'var(--color-amber)' }}>{job.status}{jobStuck ? ' ⚠' : ''}</span>}
+                          {!job ? '—' : jobRunning ? <span style={{ color: 'var(--color-secondary-light)' }}>Running</span> : <span style={{ color: jobFailed ? 'var(--color-error)' : 'var(--color-amber)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>{job.status}{jobStuck && <AlertTriangle size={10} />}</span>}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
                           {step === 1 && (
-                            <span style={{ color: 'var(--color-error)', fontSize: '0.65rem' }}>→ Resend in Stripe</span>
+                            <span style={{ color: 'var(--color-error)', fontSize: '0.65rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ArrowRight size={10} />Resend in Stripe</span>
                           )}
                           {step === 2 && (
                             <ForceQueueButton briefId={b.id} />
@@ -491,7 +499,9 @@ export default async function AdminPage() {
                     return (
                       <tr key={j.id} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
                         <td style={{ padding: '0.5rem 0.75rem', color: statusColor, whiteSpace: 'nowrap' }}>
-                          {j.status.toUpperCase()}{isStuck ? ' ⚠' : ''}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            {j.status.toUpperCase()}{isStuck && <AlertTriangle size={10} />}
+                          </span>
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>
                           {j.brief_id ? j.brief_id.slice(0, 8) + '…' : '—'}
@@ -552,6 +562,7 @@ export default async function AdminPage() {
         </Section>
       </div>
     </main>
+    </>
   );
 }
 
@@ -562,7 +573,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <div style={{
         background: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border)',
-        borderRadius: '8px',
+        borderRadius: 'var(--radius-lg)',
         padding: '1rem',
         boxShadow: 'var(--shadow-card)',
       }}>

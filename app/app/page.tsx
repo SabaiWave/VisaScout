@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
+import { ChevronRight, Check, ChevronDown, Zap, Search, FileText } from 'lucide-react';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
@@ -53,6 +54,35 @@ const NATIONALITIES = [
   'Sri Lankan', 'Swedish', 'Swiss', 'Taiwanese', 'Tajikistani', 'Thai', 'Tunisian', 'Turkish', 'Ugandan', 'Ukrainian',
   'Uruguayan', 'Uzbekistani', 'Venezuelan', 'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean',
 ];
+
+// ─── Depth card config ─────────────────────────────────────────────────────
+
+const DEPTH_CONFIG = {
+  quick: {
+    icon: Zap,
+    label: 'Scout',
+    price: 'Free',
+    description: 'Is there a visa issue I need to know about?',
+    color: 'var(--color-depth-quick)',
+    colorRgb: '129,140,248',
+  },
+  standard: {
+    icon: Search,
+    label: 'Intel',
+    price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
+    description: 'Booking soon. Need all options on the table.',
+    color: 'var(--color-depth-standard)',
+    colorRgb: '192,132,252',
+  },
+  deep: {
+    icon: FileText,
+    label: 'Dossier',
+    price: `$${(PRICES.deep.amount / 100).toFixed(2)}`,
+    description: "Complex situation or can't afford to be wrong.",
+    color: 'var(--color-depth-deep)',
+    colorRgb: '251,191,36',
+  },
+} as const;
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -109,10 +139,10 @@ function SignInPrompt() {
 function FieldError() {
   return (
     <p
-      className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
+      className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1"
       style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}
     >
-      <span>▸</span> Required
+      <ChevronRight size={10} aria-hidden="true" /> Required
     </p>
   );
 }
@@ -193,6 +223,8 @@ function AppContent() {
   const [isCheckingCap, setIsCheckingCap] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [inviteAccess, setInviteAccess] = useState(false);
+  const [showInviteInput, setShowInviteInput] = useState(false);
+  const [textareaFocused, setTextareaFocused] = useState(false);
 
   // Advance display count by one step, respecting MIN_REVEAL_STAGGER_MS between reveals.
   // Cascades automatically — after revealing idx N, immediately checks if N+1 is ready.
@@ -482,30 +514,32 @@ function AppContent() {
 
 
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                <div>
-                  <label style={LABEL_STYLE} htmlFor="nationality">Your Nationality <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                  <SearchableCombobox
-                    id="nationality"
-                    options={NATIONALITIES}
-                    value={nationality}
-                    onChange={setNationality}
-                    placeholder="Select nationality…"
-                    hasError={submitted && !nationality}
-                  />
-                  {submitted && !nationality && <FieldError />}
-                </div>
-
-                <div>
-                  <label style={LABEL_STYLE} htmlFor="destination">Destination <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                  <SearchableCombobox
-                    id="destination"
-                    options={DESTINATIONS}
-                    value={destination}
-                    onChange={v => { setDestination(v); setVisaType(''); }}
-                    placeholder="Select destination…"
-                    hasError={submitted && !destination}
-                  />
-                  {submitted && !destination && <FieldError />}
+                {/* Nationality + Destination — paired row */}
+                <div className="grid grid-cols-2 gap-3 items-start">
+                  <div>
+                    <label style={LABEL_STYLE} htmlFor="nationality">Nationality <span style={{ color: 'var(--color-error)' }}>*</span></label>
+                    <SearchableCombobox
+                      id="nationality"
+                      options={NATIONALITIES}
+                      value={nationality}
+                      onChange={setNationality}
+                      placeholder="Select…"
+                      hasError={submitted && !nationality}
+                    />
+                    {submitted && !nationality && <FieldError />}
+                  </div>
+                  <div>
+                    <label style={LABEL_STYLE} htmlFor="destination">Destination <span style={{ color: 'var(--color-error)' }}>*</span></label>
+                    <SearchableCombobox
+                      id="destination"
+                      options={DESTINATIONS}
+                      value={destination}
+                      onChange={v => { setDestination(v); setVisaType(''); }}
+                      placeholder="Select…"
+                      hasError={submitted && !destination}
+                    />
+                    {submitted && !destination && <FieldError />}
+                  </div>
                 </div>
 
                 <div>
@@ -529,10 +563,22 @@ function AppContent() {
                     id="freeform"
                     value={freeform}
                     onChange={e => setFreeform(e.target.value)}
-                    rows={4}
+                    onFocus={() => setTextareaFocused(true)}
+                    onBlur={() => setTextareaFocused(false)}
+                    rows={5}
                     maxLength={2000}
+                    aria-invalid={submitted && !freeform ? true : undefined}
+                    aria-required="true"
                     placeholder="I'm arriving in Thailand on March 15 and staying about 28 days. I work remotely for a US company and I'm thinking about a quick border run to Malaysia to reset my stay."
-                    style={{ ...INPUT_STYLE, resize: 'vertical', lineHeight: 1.75, minHeight: 100, border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : 'var(--color-border)'}` }}
+                    style={{
+                      ...INPUT_STYLE,
+                      resize: 'vertical',
+                      lineHeight: 1.75,
+                      minHeight: 130,
+                      border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`,
+                      boxShadow: textareaFocused ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
+                      transition: 'border-color 0.15s, box-shadow 0.15s',
+                    }}
                   />
                   <p className="text-xs mt-1 text-right" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                     {freeform.length}/2000
@@ -543,65 +589,45 @@ function AppContent() {
                 {/* Depth selector */}
                 <div>
                   <p style={LABEL_STYLE}>Research Depth</p>
-                  <div
-                    className="grid grid-cols-3 rounded-lg overflow-hidden"
-                    style={{ border: '1px solid var(--color-border-strong)' }}
-                  >
-                    {BRIEF_DEPTHS.map((d, i) => (
-                      <button
-                        key={d}
-                        type="button"
-                        aria-pressed={depth === d}
-                        onClick={() => setDepth(d)}
-                        className="py-2.5 text-xs font-bold uppercase transition-colors"
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          letterSpacing: '0.06em',
-                          background: depth === d ? 'var(--color-secondary)' : 'var(--color-bg-elevated)',
-                          color: depth === d ? '#ffffff' : 'var(--color-text-tertiary)',
-                          borderLeft: i > 0 ? '1px solid var(--color-border-strong)' : 'none',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {DEPTH_LABEL[d]}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-3 gap-3">
+                    {BRIEF_DEPTHS.map(d => {
+                      const cfg = DEPTH_CONFIG[d];
+                      const Icon = cfg.icon;
+                      const selected = depth === d;
+                      return (
+                        <button
+                          key={d}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setDepth(d)}
+                          style={{
+                            padding: '14px 12px',
+                            borderRadius: 'var(--radius-md)',
+                            border: `1px solid ${selected ? `rgba(${cfg.colorRgb},0.5)` : 'var(--color-border-strong)'}`,
+                            background: selected ? `rgba(${cfg.colorRgb},0.07)` : 'var(--color-bg-elevated)',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            outline: 'none',
+                            transition: 'border-color 0.15s, background 0.15s',
+                          }}
+                        >
+                          <div style={{ marginBottom: 10 }}>
+                            <Icon size={16} aria-hidden="true" style={{ color: selected ? cfg.color : 'var(--color-text-tertiary)' }} />
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: selected ? cfg.color : 'var(--color-text-primary)', marginBottom: 4 }}>
+                            {cfg.label}
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, color: selected ? cfg.color : 'var(--color-text-tertiary)', marginBottom: 8 }}>
+                            {cfg.price}
+                          </div>
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', lineHeight: 1.45 }}>
+                            {cfg.description}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <p className="mt-2 text-center" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
-                    {depth === 'quick' && 'Free · Is there a visa issue I need to know about?'}
-                    {depth === 'standard' && `$${(PRICES.standard.amount / 100).toFixed(2)} · Booking soon. Need all options on the table.`}
-                    {depth === 'deep' && `$${(PRICES.deep.amount / 100).toFixed(2)} · Complex situation or can't afford to be wrong.`}
-                  </p>
                 </div>
-
-                {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (inviteAccess || depth === 'standard' || depth === 'deep') && (
-                  <div>
-                    {inviteAccess ? (
-                      <p className="text-xs font-bold uppercase flex items-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-success)' }}>
-                        <span>✓</span> Invite access active
-                      </p>
-                    ) : (
-                      <>
-                        <label style={LABEL_STYLE}>
-                          Invite Code
-                          <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(optional)</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={inviteCode}
-                          onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
-                          placeholder="Invite code"
-                          style={{ ...INPUT_STYLE, border: `1px solid ${inviteCodeError ? 'var(--color-error)' : 'var(--color-border-strong)'}` }}
-                        />
-                        {inviteCodeError && (
-                          <p className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
-                            <span>▸</span> {inviteCodeError}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
 
                 {capReached && (
                   <div
@@ -617,21 +643,70 @@ function AppContent() {
                   </div>
                 )}
 
-                <Button
-                  type="submit"
-                  disabled={phase === 'redirecting' || isCheckingCap}
-                  className="w-full py-3"
-                >
-                  {isCheckingCap
-                    ? 'Checking…'
-                    : phase === 'redirecting'
-                      ? 'Starting…'
-                      : depth === 'quick' || inviteAccess
-                        ? 'Generate Brief · Free'
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <Button
+                    type="submit"
+                    disabled={phase === 'redirecting' || isCheckingCap}
+                    className="w-full py-3"
+                    style={
+                      inviteAccess || depth === 'quick'
+                        ? {}
                         : depth === 'standard'
-                          ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
-                          : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
-                </Button>
+                          ? { background: 'var(--color-depth-standard)', color: '#ffffff', boxShadow: '0 0 0 1px rgba(192,132,252,0.4), 0 0 24px rgba(192,132,252,0.2)' }
+                          : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
+                    }
+                  >
+                    {isCheckingCap
+                      ? 'Checking…'
+                      : phase === 'redirecting'
+                        ? 'Starting…'
+                        : depth === 'quick' || inviteAccess
+                          ? 'Generate Brief · Free'
+                          : depth === 'standard'
+                            ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
+                            : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
+                  </Button>
+
+                  {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (
+                    inviteAccess ? (
+                      <p className="text-center text-xs font-bold uppercase flex items-center justify-center gap-1.5" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-success)' }}>
+                        <Check size={12} aria-hidden="true" /> Invite access active
+                      </p>
+                    ) : (depth === 'standard' || depth === 'deep') ? (
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setShowInviteInput(v => !v)}
+                          className="w-full flex items-center justify-center gap-1 text-xs uppercase"
+                          style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                        >
+                          Have an invite code?
+                          <ChevronDown
+                            size={11}
+                            aria-hidden="true"
+                            style={{ transform: showInviteInput ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}
+                          />
+                        </button>
+                        {showInviteInput && (
+                          <div style={{ marginTop: 8 }}>
+                            <input
+                              type="text"
+                              value={inviteCode}
+                              onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
+                              placeholder="Enter invite code"
+                              style={{ ...INPUT_STYLE, border: `1px solid ${inviteCodeError ? 'var(--color-error)' : 'var(--color-border-strong)'}` }}
+                            />
+                            {inviteCodeError && (
+                              <p className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
+                                <ChevronRight size={10} aria-hidden="true" /> {inviteCodeError}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : null
+                  )}
+                </div>
               </form>
             </div>
           )}

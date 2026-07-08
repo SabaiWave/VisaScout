@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
+import Link from 'next/link';
+
 import { getSupabase } from '@/src/lib/supabase';
 import { getOrCreateUser } from '@/src/lib/users';
+import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { NavLink } from '@/app/components/ui/NavLink';
 import { BriefGrid } from './BriefGrid';
@@ -44,20 +47,39 @@ function EmptyState() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '5rem 2rem',
-      gap: '1rem',
+      minHeight: '52vh',
+      gap: 0,
       textAlign: 'center',
     }}>
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
-        <circle cx="12" cy="12" r="10"/>
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-      </svg>
-      <p className="uppercase" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+      <p style={{
+        fontFamily: 'var(--font-body)',
+        fontSize: 'var(--text-sm)',
+        color: 'var(--color-text-secondary)',
+        margin: '0 0 24px',
+      }}>
         No briefs saved yet.
       </p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', margin: 0 }}>
-        Use <strong>GENERATE BRIEF</strong> in the sidebar to get started.
-      </p>
+      <Link
+        href="/app"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '8px 12px',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 'var(--text-xs)',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: 'var(--color-text-secondary)',
+          textDecoration: 'none',
+          border: '1px solid var(--color-border-strong)',
+          borderRadius: 'var(--radius-md)',
+          background: 'transparent',
+        }}
+      >
+        + Generate Brief
+      </Link>
     </div>
   );
 }
@@ -65,15 +87,34 @@ function EmptyState() {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sim?: string }>;
 }) {
   const clerkUser = await currentUser();
   if (!clerkUser) redirect('/sign-in');
 
+  const params = await searchParams;
+
+  // Admin-only: sim=empty bypasses DB and renders the empty state
+  if (params.sim === 'empty' && isAdminUser(clerkUser.id)) {
+    return (
+      <>
+        <div className="hidden lg:flex items-center justify-end gap-1 px-4" style={{ height: '52px', borderBottom: '1px solid var(--color-border-muted)' }}>
+          <NavLink href="/">Home</NavLink>
+          <NavLink href="/contact">Contact</NavLink>
+        </div>
+        <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">MY BRIEFS</SectionHeading>
+          </div>
+          <EmptyState />
+        </div>
+      </>
+    );
+  }
+
   // briefs.user_id is the internal UUID from visascout.users, not the Clerk user ID
   const userRecord = await getOrCreateUser(clerkUser.id).catch(() => null);
 
-  const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? '1', 10));
 
   const { briefs, total } = await getUserBriefs(userRecord?.id ?? '', page);
@@ -95,7 +136,7 @@ export default async function DashboardPage({
       </div>
 
       <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ marginBottom: '2rem' }}>
           <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
             MY BRIEFS
           </SectionHeading>
