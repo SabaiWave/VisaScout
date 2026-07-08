@@ -596,10 +596,11 @@ function AppContent() {
                             borderRadius: 'var(--radius-md)',
                             border: `1px solid ${selected ? `rgba(${cfg.colorRgb},0.5)` : 'var(--color-border-strong)'}`,
                             background: selected ? `rgba(${cfg.colorRgb},0.07)` : 'var(--color-bg-elevated)',
+                            boxShadow: selected ? `0 0 0 3px rgba(${cfg.colorRgb},0.15)` : 'none',
                             cursor: 'pointer',
                             textAlign: 'left',
                             outline: 'none',
-                            transition: 'border-color 0.15s, background 0.15s',
+                            transition: 'border-color 0.15s, background 0.15s, box-shadow 0.15s',
                           }}
                         >
                           <div style={{ marginBottom: 10 }}>
@@ -693,8 +694,8 @@ function AppContent() {
                               onBlur={() => setInviteInputFocused(false)}
                               style={{
                                 ...INPUT_STYLE,
-                                border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? 'var(--color-secondary)' : 'var(--color-border-strong)'}`,
-                                boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
+                                border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? `rgba(${DEPTH_CONFIG[depth].colorRgb},0.8)` : 'var(--color-border-strong)'}`,
+                                boxShadow: inviteInputFocused && !inviteCodeError ? `0 0 0 3px rgba(${DEPTH_CONFIG[depth].colorRgb},0.18)` : 'none',
                               }}
                             />
                             {inviteCodeError && (
