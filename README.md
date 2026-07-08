@@ -10,7 +10,7 @@
 
 Tell VisaScout your nationality, destination, and situation. It returns a structured visa brief with recommended actions, deadlines, entry requirements, border run options, and per-claim confidence scores — sourced from official immigration portals, recent policy changes, and traveler ground truth.
 
-**Supported destinations:** Thailand, Vietnam, Indonesia, Malaysia, Philippines, Cambodia, Laos, Myanmar, Singapore, Brunei
+**Supported destinations:** Thailand, Vietnam, Indonesia, Malaysia, Philippines, Cambodia, Laos, Myanmar, Singapore, Brunei, Japan, South Korea, Germany, Portugal, Spain, Netherlands, France, Mexico, Colombia, Schengen
 
 ---
 
