@@ -72,7 +72,27 @@ Compare the search results against the current config. Check:
 1. Which govDomains appear active (URL found in results) vs broken/unknown.
 2. Which visaTypes are confirmed current, renamed, changed, or discontinued.
 3. Any new visa types/programs not in the config.
-4. Whether the notes field needs updating for accuracy.
+4. Whether the notes field needs updating.
+
+NOTES FIELD RULE — CRITICAL:
+The notes field is injected into agent system prompts as behavioral guardrails, not factual claims.
+It must tell agents HOW TO BEHAVE, not WHAT THE FACTS ARE.
+Facts go stale; behavior stays stable.
+
+ALLOWED in notesUpdate:
+- "Do not assert X without verifying from search results"
+- "Always surface Y to the user"
+- "Verify Z at [official source] before advising"
+- "Never conflate A and B — they are distinct"
+- Stable structural distinctions between visa types
+- Process facts unlikely to change (e.g. "must appear in person", "surrendered at exit")
+
+NOT ALLOWED in notesUpdate:
+- Specific durations, fees, or counts (e.g. "60 days", "S$5,600", "93 nationalities")
+- Specific dates or law references (e.g. "effective Oct 23, 2025", "Law No. 61/2025")
+- Factual claims about current policy that will go stale within months
+
+If you would write a factual claim, convert it: instead of "visa is now 60 days", write "do not assume any specific duration — confirm from search results".
 
 Base confidence on result quality: high = multiple gov sources confirm, medium = partial coverage, low = few/no gov sources.
 
@@ -88,7 +108,7 @@ Return JSON only:
   "newVisaTypes": [
     { "name": "string", "note": "string" }
   ],
-  "notesUpdate": "suggested replacement for the notes field, or null if no change needed",
+  "notesUpdate": "behavioral guardrail notes replacement, or null if no change needed",
   "confidence": "high|medium|low",
   "summary": "1-2 sentence summary of what changed and what needs attention"
 }`,

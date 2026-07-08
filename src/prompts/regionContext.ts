@@ -25,11 +25,10 @@ SCHENGEN-SPECIFIC RULES (read carefully — getting these wrong causes real trav
 const EAST_ASIA_CONTEXT = `
 EAST ASIA-SPECIFIC RULES:
 
-- Japan: visa-free duration VARIES by nationality (90 days for most Western passports,
-  but not universal). Never assume 90 days — always verify for the specific nationality.
-  Japan does not have a visa officially called a "digital nomad visa." Do not use that label
-  for Japanese visas. Use the official visa category name (e.g. "Highly Skilled Professional visa").
-  If Japan has launched a dedicated digital nomad program, cite the official source from mofa.go.jp.
+- Japan: visa-free duration VARIES by nationality — never assume 90 days, always verify
+  for the specific nationality. Japan has an officially named "Designated Activities (Digital Nomad)"
+  visa on mofa.go.jp — use this full official name. Do not use informal labels that do not
+  match the official mofa.go.jp designation. Always cite mofa.go.jp as the authoritative source.
 - South Korea: K-ETA (Korea Electronic Travel Authorization) required for many
   visa-exempt nationalities. Eligibility varies — do not state it is required for all nationalities.
   The Korea F-1-D digital nomad visa has nationality restrictions. Do not state it is available
@@ -49,10 +48,10 @@ LATIN AMERICA-SPECIFIC RULES:
   overstate enforcement as universal.
   Border exits reset the FMM — re-entry with a new FMM is a legitimate and common strategy
   unlike Schengen.
-- Colombia: 90-day visa-free entry, extendable to 180 by visiting a Migración Colombia office
-  — surface this option explicitly. Digital Nomad Visa (M-10) available — do not state
-  specific processing time estimates as times vary from 2 weeks to 3+ months and change
-  frequently. Direct users to check current timelines at migracioncolombia.gov.co.
+- Colombia: visa-free duration and any extension procedure vary by nationality — do not
+  assert a universal figure; verify from search results for the user's specific passport.
+  Digital Nomad Visa (M-10) available — do not cite specific processing time estimates;
+  direct users to migracioncolombia.gov.co for current timelines.
 - Remote work legal status: both countries have informal tolerance but no formal remote work
   visa for tourist-entry workers. Surface this nuance.
 `.trim();

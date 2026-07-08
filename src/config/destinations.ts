@@ -33,14 +33,16 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'consular.go.th',
     ],
     visaTypes: [
-      'Visa Exemption (30/60 days)',
+      'Visa Exemption (60 days, extendable +30 days)',
       'Tourist Visa (TR)',
       'Thailand Privilege Card',
       'Long-Term Resident (LTR) Visa',
       'Non-Immigrant B (Business)',
-      'Non-Immigrant O (Retirement/Family)',
+      'Non-Immigrant O / O-A (Retirement/Family)',
     ],
     region: 'SEA',
+    notes:
+      'Always surface: (1) current visa exemption duration and extendability for the user\'s nationality — do not assume any specific day count, confirm from search results; (2) whether Visa on Arrival applies to the user\'s nationality; (3) TDAC pre-arrival requirement — affects all travelers regardless of visa type, replaces TM6. Never conflate Non-Immigrant O and O-A — they are distinct sub-types with different conditions. Do not state O-A eligibility criteria as settled — requirements have been under revision; verify from search results before advising.',
   },
   {
     name: 'Vietnam',
@@ -60,6 +62,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'Permanent Residence',
     ],
     region: 'SEA',
+    notes:
+      'Always distinguish e-visa approval validity from maximum stay per entry — they are different values; confirm both from search results. Surface whether the user\'s nationality qualifies for any bilateral visa exemption — exemption programs have expanded recently. Do not assert Golden Visa or long-stay investor program availability without confirming from official sources — they have been in finalization stage. Primary e-visa portal: evisa.xuatnhapcanh.gov.vn — verify current active portal from search results.',
   },
   {
     name: 'Indonesia',
@@ -71,13 +75,15 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     visaTypes: [
       'Visa-Free (30 days)',
-      'Visa on Arrival (VOA)',
-      'B211A Tourist/Social',
+      'Visa on Arrival (VOA) / e-VOA',
+      '211A/C1 Visitor Visa (Tourist/Social)',
       'E-Visa',
       'KITAS Work/Stay Permit',
       'Second Home Visa',
     ],
     region: 'SEA',
+    notes:
+      'All extensions (VOA, KITAS) require in-person biometric collection — always surface this to users planning to extend; do not assume standard online-only renewal is available. A pre-arrival card must be submitted via evisa.imigrasi.go.id before arrival — surface to all travelers. New education visa categories exist — surface if user mentions study purposes. Long-stay investor visa pathway exists — surface if user is an investor or skilled professional.',
   },
   {
     name: 'Malaysia',
@@ -96,6 +102,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'DE Rantau Nomad Pass',
     ],
     region: 'SEA',
+    notes:
+      'Employment Pass renewals involving a category change require additional documentation — do not assume standard renewal process; verify current requirements from search results. MM2H program has undergone significant requirement revisions — do not rely on cached requirements; always verify current eligibility thresholds at imi.gov.my. DE Rantau Nomad Pass: verify current application status at mdec.com.my before advising.',
   },
   {
     name: 'Philippines',
@@ -106,14 +114,16 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'evisa.gov.ph',
     ],
     visaTypes: [
-      'Visa-Free (30 days)',
-      'Tourist Visa Extension',
-      '9(a) Temporary Visitor',
+      'Visa-Free (varies by nationality)',
+      '9(a) Temporary Visitors Visa',
       'Special Work Permit',
       'SRRV Retirement Visa',
-      'ACR I-Card',
+      'Pre-arranged Employment Visa (9G)',
+      'Temporary Resident Visa (TRV)',
     ],
     region: 'SEA',
+    notes:
+      'E-Visas (evisa.gov.ph) are non-extendable and non-convertible — do not suggest extending an e-Visa; extensions apply only to 9(a) visas via immigration.gov.ph. Do not assert a universal visa-free duration — it varies by nationality. ACR I-Card is an alien registration document required for long-stay holders, not a visa type. Digital Nomad Visa has been announced — verify current launch status and requirements at immigration.gov.ph before advising. Passport valid 6 months beyond departure required.',
   },
   {
     name: 'Cambodia',
@@ -124,14 +134,16 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'immigration.gov.kh',
     ],
     visaTypes: [
-      'Visa on Arrival (T/E)',
       'E-Visa',
+      'Visa Exemption',
       'Ordinary Visa (ER)',
       'Business Visa (EB)',
       'Retirement Visa',
       'MICE Visa',
     ],
     region: 'SEA',
+    notes:
+      'Do not confidently recommend Visa on Arrival without verifying current availability from search results — status is uncertain. Always surface Cambodia e-Arrival registration requirement to all travelers. Verify ER/EB visa codes and current processing against official sources before advising on those types.',
   },
   {
     name: 'Laos',
@@ -143,13 +155,15 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     visaTypes: [
       'Visa on Arrival (30 days)',
-      'E-Visa',
+      'E-Visa (30-day stay, 60-day approval validity)',
       'Tourist Visa (L)',
       'Business Visa (B)',
       'Investment Visa',
       'Non-Immigrant Visa',
     ],
     region: 'SEA',
+    notes:
+      'Never conflate e-Visa approval letter validity with actual stay duration — they are different values; confirm both from search results. A digital immigration card requirement may be in effect at some entry points, replacing paper cards — surface this to travelers. Always confirm current visa-free policy for the user\'s nationality from search results — expanded temporary policies may have lapsed. Passport valid 180+ days from arrival required.',
   },
   {
     name: 'Myanmar',
@@ -163,11 +177,13 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'E-Visa (Tourist)',
       'Tourist Visa on Arrival',
       'Business Visa',
-      'Social Visit Visa',
-      'Multiple Journey Visa',
-      'Special Economic Zone Permit',
+      'Social Visa',
+      'Religious / Education Visa',
+      'Official Visa',
     ],
     region: 'SEA',
+    notes:
+      'Multiple-entry is a sub-tier within individual visa types (Business, Social, Religious, etc.) — not a standalone product. Business Visa fees vary between gov portals — surface both values and note the discrepancy rather than asserting a single figure; verify current fees from search results. Do not recommend Special Economic Zone Permit without confirming current availability from official sources. Any US entry restrictions on Myanmar nationals affect outbound travel from Myanmar, not foreigners entering Myanmar.',
   },
   {
     name: 'Singapore',
@@ -186,6 +202,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'ONE Pass',
     ],
     region: 'SEA',
+    notes:
+      'Always verify current Employment Pass qualifying salary threshold from mom.gov.sg — it has been updated and may change further. Visa-Free Transit Facility (VFTF) is a distinct entry pathway for transit passengers — different from standard visa-free entry; surface when user mentions transit.',
   },
   {
     name: 'Brunei',
@@ -196,13 +214,15 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     visaTypes: [
       'Visa-Free (14/30 days)',
-      'Tourist Visa',
-      'Business Visa',
+      'Visit Visa',
+      'Business Visit Visa',
       'Employment Pass',
-      'Dependent Pass',
+      'Dependent Visa',
       'Permanent Residence',
     ],
     region: 'SEA',
+    notes:
+      'Always surface mandatory travel insurance requirement — verify current status at mfa.gov.bn. Business Visit Visa and Professional Visit Visa have distinct document requirements — do not conflate them. Long-Term Pass option exists for foreigners with established ties — surface if relevant. All visitors require valid passport, onward ticket, and sufficient funds.',
   },
 
   // ─── East Asia ─────────────────────────────────────────────────────────────
@@ -217,15 +237,15 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     visaTypes: [
       'Visa-Free/Waiver (varies by nationality)',
-      'Tourist Visa',
+      'Tourist Visa (Short-Term Stay)',
       'Highly Skilled Professional (HSP)',
       'Working Holiday',
-      'Business Visa',
-      'Long-term Resident',
+      'Business Manager Visa (経営・管理ビザ)',
+      'Designated Activities (Digital Nomad)',
     ],
     region: 'East Asia',
     notes:
-      "Do not use the label 'digital nomad visa' for any Japanese visa — Japan has no officially named digital nomad visa. Use the official visa category name (e.g. 'Highly Skilled Professional visa'). Visa-free duration varies by nationality — do not assume 90 days. Always cite mofa.go.jp as the authoritative source.",
+      "Use the full official name 'Designated Activities (Digital Nomad)' for Japan's digital nomad visa — do not use informal labels not matching mofa.go.jp. Verify current income and insurance requirements from search results before citing specifics. Business Manager Visa requirements have been updated — verify current criteria from search results. Visa-free duration varies by nationality — do not assume 90 days. JESTA pre-clearance rollout is in progress for visa-exempt travelers — verify current status. Always cite mofa.go.jp as authoritative source.",
   },
   {
     name: 'South Korea',
@@ -237,7 +257,7 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'english.visitkorea.or.kr',
     ],
     visaTypes: [
-      'K-ETA (visa-free eligible nationalities)',
+      'K-ETA (Korea Electronic Travel Authorization)',
       'Tourist C-3',
       'Digital Nomad F-1-D',
       'Working Holiday H-1',
@@ -246,7 +266,7 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'East Asia',
     notes:
-      'K-ETA eligibility varies by nationality — do not state it is required for all nationalities. F-1-D digital nomad visa has nationality restrictions and requirements that change — do not assert universal availability. Always verify current eligibility at www.hikorea.go.kr.',
+      'Do not state K-ETA is universally required — eligibility varies by nationality; some nationalities are temporarily exempt from both visa and K-ETA. Verify current K-ETA status for the user\'s specific nationality at www.immigration.go.kr. F-1-D digital nomad visa has nationality restrictions — do not assert universal availability. F-3 dependent visa rules have changed materially — verify current requirements before advising on family situations. Always verify current eligibility at www.immigration.go.kr.',
   },
 
   // ─── Schengen ──────────────────────────────────────────────────────────────
@@ -269,6 +289,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Schengen',
     schengenMember: true,
+    notes:
+      'Always surface EES biometric border registration to visa-free travelers — it changes how the 90/180 rule is enforced and how overstays are detected. Verify current National D Visa application process at auswaertiges-amt.de — procedures have been updated. Surface that visa rejection appeals now require court proceedings, not an administrative remonstration process. Vocational-experience and expanded student immigration pathways exist — surface if relevant to the user\'s situation.',
   },
   {
     name: 'Portugal',
@@ -283,12 +305,14 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'Schengen Visa-Free (90/180)',
       'D8 Digital Nomad Visa',
       'D7 Passive Income Visa',
-      'Job Seeker Visa',
+      'Skilled Job Seeker Visa (pending, not yet open)',
       'Working Holiday',
       'National D Visa',
     ],
     region: 'Schengen',
     schengenMember: true,
+    notes:
+      'Do not recommend the Job Seeker Visa — it has been discontinued. A replacement Skilled Job Seeker Visa exists — verify whether it is currently open for applications at vistos.mne.gov.pt before advising; it may still be pending implementing regulations. Portugal\'s immigration framework has been under active legislative revision — verify current visa type availability and eligibility at aima.gov.pt and vistos.mne.gov.pt before advising.',
   },
   {
     name: 'Spain',
@@ -309,6 +333,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Schengen',
     schengenMember: true,
+    notes:
+      'Do not recommend the Golden Visa — it has been terminated. Arraigo/Settlement residency requirements have been updated — do not cite prior requirements; verify current rules from search results. A family residence permit for family members of Spanish nationals has been introduced — surface if relevant. Consular requirements vary by consulate — always direct users to their specific exteriores.gob.es consulate page.',
   },
   {
     name: 'Netherlands',
@@ -329,6 +355,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Schengen',
     schengenMember: true,
+    notes:
+      'Verify current visa application submission requirements — procedures have been updated. Schengen C visa holders may be eligible to convert single-entry to multiple-entry while in the Netherlands — surface this option if relevant. EU Blue Card and Startup Visa are valid pathways not in the visaTypes list — surface if user asks about skilled worker or entrepreneur routes.',
   },
   {
     name: 'France',
@@ -349,6 +377,8 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Schengen',
     schengenMember: true,
+    notes:
+      'UK nationals are not visa-free — they require a Schengen or national visa. Talent Passport holders have exemptions from language and civics requirements that apply to other long-stay pathways — surface this distinction when comparing options. All applicants over 12 must appear in person for biometric capture — surface to users planning to apply. Verify current remote worker and long-stay pathways at france-visas.gouv.fr — rules have been updated.',
   },
 
   // ─── Latin America ─────────────────────────────────────────────────────────
@@ -369,7 +399,7 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Latin America',
     notes:
-      'FMM tourist card is legally required for all foreign visitors. Enforcement is inconsistent — some entry points do not issue or verify it. Instruct users to request it proactively at entry and retain it until departure. Do not dismiss FMM as unimportant, and do not overstate enforcement as universal. Border exits reset the FMM — re-entry with a new FMM is a legitimate strategy unlike Schengen.',
+      'FMM tourist card is legally required for all foreign visitors — instruct users to request it proactively at entry and retain until departure (surrendered at exit). Enforcement is inconsistent — do not dismiss FMM as unimportant, and do not overstate enforcement as universal. Border exits reset the FMM — re-entry with a new FMM is a legitimate strategy, unlike Schengen. Verify current FMM procedures and format from search results — administrative processes may have changed. Advise users that INM processing timelines may be extended — verify current timelines before citing estimates.',
   },
   {
     name: 'Colombia',
@@ -379,7 +409,7 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'www.migracioncolombia.gov.co',
     ],
     visaTypes: [
-      'Visa-Free (90 days, extendable to 180)',
+      'Visa-Free (up to 180 days)',
       'Digital Nomad Visa M-10',
       'Retirement Visa',
       'Investor Visa',
@@ -387,7 +417,7 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     ],
     region: 'Latin America',
     notes:
-      'Do not cite specific M-10 processing time estimates — processing times vary from 2 weeks to 3+ months and change frequently. Direct users to check current timelines at migracioncolombia.gov.co. The 90-day visa-free stay is extendable to 180 days by visiting a Migracion Colombia office — surface this option explicitly.',
+      'Do not assume a specific visa-free duration or extension procedure — allowances vary by nationality; verify the user\'s specific entitlement from search results before advising. Do not cite specific M-10 processing time estimates — direct users to migracioncolombia.gov.co for current timelines. Investor visa has a minimum investment threshold — verify current requirement from official sources before citing a figure.',
   },
 
   // ─── Schengen bloc-level entry ────────────────────────────────────────────
@@ -402,13 +432,13 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
     visaTypes: [
       'Visa-Free Short Stay (90/180 rule)',
       'Schengen C Visa (Short Stay)',
-      'ETIAS (pending launch)',
+      'ETIAS (post-EES launch, fee ~€7)',
       'National D Visa (country-specific)',
     ],
     region: 'Schengen',
     schengenMember: true,
     notes:
-      'User queried the Schengen Area as a whole rather than a specific country. Surface the 90/180 rule prominently. Explain that a Schengen C visa is applied for at the consulate of the primary destination country. Recommend the user specify their target country for country-specific D visa options — Portugal D8, Spain Digital Nomad Visa, Germany Freiberufler are distinct visas requiring separate applications. Do not produce country-specific border crossing options — the answer depends on which member state the user will be in.',
+      'User queried the Schengen Area as a whole rather than a specific country. Surface the 90/180 rule prominently. EES biometric border registration is being implemented — surface to visa-exempt travelers as it changes how overstay enforcement works; verify current EES launch status from search results. ETIAS pre-travel authorisation has been announced — do not assert it is currently active or required; verify current ETIAS status from search results. Explain that a Schengen C visa is applied for at the consulate of the primary destination country. Recommend the user specify their target country for country-specific D visa options — Portugal D8, Spain Digital Nomad Visa, Germany Freiberufler are distinct visas requiring separate applications. Do not produce country-specific border crossing options — the answer depends on which member state the user will be in.',
   },
 ];
 
