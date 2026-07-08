@@ -77,7 +77,7 @@
 
   /* Depth badge colors */
   --color-depth-quick:    #818cf8;  /* Indigo-light — quick depth badge */
-  --color-depth-standard: #c084fc;  /* Light purple — standard depth badge */
+  --color-depth-standard: #6366F1;  /* Primary indigo — standard depth badge */
   --color-depth-deep:     #fbbf24;  /* Golden amber — deep depth badge */
 
   /* Legacy light mode (PDF output only) */
