@@ -9,7 +9,7 @@ import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 import { NavDrawer, HamburgerButton, navDrawerLinkStyle } from '@/app/components/ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
 
-export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boolean }) {
+export function MobileNav({ isAdmin, showDev, isSignedIn = true }: { isAdmin: boolean; showDev: boolean; isSignedIn?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -25,18 +25,29 @@ export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boo
       >
         <HamburgerButton onClick={() => setOpen(true)} />
         <Wordmark />
-        <VisaScoutUserButton />
+        {isSignedIn ? (
+          <VisaScoutUserButton />
+        ) : (
+          <Link
+            href="/sign-in"
+            style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary-light)', textDecoration: 'none' }}
+          >
+            Sign In
+          </Link>
+        )}
       </nav>
 
       <NavDrawer open={open} onClose={() => setOpen(false)} side="left">
-        <Link
-          href="/dashboard"
-          onClick={() => setOpen(false)}
-          style={{ ...navDrawerLinkStyle, ...(pathname.startsWith('/dashboard') ? { color: 'var(--color-secondary-light)', background: 'var(--color-secondary-subtle)', border: 'none' } : {}) }}
-        >
-          <Archive size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
-          My Briefs
-        </Link>
+        {isSignedIn && (
+          <Link
+            href="/dashboard"
+            onClick={() => setOpen(false)}
+            style={{ ...navDrawerLinkStyle, ...(pathname.startsWith('/dashboard') ? { color: 'var(--color-secondary-light)', background: 'var(--color-secondary-subtle)', border: 'none' } : {}) }}
+          >
+            <Archive size={14} style={{ marginRight: '8px', flexShrink: 0 }} />
+            My Briefs
+          </Link>
+        )}
         <Link
           href="/app"
           onClick={() => setOpen(false)}
@@ -48,7 +59,14 @@ export function MobileNav({ isAdmin, showDev }: { isAdmin: boolean; showDev: boo
         {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Admin</Link>}
         {showDev && <Link href="/dev" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Dev</Link>}
         <div style={{ flex: 1 }} />
-        <SidebarAccount />
+        {isSignedIn ? (
+          <SidebarAccount />
+        ) : (
+          <div style={{ borderTop: '1px solid var(--color-border-muted)', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <Link href="/sign-in" onClick={() => setOpen(false)} style={{ ...navDrawerLinkStyle, justifyContent: 'center' }}>Sign In</Link>
+            <Link href="/sign-up" onClick={() => setOpen(false)} style={{ ...navDrawerLinkStyle, justifyContent: 'center', color: 'var(--color-secondary-light)', background: 'var(--color-secondary-subtle)', border: 'none' }}>Get Started</Link>
+          </div>
+        )}
       </NavDrawer>
     </>
   );
