@@ -64,7 +64,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
           style={{
             background: 'var(--color-bg-elevated)',
             border: '1px solid var(--color-border)',
-            borderRadius: '12px',
+            borderRadius: 'var(--radius-lg)',
             padding: '20px',
             cursor: 'pointer',
             position: 'relative',
@@ -80,16 +80,20 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             className="brief-delete-btn"
             style={{
               position: 'absolute',
-              top: '14px',
-              right: '14px',
+              top: '4px',
+              right: '4px',
               background: 'none',
               border: 'none',
-              padding: '4px',
+              padding: 0,
               cursor: 'pointer',
               color: 'var(--color-text-tertiary)',
-              borderRadius: '4px',
+              borderRadius: 'var(--radius-sm)',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              width: '44px',
+              height: '44px',
+              flexShrink: 0,
               transition: 'color 0.15s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(239,68,68,0.85)')}
@@ -138,7 +142,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
                 textTransform: 'uppercase' as const,
                 letterSpacing: '0.05em',
                 padding: '2px 8px',
-                borderRadius: '4px',
+                borderRadius: 'var(--radius-sm)',
                 background: 'rgba(245,158,11,0.12)',
                 color: 'var(--color-amber)',
               }}>

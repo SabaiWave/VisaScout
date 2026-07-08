@@ -191,6 +191,14 @@ export default function DevPage() {
           </DevGrid>
           <div className="mt-3 mb-2">
             <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
+              Dashboard states
+            </span>
+          </div>
+          <DevGrid>
+            <DevButton label="Dashboard: Empty State ↗" sublabel="/dashboard?sim=empty" href="/dashboard?sim=empty" newTab />
+          </DevGrid>
+          <div className="mt-3 mb-2">
+            <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
               Brief page states
             </span>
           </div>
