@@ -100,7 +100,9 @@ export function SearchableCombobox({
     ? 'var(--color-error)'
     : open
       ? 'var(--color-secondary)'
-      : 'var(--color-border-strong)';
+      : value
+        ? 'rgba(99,102,241,0.4)'
+        : 'var(--color-border-strong)';
 
   const focusRing = open
     ? '0 0 0 3px rgba(99,102,241,0.18)'
