@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertTriangle } from 'lucide-react';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { DevButton } from '@/app/components/ui/DevButton';
 import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
@@ -14,8 +14,8 @@ function DevSection({ title, children }: { title: string; children: React.ReactN
     <div className="mb-8">
       <SectionHeading size="sm" className="mb-3">{title}</SectionHeading>
       <div
-        className="rounded-lg p-4"
-        style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-card)' }}
+        className="p-4"
+        style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)' }}
       >
         {children}
       </div>
@@ -92,16 +92,13 @@ export default function DevPage() {
   }
 
   return (
-    <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
-        <SectionHeading size="md" as="h1" className="mb-1">Dev Tools</SectionHeading>
-        <p className="text-sm mb-8" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          ADMIN GATED
-        </p>
+    <main className="px-4 sm:px-6 py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+        <SectionHeading size="md" as="h1" subtitle="Admin gated" className="mb-8">DEV TOOLS</SectionHeading>
 
         {/* Brief Flows */}
         <DevSection title="Brief Flows">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            Depth affects pipeline config + downstream logs. Dry Run defaults on — toggle off to burn real API calls.
+            Depth affects pipeline config + downstream logs. Dry Run defaults on. Toggle off to burn real API calls.
           </p>
           <div className="mb-3 flex items-center gap-4 flex-wrap">
             <div
@@ -215,7 +212,7 @@ export default function DevPage() {
         {/* Log & Event Simulation */}
         <DevSection title="Log & Event Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB — CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
+            FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB. CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
           </p>
           <div className="mb-2">
             <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
@@ -224,56 +221,56 @@ export default function DevPage() {
           </div>
           <DevGrid>
             <DevButton
-              label="▲ Error Log ↗"
+              label="Error Log ↗"
               sublabel="level:error → must-have alert"
               href="/api/debug/sim?event=error"
               newTab
               accent
             />
             <DevButton
-              label="▲ Brief Failed ↗"
+              label="Brief Failed ↗"
               sublabel="event:brief.failed + level:error"
               href="/api/debug/sim?event=brief.failed"
               newTab
               accent
             />
             <DevButton
-              label="▲ Payment Completed ↗"
+              label="Payment Completed ↗"
               sublabel="event:payment.completed · $19 sim"
               href="/api/debug/sim?event=payment.completed"
               newTab
               accent
             />
             <DevButton
-              label="▲ Poll: Job Claimed ↗"
+              label="Poll: Job Claimed ↗"
               sublabel="event:poll.job_claimed · pipeline fires"
               href="/api/debug/sim?event=poll.job_claimed"
               newTab
               accent
             />
             <DevButton
-              label="▲ Free Cap Hit ↗"
+              label="Free Cap Hit ↗"
               sublabel="event:free_cap.reached"
               href="/api/debug/sim?event=free-cap.reached"
               newTab
               accent
             />
             <DevButton
-              label="▲ PDF Failed ↗"
+              label="PDF Failed ↗"
               sublabel="event:brief.pdf_failed + level:error"
               href="/api/debug/sim?event=brief.pdf_failed"
               newTab
               accent
             />
             <DevButton
-              label="▲ Input Oversized ↗"
+              label="Input Oversized ↗"
               sublabel="level:warn · API bypass signal"
               href="/api/debug/sim?event=input.oversized"
               newTab
               accent
             />
             <DevButton
-              label="▲ Invalid Invite Code ↗"
+              label="Invalid Invite Code ↗"
               sublabel="level:warn · bad invite code"
               href="/api/debug/sim?event=invite.invalid-code"
               newTab
@@ -322,7 +319,7 @@ export default function DevPage() {
         {/* Admin Sims */}
         <DevSection title="Admin Sims">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            Creates a real brief row in DB to test the Support — Stuck Briefs section in admin. Opens JSON in new tab — then check admin to verify the action button appears. Delete sim rows from Supabase when done.
+            Creates a real brief row in DB to test the Support: Stuck Briefs section in admin. Opens JSON in new tab. Check admin to verify the action button appears. Delete sim rows from Supabase when done.
           </p>
           <DevGrid>
             <DevButton
@@ -346,7 +343,7 @@ export default function DevPage() {
               newTab
             />
             <DevButton
-              label="→ Admin Dashboard ↗"
+              label="Admin Dashboard ↗"
               sublabel="Check Support section after running a sim"
               href="/admin"
               newTab
@@ -371,9 +368,9 @@ export default function DevPage() {
         {/* User Management */}
         <DevSection title="User Management">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY — ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
+            ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY. ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
             {userMgmtId.trim() === userId && (
-              <span style={{ color: 'var(--color-amber)' }}> ⚠ THIS IS YOUR OWN ACCOUNT.</span>
+              <span style={{ color: 'var(--color-amber)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertTriangle size={12} />THIS IS YOUR OWN ACCOUNT.</span>
             )}
           </p>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
@@ -385,7 +382,7 @@ export default function DevPage() {
               style={{
                 flex: 1,
                 padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--color-border-strong)',
                 background: 'var(--color-bg-base)',
                 color: 'var(--color-text-primary)',
@@ -399,7 +396,7 @@ export default function DevPage() {
               disabled={!userMgmtId.trim() || clearState === 'loading'}
               style={{
                 padding: '0.5rem 1rem',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid rgba(99,102,241,0.4)',
                 background: 'rgba(99,102,241,0.1)',
                 color: 'var(--color-secondary-light)',
@@ -420,7 +417,7 @@ export default function DevPage() {
               disabled={!userMgmtId.trim() || deleteState === 'loading'}
               style={{
                 padding: '0.5rem 1rem',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid rgba(239,68,68,0.4)',
                 background: 'rgba(239,68,68,0.1)',
                 color: 'var(--color-error)',
@@ -441,7 +438,7 @@ export default function DevPage() {
               style={{
                 fontSize: '0.7rem',
                 padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-md)',
                 marginBottom: '6px',
                 border: `1px solid ${clearState === 'success' ? 'rgba(99,102,241,0.3)' : 'rgba(239,68,68,0.3)'}`,
                 background: clearState === 'success' ? 'rgba(99,102,241,0.05)' : 'rgba(239,68,68,0.05)',
@@ -459,7 +456,7 @@ export default function DevPage() {
               style={{
                 fontSize: '0.7rem',
                 padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-md)',
                 border: `1px solid ${deleteState === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
                 background: deleteState === 'success' ? 'rgba(34,197,94,0.05)' : 'rgba(239,68,68,0.05)',
                 color: deleteState === 'success' ? 'var(--color-success)' : 'var(--color-error)',
@@ -476,7 +473,7 @@ export default function DevPage() {
         {/* Page navigation */}
         <DevSection title="Page Navigation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
-            OPENS IN NEW TAB — /DEV STAYS OPEN AS HOME BASE.
+            OPENS IN NEW TAB. /DEV STAYS OPEN AS HOME BASE.
           </p>
           <DevGrid>
             <DevButton label="Home ↗"         href="/"                        newTab />
