@@ -27,6 +27,40 @@ function renderWithLinks(text: string): React.ReactNode {
   );
 }
 
+function renderActionSteps(text: string): React.ReactNode {
+  const hasSteps = /Step\s+\d+[.:]/i.test(text);
+  if (!hasSteps) {
+    return (
+      <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>
+        {renderWithLinks(text)}
+      </p>
+    );
+  }
+  const steps = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
+  return (
+    <ol className="space-y-3 pl-0 list-none">
+      {steps.map((step, i) => {
+        const labelMatch = step.match(/^(Step\s+\d+[.:])\s*/i);
+        const label = labelMatch ? labelMatch[1].replace(/[.:]$/, '') : `Step ${i + 1}`;
+        const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
+        return (
+          <li key={i} className="flex gap-3 items-start">
+            <span
+              className="shrink-0 text-xs font-bold uppercase mt-0.5 px-2 py-0.5 rounded"
+              style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', background: 'rgba(245,158,11,0.12)', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}
+            >
+              {label}
+            </span>
+            <span className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>
+              {renderWithLinks(content)}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
 function Label({ children, color, size = 'xs' }: { children: React.ReactNode; color?: string; size?: 'xs' | 'sm' | 'xl' }) {
@@ -518,7 +552,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           )}
 
           {/* Action */}
-          <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>{renderWithLinks(brief.recommendedAction.action)}</p>
+          {renderActionSteps(brief.recommendedAction.action)}
 
           {/* Rationale */}
           <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(245,158,11,0.18)' }}>
