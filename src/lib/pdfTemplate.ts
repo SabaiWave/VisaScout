@@ -113,18 +113,44 @@ function renderStepsPdf(
 ): string {
   const { fontSize, color, mb = '12px', fontFamily = '' } = opts;
   const familyStyle = fontFamily ? `font-family:${fontFamily};` : '';
-  const hasSteps = /Step\s+\d+[.:]/i.test(text);
-  if (!hasSteps) {
+  const badge = (lbl: string) => `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 5px;border-radius:3px;background:${C.amberSubtle};color:${C.amber};flex-shrink:0;white-space:nowrap;border:1px solid ${C.amberBorder};">${esc(lbl)}</span>`;
+  const li = (lbl: string, content: string) => `<li style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">${badge(lbl)}<span style="${familyStyle}font-size:${fontSize}px;color:${color};line-height:1.55;">${esc(nd(content))}</span></li>`;
+  const list = (items: string, preamble = '') => `${preamble}<ul style="list-style:none;padding:0;margin:0 0 ${mb};">${items}</ul>`;
+
+  const hasNamedSteps = /Step\s+\d+[.:]/i.test(text);
+  const parentheticals = text.match(/\(\d+\)/g) ?? [];
+  const hasParentheticals = parentheticals.length >= 2;
+
+  if (!hasNamedSteps && !hasParentheticals) {
     return `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 ${mb};line-height:1.55;">${esc(nd(text))}</p>`;
   }
-  const steps = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
-  const items = steps.map((step, idx) => {
-    const lm = step.match(/^(Step\s+\d+[.:])\s*/i);
-    const lbl = lm ? lm[1].replace(/[.:]$/, '') : `Step ${idx + 1}`;
-    const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
-    return `<li style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 5px;border-radius:3px;background:${C.amberSubtle};color:${C.amber};flex-shrink:0;white-space:nowrap;border:1px solid ${C.amberBorder};">${esc(lbl)}</span><span style="${familyStyle}font-size:${fontSize}px;color:${color};line-height:1.55;">${esc(nd(content))}</span></li>`;
+
+  if (hasNamedSteps) {
+    const steps = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
+    const items = steps.map((step, idx) => {
+      const lm = step.match(/^(Step\s+\d+[.:])\s*/i);
+      const lbl = lm ? lm[1].replace(/[.:]$/, '') : `Step ${idx + 1}`;
+      const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
+      return li(lbl, content);
+    }).join('');
+    return list(items);
+  }
+
+  const firstIdx = text.search(/\(\d+\)/);
+  const preambleText = firstIdx > 0 ? text.slice(0, firstIdx).trim().replace(/[:;,]$/, '').trim() : '';
+  const preambleHtml = preambleText ? `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 6px;line-height:1.55;">${esc(nd(preambleText))}</p>` : '';
+  const tail = firstIdx >= 0 ? text.slice(firstIdx) : text;
+  const parts = tail.split(/(?=\(\d+\))/).filter(s => s.trim());
+  if (parts.length < 2) {
+    return `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 ${mb};line-height:1.55;">${esc(nd(text))}</p>`;
+  }
+  const items = parts.map((part, idx) => {
+    const lm = part.match(/^\((\d+)\)\s*/);
+    const lbl = lm ? lm[1] : String(idx + 1);
+    const content = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+    return li(lbl, content);
   }).join('');
-  return `<ul style="list-style:none;padding:0;margin:0 0 ${mb};">${items}</ul>`;
+  return list(items, preambleHtml);
 }
 
 function conflictItems(items: ConflictItem[], color: string, labelText: string): string {
