@@ -59,16 +59,37 @@ function renderActionSteps(
     });
   } else {
     const firstIdx = text.search(/\(\d+\)/);
-    if (firstIdx > 0) preamble = text.slice(0, firstIdx).trim().replace(/[:;,]$/, '').trim();
+    if (firstIdx > 0) preamble = text.slice(0, firstIdx).trim().replace(/[;,]$/, '').trim();
     const tail = firstIdx >= 0 ? text.slice(firstIdx) : text;
     const parts = tail.split(/(?=\(\d+\))/).filter(s => s.trim());
     items = parts.map((part, i) => {
       const lm = part.match(/^\((\d+)\)\s*/);
       const label = lm ? lm[1] : String(i + 1);
-      const content = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+      const raw = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+      const content = raw.charAt(0).toUpperCase() + raw.slice(1);
       return { label, content };
     });
     if (items.length < 2) return fallback;
+  }
+
+  // Parenthetical (N) items are parallel — render as bullets, not numbered steps
+  if (!hasNamedSteps) {
+    return (
+      <>
+        {preamble && (
+          <p className={`${textClass} leading-relaxed mb-2`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
+            {renderWithLinks(preamble)}
+          </p>
+        )}
+        <ul className="list-disc pl-5 space-y-2">
+          {items.map((item, i) => (
+            <li key={i} className={`${textClass} leading-relaxed`} style={{ color: textColor }}>
+              {renderWithLinks(item.content)}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
   }
 
   return (
