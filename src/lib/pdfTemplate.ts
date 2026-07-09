@@ -137,7 +137,7 @@ function renderStepsPdf(
   }
 
   const firstIdx = text.search(/\(\d+\)/);
-  const preambleText = firstIdx > 0 ? text.slice(0, firstIdx).trim().replace(/[:;,]$/, '').trim() : '';
+  const preambleText = firstIdx > 0 ? text.slice(0, firstIdx).trim().replace(/[;,]$/, '').trim() : '';
   const preambleHtml = preambleText ? `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 6px;line-height:1.55;">${esc(nd(preambleText))}</p>` : '';
   const tail = firstIdx >= 0 ? text.slice(firstIdx) : text;
   const parts = tail.split(/(?=\(\d+\))/).filter(s => s.trim());
@@ -147,7 +147,8 @@ function renderStepsPdf(
   const items = parts.map((part, idx) => {
     const lm = part.match(/^\((\d+)\)\s*/);
     const lbl = lm ? lm[1] : String(idx + 1);
-    const content = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+    const raw = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+    const content = raw.charAt(0).toUpperCase() + raw.slice(1);
     return li(lbl, content);
   }).join('');
   return list(items, preambleHtml);
