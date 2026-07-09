@@ -27,11 +27,15 @@ function renderWithLinks(text: string): React.ReactNode {
   );
 }
 
-function renderActionSteps(text: string): React.ReactNode {
+function renderActionSteps(
+  text: string,
+  opts: { textClass?: string; textColor?: string } = {},
+): React.ReactNode {
+  const { textClass = 'text-base', textColor = 'var(--color-text-primary)' } = opts;
   const hasSteps = /Step\s+\d+[.:]/i.test(text);
   if (!hasSteps) {
     return (
-      <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>
+      <p className={`${textClass} leading-relaxed`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
         {renderWithLinks(text)}
       </p>
     );
@@ -51,7 +55,7 @@ function renderActionSteps(text: string): React.ReactNode {
             >
               {label}
             </span>
-            <span className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)', textWrap: 'pretty' } as React.CSSProperties}>
+            <span className={`${textClass} leading-relaxed`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
               {renderWithLinks(content)}
             </span>
           </li>
@@ -418,7 +422,7 @@ function ContingencySection({ contingency, forPrint }: { contingency: VisaBrief[
       )}
       <div>
         <Label>Overstay Scenario</Label>
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{noDash(contingency.overstayScenario)}</p>
+        {renderActionSteps(contingency.overstayScenario, { textClass: 'text-sm', textColor: 'var(--color-text-secondary)' })}
       </div>
       {contingency.emergencyContacts.length > 0 && (
         <div>
