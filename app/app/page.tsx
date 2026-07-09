@@ -63,8 +63,8 @@ const DEPTH_CONFIG = {
     label: 'Scout',
     price: 'Free',
     description: 'Is there a visa issue I need to know about?',
-    color: 'var(--color-depth-quick)',
-    colorRgb: '129,140,248',
+    color: '#10b981',
+    colorRgb: '16,185,129',
   },
   standard: {
     icon: Search,
@@ -644,7 +644,7 @@ function AppContent() {
                       inviteAccess
                         ? {}
                         : depth === 'quick'
-                          ? { background: '#818cf8', color: '#ffffff', boxShadow: '0 0 0 1px rgba(129,140,248,0.4), 0 0 24px rgba(129,140,248,0.2)' }
+                          ? { background: '#10b981', color: '#0a0a0a', boxShadow: '0 0 0 1px rgba(16,185,129,0.4), 0 0 24px rgba(16,185,129,0.2)' }
                           : depth === 'standard'
                             ? { background: '#6366F1', color: '#ffffff', boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 0 24px rgba(99,102,241,0.2)' }
                             : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
