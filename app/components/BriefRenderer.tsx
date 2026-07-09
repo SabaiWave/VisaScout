@@ -72,6 +72,26 @@ function renderActionSteps(
     if (items.length < 2) return fallback;
   }
 
+  // Parenthetical (N) items are parallel — render as bullets, not numbered steps
+  if (!hasNamedSteps) {
+    return (
+      <>
+        {preamble && (
+          <p className={`${textClass} leading-relaxed mb-2`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
+            {renderWithLinks(preamble)}
+          </p>
+        )}
+        <ul className="list-disc pl-5 space-y-2">
+          {items.map((item, i) => (
+            <li key={i} className={`${textClass} leading-relaxed`} style={{ color: textColor }}>
+              {renderWithLinks(item.content)}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+
   return (
     <>
       {preamble && (

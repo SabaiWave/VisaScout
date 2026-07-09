@@ -144,14 +144,13 @@ function renderStepsPdf(
   if (parts.length < 2) {
     return `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 ${mb};line-height:1.55;">${esc(nd(text))}</p>`;
   }
-  const items = parts.map((part, idx) => {
-    const lm = part.match(/^\((\d+)\)\s*/);
-    const lbl = lm ? lm[1] : String(idx + 1);
+  // Parenthetical (N) items are parallel — render as bullets, not numbered steps
+  const bulletItems = parts.map((part) => {
     const raw = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
     const content = raw.charAt(0).toUpperCase() + raw.slice(1);
-    return li(lbl, content);
+    return `<li style="display:flex;gap:6px;align-items:flex-start;margin-bottom:5px;"><span style="flex-shrink:0;color:${color};margin-top:2px;">•</span><span style="${familyStyle}font-size:${fontSize}px;color:${color};line-height:1.55;">${esc(nd(content))}</span></li>`;
   }).join('');
-  return list(items, preambleHtml);
+  return `${preambleHtml}<ul style="list-style:none;padding:0;margin:0 0 ${mb};">${bulletItems}</ul>`;
 }
 
 function conflictItems(items: ConflictItem[], color: string, labelText: string): string {
