@@ -54,9 +54,6 @@ export async function generateMetadata(): Promise<Metadata> {
       description: clientConfig.landingPage.hero.subhead,
       images: ['/og-image.png'],
     },
-    icons: {
-      apple: '/apple-touch-icon.png',
-    },
     robots: {
       index: true,
       follow: true,
