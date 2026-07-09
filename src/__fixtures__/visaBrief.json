@@ -46,10 +46,11 @@
     }
   ],
   "recommendedAction": {
-    "action": "Enter on Visa Exemption — no pre-application required.",
-    "deadline": "Book onward ticket before March 15 departure",
-    "rationale": "Your 28-day stay is well within the 60-day visa exemption allowance for US passport holders. One border run to Malaysia is within the 2-per-year land crossing limit. Carry proof of onward travel due to stricter checks at Suvarnabhumi since January 2025.",
-    "urgency": "low"
+    "action": "Enter Thailand by air at Suvarnabhumi or Don Mueang to receive the 60-day visa exemption — your 28-day stay fits comfortably within this window with no extension required. Before departure, verify: (1) your US passport has at least 6 months validity beyond March 15; (2) you have a confirmed return or onward ticket — airline check-in staff at Suvarnabhumi are increasingly enforcing this requirement; and (3) you can show proof of funds of 20,000 THB per person (~$550 USD) if asked at immigration. For your planned Malaysia border run, Padang Besar (Hat Yai → Padang Besar by train) is the smoothest crossing. You have 2 land border crossings permitted on visa exemption per calendar year — use one for Malaysia and preserve the second.",
+    "deadline": "Confirm passport validity and secure a return or onward ticket before purchasing flights.",
+    "rationale": "Your 28-day stay fits well within the 60-day air-entry exemption. No pre-application needed. Main risks are a missing onward ticket flagged at airline check-in and insufficient passport validity — both are preventable before departure.",
+    "urgency": "medium",
+    "stalePolicyWarning": null
   },
   "entryRequirements": {
     "documents": [
