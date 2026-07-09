@@ -42,25 +42,19 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(APP_URL),
     openGraph: {
       title: `VisaScout — ${clientConfig.tagline}`,
-      description:
-        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
+      description: clientConfig.landingPage.hero.subhead,
       url: APP_URL,
-      siteName: 'VisaScout',
+      siteName: clientConfig.brandName,
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `VisaScout — ${clientConfig.tagline}` }],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: `VisaScout — ${clientConfig.tagline}`,
-      description:
-        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
+      description: clientConfig.landingPage.hero.subhead,
       images: ['/og-image.png'],
     },
     icons: {
-      icon: [
-        { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
-        { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
-      ],
       apple: '/apple-touch-icon.png',
     },
     robots: {
