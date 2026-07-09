@@ -32,36 +32,68 @@ function renderActionSteps(
   opts: { textClass?: string; textColor?: string } = {},
 ): React.ReactNode {
   const { textClass = 'text-base', textColor = 'var(--color-text-primary)' } = opts;
-  const hasSteps = /Step\s+\d+[.:]/i.test(text);
-  if (!hasSteps) {
-    return (
-      <p className={`${textClass} leading-relaxed`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
-        {renderWithLinks(text)}
-      </p>
-    );
+
+  const hasNamedSteps = /Step\s+\d+[.:]/i.test(text);
+  const parentheticals = text.match(/\(\d+\)/g) ?? [];
+  const hasParentheticals = parentheticals.length >= 2;
+
+  const fallback = (
+    <p className={`${textClass} leading-relaxed`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
+      {renderWithLinks(text)}
+    </p>
+  );
+
+  if (!hasNamedSteps && !hasParentheticals) return fallback;
+
+  type Item = { label: string; content: string };
+  let preamble = '';
+  let items: Item[] = [];
+
+  if (hasNamedSteps) {
+    const parts = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
+    items = parts.map((step, i) => {
+      const lm = step.match(/^(Step\s+\d+[.:])\s*/i);
+      const label = lm ? lm[1].replace(/[.:]$/, '') : `Step ${i + 1}`;
+      const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
+      return { label, content };
+    });
+  } else {
+    const firstIdx = text.search(/\(\d+\)/);
+    if (firstIdx > 0) preamble = text.slice(0, firstIdx).trim().replace(/[:;,]$/, '').trim();
+    const tail = firstIdx >= 0 ? text.slice(firstIdx) : text;
+    const parts = tail.split(/(?=\(\d+\))/).filter(s => s.trim());
+    items = parts.map((part, i) => {
+      const lm = part.match(/^\((\d+)\)\s*/);
+      const label = lm ? lm[1] : String(i + 1);
+      const content = part.replace(/^\(\d+\)\s*/, '').replace(/[;]\s*(and\s+)?$/i, '').trim();
+      return { label, content };
+    });
+    if (items.length < 2) return fallback;
   }
-  const steps = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
+
   return (
-    <ol className="space-y-3 pl-0 list-none">
-      {steps.map((step, i) => {
-        const labelMatch = step.match(/^(Step\s+\d+[.:])\s*/i);
-        const label = labelMatch ? labelMatch[1].replace(/[.:]$/, '') : `Step ${i + 1}`;
-        const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
-        return (
+    <>
+      {preamble && (
+        <p className={`${textClass} leading-relaxed mb-3`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
+          {renderWithLinks(preamble)}
+        </p>
+      )}
+      <ol className="space-y-3 pl-0 list-none">
+        {items.map((item, i) => (
           <li key={i} className="flex gap-3 items-start">
             <span
               className="shrink-0 text-xs font-bold uppercase mt-0.5 px-2 py-0.5 rounded"
               style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', background: 'rgba(245,158,11,0.12)', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}
             >
-              {label}
+              {item.label}
             </span>
             <span className={`${textClass} leading-relaxed`} style={{ color: textColor, textWrap: 'pretty' } as React.CSSProperties}>
-              {renderWithLinks(content)}
+              {renderWithLinks(item.content)}
             </span>
           </li>
-        );
-      })}
-    </ol>
+        ))}
+      </ol>
+    </>
   );
 }
 
