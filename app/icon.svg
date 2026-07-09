@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7" fill="#6366F1"/>
+  <text
+    x="50%"
+    y="57%"
+    dominant-baseline="middle"
+    text-anchor="middle"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-weight="900"
+    font-size="14"
+    fill="white"
+    letter-spacing="-0.5"
+  >VS</text>
+</svg>
