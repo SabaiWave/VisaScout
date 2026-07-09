@@ -380,6 +380,7 @@ function AppContent() {
           throw new Error(errMsg);
         }
         const { checkoutUrl } = await res.json() as { checkoutUrl: string };
+        try { sessionStorage.setItem('visascout_form_state', JSON.stringify({ nationality, destination, visaType, freeform, depth })); } catch { /* ignore */ }
         window.location.href = checkoutUrl;
         return;
       } catch (err) {

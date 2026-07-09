@@ -34,7 +34,7 @@ export async function createShellBrief(input: ShellBriefInput): Promise<string> 
       freeform_input: input.freeform,
       depth: input.depth,
       user_id: internalUserId,
-      payment_status: 'pending',
+      payment_status: 'awaiting_payment',
       degraded: false,
     })
     .select('id')

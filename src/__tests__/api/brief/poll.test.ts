@@ -86,6 +86,18 @@ describe('GET /api/brief/poll', () => {
     expect(body.status).toBe('error');
   });
 
+  it('returns status=awaiting_payment and does not fire pipeline', async () => {
+    const { waitUntil } = jest.requireMock('@vercel/functions') as { waitUntil: jest.Mock };
+    const chain = makeSelectChain({ data: { id: TEST_ID, payment_status: 'awaiting_payment' }, error: null });
+    mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);
+
+    const res = await GET(makeRequest(TEST_ID));
+    expect(res.status).toBe(200);
+    const body = await res.json() as { status: string };
+    expect(body.status).toBe('awaiting_payment');
+    expect(waitUntil).not.toHaveBeenCalled();
+  });
+
   it('queries by the provided brief_id', async () => {
     const chain = makeSelectChain({ data: { id: TEST_ID, payment_status: 'paid' }, error: null });
     mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);

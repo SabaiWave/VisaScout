@@ -54,7 +54,7 @@ describe('saveBrief', () => {
 });
 
 describe('createShellBrief', () => {
-  it('inserts shell record with payment_status=pending and returns id', async () => {
+  it('inserts shell record with payment_status=awaiting_payment and returns id', async () => {
     const chain = makeInsertChain({ data: { id: TEST_ID }, error: null });
     mockGetSupabase.mockReturnValue({ from: chain.from } as unknown as SupabaseClient);
 
@@ -71,7 +71,7 @@ describe('createShellBrief', () => {
     expect(chain.insert).toHaveBeenCalledWith(expect.objectContaining({
       nationality: 'American',
       destination: 'Thailand',
-      payment_status: 'pending',
+      payment_status: 'awaiting_payment',
       degraded: false,
       user_id: 'internal-uuid-123',
     }));
