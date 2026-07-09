@@ -41,26 +41,19 @@ export async function generateMetadata(): Promise<Metadata> {
       'Know exactly what to do about your visa — sourced, confidence-scored, in under 60 seconds. Official policy + recent enforcement changes + real traveler experience.',
     metadataBase: new URL(APP_URL),
     openGraph: {
-      title: 'VisaScout — Stop guessing. Know exactly where you stand.',
+      title: `VisaScout — ${clientConfig.tagline}`,
       description:
-        'Official policy + recent enforcement changes + real traveler experience, synthesized into one structured brief. First brief free.',
+        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
       url: APP_URL,
       siteName: 'VisaScout',
-      images: [
-        {
-          url: '/og-image.png',
-          width: 1200,
-          height: 630,
-          alt: `VisaScout — ${clientConfig.tagline}`,
-        },
-      ],
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `VisaScout — ${clientConfig.tagline}` }],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'VisaScout — Stop guessing. Know exactly where you stand.',
+      title: `VisaScout — ${clientConfig.tagline}`,
       description:
-        'Sourced, confidence-scored visa intelligence. Official policy + recent enforcement + real traveler experience. First brief free.',
+        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
       images: ['/og-image.png'],
     },
     icons: {
