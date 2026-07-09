@@ -107,6 +107,26 @@ function visaOptionHtml(opt: VisaOption, depth: string): string {
   </div>`;
 }
 
+function renderStepsPdf(
+  text: string,
+  opts: { fontSize: number; color: string; mb?: string; fontFamily?: string },
+): string {
+  const { fontSize, color, mb = '12px', fontFamily = '' } = opts;
+  const familyStyle = fontFamily ? `font-family:${fontFamily};` : '';
+  const hasSteps = /Step\s+\d+[.:]/i.test(text);
+  if (!hasSteps) {
+    return `<p style="${familyStyle}font-size:${fontSize}px;color:${color};margin:0 0 ${mb};line-height:1.55;">${esc(nd(text))}</p>`;
+  }
+  const steps = text.split(/(?=Step\s+\d+[.:])/i).filter(s => s.trim());
+  const items = steps.map((step, idx) => {
+    const lm = step.match(/^(Step\s+\d+[.:])\s*/i);
+    const lbl = lm ? lm[1].replace(/[.:]$/, '') : `Step ${idx + 1}`;
+    const content = step.replace(/^Step\s+\d+[.:]\s*/i, '').trim();
+    return `<li style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 5px;border-radius:3px;background:${C.amberSubtle};color:${C.amber};flex-shrink:0;white-space:nowrap;border:1px solid ${C.amberBorder};">${esc(lbl)}</span><span style="${familyStyle}font-size:${fontSize}px;color:${color};line-height:1.55;">${esc(nd(content))}</span></li>`;
+  }).join('');
+  return `<ul style="list-style:none;padding:0;margin:0 0 ${mb};">${items}</ul>`;
+}
+
 function conflictItems(items: ConflictItem[], color: string, labelText: string): string {
   if (!items.length) return '';
   return `<div style="margin-bottom:12px;">
@@ -142,7 +162,7 @@ export function generateBriefHtml(brief: VisaBrief, meta: PdfMeta): string {
         <p style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${C.error};margin:0 0 3px;">Deadline</p>
         <p style="font-size:12px;font-weight:600;color:${C.error};margin:0;">${esc(nd(brief.recommendedAction.deadline))}</p>
       </div>` : ''}
-      <p style="font-family:'Geist',sans-serif;font-size:14px;color:${C.textPrimary};margin:0 0 14px;line-height:1.55;">${esc(nd(brief.recommendedAction.action))}</p>
+      ${renderStepsPdf(brief.recommendedAction.action, { fontSize: 14, color: C.textPrimary, mb: '14px', fontFamily: "'Geist',sans-serif" })}
       <div style="border-top:1px solid ${C.border};padding-top:10px;">
         ${label('Why', C.amber)}
         <p style="font-size:12px;color:${C.textSecondary};margin:0;line-height:1.5;">${esc(nd(brief.recommendedAction.rationale))}</p>
@@ -201,7 +221,7 @@ export function generateBriefHtml(brief: VisaBrief, meta: PdfMeta): string {
 
   const contingencyContent = `
     ${brief.contingency.deniedEntrySteps.length ? `${label('If Denied Entry')}<ul style="list-style:none;padding:0;margin:0 0 12px;">${brief.contingency.deniedEntrySteps.map(s => `<li style="font-size:12px;color:${C.textSecondary};padding:2px 0;">• ${esc(s)}</li>`).join('')}</ul>` : ''}
-    ${label('Overstay Scenario')}<p style="font-size:12px;color:${C.textSecondary};margin:0 0 12px;">${esc(nd(brief.contingency.overstayScenario))}</p>
+    ${label('Overstay Scenario')}${renderStepsPdf(brief.contingency.overstayScenario, { fontSize: 12, color: C.textSecondary, mb: '12px' })}
     ${brief.contingency.emergencyContacts.length ? `${label('Emergency Contacts')}<ul style="list-style:none;padding:0;margin:0;">${brief.contingency.emergencyContacts.map(c => `<li style="font-size:12px;color:${C.textSecondary};padding:2px 0;">• ${esc(c)}</li>`).join('')}</ul>` : ''}`;
   const contingency = depth !== 'quick' ? card('Contingency Planning', contingencyContent) : '';
 
