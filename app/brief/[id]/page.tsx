@@ -196,9 +196,10 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     }
   }
 
-  const isStillPending = !['unpaid', 'paid', 'error'].includes(row.payment_status);
+  const paymentNotCompleted = row.payment_status === 'awaiting_payment';
+  const isStillPending = !['unpaid', 'paid', 'error', 'awaiting_payment'].includes(row.payment_status);
   // pendingParam: user navigated from a GENERATING card — enforce skeleton gate even if brief is already done
-  const isProcessing = pendingParam || (!brief && isStillPending);
+  const isProcessing = !paymentNotCompleted && (pendingParam || (!brief && isStillPending));
   const isActuallyDone = pendingParam && !isStillPending;
 
   return (
@@ -228,7 +229,17 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
           </div>
 
           <div>
-            {isProcessing ? (
+            {paymentNotCompleted ? (
+              <div
+                className="px-4 py-3 rounded-lg"
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-amber)' }}
+              >
+                Payment was not completed. No brief was generated.{' '}
+                <a href="/app" style={{ color: 'var(--color-amber)', textDecoration: 'underline' }}>
+                  Start a new brief
+                </a>
+              </div>
+            ) : isProcessing ? (
               <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} pollForJob={row.payment_status === 'queued'} />
             ) : brief ? (
               <BriefRenderer brief={brief} hideMetadata briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />

@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       }],
       metadata: { brief_id: briefId, user_id: userId, nationality, destination, depth },
       success_url: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}`,
-      cancel_url: `${baseUrl}/?cancelled=true`,
+      cancel_url: `${baseUrl}/app?cancelled=true`,
     });
 
     await trackEvent('checkout.started', {

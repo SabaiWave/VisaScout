@@ -32,6 +32,7 @@ async function getUserBriefs(internalUserId: string, page: number): Promise<{ br
     .from('briefs')
     .select('id, created_at, nationality, destination, depth, overall_confidence, payment_status, degraded, rerun_count', { count: 'exact' })
     .eq('user_id', internalUserId)
+    .neq('payment_status', 'awaiting_payment')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .range(from, to);
