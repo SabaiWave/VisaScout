@@ -2,48 +2,42 @@ import { chromium } from 'playwright';
 import { writeFileSync, readFileSync } from 'fs';
 import path from 'path';
 
-const SIZES = [
-  { name: 'apple-touch-icon.png', size: 180, dest: 'public' },
-  { name: 'apple-icon.png', size: 180, dest: 'app' },
-];
+// Output: app/apple-icon.png (180×180) — Next.js file convention, auto-serves as apple-touch-icon
+const TARGET = { file: path.join('app', 'apple-icon.png'), size: 180 };
 
 async function main() {
-  const svgContent = readFileSync(path.join(process.cwd(), 'app', 'icon.svg'), 'utf-8');
+  const svgRaw = readFileSync(path.join(process.cwd(), 'app', 'icon.svg'), 'utf-8');
 
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
+  // Remove explicit width/height so CSS controls scaling; keep viewBox for proportional render
+  const svg = svgRaw.replace(/\s*width="[^"]*"/, '').replace(/\s*height="[^"]*"/, '');
 
-  for (const { name, size, dest } of SIZES) {
-    await page.setViewportSize({ width: size, height: size });
-
-    // Render SVG scaled to target size with transparent background
-    const html = `<!DOCTYPE html>
+  const { size, file } = TARGET;
+  const html = `<!DOCTYPE html>
 <html>
 <head>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { width: ${size}px; height: ${size}px; background: transparent; }
-  svg { width: ${size}px; height: ${size}px; }
+* { margin: 0; padding: 0; }
+html, body { width: ${size}px; height: ${size}px; overflow: hidden; }
+svg { display: block; width: ${size}px; height: ${size}px; }
 </style>
 </head>
-<body>${svgContent.replace(/width="32"/, `width="${size}"`).replace(/height="32"/, `height="${size}"`).replace(/font-size="14"/, `font-size="${Math.round(14 * size / 32)}"`)}</body>
+<body>${svg}</body>
 </html>`;
 
-    await page.setContent(html, { waitUntil: 'networkidle' });
-    await page.evaluate(() => document.fonts.ready);
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.setViewportSize({ width: size, height: size });
+  await page.setContent(html, { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
 
-    const screenshot = await page.screenshot({
-      clip: { x: 0, y: 0, width: size, height: size },
-      type: 'png',
-      omitBackground: false,
-    });
+  const screenshot = await page.screenshot({
+    clip: { x: 0, y: 0, width: size, height: size },
+    type: 'png',
+  });
 
-    const outPath = path.join(process.cwd(), dest, name);
-    writeFileSync(outPath, screenshot);
-    console.log(`✓ ${dest}/${name} (${size}×${size})`);
-  }
-
+  writeFileSync(path.join(process.cwd(), file), screenshot);
   await browser.close();
+  console.log(`✓ ${file} (${size}×${size})`);
 }
 
 main();
