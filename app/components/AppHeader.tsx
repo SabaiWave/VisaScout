@@ -8,7 +8,7 @@ import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
 import { NavDrawer, HamburgerButton, navDrawerSecondaryStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
-import { VisaScoutUserButton } from './VisaScoutUserButton';
+import { UserAvatar } from './UserAvatar';
 
 export function AppHeader() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -28,7 +28,7 @@ export function AppHeader() {
             <NavLink href="/">Home</NavLink>
             <NavLink href="/dashboard">Dashboard</NavLink>
             {isLoaded && (isSignedIn
-              ? <VisaScoutUserButton />
+              ? <UserAvatar />
               : <Link href="/sign-in" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', textDecoration: 'none', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Sign in</Link>
             )}
           </div>
