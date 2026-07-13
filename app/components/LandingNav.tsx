@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { Home, LayoutDashboard, HelpCircle, Zap } from 'lucide-react';
+import { Home, LayoutDashboard, HelpCircle, Zap, LogIn } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
 import { NavLink } from './ui/NavLink';
 import { Button } from './ui/Button';
 import { NavDrawer, HamburgerButton, navDrawerSecondaryStyle, navDrawerLinkStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
-import { VisaScoutUserButton } from './VisaScoutUserButton';
 
 export function LandingNav() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -34,7 +33,6 @@ export function LandingNav() {
                 <Button asChild>
                   <Link href="/app">Generate Brief</Link>
                 </Button>
-                <VisaScoutUserButton />
               </>
             ) : (
               <>
@@ -81,8 +79,12 @@ export function LandingNav() {
               <HelpCircle size={16} aria-hidden /> How It Works
             </Link>
             <div style={{ borderTop: '1px solid var(--color-border-muted)', margin: '4px 0' }} />
-            <Link href="/sign-in" onClick={() => setOpen(false)} style={navDrawerLinkStyle}>Sign in</Link>
-            <Link href="/sign-up" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>Get Started</Link>
+            <Link href="/sign-in" onClick={() => setOpen(false)} style={{ ...navDrawerSecondaryStyle, justifyContent: 'center', gap: '8px' }}>
+              <LogIn size={15} aria-hidden /> Sign In
+            </Link>
+            <Link href="/sign-up" onClick={() => setOpen(false)} style={navDrawerPrimaryStyle}>
+              Get Started
+            </Link>
           </>
         ))}
       </NavDrawer>

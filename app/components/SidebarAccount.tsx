@@ -1,38 +1,79 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
-import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useClerk } from '@clerk/nextjs';
+import { Settings, LogOut } from 'lucide-react';
 
-export function SidebarAccount() {
-  const { user } = useUser();
-  const email = user?.primaryEmailAddress?.emailAddress ?? '';
-  const displayName = email ? email.split('@')[0] : 'My Account';
+const navRowBase: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  width: '100%',
+  padding: '8px 12px',
+  borderRadius: '8px',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  fontFamily: 'var(--font-mono)',
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  textDecoration: 'none',
+  color: 'var(--color-text-secondary)',
+  transition: 'background 0.15s ease, color 0.15s ease',
+};
 
+function AccountLink({ icon, href, children }: { icon: React.ReactNode; href: string; children: React.ReactNode }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div
+    <Link
+      href={href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.6rem',
-        padding: '0.75rem 1rem',
-        borderTop: '1px solid var(--color-border-muted)',
-        minWidth: 0,
+        ...navRowBase,
+        background: hovered ? 'var(--color-secondary-subtle)' : 'transparent',
+        color: hovered ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
       }}
     >
-      <VisaScoutUserButton />
-      <span style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.72rem',
-        fontWeight: 500,
-        color: 'var(--color-text-tertiary)',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        minWidth: 0,
-        flex: 1,
-      }}>
-        {displayName}
-      </span>
+      {icon}
+      {children}
+    </Link>
+  );
+}
+
+function AccountButton({ icon, onClick, children }: { icon: React.ReactNode; onClick: () => void; children: React.ReactNode }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        ...navRowBase,
+        border: 'none',
+        cursor: 'pointer',
+        textAlign: 'left',
+        background: hovered ? 'var(--color-secondary-subtle)' : 'transparent',
+        color: hovered ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
+      }}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+export function SidebarAccount() {
+  const { signOut } = useClerk();
+
+  return (
+    <div style={{ borderTop: '1px solid var(--color-border-muted)', paddingTop: '0.5rem' }}>
+      <AccountLink icon={<Settings size={13} />} href="/dashboard/account">
+        Account Settings
+      </AccountLink>
+      <AccountButton icon={<LogOut size={13} />} onClick={() => signOut({ redirectUrl: '/' })}>
+        Sign Out
+      </AccountButton>
     </div>
   );
 }

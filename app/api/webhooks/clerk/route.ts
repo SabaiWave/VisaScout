@@ -63,5 +63,32 @@ export async function POST(req: Request) {
       .eq('clerk_user_id', clerkUserId);
   }
 
+  if (event.type === 'user.deleted') {
+    const supabase = getSupabase();
+
+    // Find internal user row
+    const { data: userRow } = await supabase
+      .from('users')
+      .select('id')
+      .eq('clerk_user_id', clerkUserId)
+      .single();
+
+    if (userRow) {
+      // Anonymize briefs first — FK constraint prevents deleting user row otherwise
+      await supabase
+        .from('briefs')
+        .update({ user_id: null })
+        .eq('user_id', userRow.id);
+
+      // Hard delete the user row — Clerk already deleted them upstream
+      await supabase
+        .from('users')
+        .delete()
+        .eq('id', userRow.id);
+    }
+
+    await trackEvent('user.deleted', { userId: clerkUserId });
+  }
+
   return new Response('ok', { status: 200 });
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth, SignInButton } from '@clerk/nextjs';
-import { VisaScoutUserButton } from './VisaScoutUserButton';
+import { UserAvatar } from './UserAvatar';
 import { Button } from '@/app/components/ui/Button';
 
 export function HeaderAuth() {
@@ -10,7 +10,7 @@ export function HeaderAuth() {
   if (!isLoaded) return <div className="w-8 h-8" />;
 
   if (isSignedIn) {
-    return <VisaScoutUserButton />;
+    return <UserAvatar />;
   }
 
   return (
