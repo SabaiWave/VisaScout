@@ -5,7 +5,6 @@ import { Archive, Zap } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Wordmark } from '@/app/components/ui/Wordmark';
-import { VisaScoutUserButton } from '@/app/components/VisaScoutUserButton';
 import { NavDrawer, HamburgerButton, navDrawerLinkStyle } from '@/app/components/ui/MobileDrawer';
 import { SidebarAccount } from './SidebarAccount';
 
@@ -25,16 +24,8 @@ export function MobileNav({ isAdmin, showDev, isSignedIn = true }: { isAdmin: bo
       >
         <HamburgerButton onClick={() => setOpen(true)} />
         <Wordmark />
-        {isSignedIn ? (
-          <VisaScoutUserButton />
-        ) : (
-          <Link
-            href="/sign-in"
-            style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary-light)', textDecoration: 'none' }}
-          >
-            Sign In
-          </Link>
-        )}
+        {/* Spacer keeps wordmark centered; drawer has account access */}
+        <div style={{ width: '40px' }} />
       </nav>
 
       <NavDrawer open={open} onClose={() => setOpen(false)} side="left">
