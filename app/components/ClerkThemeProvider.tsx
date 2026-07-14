@@ -45,7 +45,6 @@ const darkElements = {
   card: { backgroundColor: '#111118', borderColor: '#2D2D3D' },
   navbar: { backgroundColor: '#0A0A0A', borderColor: '#2D2D3D' },
   navbarHeader: { color: '#F4F4F5', opacity: 1 },
-  navbarButton: { color: '#A1A1AA' },
   navbarButtonIcon: { color: '#A1A1AA' },
   pageScrollBox: { backgroundColor: '#111118' },
   profileSectionTitle: { color: '#F4F4F5', borderColor: '#2D2D3D' },
@@ -73,9 +72,22 @@ const darkElements = {
   identityPreviewEditButton: { color: '#6366F1' },
 };
 
+const localization = {
+  userProfile: {
+    deletePage: {
+      title: 'Delete account',
+      messageLine1: 'Your account will be permanently deleted.',
+      messageLine2: 'This action cannot be undone.',
+      actionDescription: 'Type "DELETE ACCOUNT" below to continue.',
+      confirm: 'DELETE ACCOUNT',
+    },
+  },
+};
+
 export function ClerkThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
+      localization={localization}
       appearance={{
         variables: darkVariables,
         elements: darkElements,
