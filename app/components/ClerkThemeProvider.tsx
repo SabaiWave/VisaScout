@@ -78,7 +78,7 @@ const localization = {
       title: 'Delete account',
       messageLine1: 'Your account will be permanently deleted.',
       messageLine2: 'This action cannot be undone.',
-      actionDescription: 'Type "DELETE ACCOUNT" below to continue.',
+      actionDescription: 'Type "Delete account" below to continue.',
       confirm: 'DELETE ACCOUNT',
     },
   },
