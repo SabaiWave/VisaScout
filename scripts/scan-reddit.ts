@@ -394,9 +394,21 @@ async function main() {
 
   console.log('\n' + output)
 
-  const outputDir = path.join(process.cwd(), 'outputs')
+  const outputDir = path.join(process.cwd(), 'outputs', 'scans')
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
-  fs.writeFileSync(path.join(outputDir, 'reddit-scan-latest.md'), ['```', output, '```'].join('\n'), 'utf-8')
+
+  const now = new Date()
+  const stamp = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+    '-',
+    String(now.getHours()).padStart(2, '0'),
+    String(now.getMinutes()).padStart(2, '0'),
+  ].join('')
+  const filename = `reddit-scan-${stamp}.md`
+  fs.writeFileSync(path.join(outputDir, filename), ['```', output, '```'].join('\n'), 'utf-8')
+  console.log(`\nSaved → outputs/scans/${filename}`)
 }
 
 main()
