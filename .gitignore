@@ -59,6 +59,9 @@ STRATEGY.md
 
 .claude/
 
-
+# Design tooling — scratch space, not source code
+/design-mockups/
+/design-library/screenshots/
+/.agents/
 
 !docs/.gitkeep
