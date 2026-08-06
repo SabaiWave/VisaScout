@@ -9,41 +9,41 @@
 // Run: bash scripts/run.sh scripts/scan-reddit-tavily.ts
 
 // === CONFIG ===
-const DAYS_BACK = 7           // how far back to search (Tavily days param)
-const MAX_RESULTS_PER_QUERY = 10  // Tavily results per search query
+const DAYS_BACK = 7               // how far back to search (Tavily re-index window)
+const MAX_RESULTS_PER_QUERY = 20  // Tavily results per search query
+const TAVILY_COST_PER_SEARCH = 0.005  // USD per query (estimate — verify at tavily.com/pricing)
 // Tavily's `days` filter uses re-indexing date, not post creation date.
 // Old posts that get new comments resurface as "recent". We filter on publishedDate
 // when Tavily returns it. When publishedDate is null (common for Reddit), we move
 // posts to a separate UNVERIFIED DATE section rather than mixing with dated results.
-const SHOW_UNDATED_SECTION = true   // set false to drop undated posts entirely
+const SHOW_UNDATED_SECTION = true  // set false to drop undated posts entirely
 // ==============
 
 import { tavily } from '@tavily/core'
 import * as fs from 'fs'
 import * as path from 'path'
 
-// Date cutoff for `after:` operator — computed at runtime
-function getDateCutoff(daysBack: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() - daysBack)
-  return d.toISOString().slice(0, 10)  // YYYY-MM-DD
-}
-
-// Targeted queries — `after:` operator tells Google to filter by indexed date.
-// We don't use `includeDomains` here so the `site:` operator works in the query.
-// Note: `after:` is a Google search operator; Tavily may or may not pass it through.
-function buildQueries(afterDate: string): string[] {
+function buildQueries(): string[] {
+  // No `after:` date operator — it's a Google operator that Tavily may not pass through.
+  // Date filtering is handled by Tavily's `days` param + our ID-based estimation filter.
   return [
-    `site:reddit.com Thailand visa tourist extension border run question after:${afterDate}`,
-    `site:reddit.com Vietnam visa e-visa entry requirements question after:${afterDate}`,
-    `site:reddit.com Bali Indonesia tourist visa extension question after:${afterDate}`,
-    `site:reddit.com Malaysia Philippines Cambodia visa question after:${afterDate}`,
-    `site:reddit.com Japan Korea tourist visa requirements question after:${afterDate}`,
-    `site:reddit.com digital nomad visa remote work question help after:${afterDate}`,
-    `site:reddit.com border run visa run overstay question after:${afterDate}`,
-    `site:reddit.com Schengen visa Germany Portugal Spain Netherlands question after:${afterDate}`,
-    `site:reddit.com Mexico Colombia tourist visa long stay question after:${afterDate}`,
-    `site:reddit.com visa on arrival extension overstay fine question after:${afterDate}`,
+    // Broad topic queries
+    `site:reddit.com Thailand visa tourist extension border run question`,
+    `site:reddit.com Vietnam visa e-visa entry requirements question`,
+    `site:reddit.com Bali Indonesia tourist visa extension question`,
+    `site:reddit.com Malaysia Philippines Cambodia visa question`,
+    `site:reddit.com Japan Korea tourist visa requirements question`,
+    `site:reddit.com digital nomad visa remote work question help`,
+    `site:reddit.com border run visa run overstay question`,
+    `site:reddit.com Schengen visa Germany Portugal Spain Netherlands question`,
+    `site:reddit.com Mexico Colombia tourist visa long stay question`,
+    `site:reddit.com visa on arrival extension overstay fine question`,
+    // Subreddit-targeted queries — higher signal, less noise
+    `site:reddit.com/r/ThailandTourism visa extension border run`,
+    `site:reddit.com/r/digitalnomad visa question Southeast Asia`,
+    `site:reddit.com/r/bali visa extension VOA question`,
+    `site:reddit.com/r/SEABackpacking visa entry question`,
+    `site:reddit.com/r/expats visa long stay digital nomad`,
   ]
 }
 
@@ -68,8 +68,6 @@ interface Post {
   body: string
   matchedKeywords: string[]
   isQuestion: boolean
-  // Date from Tavily publishedDate (confirmed) or Reddit ID estimate (~estimated).
-  // null = couldn't determine either way.
   estimatedDate: Date | null
   dateIsEstimated: boolean
 }
@@ -78,9 +76,9 @@ interface Post {
 // Post 1cqrtt2 confirmed ~2 years old on 2026-07-16 → reference date 2024-07-16
 // Post 1uw24qd appeared in after:2026-07-08 search with very high ID → anchor for rate
 const REDDIT_CALIBRATION = {
-  refIdInt: parseInt('1cqrtt2', 36),   // 2,947,343,806
-  refDate: new Date('2024-07-16'),      // confirmed creation date (approximate)
-  ratePerDay: 1_501_053,               // IDs created per day (site-wide estimate)
+  refIdInt: parseInt('1cqrtt2', 36),
+  refDate: new Date('2024-07-16'),
+  ratePerDay: 1_501_053,
 }
 
 function estimateDateFromRedditId(url: string): { date: Date; estimated: boolean } | null {
@@ -131,7 +129,6 @@ function detectQuestion(title: string): boolean {
 }
 
 function categorize(post: Post): Category {
-  // No comment count from Tavily — categorize by question + keyword signal only
   if (post.isQuestion && post.matchedKeywords.length > 0) return 'priority'
   if (post.isQuestion || post.matchedKeywords.length > 0) return 'worthLook'
   return 'noise'
@@ -147,7 +144,8 @@ function formatPost(post: Post, cat: Category): string {
   const dateTag = post.estimatedDate
     ? ` · ${formatDate(post.estimatedDate, post.dateIsEstimated)}`
     : ''
-  const header = `[r/${post.subreddit}${dateTag}]`
+  const kwTag = post.matchedKeywords.length > 0 ? ` · [${post.matchedKeywords.slice(0, 3).join(', ')}]` : ''
+  const header = `[r/${post.subreddit}${dateTag}${kwTag}]`
   const title = `"${post.title}"`
   const lines = [header, title]
   if (cat === 'priority') {
@@ -158,12 +156,26 @@ function formatPost(post: Post, cat: Category): string {
   return lines.join('\n')
 }
 
+const LINE = '─'.repeat(62)
+const HEAVY = '═'.repeat(62)
+
 function renderSection(title: string, posts: Post[], cat: Category): string {
   if (posts.length === 0) return ''
-  const label = `── ${title} [${posts.length}] `
-  const divider = '─'.repeat(Math.max(0, 52 - label.length))
+  const label = `  ${title}`
+  const count = `[${posts.length}]`
+  const pad = Math.max(0, 60 - label.length - count.length)
+  const heading = `${LINE}\n${label}  ${' '.repeat(pad)}${count}\n${LINE}`
   const items = posts.map((p, i) => `${i + 1}. ${formatPost(p, cat)}`).join('\n\n')
-  return `${label}${divider}\n\n${items}`
+  return `${heading}\n\n${items}`
+}
+
+function topEntries(map: Map<string, number>, n: number): string {
+  return [...map.entries()]
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([k, v]) => `${k} (${v})`)
+    .join('  ·  ')
 }
 
 async function main() {
@@ -173,42 +185,50 @@ async function main() {
     process.exit(1)
   }
 
+  const startMs = Date.now()
   const client = tavily({ apiKey })
   const seen = new Set<string>()
   const results: Post[] = []
 
-  const afterDate = getDateCutoff(DAYS_BACK)
-  const QUERIES = buildQueries(afterDate)
+  // Funnel counters
+  let rawCount = 0
+  let dupeCount = 0
+  let nonThreadCount = 0
+  let tooOldCount = 0
 
-  console.log(`Searching ${QUERIES.length} queries via Tavily (last ${DAYS_BACK} days, after:${afterDate})...\n`)
+  // Breakdown maps
+  const subredditMap = new Map<string, number>()
+  const keywordMap = new Map<string, number>()
+
+  const QUERIES = buildQueries()
+
+  console.log(`Scanning ${QUERIES.length} queries via Tavily (last ${DAYS_BACK}d)...`)
 
   for (let i = 0; i < QUERIES.length; i++) {
     const query = QUERIES[i]
     try {
       const response = await client.search(query, {
         maxResults: MAX_RESULTS_PER_QUERY,
-        // No includeDomains — site:reddit.com is in the query string.
-        // No days — conflicts with after: operator parsed from query string.
+        days: DAYS_BACK,
         includeAnswer: false,
       })
 
       for (const r of response.results ?? []) {
-        if (seen.has(r.url)) continue
-        // Skip non-thread URLs (subreddit listings, profiles, etc.)
-        if (!r.url.match(/reddit\.com\/r\/[^/]+\/comments\//)) continue
+        rawCount++
 
-        // Filter by actual published date — Tavily's `days` param uses indexing date,
-        // not post creation date. Old posts that get re-commented resurface as "recent".
+        if (seen.has(r.url)) { dupeCount++; continue }
+        if (!r.url.match(/reddit\.com\/r\/[^/]+\/comments\//)) { nonThreadCount++; continue }
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rawDate: string | undefined = (r as any).publishedDate ?? (r as any).published_date
-        // Determine date: Tavily publishedDate (confirmed) or Reddit ID estimate
         const tavilyDate = parsePublishedDate(rawDate)
         const idEstimate = tavilyDate ? null : estimateDateFromRedditId(r.url)
         const estimatedDate: Date | null = tavilyDate ?? idEstimate?.date ?? null
         const dateIsEstimated = !tavilyDate && !!idEstimate
-
-        // Drop posts with a known/estimated date that's too old
-        if (estimatedDate !== null && !isWithinDays(estimatedDate, DAYS_BACK)) continue
+        // 90-day ID filter — Tavily `days` re-indexes old posts when they get new comments.
+        // Without this, 2022 posts resurface and pollute results. Posts with no estimable
+        // date (null) pass through to the undated section rather than being dropped.
+        if (estimatedDate !== null && !isWithinDays(estimatedDate, 90)) { tooOldCount++; continue }
 
         seen.add(r.url)
 
@@ -216,10 +236,16 @@ async function main() {
         const body = r.content ?? ''
         const searchText = `${title} ${body}`
         const matched = matchKeywords(searchText)
+        const sub = extractSubreddit(r.url)
+
+        subredditMap.set(sub, (subredditMap.get(sub) ?? 0) + 1)
+        for (const kw of matched) {
+          keywordMap.set(kw, (keywordMap.get(kw) ?? 0) + 1)
+        }
 
         results.push({
           url: r.url,
-          subreddit: extractSubreddit(r.url),
+          subreddit: sub,
           title,
           body,
           matchedKeywords: matched,
@@ -231,48 +257,67 @@ async function main() {
       process.stdout.write('.')
     } catch (err) {
       process.stdout.write('\n')
-      console.warn(`⚠ Query failed, skipping: "${query}" — ${(err as Error).message}`)
+      console.warn(`  ⚠ Query ${i + 1} failed: ${(err as Error).message}`)
     }
   }
 
-  process.stdout.write('\n')
+  process.stdout.write('\n\n')
 
-  const runTime = new Date().toLocaleString('en-US', { hour12: false })
+  const durationMs = Date.now() - startMs
+  const durationSec = (durationMs / 1000).toFixed(1)
+  const costEst = (QUERIES.length * TAVILY_COST_PER_SEARCH).toFixed(3)
 
-  // Split: posts with known/estimated date vs truly undatable (short ID, parse failure)
+  const runTime = new Date().toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  })
+
   const dated = results.filter(p => p.estimatedDate !== null)
   const undated = results.filter(p => p.estimatedDate === null)
+  const confirmedCount = dated.filter(p => !p.dateIsEstimated).length
   const estimatedCount = dated.filter(p => p.dateIsEstimated).length
-  const confirmedCount = dated.length - estimatedCount
 
-  const priority = dated.filter(p => categorize(p) === 'priority')
-  const worthLook = dated.filter(p => categorize(p) === 'worthLook')
-  const noise = dated.filter(p => categorize(p) === 'noise')
+  const byDateDesc = (a: Post, b: Post) =>
+    (b.estimatedDate?.getTime() ?? 0) - (a.estimatedDate?.getTime() ?? 0)
 
-  const dateLine = confirmedCount > 0
-    ? `${confirmedCount} confirmed + ${estimatedCount} ID-estimated (last ${DAYS_BACK}d)`
-    : `${estimatedCount} ID-estimated (last ${DAYS_BACK}d)`
-
+  const priority = dated.filter(p => categorize(p) === 'priority').sort(byDateDesc)
+  const worthLook = dated.filter(p => categorize(p) === 'worthLook').sort(byDateDesc)
+  const noise = dated.filter(p => categorize(p) === 'noise').sort(byDateDesc)
   const totalActionable = priority.length + worthLook.length
+  const keptCount = results.length
+
+  const topSubs = topEntries(subredditMap, 8)
+  const topKws = topEntries(keywordMap, 6)
+
   const header = [
-    `=== VISA SCOUT — Reddit Opportunity Scan (Tavily) ===`,
-    `Run: ${runTime}  ·  ${QUERIES.length} queries  ·  ${dated.length} posts ${dateLine}  ·  ${undated.length} undated`,
-    `Actionable: ${totalActionable} (${priority.length} answer these · ${worthLook.length} worth a look · ${noise.length} noise)`,
-    `Note: ~YYYY-MM-DD = date estimated from Reddit post ID (±2 days). No comment count available.`,
+    HEAVY,
+    `  VISA SCOUT — Reddit Opportunity Scan (Tavily)`,
+    HEAVY,
+    ``,
+    `  Run       ${runTime}`,
+    `  Period    Last ${DAYS_BACK} days`,
+    `  Duration  ${durationSec}s   Cost ~$${costEst} (${QUERIES.length} queries × $${TAVILY_COST_PER_SEARCH})`,
+    ``,
+    `  Funnel    ${rawCount} raw  →  ${keptCount} kept`,
+    `            (${dupeCount} dupes  ·  ${nonThreadCount} non-thread  ·  ${tooOldCount} >90d old)`,
+    `  Results   ${dated.length} dated (${confirmedCount} confirmed · ${estimatedCount} ID-estimated)  ·  ${undated.length} undated`,
+    ``,
+    `  Actionable  ${totalActionable}  (${priority.length} answer these · ${worthLook.length} worth a look · ${noise.length} noise)`,
+    HEAVY,
   ].join('\n')
 
   let body: string
   if (dated.length === 0 && undated.length === 0) {
-    body = `No matching posts found. Try increasing DAYS_BACK or adding queries.`
+    body = `  No matching posts found. Try increasing DAYS_BACK or expanding queries.`
   } else {
     const sections = [
-      renderSection('ANSWER THESE (questions with visa keywords)', priority, 'priority'),
+      renderSection('ANSWER THESE  (unanswered questions)', priority, 'priority'),
       renderSection('WORTH A LOOK', worthLook, 'worthLook'),
       renderSection('NOISE', noise, 'noise'),
     ]
     if (SHOW_UNDATED_SECTION && undated.length > 0) {
       sections.push(renderSection(
-        `UNVERIFIED DATE (${undated.length} posts — very old or unparseable ID)`,
+        `UNVERIFIED DATE  (very old or unparseable ID)`,
         undated,
         'worthLook'
       ))
@@ -280,13 +325,23 @@ async function main() {
     body = sections.filter(Boolean).join('\n\n')
   }
 
-  const output = [
-    header,
-    body,
-    '──────────────────────────────────────────\nDone. Pick your threads and answer manually.',
-  ].join('\n\n')
+  const statsFooter = [
+    LINE,
+    `  STATS`,
+    LINE,
+    topSubs ? `  Subreddits  ${topSubs}` : `  Subreddits  (none with results)`,
+    topKws   ? `  Keywords    ${topKws}`   : `  Keywords    (no matches)`,
+    ``,
+    `  Note: ~YYYY-MM-DD = date estimated from Reddit post ID (±2 days).`,
+    `        Cost estimate uses $${TAVILY_COST_PER_SEARCH}/query — verify at tavily.com/pricing.`,
+    HEAVY,
+    `  Done. Review threads above and respond manually.`,
+    HEAVY,
+  ].join('\n')
 
-  console.log('\n' + output)
+  const output = [header, body, statsFooter].join('\n\n')
+
+  console.log(output)
 
   const outputDir = path.join(process.cwd(), 'outputs', 'scans')
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })

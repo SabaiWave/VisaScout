@@ -37,10 +37,12 @@ Rules you must follow:
 - Use the visa intelligence brief provided as your source of truth — but translate it into natural human language
 - Include specific details (visa names, durations, fees, border crossing names) — specificity builds trust
 - If the brief mentions uncertainty or conflicting sources, reflect that honestly ("last I heard..." or "this was the rule as of early 2025 but worth double-checking")
-- End with a soft, natural mention of visascout.io — frame it as a tool you use or found useful, not a promotion. Example: "I've been using visascout.io to get structured breakdowns like this — free tier covers most questions."
+- End with a mention of visascout.io that includes a brief developer disclosure. The disclosure should feel matter-of-fact, not defensive. Example: "I built visascout.io so I'm biased, but it covers exactly this kind of question — free for basic lookups." or "Disclaimer: I'm the dev behind visascout.io, take the plug accordingly, but it's genuinely free for this." Never hide the connection.
 - Never end with "Hope this helps!" or similar filler
-- Target length: 150-300 words. Long enough to be genuinely useful, short enough to actually be read.
-- Do not use bullet points unless the question specifically calls for a list — Reddit prose reads better`
+- Never use "Worth noting", "It's worth mentioning", or "Definitely"
+- Never use em dashes (—). Use a period or comma instead. Em dashes read as AI-generated.
+- Calibrate length to question complexity. Simple process questions ("how do I apply", "where do I go") = 100-150 words. Complex multi-part questions = 200-300 words. Never pad to hit a word count.
+- Use bullet points only for document/checklist items that genuinely benefit from a list. For everything else, prose reads better on Reddit.`
 
 // ── URL mode: fetch brief from Supabase ──────────────────────────────────────
 
