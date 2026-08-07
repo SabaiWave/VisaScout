@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:pipeline": "tsx scripts/test-pipeline.ts",
-    "test:pipeline:dry": "DRY_RUN=true tsx scripts/test-pipeline.ts"
+    "test:pipeline:dry": "DRY_RUN=true tsx scripts/test-pipeline.ts",
+    "mockups": "bash scripts/mockups.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
@@ -36,7 +37,6 @@
     "html2pdf.js": "^0.14.0",
     "lucide-react": "^1.14.0",
     "next": "^16.2.6",
-    "next-themes": "^0.4.6",
     "puppeteer-core": "^25.0.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",

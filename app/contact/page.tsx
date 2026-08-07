@@ -106,7 +106,7 @@ export default function ContactPage() {
                 }}
                 onFocus={e => {
                   e.currentTarget.style.borderColor = 'var(--color-secondary)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-indigo)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-focus)';
                 }}
                 onBlur={e => {
                   e.currentTarget.style.borderColor = 'var(--color-border-strong)';
@@ -140,7 +140,7 @@ export default function ContactPage() {
                 }}
                 onFocus={e => {
                   e.currentTarget.style.borderColor = 'var(--color-secondary)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-indigo)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-focus)';
                 }}
                 onBlur={e => {
                   e.currentTarget.style.borderColor = 'var(--color-border-strong)';
@@ -176,7 +176,7 @@ export default function ContactPage() {
                 }}
                 onFocus={e => {
                   e.currentTarget.style.borderColor = 'var(--color-secondary)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-indigo)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-focus)';
                 }}
                 onBlur={e => {
                   e.currentTarget.style.borderColor = 'var(--color-border-strong)';

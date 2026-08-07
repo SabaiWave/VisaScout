@@ -61,7 +61,7 @@ STRATEGY.md
 
 # Design tooling — scratch space, not source code
 /design-mockups/
-/design-library/screenshots/
-/.agents/
+/design-library/
+.agents/
 
 !docs/.gitkeep
