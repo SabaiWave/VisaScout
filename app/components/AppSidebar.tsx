@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Archive, ShieldCheck, Terminal, Zap } from 'lucide-react';
 import { Wordmark } from './ui/Wordmark';
+import { BrandGlyph } from './ui/BrandGlyph';
 import { SidebarAccount } from './SidebarAccount';
 
 interface AppSidebarProps {
@@ -39,7 +40,10 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
         gap: '0.25rem',
       }}
     >
-      <Wordmark className="block px-2 mb-6" />
+      <Link href="/" className="flex items-center gap-2.5 px-2 mb-6" style={{ textDecoration: 'none' }}>
+        <BrandGlyph size={18} />
+        <Wordmark noLink />
+      </Link>
 
       {navItems.map(({ href, label, icon: Icon }) => {
         const active = pathname === href;
@@ -51,8 +55,8 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '8px 12px',
-              borderRadius: '8px',
+              padding: '8px 12px 8px 9px',
+              borderLeft: `3px solid ${active ? 'var(--color-amber)' : 'transparent'}`,
               fontSize: '0.8rem',
               fontWeight: 600,
               color: active ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
@@ -79,7 +83,7 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
             style={{
               display: 'block',
               padding: '8px 12px',
-              borderRadius: '8px',
+              borderRadius: '0px',
               fontSize: '0.8rem',
               fontWeight: 600,
               color: 'var(--color-text-secondary)',
@@ -97,7 +101,7 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
             style={{
               display: 'block',
               padding: '8px 12px',
-              borderRadius: '8px',
+              borderRadius: '0px',
               fontSize: '0.8rem',
               fontWeight: 700,
               color: 'var(--color-secondary-light)',

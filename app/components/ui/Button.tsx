@@ -20,23 +20,23 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'text-center font-bold uppercase rounded-lg transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   secondary:
-    'text-center font-bold uppercase rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   ghost:
-    'text-center font-bold uppercase rounded-lg border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   danger:
-    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   warning:
-    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
   admin:
-    'text-center font-bold uppercase rounded border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
+    'text-center font-bold uppercase border transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed',
 };
 
 const variantStyles: Record<Variant, CSSProperties> = {
   primary: {
     background: 'var(--color-secondary)',
-    color: '#ffffff',
+    color: 'var(--color-neutral)',
     fontFamily: 'var(--font-mono)',
     letterSpacing: '0.04em',
   },
@@ -69,9 +69,9 @@ const variantStyles: Record<Variant, CSSProperties> = {
     letterSpacing: '0.04em',
   },
   admin: {
-    background: 'rgba(99,102,241,0.08)',
+    background: 'rgba(var(--color-secondary-rgb),0.08)',
     color: 'var(--color-secondary-light)',
-    borderColor: 'rgba(99,102,241,0.3)',
+    borderColor: 'rgba(var(--color-secondary-rgb),0.3)',
     fontFamily: 'var(--font-mono)',
     letterSpacing: '0.04em',
   },

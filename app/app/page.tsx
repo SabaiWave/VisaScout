@@ -71,8 +71,8 @@ const DEPTH_CONFIG = {
     label: 'Intel',
     price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
     description: 'Booking soon. Need all options on the table.',
-    color: '#6366F1',
-    colorRgb: '99,102,241',
+    color: 'var(--color-depth-standard)',
+    colorRgb: '200,120,10',
   },
   deep: {
     icon: FileText,
@@ -163,8 +163,8 @@ function AppContent() {
   const agentDisplayCountRef = useRef(0);
   const lastRevealRef = useRef(0);       // timestamp of last reveal (for min-stagger enforcement)
   const revealScheduledRef = useRef(-1); // which idx currently has a pending reveal timer (-1 = none)
-  const [nationality, setNationality] = useState('');
-  const [destination, setDestination] = useState('');
+  const [nationality, setNationality] = useState(() => searchParams.get('nationality') || '');
+  const [destination, setDestination] = useState(() => searchParams.get('destination') || '');
   const [visaType, setVisaType] = useState('');
   const [freeform, setFreeform] = useState('');
   const depthParam = searchParams.get('depth');
@@ -496,7 +496,7 @@ function AppContent() {
 
               {error && !capReached && (
                 <div
-                  className="mb-6 rounded-lg px-4 py-3 text-sm border"
+                  className="mb-6 px-4 py-3 text-sm border"
                   style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-error)' }}
                 >
                   {error}{' '}
@@ -568,7 +568,7 @@ function AppContent() {
                       lineHeight: 1.75,
                       minHeight: 130,
                       border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`,
-                      boxShadow: textareaFocused ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
+                      boxShadow: textareaFocused ? '0 0 0 3px rgba(var(--color-secondary-rgb),0.18)' : 'none',
                       transition: 'border-color 0.15s, box-shadow 0.15s',
                     }}
                   />
@@ -624,7 +624,7 @@ function AppContent() {
 
                 {capReached && (
                   <div
-                    className="rounded-lg px-4 py-3 border"
+                    className="px-4 py-3 border"
                     style={{ background: 'var(--color-amber-subtle)', borderColor: 'rgba(245,158,11,0.35)' }}
                   >
                     <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
@@ -647,7 +647,7 @@ function AppContent() {
                         : depth === 'quick'
                           ? { background: '#10b981', color: '#0a0a0a', boxShadow: '0 0 0 1px rgba(16,185,129,0.4), 0 0 24px rgba(16,185,129,0.2)' }
                           : depth === 'standard'
-                            ? { background: '#6366F1', color: '#ffffff', boxShadow: '0 0 0 1px rgba(99,102,241,0.4), 0 0 24px rgba(99,102,241,0.2)' }
+                            ? { background: 'var(--color-depth-standard)', color: 'var(--color-neutral)', boxShadow: '0 0 0 1px rgba(var(--color-secondary-rgb),0.4), 0 0 24px rgba(var(--color-secondary-rgb),0.2)' }
                             : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
                     }
                   >
@@ -696,7 +696,7 @@ function AppContent() {
                               style={{
                                 ...INPUT_STYLE,
                                 border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? 'var(--color-secondary)' : 'var(--color-border-strong)'}`,
-                                boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(99,102,241,0.18)' : 'none',
+                                boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(var(--color-secondary-rgb),0.18)' : 'none',
                               }}
                             />
                             {inviteCodeError && (

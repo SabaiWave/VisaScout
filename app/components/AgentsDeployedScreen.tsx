@@ -69,7 +69,7 @@ function AgentDisplayRow({ label, index, displayCount, failed = false }: {
 
   const borderColor = done
     ? (failed ? 'rgba(239,68,68,0.3)' : 'var(--color-border)')
-    : isQueued ? 'var(--color-border-muted)' : 'rgba(99,102,241,0.15)';
+    : isQueued ? 'var(--color-border-muted)' : 'rgba(var(--color-secondary-rgb),0.15)';
   const bg = done
     ? (failed ? 'var(--color-error-bg)' : 'var(--color-bg-elevated)')
     : isQueued ? 'transparent' : 'var(--color-secondary-subtle)';
@@ -86,7 +86,7 @@ function AgentDisplayRow({ label, index, displayCount, failed = false }: {
   return (
     <motion.div
       variants={rowVariant}
-      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-1.5"
+      className="flex items-center gap-3 px-4 py-3 mb-1.5"
       style={{ border: `1px solid ${borderColor}`, background: bg, willChange: 'transform, opacity' }}
     >
       <StatusIcon
@@ -160,7 +160,7 @@ export function AgentsDeployedScreen({ children }: { children: React.ReactNode }
           </h2>
           <div
             className="mb-5"
-            style={{ height: 1, background: 'linear-gradient(to right, rgba(99,102,241,0.4), transparent)' }}
+            style={{ height: 1, background: 'linear-gradient(to right, rgba(var(--color-secondary-rgb),0.4), transparent)' }}
           />
           <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
             Pulling from official sources, recent enforcement data, and real traveler reports.
@@ -185,7 +185,6 @@ export function AgentsDeployedScreen({ children }: { children: React.ReactNode }
             style={{
               background: 'var(--color-bg-elevated)',
               border: '1px solid var(--color-border)',
-              borderRadius: 12,
               padding: '20px 24px',
               display: 'flex',
               flexDirection: 'column',
@@ -193,12 +192,12 @@ export function AgentsDeployedScreen({ children }: { children: React.ReactNode }
             }}
           >
             {/* No inline background — skeleton-shimmer class owns the gradient + animation */}
-            <div className="skeleton-shimmer" style={{ height: 13, width: s.headingWidth, borderRadius: 4, marginBottom: 4 }} />
+            <div className="skeleton-shimmer" style={{ height: 13, width: s.headingWidth, marginBottom: 4 }} />
             {Array.from({ length: s.lines }).map((_, j) => (
               <div
                 key={j}
                 className="skeleton-shimmer"
-                style={{ height: 14, width: j === s.lines - 1 ? '70%' : '100%', borderRadius: 4 }}
+                style={{ height: 14, width: j === s.lines - 1 ? '70%' : '100%' }}
               />
             ))}
           </div>

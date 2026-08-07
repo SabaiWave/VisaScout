@@ -102,7 +102,7 @@ export default function DevPage() {
           </p>
           <div className="mb-3 flex items-center gap-4 flex-wrap">
             <div
-              className="inline-grid grid-cols-3 rounded overflow-hidden"
+              className="inline-grid grid-cols-3 overflow-hidden"
               style={{ border: '1px solid var(--color-border-strong)' }}
             >
               {BRIEF_DEPTHS.map((d, i) => (
@@ -115,7 +115,7 @@ export default function DevPage() {
                     fontFamily: 'var(--font-mono)',
                     letterSpacing: '0.06em',
                     background: devBriefDepth === d ? 'var(--color-secondary)' : 'var(--color-bg-base)',
-                    color: devBriefDepth === d ? '#fff' : 'var(--color-text-tertiary)',
+                    color: devBriefDepth === d ? 'var(--color-neutral)' : 'var(--color-text-tertiary)',
                     borderLeft: i > 0 ? '1px solid var(--color-border-strong)' : 'none',
                     cursor: 'pointer',
                   }}
@@ -127,7 +127,7 @@ export default function DevPage() {
             <button
               type="button"
               onClick={() => setDevBriefDegraded(d => !d)}
-              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors"
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.06em',
@@ -142,12 +142,12 @@ export default function DevPage() {
             <button
               type="button"
               onClick={() => setDevForceDryRun(d => !d)}
-              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors"
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.06em',
                 border: '1px solid var(--color-border-strong)',
-                background: devForceDryRun ? 'rgba(99,102,241,0.15)' : 'rgba(239,68,68,0.1)',
+                background: devForceDryRun ? 'rgba(var(--color-secondary-rgb),0.15)' : 'rgba(239,68,68,0.1)',
                 color: devForceDryRun ? 'var(--color-secondary-light)' : 'var(--color-error)',
                 cursor: 'pointer',
               }}
@@ -159,7 +159,7 @@ export default function DevPage() {
             href={`/app?trigger=quick&depth=${devBriefDepth}${devBriefDegraded ? '&sim_degraded=true' : ''}${devForceDryRun ? '&force_dry_run=true' : ''}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase transition-colors"
             style={{
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.06em',
@@ -397,8 +397,8 @@ export default function DevPage() {
               style={{
                 padding: '0.5rem 1rem',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(99,102,241,0.4)',
-                background: 'rgba(99,102,241,0.1)',
+                border: '1px solid rgba(var(--color-secondary-rgb),0.4)',
+                background: 'rgba(var(--color-secondary-rgb),0.1)',
                 color: 'var(--color-secondary-light)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.75rem',
@@ -440,8 +440,8 @@ export default function DevPage() {
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
                 marginBottom: '6px',
-                border: `1px solid ${clearState === 'success' ? 'rgba(99,102,241,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                background: clearState === 'success' ? 'rgba(99,102,241,0.05)' : 'rgba(239,68,68,0.05)',
+                border: `1px solid ${clearState === 'success' ? 'rgba(var(--color-secondary-rgb),0.3)' : 'rgba(239,68,68,0.3)'}`,
+                background: clearState === 'success' ? 'rgba(var(--color-secondary-rgb),0.05)' : 'rgba(239,68,68,0.05)',
                 color: clearState === 'success' ? 'var(--color-secondary-light)' : 'var(--color-error)',
                 fontFamily: 'var(--font-mono)',
                 whiteSpace: 'pre-wrap',

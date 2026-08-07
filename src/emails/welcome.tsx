@@ -31,7 +31,7 @@ export default function WelcomeEmail({ appUrl }: WelcomeEmailProps) {
 
           {/* Wordmark */}
           <Text style={styles.wordmark}>
-            <span style={{ color: '#6366F1' }}>{'// '}</span>VISASCOUT
+            VISASCOUT
           </Text>
 
           {/* Hero */}
@@ -44,7 +44,7 @@ export default function WelcomeEmail({ appUrl }: WelcomeEmailProps) {
 
           {/* How it works */}
           <Text style={styles.sectionLabel}>
-            <span style={{ color: '#6366F1' }}>{'// '}</span>HOW IT WORKS
+            HOW IT WORKS
           </Text>
 
           {steps.map(({ number, text }) => (
@@ -81,11 +81,10 @@ export default function WelcomeEmail({ appUrl }: WelcomeEmailProps) {
 const styles = {
   body: {
     backgroundColor: '#f4f4f5',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   container: {
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
     border: '1px solid #e4e4e7',
     margin: '40px auto',
     padding: '40px',
@@ -102,17 +101,18 @@ const styles = {
   heading: {
     color: '#18181b',
     fontSize: '36px',
-    fontWeight: '700',
-    lineHeight: '1.2',
+    fontWeight: '900',
+    lineHeight: '1.1',
+    textTransform: 'uppercase' as const,
     margin: '0 0 12px',
-    fontFamily: "'DM Serif Display', Georgia, 'Times New Roman', serif",
+    fontFamily: "'Barlow Condensed', Georgia, 'Times New Roman', serif",
   },
   text: {
     color: '#52525b',
     fontSize: '15px',
     lineHeight: '1.75',
     margin: '0 0 32px',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   sectionLabel: {
     color: '#18181b',
@@ -130,7 +130,7 @@ const styles = {
     verticalAlign: 'top',
   },
   stepNumber: {
-    color: '#6366F1',
+    color: '#c8780a',
     fontSize: '18px',
     fontWeight: '700',
     margin: '0',
@@ -141,15 +141,14 @@ const styles = {
     fontSize: '14px',
     lineHeight: '1.6',
     margin: '0',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   btnSection: {
     margin: '32px 0 0',
   },
   btn: {
-    backgroundColor: '#6366F1',
-    borderRadius: '6px',
-    color: '#ffffff',
+    backgroundColor: '#c8780a',
+    color: '#060c12',
     fontSize: '13px',
     fontWeight: '700',
     letterSpacing: '0.1em',

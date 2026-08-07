@@ -101,11 +101,11 @@ export function SearchableCombobox({
     : open
       ? 'var(--color-secondary)'
       : value
-        ? 'rgba(99,102,241,0.4)'
+        ? 'rgba(var(--color-secondary-rgb),0.4)'
         : 'var(--color-border-strong)';
 
   const focusRing = open
-    ? '0 0 0 3px rgba(99,102,241,0.18)'
+    ? '0 0 0 3px rgba(var(--color-secondary-rgb),0.18)'
     : 'none';
 
   return (

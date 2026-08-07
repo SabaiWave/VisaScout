@@ -103,7 +103,7 @@ function renderActionSteps(
         {items.map((item, i) => (
           <li key={i} className="flex gap-3 items-start">
             <span
-              className="shrink-0 text-xs font-bold uppercase mt-0.5 px-2 py-0.5 rounded"
+              className="shrink-0 text-xs font-bold uppercase mt-0.5 px-2 py-0.5"
               style={{ color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', background: 'rgba(245,158,11,0.12)', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}
             >
               {item.label}
@@ -137,7 +137,7 @@ function CardHeader({ title, badge }: { title: string; badge?: React.ReactNode }
 
 function DepthGateTeaser({ title, message, href }: { title: string; message: string; href: string }) {
   return (
-    <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
+    <div className="brief-section overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
       <div className="flex items-center justify-between px-5 py-3" style={{ background: 'var(--color-bg-elevated)' }}>
         <CardHeader title={title} />
         <Lock size={14} className="flex-shrink-0 ml-4" style={{ color: 'var(--color-text-tertiary)' }} />
@@ -156,7 +156,7 @@ function DepthGateTeaser({ title, message, href }: { title: string; message: str
 
 function WarningBox({ header, items }: { header: string; items: string[] }) {
   return (
-    <div className="rounded-lg px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: 'var(--shadow-amber)' }}>
+    <div className="px-4 py-3 border space-y-2" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)', boxShadow: 'var(--shadow-amber)' }}>
       <Label color="var(--color-amber)">{header}</Label>
       {items.map((w, i) => (
         <p key={i} className="text-sm flex items-start gap-2" style={{ color: 'var(--color-text-secondary)' }}>
@@ -181,7 +181,7 @@ function CollapsibleCard({
   const [open, setOpen] = useState(defaultOpen);
   const showContent = forPrint || open;
   return (
-    <div className="brief-section rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
+    <div className="brief-section overflow-hidden border" style={{ borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
       <Button
         variant="ghost"
         aria-expanded={open}
@@ -206,19 +206,19 @@ function CollapsibleCard({
 function VisaOptionCard({ option, depth }: { option: VisaOption; depth: string }) {
   const bg = {
     best:       'rgba(34,197,94,0.06)',
-    good:       'rgba(99,102,241,0.06)',
+    good:       'rgba(var(--color-secondary-rgb),0.06)',
     acceptable: 'var(--color-bg-base)',
   }[option.suitability];
   const suitabilityLabel = { best: 'Best Fit', good: 'Good Fit', acceptable: 'Acceptable' }[option.suitability];
   const badgeColors = {
     best:       { background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)' },
-    good:       { background: 'rgba(99,102,241,0.12)', color: 'var(--color-secondary-light)' },
+    good:       { background: 'rgba(var(--color-secondary-rgb),0.12)', color: 'var(--color-secondary-light)' },
     acceptable: { background: 'var(--color-bg-overlay)', color: 'var(--color-text-tertiary)' },
   }[option.suitability];
 
   return (
     <div
-      className="rounded-lg p-5 mb-4 border"
+      className="p-5 mb-4 border"
       style={{ background: bg, borderColor: 'var(--color-border)' }}
     >
       {/* Name + suitability badge */}
@@ -244,13 +244,13 @@ function VisaOptionCard({ option, depth }: { option: VisaOption; depth: string }
         <ul className="text-sm space-y-2 mt-3">
           {option.pros.map((p, i) => (
             <li key={`pro-${i}`} className="flex items-start gap-2">
-              <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}>Pro</span>
+              <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 mt-0.5" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--color-success)', fontFamily: 'var(--font-mono)' }}>Pro</span>
               <span style={{ color: 'var(--color-text-secondary)' }}>{noDash(p)}</span>
             </li>
           ))}
           {option.cons.map((c, i) => (
             <li key={`con-${i}`} className="flex items-start gap-2">
-              <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mt-0.5" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>Con</span>
+              <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 mt-0.5" style={{ background: 'rgba(239,68,68,0.15)', color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>Con</span>
               <span style={{ color: 'var(--color-text-secondary)' }}>{noDash(c)}</span>
             </li>
           ))}
@@ -269,7 +269,7 @@ function VisaOptionCard({ option, depth }: { option: VisaOption; depth: string }
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-[0.65rem] font-bold uppercase px-2 py-0.5"
-              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(99,102,241,0.10)', borderRadius: '4px' }}
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-secondary)', background: 'rgba(var(--color-secondary-rgb),0.10)', borderRadius: '4px' }}
             >
               Apply Online <ExternalLink size={9} />
             </a>
@@ -526,7 +526,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
       {/* Degraded notice */}
       {failedAgents.length > 0 && (
         <div
-          className="rounded-lg px-5 py-4 border"
+          className="px-5 py-4 border"
           style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.25)' }}
         >
           <p className="text-xs font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
@@ -540,7 +540,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
               <button
                 onClick={handleRerun}
                 disabled={rerunLoading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 min-h-[44px] rounded text-xs font-bold uppercase transition-opacity disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 min-h-[44px] text-xs font-bold uppercase transition-opacity disabled:opacity-50"
                 style={{
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.04em',
@@ -574,8 +574,8 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
       {/* We Understood */}
       {!hideParsedSituation && brief.parsedSituation && (
         <div
-          className="brief-section rounded-lg px-5 py-4 border"
-          style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(99,102,241,0.2)', boxShadow: 'var(--shadow-card)' }}
+          className="brief-section px-5 py-4 border"
+          style={{ background: 'var(--color-secondary-subtle)', borderColor: 'rgba(var(--color-secondary-rgb),0.2)', boxShadow: 'var(--shadow-card)' }}
         >
           <CardHeading>We Understood</CardHeading>
           <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{brief.parsedSituation}</p>
@@ -584,7 +584,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
 
       {/* Recommended Action */}
       <div
-        className="brief-section rounded-lg overflow-hidden"
+        className="brief-section overflow-hidden"
         style={{
           border: '1px solid var(--color-border-amber)',
           boxShadow: 'var(--shadow-amber)',
@@ -597,7 +597,7 @@ export default function BriefRenderer({ brief, forPrint = false, hideMetadata = 
           {/* Deadline callout — most urgent, show first */}
           {brief.recommendedAction.deadline && (
             <div
-              className="flex items-start gap-2.5 rounded px-3.5 py-3 mb-4"
+              className="flex items-start gap-2.5 px-3.5 py-3 mb-4"
               style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
             >
               <Flag size={12} style={{ color: 'var(--color-error)', flexShrink: 0, marginTop: '3px' }} />

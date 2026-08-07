@@ -46,7 +46,7 @@ function HudHeading({ children, color = 'var(--color-text-primary)' }: { childre
       </h1>
       <div
         className="mb-5"
-        style={{ height: 1, background: 'linear-gradient(to right, rgba(99,102,241,0.4), transparent)' }}
+        style={{ height: 1, background: 'linear-gradient(to right, rgba(var(--color-secondary-rgb),0.4), transparent)' }}
       />
     </>
   );

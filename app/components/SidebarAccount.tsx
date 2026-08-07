@@ -11,7 +11,7 @@ const navRowBase: React.CSSProperties = {
   gap: '10px',
   width: '100%',
   padding: '8px 12px',
-  borderRadius: '8px',
+  borderRadius: '0px',
   fontSize: '0.8rem',
   fontWeight: 600,
   fontFamily: 'var(--font-mono)',

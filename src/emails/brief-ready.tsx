@@ -23,7 +23,7 @@ export default function BriefReadyEmail({ destination, briefUrl }: BriefReadyEma
         <Container style={styles.container}>
 
           <Text style={styles.wordmark}>
-            <span style={{ color: '#6366F1' }}>{'// '}</span>VISASCOUT
+            VISASCOUT
           </Text>
 
           <Text style={styles.heading}>Your brief is ready.</Text>
@@ -57,11 +57,10 @@ export default function BriefReadyEmail({ destination, briefUrl }: BriefReadyEma
 const styles = {
   body: {
     backgroundColor: '#f4f4f5',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   container: {
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
     border: '1px solid #e4e4e7',
     margin: '40px auto',
     padding: '40px',
@@ -78,25 +77,25 @@ const styles = {
   heading: {
     color: '#18181b',
     fontSize: '32px',
-    fontWeight: '700',
-    lineHeight: '1.2',
+    fontWeight: '900',
+    lineHeight: '1.1',
+    textTransform: 'uppercase' as const,
     margin: '0 0 12px',
-    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    fontFamily: "'Barlow Condensed', Georgia, 'Times New Roman', serif",
   },
   text: {
     color: '#52525b',
     fontSize: '15px',
     lineHeight: '1.75',
     margin: '0 0 28px',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   btnSection: {
     margin: '0 0 32px',
   },
   btn: {
-    backgroundColor: '#6366F1',
-    borderRadius: '6px',
-    color: '#ffffff',
+    backgroundColor: '#c8780a',
+    color: '#060c12',
     fontSize: '13px',
     fontWeight: '700',
     letterSpacing: '0.1em',
@@ -110,7 +109,7 @@ const styles = {
     fontSize: '11px',
     lineHeight: '1.6',
     margin: '0 0 20px',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
     borderTop: '1px solid #e4e4e7',
     paddingTop: '16px',
   },

@@ -2,10 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/app/components/ui/Button';
-import { Wordmark } from '@/app/components/ui/Wordmark';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { NavLink } from '@/app/components/ui/NavLink';
-import { MiniFooter } from '@/app/components/ui/MiniFooter';
+import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -42,20 +40,8 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }} className="relative">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
-      {/* Nav */}
-      <nav
-        className="relative z-10 border-b px-6 py-4"
-        style={{ borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <NavLink href="/">Home</NavLink>
-        </div>
-      </nav>
-
-      <main className="relative z-10 max-w-[560px] mx-auto px-6 py-16">
+    <UtilityPageShell maxWidth="760px" excludeFooterLink="/contact">
+      <div className="max-w-[560px] mx-auto">
         <SectionHeading as="h1" size="md" className="mb-8">Contact</SectionHeading>
         <p className="text-sm mb-10 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
           Questions, bug reports, feedback, or partnership inquiries. We reply within one business day.
@@ -63,7 +49,7 @@ export default function ContactPage() {
 
         {status === 'success' ? (
           <div
-            className="p-5 rounded-lg border"
+            className="p-5 border"
             style={{
               background: 'rgba(34,197,94,0.08)',
               borderColor: 'rgba(34,197,94,0.25)',
@@ -97,7 +83,7 @@ export default function ContactPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all"
+                className="w-full px-4 py-3 text-base outline-none transition-all"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
@@ -131,7 +117,7 @@ export default function ContactPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all"
+                className="w-full px-4 py-3 text-base outline-none transition-all"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
@@ -165,7 +151,7 @@ export default function ContactPage() {
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder="How can we help?"
-                className="w-full px-4 py-3 rounded-lg text-base outline-none transition-all resize-vertical"
+                className="w-full px-4 py-3 text-base outline-none transition-all resize-vertical"
                 style={{
                   background: 'var(--color-bg-elevated)',
                   border: '1px solid var(--color-border-strong)',
@@ -188,7 +174,7 @@ export default function ContactPage() {
             {/* Error */}
             {status === 'error' && (
               <div
-                className="px-4 py-3 rounded-lg border"
+                className="px-4 py-3 border"
                 style={{
                   background: 'rgba(239,68,68,0.08)',
                   borderColor: 'rgba(239,68,68,0.25)',
@@ -205,15 +191,13 @@ export default function ContactPage() {
               type="submit"
               disabled={status === 'submitting'}
               className="w-full py-3"
-              style={status === 'submitting' ? { background: 'rgba(99,102,241,0.5)' } : undefined}
+              style={status === 'submitting' ? { background: 'rgba(var(--color-secondary-rgb),0.5)' } : undefined}
             >
               {status === 'submitting' ? 'Sending...' : 'Send message'}
             </Button>
           </form>
         )}
-      </main>
-
-      <MiniFooter exclude="/contact" />
-    </div>
+      </div>
+    </UtilityPageShell>
   );
 }

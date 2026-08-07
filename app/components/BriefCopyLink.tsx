@@ -16,7 +16,7 @@ export function BriefCopyLink({ url }: { url: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-2.5 py-1.5 rounded transition-colors"
+      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-2.5 py-1.5 transition-colors"
       style={{
         fontFamily: 'var(--font-mono)',
         letterSpacing: '0.04em',

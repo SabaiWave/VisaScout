@@ -27,7 +27,7 @@ function SkeletonCard({ lines = 3, headingWidth = '40%' }: { lines?: number; hea
       style={{
         background: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border)',
-        borderRadius: '12px',
+        borderRadius: '0px',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -84,7 +84,7 @@ export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollFor
 
   if (timedOut) {
     return (
-      <div className="rounded-lg border text-center px-5 py-10" style={{ background: 'var(--color-bg-elevated)', borderColor: 'rgba(245,158,11,0.3)' }}>
+      <div className="border text-center px-5 py-10" style={{ background: 'var(--color-bg-elevated)', borderColor: 'rgba(245,158,11,0.3)' }}>
         <div className="inline-flex items-center justify-center w-16 h-16 mb-5 mx-auto" style={{ background: 'rgba(245,158,11,0.1)', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.2)' }}>
           <Clock size={28} style={{ color: 'var(--color-amber)' }} />
         </div>

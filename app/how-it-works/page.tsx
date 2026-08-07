@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Wordmark } from '@/app/components/ui/Wordmark';
-import { NavLink } from '@/app/components/ui/NavLink';
-import { MiniFooter } from '@/app/components/ui/MiniFooter';
+import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 
@@ -69,21 +67,7 @@ const CONFIDENCE_LEVELS = [
 
 export default function HowItWorksPage() {
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }} className="relative">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
-      {/* Nav */}
-      <nav
-        className="relative z-10 border-b px-6 py-4"
-        style={{ borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[860px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <NavLink href="/">Home</NavLink>
-        </div>
-      </nav>
-
-      <main className="relative z-10 max-w-[860px] mx-auto px-6 py-16 space-y-20">
-
+    <UtilityPageShell maxWidth="860px" mainClassName="space-y-20" excludeFooterLink="/how-it-works">
         {/* Header */}
         <section>
           <SectionHeading as="h1" size="md" className="mb-6">The research, explained.</SectionHeading>
@@ -107,14 +91,14 @@ export default function HowItWorksPage() {
             black box.
           </p>
 
-          <div className="rounded-xl border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+          <div className="border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
             {SOURCE_TIERS.map((t, i) => (
               <div
                 key={t.tier}
                 className="p-6"
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="flex-shrink-0" style={{ width: 3, height: 14, borderRadius: 2, background: t.color, display: 'inline-block' }} />
+                  <span className="flex-shrink-0" style={{ width: 3, height: 14, background: t.color, display: 'inline-block' }} />
                   <p
                     className="text-xs font-bold uppercase"
                     style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: t.color }}
@@ -154,14 +138,14 @@ export default function HowItWorksPage() {
             verify something from official sources, we say so.
           </p>
 
-          <div className="rounded-xl border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+          <div className="border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
             {CONFIDENCE_LEVELS.map(c => (
               <div
                 key={c.level}
                 className="p-6"
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="flex-shrink-0" style={{ width: 3, height: 14, borderRadius: 2, background: c.color, display: 'inline-block' }} />
+                  <span className="flex-shrink-0" style={{ width: 3, height: 14, background: c.color, display: 'inline-block' }} />
                   <p
                     className="text-xs font-bold uppercase"
                     style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: c.color }}
@@ -217,7 +201,7 @@ export default function HowItWorksPage() {
 
         {/* CTA */}
         <section
-          className="brief-section p-8 rounded-xl border text-center"
+          className="brief-section p-8 border text-center"
           style={{
             background: 'var(--color-bg-elevated)',
             borderColor: 'var(--color-border)',
@@ -230,14 +214,10 @@ export default function HowItWorksPage() {
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             No card required.
           </p>
-          <Button asChild size="lg" style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)' }}>
+          <Button asChild size="lg">
             <Link href="/app?depth=quick">Start free</Link>
           </Button>
         </section>
-
-      </main>
-
-      <MiniFooter exclude="/how-it-works" />
-    </div>
+    </UtilityPageShell>
   );
 }

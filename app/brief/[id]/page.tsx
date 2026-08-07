@@ -231,7 +231,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
           <div>
             {paymentNotCompleted ? (
               <div
-                className="px-4 py-3 rounded-lg"
+                className="px-4 py-3"
                 style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-amber)' }}
               >
                 Payment was not completed. No brief was generated.{' '}
@@ -245,7 +245,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
               <BriefRenderer brief={brief} hideMetadata briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
               <div
-                className="px-4 py-3 rounded-lg"
+                className="px-4 py-3"
                 style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
               >
                 Brief content unavailable.{' '}

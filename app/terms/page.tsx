@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Wordmark } from '@/app/components/ui/Wordmark';
-import { NavLink } from '@/app/components/ui/NavLink';
-import { MiniFooter } from '@/app/components/ui/MiniFooter';
+import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 
 export const metadata: Metadata = {
@@ -12,20 +10,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }} className="relative">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
-      {/* Nav */}
-      <nav
-        className="relative z-10 border-b px-6 py-4"
-        style={{ borderColor: 'var(--color-border-muted)' }}
-      >
-        <div className="max-w-[760px] mx-auto flex items-center justify-between">
-          <Wordmark />
-          <NavLink href="/">Home</NavLink>
-        </div>
-      </nav>
-
-      <main className="max-w-[760px] mx-auto px-6 py-16">
+    <UtilityPageShell maxWidth="760px" excludeFooterLink="/terms">
         <SectionHeading as="h1" size="md" className="mb-2">Terms of Service</SectionHeading>
         <p className="text-sm mb-10" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
           Last updated: May 2026
@@ -101,9 +86,6 @@ export default function TermsPage() {
             </p>
           </section>
         </div>
-      </main>
-
-      <MiniFooter exclude="/terms" />
-    </div>
+    </UtilityPageShell>
   );
 }
