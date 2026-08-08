@@ -264,7 +264,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
               ) : (
                 <div
                   className="px-4 py-3"
-                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
+                  style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
                 >
                   Brief content unavailable.{' '}
                   <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>

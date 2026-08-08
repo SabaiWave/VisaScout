@@ -1,287 +1,273 @@
 'use client';
 
-import { useEffect, useState, Suspense, useRef } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/app/components/ui/Button';
-import { AgentsDeployedScreen, AgentRowList } from '@/app/components/AgentsDeployedScreen';
 
-const MAX_WAIT_MS = 6 * 60 * 1000;
-const POLL_INTERVAL_MS = 3000;
-const MIN_DISPLAY_MS = 10000;
-const DEV_MIN_DISPLAY_MS = 3000;
+const MAX_WAIT_MS    = 6 * 60 * 1000; // 6 min → timeout state
+const HANDOFF_MS     = 90 * 1000;     // 90s → handoff message
+const POLL_INTERVAL  = 3000;
 
-// When brief is ready: stagger each agent green, then redirect after COMPLETION_ANIM_MS
-const COMPLETION_STAGGER_MS = [0, 250, 500, 750, 1000, 1600];
-const COMPLETION_ANIM_MS = 1600 + 400;
+type PageState = 'generating' | 'handoff' | 'timeout' | 'error';
 
-const DEV_BRIEF_INPUTS = {
-  nationality: 'American',
-  destination: 'Thailand',
-  visaType: 'Visa Exemption',
-  freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
-  depth: 'quick',
+// ─── CSS ─────────────────────────────────────────────────────────────────────
+
+const PAGE_CSS = `
+  @keyframes pd-pulse   { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
+  @keyframes pd-shimmer { 0% { background-position:-200px 0; } 100% { background-position:260px 0; } }
+  .pd-agent-card { border:1px solid var(--color-border); background:var(--color-bg-elevated); }
+  .pd-card-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; border-bottom:1px solid var(--color-border);
+    font-family:var(--font-mono); font-size:10px; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text-tertiary);
+  }
+  .pd-card-count { font-weight:400; letter-spacing:0.04em; }
+  .pd-agent-row {
+    display:flex; align-items:center; gap:12px;
+    height:40px; padding:0 16px;
+    border-left:3px solid var(--color-border);
+    border-bottom:1px solid var(--color-border);
+  }
+  .pd-agent-row:last-child { border-bottom:none; }
+  .pd-agent-row.running { border-left-color:var(--color-secondary); }
+  .pd-agent-row.failed  { border-left-color:var(--color-error); }
+  .pd-dot { width:8px; height:8px; border-radius:9999px; background:var(--color-border); flex-shrink:0; }
+  .pd-agent-row.running .pd-dot { background:var(--color-secondary); animation:pd-pulse 1.4s ease-in-out infinite; }
+  .pd-agent-row.failed  .pd-dot { background:var(--color-error); }
+  .pd-agent-name {
+    font-family:var(--font-mono); font-size:11px; font-weight:700;
+    letter-spacing:0.04em; text-transform:uppercase; color:var(--color-text-tertiary);
+  }
+  .pd-agent-row.running .pd-agent-name { color:var(--color-text-secondary); }
+  .pd-shimmer {
+    margin-left:auto; width:120px; height:8px;
+    background:linear-gradient(90deg,rgba(30,48,64,0.5) 0%,rgba(200,120,10,0.16) 50%,rgba(30,48,64,0.5) 100%);
+    background-size:260px 100%; animation:pd-shimmer 1.8s linear infinite;
+  }
+  .pd-agent-row.queued .pd-shimmer,
+  .pd-agent-row:not(.running):not(.failed):not(.queued) .pd-shimmer {
+    animation:none; background:rgba(22,36,47,0.9);
+  }
+  .pd-agent-row.failed .pd-shimmer { animation:none; background:rgba(61,21,21,0.9); }
+`;
+
+// ─── Shared styles ────────────────────────────────────────────────────────────
+
+const STATE_H: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontWeight: 900, fontSize: 36, lineHeight: 1.05,
+  letterSpacing: '0.01em', textTransform: 'uppercase',
+  color: 'var(--color-text-primary)', marginBottom: 16,
+};
+const BODY: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)', fontSize: 13, lineHeight: 1.7,
+  color: 'var(--color-text-secondary)', maxWidth: 600, marginBottom: 24,
+};
+const ESCAPE: React.CSSProperties = {
+  display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 12,
+  fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+  color: 'var(--color-secondary)', textDecoration: 'none',
+  borderBottom: '1px solid rgba(200,120,10,0.4)', paddingBottom: 2, marginBottom: 40,
+};
+const BTN_OUT: React.CSSProperties = {
+  display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
+  fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+  color: 'var(--color-secondary)', background: 'transparent',
+  border: '1px solid var(--color-secondary)', padding: '11px 22px',
+  textDecoration: 'none', cursor: 'pointer',
+};
+const BTN_GHOST: React.CSSProperties = {
+  display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
+  fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
+  color: 'var(--color-text-secondary)', background: 'transparent',
+  border: '1px solid var(--color-border-strong)', padding: '11px 22px',
+  textDecoration: 'none', cursor: 'pointer',
 };
 
+// ─── AgentCard ────────────────────────────────────────────────────────────────
 
-// ─── Shared layout shell ──────────────────────────────────────────────────────
+const AGENT_NAMES = [
+  'Official Policy', 'Recent Changes', 'Community Intel',
+  'Entry Requirements', 'Border Run', 'Conflict Resolver',
+] as const;
 
-function PendingShell({ children }: { children: React.ReactNode }) {
+type AgentSt = 'running' | 'queued' | 'failed' | 'idle';
+
+function AgentCard({ label, statuses }: { label: string; statuses: AgentSt[] }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 1.5rem' }}>
-      <div className="w-full max-w-md">
-        {children}
+    <div className="pd-agent-card">
+      <div className="pd-card-head">
+        <span>Pipeline</span>
+        <span className="pd-card-count">{label}</span>
       </div>
+      {AGENT_NAMES.map((name, i) => {
+        const st = statuses[i] ?? 'idle';
+        return (
+          <div key={name} className={`pd-agent-row${st !== 'idle' ? ` ${st}` : ''}`}>
+            <span className="pd-dot" />
+            <span className="pd-agent-name">{name}</span>
+            <span className="pd-shimmer" />
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function HudHeading({ children, color = 'var(--color-text-primary)' }: { children: React.ReactNode; color?: string }) {
-  return (
-    <>
-      <h1
-        className="text-2xl font-bold mb-2"
-        style={{ fontFamily: 'var(--font-mono)', color, textTransform: 'uppercase', letterSpacing: '0.04em' }}
-      >
-        {children}
-      </h1>
-      <div
-        className="mb-5"
-        style={{ height: 1, background: 'linear-gradient(to right, rgba(var(--color-secondary-rgb),0.4), transparent)' }}
-      />
-    </>
-  );
-}
-
-function IconBox({ children, bg }: { children: React.ReactNode; bg: string }) {
-  return (
-    <div
-      className="inline-flex items-center justify-center w-20 h-20 mb-6"
-      style={{ background: bg, borderRadius: '4px', border: '1px solid var(--color-border-muted)' }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ─── States ───────────────────────────────────────────────────────────────────
-
-function GeneratingState({ completedCount }: { completedCount: number }) {
-  return (
-    <div style={{ padding: '4rem 1.5rem 4rem' }}>
-      <AgentsDeployedScreen>
-        <AgentRowList displayCount={completedCount} />
-      </AgentsDeployedScreen>
-    </div>
-  );
-}
-
-function TimedOutState({ briefId }: { briefId: string | null }) {
-  const router = useRouter();
-  const contactHref = `/contact${briefId ? `?ref=${briefId}` : ''}`;
-  return (
-    <PendingShell>
-      <div className="text-center">
-        <IconBox bg="rgba(245,158,11,0.1)">
-          <span style={{ color: 'var(--color-amber)', fontSize: '1.4rem' }}>⏱</span>
-        </IconBox>
-        <HudHeading color="var(--color-amber)">Taking Longer Than Expected</HudHeading>
-        <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Your brief is taking longer than expected but it&apos;s still running. Check your dashboard in a few minutes and it should be there. If it&apos;s not showing up, reach out and we&apos;ll take a look.
-        </p>
-        {briefId && (
-          <p
-            className="text-xs mb-6"
-            style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
-          >
-            Ref: {briefId}
-          </p>
-        )}
-        <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
-          <Button variant="secondary" onClick={() => router.push(contactHref)}>Contact Us</Button>
-        </div>
-      </div>
-    </PendingShell>
-  );
-}
-
-function ErrorState({ briefId }: { briefId: string | null }) {
-  const router = useRouter();
-  const contactHref = `/contact${briefId ? `?ref=${briefId}` : ''}`;
-  return (
-    <PendingShell>
-      <div className="text-center">
-        <IconBox bg="rgba(239,68,68,0.1)">
-          <span style={{ color: 'var(--color-error)', fontSize: '1.4rem', fontWeight: 700 }}>✕</span>
-        </IconBox>
-        <HudHeading color="var(--color-error)">Brief Generation Failed</HudHeading>
-        <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Something went wrong while putting your brief together. Get in touch and we&apos;ll look into it and make it right.
-        </p>
-        {briefId && (
-          <p
-            className="text-xs mb-6"
-            style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}
-          >
-            Ref: {briefId}
-          </p>
-        )}
-        <div className="flex flex-col gap-3">
-          <Button onClick={() => router.push(contactHref)}>Contact Us</Button>
-          <Button variant="secondary" onClick={() => router.push('/')}>Back to Home</Button>
-        </div>
-      </div>
-    </PendingShell>
-  );
-}
-
-// ─── Main content ─────────────────────────────────────────────────────────────
+// ─── Page content ─────────────────────────────────────────────────────────────
 
 function PendingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const briefId = searchParams.get('brief_id');
+  const sim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development'
+    ? searchParams.get('sim') : null;
 
-  const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('dev') === 'true';
-  // dev-only error simulation via ?sim=error or ?sim=timeout
-  const sim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
-
-  const [state, setState] = useState<'generating' | 'error' | 'timeout'>(
-    sim === 'error' ? 'error' : sim === 'timeout' ? 'timeout' : 'generating',
+  const [pageState, setPageState] = useState<PageState>(
+    sim === 'error' ? 'error'
+    : sim === 'timeout' ? 'timeout'
+    : sim === 'handoff' ? 'handoff'
+    : 'generating'
   );
-  const [completedCount, setCompletedCount] = useState(0);
   const [startTime] = useState(() => Date.now());
-  const completionStartedRef = useRef(false);
 
-  // Trigger rapid sequential completion animation, then redirect after animation finishes
-  function triggerCompletionAndRedirect(redirectFn: (delay: number) => void) {
-    COMPLETION_STAGGER_MS.forEach((ms, i) => {
-      setTimeout(() => setCompletedCount(i + 1), ms);
-    });
-    const elapsed = Date.now() - startTime;
-    // Wait for animation to finish, also respect any remaining minimum display time
-    const delay = Math.max(COMPLETION_ANIM_MS, 0);
-    redirectFn(delay);
-    // Suppress elapsed — MIN_DISPLAY_MS already accounted for by caller
-    void elapsed;
-  }
-
-  // Dev mode: fire brief generation from this page, redirect after min display time
+  // State timer — drives handoff / timeout thresholds
   useEffect(() => {
-    if (!isDev || sim) return;
+    if (pageState === 'error' || pageState === 'timeout') return;
+    const id = setInterval(() => {
+      const ms = Date.now() - startTime;
+      if (ms >= MAX_WAIT_MS) { setPageState('timeout'); return; }
+      if (ms >= HANDOFF_MS && pageState === 'generating') setPageState('handoff');
+    }, 1000);
+    return () => clearInterval(id);
+  }, [pageState, startTime]);
 
-    const run = async () => {
-      try {
-        const response = await fetch('/api/brief', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(DEV_BRIEF_INPUTS),
-        });
-
-        if (!response.ok || !response.body) {
-          setState('error');
-          return;
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let foundBriefId: string | null = null;
-
-        outer: while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split('\n\n');
-          buffer = parts.pop() ?? '';
-
-          for (const part of parts) {
-            const line = part.trim();
-            if (!line.startsWith('data: ')) continue;
-            try {
-              const data = JSON.parse(line.slice(6)) as Record<string, unknown>;
-              if (data.type === 'complete') {
-                if (data.briefId) foundBriefId = data.briefId as string;
-                break outer;
-              }
-              if (data.type === 'error') {
-                setState('error');
-                return;
-              }
-            } catch { continue; }
-          }
-        }
-
-        if (!foundBriefId) { setState('error'); return; }
-
-        const elapsed = Date.now() - startTime;
-        triggerCompletionAndRedirect((animDelay) => {
-          const totalDelay = Math.max(animDelay, DEV_MIN_DISPLAY_MS - elapsed);
-          setTimeout(() => router.replace(`/brief/${foundBriefId}`), totalDelay);
-        });
-      } catch {
-        setState('error');
-      }
-    };
-
-    void run();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDev, sim, router, startTime]);
-
-  // Real payment flow: poll for brief status
+  // Poll for paid/error status (real paid-brief flow only)
   useEffect(() => {
-    if (isDev || !briefId || sim) return;
-
+    if (!briefId || sim || pageState === 'error' || pageState === 'timeout') return;
     const poll = async () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed > MAX_WAIT_MS) {
-        setState('timeout');
-        return;
-      }
-
       try {
         const res = await fetch(`/api/brief/poll?brief_id=${briefId}`);
         if (!res.ok) return;
         const data = await res.json() as { status: string };
-
-        if (data.status === 'paid') {
-          if (completionStartedRef.current) return;
-          completionStartedRef.current = true;
-          const elapsed = Date.now() - startTime;
-          triggerCompletionAndRedirect((animDelay) => {
-            const totalDelay = Math.max(animDelay, MIN_DISPLAY_MS - elapsed);
-            setTimeout(() => router.replace(`/brief/${briefId}`), totalDelay);
-          });
-          return;
-        }
-        if (data.status === 'error') {
-          setState('error');
-          return;
-        }
-      } catch { /* network blip — keep polling */ }
+        if (data.status === 'paid') { router.replace(`/brief/${briefId}`); return; }
+        if (data.status === 'error') setPageState('error');
+      } catch { /* network blip */ }
     };
-
     void poll();
-    const interval = setInterval(() => { void poll(); }, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDev, briefId, sim, router, startTime]);
+    const id = setInterval(() => { void poll(); }, POLL_INTERVAL);
+    return () => clearInterval(id);
+  }, [briefId, sim, pageState, router]);
 
-  if (state === 'timeout') return <TimedOutState briefId={briefId} />;
-  if (state === 'error')   return <ErrorState briefId={briefId} />;
-  return <GeneratingState completedCount={completedCount} />;
+  const contactHref = `/contact${briefId ? `?ref=${briefId}` : ''}`;
+
+  if (pageState === 'generating') {
+    return (
+      <>
+        <h1 style={STATE_H}>Agents Deployed</h1>
+        <p style={BODY}>
+          We&apos;re pulling from official immigration sources, recent enforcement reports,
+          and what travelers are actually seeing on the ground. Your brief is generating
+          in the background. Feel free to head to My Briefs and check back.
+        </p>
+        <a style={ESCAPE} href="/dashboard">Go to My Briefs &rarr;</a>
+        <AgentCard
+          label="5 agents · parallel"
+          statuses={['running', 'running', 'running', 'running', 'running', 'queued']}
+        />
+      </>
+    );
+  }
+
+  if (pageState === 'handoff') {
+    return (
+      <>
+        <svg style={{ display: 'block', marginBottom: 24 }} width="36" height="36" viewBox="0 0 24 24"
+          fill="none" stroke="var(--color-secondary)" strokeWidth="1.5" strokeLinecap="square">
+          <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" />
+        </svg>
+        <h1 style={STATE_H}>Still Working</h1>
+        <p style={BODY}>
+          Your brief is still generating in the background. Head to My Briefs.
+          We&apos;ll show your brief there as soon as it&apos;s ready.
+        </p>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
+          <a style={BTN_OUT} href="/dashboard">Go to My Briefs &rarr;</a>
+        </div>
+        <AgentCard
+          label="6 agents · parallel"
+          statuses={['running', 'running', 'running', 'running', 'running', 'running']}
+        />
+      </>
+    );
+  }
+
+  if (pageState === 'timeout') {
+    const ms = Date.now() - startTime;
+    const elapsedStr = `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`;
+    return (
+      <>
+        <svg style={{ display: 'block', marginBottom: 24 }} width="36" height="36" viewBox="0 0 24 24"
+          fill="none" stroke="var(--color-secondary)" strokeWidth="1.5"
+          strokeLinecap="square" strokeLinejoin="miter">
+          <path d="M12 3 L22 20 L2 20 Z" /><path d="M12 9v5" /><path d="M12 17h.01" />
+        </svg>
+        <h1 style={STATE_H}>Taking Longer Than Expected</h1>
+        <p style={BODY}>
+          Your brief may still be processing. Check My Briefs in a few minutes.
+          If it hasn&apos;t appeared after 10 minutes, contact support.
+        </p>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
+          <a style={BTN_OUT} href="/dashboard">Go to My Briefs &rarr;</a>
+          <a style={BTN_GHOST} href={contactHref}>Contact Support</a>
+        </div>
+        <AgentCard
+          label={`elapsed ${elapsedStr}`}
+          statuses={['running', 'running', 'running', 'running', 'running', 'queued']}
+        />
+      </>
+    );
+  }
+
+  // error state
+  return (
+    <>
+      <svg style={{ display: 'block', marginBottom: 24 }} width="36" height="36" viewBox="0 0 24 24"
+        fill="none" stroke="var(--color-error)" strokeWidth="1.5" strokeLinecap="square">
+        <circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" />
+      </svg>
+      <h1 style={{ ...STATE_H, color: 'var(--color-error)' }}>Something Went Wrong</h1>
+      <p style={BODY}>
+        We hit an issue generating your brief. Your payment has been noted.
+        Contact support with your ref ID and we&apos;ll make it right.
+      </p>
+      {briefId && (
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', marginBottom: 28 }}>
+          Ref: {briefId}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
+        <a style={BTN_OUT} href={contactHref}>Contact Support &rarr;</a>
+      </div>
+      <AgentCard
+        label="halted"
+        statuses={['idle', 'idle', 'failed', 'idle', 'idle', 'failed']}
+      />
+    </>
+  );
 }
 
-// ─── Suspense shell ───────────────────────────────────────────────────────────
-
-function PendingFallback() {
-  return <GeneratingState completedCount={0} />;
-}
+// ─── Page export ──────────────────────────────────────────────────────────────
 
 export default function PendingPage() {
   return (
-    <Suspense fallback={<PendingFallback />}>
-      <PendingContent />
-    </Suspense>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
+      <main style={{ maxWidth: 760, margin: '0 auto', padding: '56px 32px 96px' }}>
+        <Suspense>
+          <PendingContent />
+        </Suspense>
+      </main>
+    </>
   );
 }

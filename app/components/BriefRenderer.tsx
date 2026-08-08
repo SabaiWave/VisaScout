@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 import BriefDocument from './BriefDocument';
-import { AGENT_DISPLAY_LABELS } from './AgentsDeployedScreen';
+import { AGENT_DISPLAY_LABELS } from './agentLabels';
 import type { VisaBrief } from '@/src/types/index';
 
 export default function BriefRenderer({

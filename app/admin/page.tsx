@@ -4,7 +4,6 @@ import { Check, X, ArrowRight, AlertTriangle } from 'lucide-react';
 import { getSupabase } from '@/src/lib/supabase';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { NavLink } from '@/app/components/ui/NavLink';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
 import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
@@ -152,13 +151,15 @@ export default async function AdminPage() {
   }
 
   const client = await clerkClient();
-  const [userCount, recentSignupsResult, metrics, stuckBriefs, inviteUsers] = await Promise.all([
+  const [userCount, recentSignupsResult, metrics, stuckBriefs, inviteUsers, adminUserData] = await Promise.all([
     client.users.getCount(),
     client.users.getUserList({ limit: 10, orderBy: '-created_at' }),
     getAdminMetrics(),
     getStuckBriefs(),
     getInviteUsers(),
+    client.users.getUser(userId!),
   ]);
+  const adminEmail = adminUserData.emailAddresses[0]?.emailAddress ?? userId;
 
   const { briefs, ipLogs, jobs, freeTierToday, freeTierWeek, freeTierAllTime, subscriberCount } = metrics;
 
@@ -185,16 +186,51 @@ export default async function AdminPage() {
 
   const recentUsers = recentSignupsResult.data ?? [];
 
+  const SIDEBAR_LINKS = [
+    { href: '#s-briefs',   label: 'Briefs' },
+    { href: '#s-users',    label: 'Users' },
+    { href: '#s-cost',     label: 'Cost' },
+    { href: '#s-pipeline', label: 'Pipeline' },
+    { href: '#s-logs',     label: 'Logs' },
+  ];
+
   return (
-    <>
-      <div className="hidden lg:flex items-center justify-end gap-1 px-4" style={{ height: '52px', borderBottom: '1px solid var(--color-border-muted)' }}>
-        <NavLink href="/">Home</NavLink>
-        <NavLink href="/contact">Contact</NavLink>
-      </div>
-      <main className="px-4 sm:px-6 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
-        <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Page sidebar */}
+      <aside style={{
+        width: 200, flexShrink: 0,
+        position: 'sticky', top: 0, height: '100vh',
+        overflowY: 'auto', display: 'flex', flexDirection: 'column',
+        borderRight: '1px solid var(--color-border)',
+        background: 'var(--color-bg-elevated)',
+        padding: '28px 0',
+      }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', padding: '0 20px', marginBottom: 24 }}>
+          Admin
+        </div>
+        <nav style={{ flex: 1 }}>
+          {SIDEBAR_LINKS.map(({ href, label }) => (
+            <a key={href} href={href} style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', textDecoration: 'none', padding: '7px 20px', borderLeft: '2px solid transparent', transition: 'color 0.12s, border-color 0.12s' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-secondary)'; e.currentTarget.style.borderLeftColor = 'var(--color-secondary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderLeftColor = 'transparent'; }}>
+              {label}
+            </a>
+          ))}
+        </nav>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', marginTop: 'auto' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#c8780a', background: 'rgba(200,120,10,0.1)', border: '1px solid rgba(200,120,10,0.3)', padding: '2px 8px', display: 'inline-block', marginBottom: 6 }}>
+            Admin
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-tertiary)', wordBreak: 'break-all' as const }}>
+            {adminEmail}
+          </div>
+        </div>
+      </aside>
+
+      <main className="px-4 sm:px-6 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)', flex: 1, minWidth: 0 }}>
+        <div style={{ maxWidth: '1120px' }}>
         <SectionHeading size="md" as="h1" className="mb-8">
-          OPERATIONS DASHBOARD
+          Operations Dashboard
         </SectionHeading>
 
         {/* Summary row — users + revenue */}
@@ -247,7 +283,7 @@ export default async function AdminPage() {
         </div>
 
         {/* Support — stuck briefs */}
-        <Section title="STUCK BRIEFS">
+        <Section id="s-briefs" title="STUCK BRIEFS">
           <div className="mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[
               { n: '1', label: 'No Stripe session', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
@@ -384,7 +420,7 @@ export default async function AdminPage() {
         </Section>
 
         {/* Recent signups */}
-        <Section title="RECENT SIGNUPS">
+        <Section id="s-users" title="RECENT SIGNUPS">
           {recentUsers.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No users yet.</p>
           ) : (
@@ -421,7 +457,7 @@ export default async function AdminPage() {
         </Section>
 
         {/* Cost by depth */}
-        <Section title="REPORTS BY DEPTH">
+        <Section id="s-cost" title="REPORTS BY DEPTH">
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', minWidth: '360px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
               <thead>
@@ -480,7 +516,7 @@ export default async function AdminPage() {
 
         {/* Background jobs */}
         {(pendingJobs.length > 0 || failedJobs.length > 0) && (
-          <Section title="BACKGROUND JOBS">
+          <Section id="s-pipeline" title="BACKGROUND JOBS">
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', minWidth: '560px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                 <thead>
@@ -533,7 +569,7 @@ export default async function AdminPage() {
         )}
 
         {/* IP abuse log */}
-        <Section title="FLAGGED IPS">
+        <Section id="s-logs" title="FLAGGED IPS">
           {ipLogs.length === 0 ? (
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>No flagged IPs.</p>
           ) : (
@@ -562,13 +598,13 @@ export default async function AdminPage() {
         </Section>
       </div>
     </main>
-    </>
+    </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div id={id} style={{ marginBottom: '2rem' }}>
       <SectionHeading size="sm" className="mb-3">{title}</SectionHeading>
       <div style={{
         background: 'var(--color-bg-elevated)',

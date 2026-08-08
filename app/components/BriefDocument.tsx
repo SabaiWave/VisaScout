@@ -1,9 +1,8 @@
 // Pure presentational — no 'use client', no hooks, no Next.js imports.
 // Works in renderToStaticMarkup for PDF generation and in React tree for screen.
 
-import type { VisaBrief, VisaOption, ConflictReport, SourceCitation, AgentStatus } from '@/src/types/index';
+import type { VisaBrief } from '@/src/types/index';
 import { DEPTH_LABEL } from '@/src/lib/depth';
-import { AGENT_DISPLAY_LABELS } from '@/app/components/agentLabels';
 
 export interface BriefDocumentMeta {
   nationality: string;
@@ -20,23 +19,16 @@ function noDash(text: string): string {
 
 function fmt(isoDate: string): string {
   try {
-    return new Date(isoDate).toLocaleDateString('en-US', {
-      day: 'numeric', month: 'short', year: 'numeric',
-    });
-  } catch {
-    return isoDate;
-  }
+    return new Date(isoDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return isoDate; }
 }
 
-function zeroPad(n: number): string {
-  return n < 10 ? `0${n}` : String(n);
+function zeroPad(n: number): string { return n < 10 ? `0${n}` : String(n); }
+
+function urlDomain(url: string): string {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }
 
-function confidenceLabel(c: 'high' | 'medium' | 'low'): string {
-  return c.charAt(0).toUpperCase() + c.slice(1);
-}
-
-// Simple text link renderer — no React.Node linkification (works in renderToStaticMarkup)
 function withLinks(text: string): string {
   return noDash(text).replace(
     /(https?:\/\/[^\s<>"()\[\]{};,]+)/g,
@@ -44,21 +36,25 @@ function withLinks(text: string): string {
   );
 }
 
-function tierClass(tier: 1 | 2 | 3 | 4): string {
-  if (tier === 1) return 'tier t1';
-  if (tier === 2) return 'tier t2';
-  if (tier === 4) return 'tier t4';
-  return 'tier';
+function confLabel(c: 'high' | 'medium' | 'low' | undefined): string {
+  if (c === 'high') return 'High';
+  if (c === 'medium') return 'Med';
+  if (c === 'low') return 'Low';
+  return '—';
 }
 
-function tierLabel(tier: 1 | 2 | 3 | 4): string {
-  return `T${tier}`;
+function confTagClass(c: 'high' | 'medium' | 'low' | undefined): string {
+  if (c === 'high') return 'ctag hi';
+  if (c === 'medium') return 'ctag md';
+  if (c === 'low') return 'ctag';
+  return 'ctag na';
 }
 
-function sectionMark(level: 'high' | 'medium' | 'low' | undefined): string {
-  if (level === 'high') return 'mark full';
-  if (level === 'medium') return 'mark warn';
-  return 'mark none';
+function deadlineDays(dl?: string | null): string {
+  if (!dl) return '—';
+  const m = dl.match(/(\d+)\s*day/i);
+  if (m) return m[1];
+  return '—';
 }
 
 // ── CSS ───────────────────────────────────────────────────────────────────────
@@ -88,18 +84,24 @@ const CSS = `
   --ok-wash:      rgba(16,185,129,0.10);
   --bad:          #e0574a;
   --bad-wash:     rgba(224,87,74,0.10);
-
-  --sheet-w:      1340px;
-  --sheet-pad:    40px;
-  --sheet-rim:    transparent;
-  --rail-w:       272px;
-  --rail-pos:     sticky;
-  --rail-gap:     40px;
-  --grid-cols:    var(--rail-w) minmax(0,1fr);
+  --radius:       0px;
   --chrome:       block;
+  --chrome-flex:  flex;
   --texture:      1;
   --nav-h:        0px;
   --break:        auto;
+  --scrollx:      auto;
+
+  --sheet-w:      1180px;
+  --sheet-pad:    46px 0 70px;
+  --sec-gap:      42px;
+  --num-size:     52px;
+  --title-size:   30px;
+
+  --rail-w:       268px;
+  --rail-pos:     sticky;
+  --rail-gap:     40px;
+  --grid-cols:    var(--rail-w) minmax(0,1fr);
 
   background: var(--stage);
   color: var(--ink-2);
@@ -110,35 +112,24 @@ const CSS = `
 }
 
 .doc[data-mode="print"] {
-  --stage:        #ffffff;
-  --ground:       #ffffff;
-  --ground-up:    #f0f0f0;
-  --ground-sub:   #e4e4e4;
-  --rim:          #aaaaaa;
-  --rim-soft:     #d4d4d4;
-  --accent:       #111111;
-  --accent-ink:   #111111;
-  --accent-hot:   #000000;
-  --accent-wash:  #eeeeee;
-  --accent-rim:   #888888;
-  --ink:          #0a0a0a;
-  --ink-2:        #2a2a2a;
-  --ink-3:        #555555;
-  --ink-4:        #777777;
-  --ok:           #0a0a0a;
-  --ok-wash:      #eeeeee;
-  --bad:          #555555;
-  --bad-wash:     #e6e6e6;
+  --stage: #ffffff; --ground: #ffffff; --ground-up: #f0f0f0; --ground-sub: #e4e4e4;
+  --rim: #aaaaaa; --rim-soft: #d4d4d4;
+  --accent: #111111; --accent-ink: #111111; --accent-hot: #000000;
+  --accent-wash: #eeeeee; --accent-rim: #888888;
+  --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
+  --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
+  --chrome: none; --chrome-flex: none; --texture: 0; --break: avoid; --scrollx: visible;
 
-  --sheet-w:      210mm;
-  --sheet-pad:    17mm 16mm 20mm;
-  --sheet-rim:    #cccccc;
-  --rail-pos:     static;
-  --rail-gap:     0px;
-  --grid-cols:    minmax(0,1fr);
-  --chrome:       none;
-  --texture:      0;
-  --break:        avoid;
+  --sheet-w:    210mm;
+  --sheet-pad:  16mm 15mm 18mm;
+  --sec-gap:    26px;
+  --num-size:   40px;
+  --title-size: 23px;
+
+  --rail-pos:   static;
+  --rail-w:     0px;
+  --rail-gap:   0px;
+  --grid-cols:  minmax(0,1fr);
 }
 
 @media print {
@@ -149,345 +140,415 @@ const CSS = `
     --accent-wash: #eeeeee; --accent-rim: #888888;
     --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
     --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
-    --sheet-w: 100%; --sheet-pad: 0; --sheet-rim: transparent;
-    --grid-cols: minmax(0,1fr);
-    --chrome: none; --texture: 0; --break: avoid;
+    --chrome: none; --chrome-flex: none; --texture: 0; --break: avoid; --scrollx: visible;
+    --sheet-w: 100%; --sheet-pad: 0; --sec-gap: 24px;
+    --num-size: 40px; --title-size: 23px;
+    --rail-pos: static; --rail-w: 0px; --rail-gap: 0px; --grid-cols: minmax(0,1fr);
   }
   @page { size: A4; margin: 16mm 15mm 18mm; }
+  .doc::before { display: none !important; }
 }
 
+.doc::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  opacity: var(--texture);
+  pointer-events: none;
+  background-image:
+    repeating-radial-gradient(ellipse 52% 40% at 18% 30%,
+      transparent 0, transparent 58px, rgba(200,120,10,0.028) 59px, transparent 60px),
+    repeating-radial-gradient(ellipse 64% 46% at 86% 70%,
+      transparent 0, transparent 74px, rgba(30,48,64,0.34) 75px, transparent 76px);
+}
+
+/* ── SHEET + GRID ──────────────────────────────────────────────── */
 .sheet {
   position: relative; z-index: 1;
-  width: 100%; max-width: var(--sheet-w); margin: 0 auto;
-  padding: var(--sheet-pad);
+  width: 100%; max-width: var(--sheet-w);
+  margin: 0 auto; padding: var(--sheet-pad);
   background: var(--ground);
-  border: 1px solid var(--sheet-rim);
 }
-.doc[data-mode="print"] .sheet { margin: 0 auto; }
+.grid { display: grid; grid-template-columns: var(--grid-cols); }
 
-.bd-grid { display: grid; grid-template-columns: var(--grid-cols); }
-
+/* ── RAIL ──────────────────────────────────────────────────────── */
 .rail {
-  display: var(--chrome);
   position: var(--rail-pos);
-  top: 22px;
+  top: calc(var(--nav-h) + 22px);
   align-self: start;
-  padding-right: var(--rail-gap);
-  border-right: 1px solid var(--rim);
-  max-height: calc(100vh - 44px);
+  min-width: 0;
+  max-height: calc(100vh - var(--nav-h) - 42px);
   overflow-y: auto;
-  scrollbar-width: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rim) transparent;
 }
-.rail::-webkit-scrollbar { display: none; }
-.doc[data-mode="print"] .rail { display: none; }
+.doc[data-mode="print"] .rail { display: none !important; }
 @media print { .rail { display: none !important; } }
 
-.rail-id { padding-bottom: 16px; border-bottom: 1px solid var(--rim-soft); }
-.rail-kicker {
+/* Rail panel primitive */
+.rp { border: 1px solid var(--rim); }
+.rp + .rp { margin-top: 16px; }
+.rp-h {
   display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px;
+  background: var(--ground-up);
+  border-bottom: 1px solid var(--rim);
   font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--accent-ink); margin-bottom: 12px;
+  color: var(--accent-ink); white-space: nowrap;
 }
-.rail-kicker::before { content: ''; width: 18px; height: 1px; background: var(--accent); }
-.rail-route {
+.rp-h i { flex: 1; height: 1px; min-width: 10px; display: block;
+  background: linear-gradient(to right, var(--accent-rim), transparent); }
+.rp-h .ct { color: var(--ink-4); letter-spacing: 0.14em; }
+.rp-b { padding: 12px 11px; }
+
+/* Panel 1 — route identity */
+.route {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 30px; font-weight: 900; line-height: 0.92;
+  font-size: 27px; font-weight: 900; line-height: 0.94;
   text-transform: uppercase; letter-spacing: -0.005em; color: var(--ink);
 }
-.rail-route em { font-style: normal; color: var(--accent); }
-.rail-sub { margin-top: 8px; font-size: 9px; letter-spacing: 0.1em; color: var(--ink-4); line-height: 1.85; }
-
-.ledger { border: 1px solid var(--rim); margin-top: 16px; }
-.ledger-row {
-  display: grid; grid-template-columns: 1fr auto;
-  align-items: center; gap: 10px;
-  padding: 8px 12px; border-bottom: 1px solid var(--rim-soft);
-  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3);
+.route em { font-style: normal; color: var(--accent-ink); }
+.route-sub {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rim-soft);
+  font-size: 8.5px; letter-spacing: 0.11em; color: var(--ink-4); line-height: 1.95; text-transform: uppercase;
 }
-.ledger-row:last-child { border-bottom: none; }
-.ledger-row b {
+.route-sub b { color: var(--ink-3); font-weight: 700; }
+
+/* Panel 2 — confidence ledger */
+.led-hero { padding: 12px 12px 13px; background: var(--ground-up); }
+.led-hero .l { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); }
+.led-hero .v {
+  margin-top: 6px;
   font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-  font-size: 19px; letter-spacing: 0.02em; line-height: 1; color: var(--accent);
+  font-size: 30px; line-height: 1; letter-spacing: 0.035em;
+  text-transform: uppercase; color: var(--ok);
 }
-.ledger-row.big { background: var(--accent-wash); }
-.ledger-row.big b { font-size: 26px; }
+.bars { display: flex; gap: 4px; margin-top: 10px; }
+.bars i { flex: 1; height: 6px; background: var(--rim); display: block; }
+.bars i.on { background: var(--ok); }
+.bars i.mid { background: var(--accent); }
 
-.rail-h {
-  margin: 22px 0 9px;
-  display: flex; align-items: center; gap: 9px;
-  font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-ink);
-}
-.rail-h::after { content: ''; flex: 1; height: 1px; background: var(--rim); }
-
-.idx { list-style: none; }
-.idx li { border-bottom: 1px solid var(--rim-soft); }
-.idx li:last-child { border-bottom: none; }
-.idx a {
-  display: grid; grid-template-columns: 22px 1fr auto;
-  align-items: center; gap: 10px;
-  padding: 7px 0; text-decoration: none;
-  font-size: 10px; color: var(--ink-3); letter-spacing: 0.03em;
-  border-left: 2px solid transparent; padding-left: 9px;
-}
-.idx a:hover { color: var(--ink); }
-.idx a.on { color: var(--ink); border-left-color: var(--accent); background: var(--accent-wash); }
-.idx .n { font-size: 8px; letter-spacing: 0.14em; color: var(--ink-4); }
-.idx a.on .n { color: var(--accent-ink); }
-
-.mark { display: inline-block; width: 7px; height: 7px; border: 1px solid var(--accent); flex-shrink: 0; vertical-align: middle; }
-.mark.full { background: var(--accent); }
-.mark.warn { border-color: var(--ink-4); }
-.mark.none { border-color: var(--rim); background: transparent; }
-
-.rail-agents { margin-top: 4px; }
-.agentrow {
-  display: grid; grid-template-columns: 1fr auto auto;
-  align-items: center; gap: 8px;
-  padding: 6px 0 6px 9px; border-left: 3px solid var(--accent);
-  border-bottom: 1px solid var(--rim-soft);
-  font-size: 10px; color: var(--ink-3);
-}
-.agentrow.failed { border-left-color: var(--bad); }
-.agentrow:last-child { border-bottom: none; }
-.agentrow .ms { font-size: 8px; letter-spacing: 0.1em; color: var(--ink-4); }
-
-.bd-body { padding-left: var(--rail-gap); min-width: 0; }
-.doc[data-mode="print"] .bd-body { padding-left: 0; }
-@media print { .bd-body { padding-left: 0; } }
-
-.dochead { padding-bottom: 22px; border-bottom: 1px solid var(--accent-rim); margin-bottom: 30px; }
-.brandline {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 18px;
-  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-ink);
-}
-.brandline .r { color: var(--ink-4); letter-spacing: 0.14em; }
-.h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: clamp(42px, 6.4vw, 82px); font-weight: 900;
-  line-height: 0.84; letter-spacing: -0.018em; text-transform: uppercase;
-  color: var(--ink);
-}
-.h1 .arrow { color: var(--accent); padding: 0 0.12em; }
-.doc[data-mode="print"] .h1 { font-size: 46px; }
-@media print { .h1 { font-size: 46px; } }
-
-.statline {
-  display: none;
-  margin-top: 10px; padding: 8px 14px;
-  border: 1px solid var(--rim);
-  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4);
-  gap: 20px;
-}
-.doc[data-mode="print"] .statline { display: flex; flex-wrap: wrap; }
-@media print { .statline { display: flex !important; flex-wrap: wrap; } }
-.statline .s { white-space: nowrap; }
-.statline .s b { color: var(--accent-ink); font-weight: 700; }
-
-.metastrip {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--rim); margin-top: 22px;
-}
-.metacell { padding: 12px 14px; border-right: 1px solid var(--rim); }
-.metacell:last-child { border-right: none; }
-.metacell .k { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 6px; }
-.metacell .v {
+.metrics { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rim); }
+.m-cell { padding: 10px 12px; border-right: 1px solid var(--rim-soft); border-bottom: 1px solid var(--rim-soft); }
+.m-cell:nth-child(2n) { border-right: none; }
+.m-cell:nth-last-child(-n+2) { border-bottom: none; }
+.m-k { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 6px; }
+.m-v {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-  font-size: 22px; line-height: 1; text-transform: uppercase; color: var(--ink);
+  font-size: 24px; line-height: 1; color: var(--accent-ink);
 }
-.metacell .v.acc { color: var(--accent); }
+.m-v.good { color: var(--ok); }
+.m-v.nil { color: var(--ink-4); }
 
-section.sec { margin-bottom: 34px; scroll-margin-top: 22px; }
-.sechead {
-  display: grid; grid-template-columns: auto 1fr auto;
-  align-items: baseline; gap: 14px;
-  padding-bottom: 8px; border-bottom: 1px solid var(--rim);
-  margin-bottom: 16px;
+/* Panel 3 — contents TOC */
+.toc { list-style: none; }
+.toc li { border-bottom: 1px solid var(--rim-soft); }
+.toc li:last-child { border-bottom: none; }
+.toc a {
+  display: grid; grid-template-columns: 19px minmax(0,1fr) auto;
+  align-items: center; gap: 9px;
+  padding: 7px 11px 7px 9px;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  font-size: 10px; letter-spacing: 0.02em; color: var(--ink-3);
 }
-.sec-n {
+.toc a:hover { color: var(--ink); background: var(--ground-up); }
+.toc a.on { color: var(--ink); border-left-color: var(--accent); background: var(--accent-wash); }
+.toc .n { font-size: 8px; letter-spacing: 0.13em; color: var(--ink-4); }
+.toc a.on .n { color: var(--accent-ink); }
+.toc .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ctag {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid var(--rim-soft);
+  padding: 2px 5px; white-space: nowrap; color: var(--ink-4);
+}
+.ctag.hi { color: var(--ok); border-color: rgba(16,185,129,0.32); }
+.ctag.md { color: var(--accent-ink); border-color: var(--accent-rim); }
+.ctag.na { color: var(--ink-4); }
+
+.rp-foot {
+  padding: 9px 11px; border-top: 1px solid var(--rim-soft);
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); line-height: 1.8;
+}
+
+/* ── BODY + MASTHEAD ───────────────────────────────────────────── */
+.body { padding-left: var(--rail-gap); min-width: 0; }
+.doc[data-mode="print"] .body { padding-left: 0; }
+
+.mast { border: 1px solid var(--rim); page-break-inside: var(--break); }
+.mast-top {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  padding: 20px 20px 16px; border-bottom: 1px solid var(--rim);
+}
+.mast-kicker {
+  font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--accent-ink); margin-bottom: 8px;
+}
+.mast-title {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-  font-size: 26px; line-height: 1; color: var(--accent);
+  font-size: clamp(30px, 4vw, 46px); line-height: 0.9;
+  letter-spacing: 0.005em; text-transform: uppercase; color: var(--ink);
 }
-.sec-t {
+.mast-title .arr { color: var(--accent-ink); margin: 0 0.14em; }
+.mast-seal { text-align: right; white-space: nowrap; }
+.mast-seal .id {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
+  letter-spacing: 0.1em; color: var(--accent-ink);
+}
+.mast-seal .st { margin-top: 5px; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-4); line-height: 1.9; }
+
+.metastrip { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); }
+.metastrip > div { padding: 12px 14px; border-left: 1px solid var(--rim-soft); }
+.metastrip > div:first-child { border-left: none; }
+.metastrip .l { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); }
+.metastrip .v {
+  margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+  font-size: 19px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); line-height: 1;
+}
+.metastrip .v.hot { color: var(--accent-ink); }
+.metastrip .v.good { color: var(--ok); }
+
+/* ── SECTION HEADER ────────────────────────────────────────────── */
+.sec { margin-top: var(--sec-gap); scroll-margin-top: calc(var(--nav-h) + 18px); }
+.sh {
+  display: flex; align-items: baseline; gap: 14px;
+  padding-bottom: 10px; margin-bottom: 14px;
+  border-bottom: 1px solid var(--rim);
+  page-break-after: avoid;
+}
+.sh-n {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-  font-size: 25px; line-height: 1; letter-spacing: 0.015em;
-  text-transform: uppercase; color: var(--ink);
+  font-size: var(--num-size); line-height: 0.78;
+  letter-spacing: -0.01em; color: var(--accent-ink);
 }
-.sec-m {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4);
+.sh-t {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+  font-size: var(--title-size); letter-spacing: 0.045em;
+  text-transform: uppercase; color: var(--ink); line-height: 1;
 }
+.sh-rule { flex: 1; height: 1px; background: var(--rim); align-self: center; }
+.sh-meta { font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; }
 
-.lab {
-  font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--accent-ink); margin-bottom: 6px;
+.sh-toggle {
+  display: var(--chrome-flex);
+  align-self: center; flex-shrink: 0;
+  width: 22px; height: 22px;
+  border: 1px solid var(--rim); background: transparent; color: var(--ink-4);
+  cursor: pointer;
+  align-items: center; justify-content: center;
 }
-.lab.mute { color: var(--ink-4); }
-.lab.ok   { color: var(--ok); }
-.lab.bad  { color: var(--bad); }
-p.t { font-size: 12px; line-height: 1.85; color: var(--ink-2); }
-p.t + p.t { margin-top: 10px; }
+.sh-toggle:hover { color: var(--ink); border-color: var(--accent-rim); }
+.sh-toggle svg { width: 12px; height: 12px; transition: transform 0.15s; display: block; }
+.sec.collapsed .sh-toggle svg { transform: rotate(-90deg); }
+.sec.collapsed > *:not(.sh) { display: none; }
+@media print { .sec.collapsed > *:not(.sh) { display: block !important; } }
+.doc[data-mode="print"] .sec.collapsed > *:not(.sh) { display: block !important; }
 
-.card {
-  border: 1px solid var(--rim); background: var(--ground-up);
-  padding: 18px 20px; page-break-inside: var(--break);
-}
-.card + .card { margin-top: 12px; }
+/* Gated sections get no toggle at quick depth */
+.doc[data-depth="quick"] #s5 .sh-toggle,
+.doc[data-depth="quick"] #s7 .sh-toggle,
+.doc[data-depth="quick"] #s9 .sh-toggle { display: none; }
 
-.tier {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 2px 6px; border: 1px solid var(--rim); color: var(--ink-4);
-  background: var(--ground-sub); flex-shrink: 0; white-space: nowrap;
-}
-.tier.t1 { color: var(--accent-ink); border-color: var(--accent-rim); background: var(--accent-wash); }
-.tier.t2 { color: var(--ink-2); border-color: var(--rim); }
-.tier.t4 { color: var(--ink-4); border-style: dashed; }
-.tier .sq { width: 5px; height: 5px; background: currentColor; display: inline-block; flex-shrink: 0; }
-.tier.t4 .sq { background: transparent; border: 1px solid currentColor; }
+/* wide tables scroll in-place */
+.scrollx { overflow-x: var(--scrollx); }
 
-.chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 8.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 3px 8px; border: 1px solid var(--rim); color: var(--ink-3);
-  white-space: nowrap;
+/* ── KEY/VALUE GRID ─────────────────────────────────────────────── */
+.kv { border: 1px solid var(--rim); page-break-inside: var(--break); }
+.kv-r { display: grid; grid-template-columns: 214px minmax(0,1fr); border-bottom: 1px solid var(--rim-soft); }
+.kv-r:last-child { border-bottom: none; }
+.kv-k {
+  padding: 11px 14px; background: var(--ground-up);
+  border-right: 1px solid var(--rim-soft);
+  font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4);
 }
-.chip.high { color: var(--accent-ink); border-color: var(--accent-rim); background: var(--accent-wash); }
-.chip.med  { color: var(--ink-3); }
-.chip.ok   { color: var(--ok); border-color: var(--ok); background: var(--ok-wash); }
-.chip.bad  { color: var(--bad); border-color: var(--bad); background: var(--bad-wash); }
+.kv-v { padding: 11px 16px; color: var(--ink); }
+.kv-v .dim { color: var(--ink-3); }
+.kv-v .hot { color: var(--accent-ink); font-weight: 700; }
 
-ul.bul { list-style: none; }
-ul.bul li {
-  display: flex; gap: 9px; align-items: flex-start;
-  font-size: 12px; line-height: 1.75; color: var(--ink-2);
-  padding: 4px 0;
-}
-ul.bul li::before { content: ''; width: 4px; height: 4px; background: var(--accent); flex-shrink: 0; margin-top: 8px; }
-ul.bul.num { counter-reset: b; }
-ul.bul.num li::before {
-  counter-increment: b; content: counter(b, decimal-leading-zero);
-  width: auto; height: auto; background: none; margin-top: 0;
-  font-size: 9px; letter-spacing: 0.1em; color: var(--accent-ink); min-width: 18px;
-}
-
-.warn {
-  border: 1px solid var(--rim); border-left: 3px solid var(--accent);
-  background: var(--accent-wash); padding: 12px 14px; margin-top: 12px;
+/* ── RECOMMENDED ACTION ────────────────────────────────────────── */
+.act {
+  border: 1px solid var(--accent-rim);
+  border-top: 3px solid var(--accent);
+  background: var(--accent-wash);
   page-break-inside: var(--break);
 }
-.warn li { color: var(--ink-2); }
-.warn li::before { background: var(--accent); }
-
-/* ── 02 Recommended Action ── */
-.verdict {
-  border: 1px solid var(--accent-rim); border-top: 3px solid var(--accent);
-  background: var(--accent-wash); page-break-inside: var(--break);
+.act-body { display: grid; grid-template-columns: minmax(0,1fr) 190px; }
+.act-main { padding: 18px 20px; }
+.act-lab { font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-ink); }
+.act-head {
+  margin-top: 9px;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+  font-size: 25px; line-height: 1.06; letter-spacing: 0.015em;
+  text-transform: uppercase; color: var(--ink);
 }
-.verdict-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px;
-  padding: 9px 18px; border-bottom: 1px solid var(--accent-rim);
+.act-note { margin-top: 11px; font-size: 11.5px; line-height: 1.72; color: var(--ink-2); }
+.act-clock {
+  border-left: 1px solid var(--accent-rim);
+  padding: 18px; text-align: center;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.act-clock .n {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 68px; line-height: 0.8; color: var(--accent-ink);
+}
+.act-clock .u { margin-top: 8px; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+.act-foot {
+  border-top: 1px solid var(--accent-rim);
+  padding: 11px 20px;
+  display: flex; gap: 24px; flex-wrap: wrap;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+}
+.act-foot b { color: var(--ink); font-weight: 700; }
+
+/* ── DATA TABLES ────────────────────────────────────────────────── */
+table.tbl {
+  width: 100%; border-collapse: collapse;
+  border: 1px solid var(--rim);
+  page-break-inside: var(--break);
+}
+table.tbl thead th {
   background: var(--ground-up);
+  padding: 10px 12px; text-align: left; vertical-align: bottom;
+  border-bottom: 1px solid var(--rim);
+  border-right: 1px solid var(--rim-soft);
+  font-size: 8px; font-weight: 700; letter-spacing: 0.19em;
+  text-transform: uppercase; color: var(--ink-4); white-space: nowrap;
 }
-.verdict-bar .l { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-ink); }
-.verdict-body { padding: 20px 18px; }
-.deadline {
-  display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
-  border: 1px solid var(--bad); background: var(--bad-wash);
-  padding: 12px 15px; margin-bottom: 18px;
+table.tbl thead th:last-child { border-right: none; }
+table.tbl tbody td {
+  padding: 12px; vertical-align: top;
+  border-bottom: 1px solid var(--rim-soft);
+  border-right: 1px solid var(--rim-soft);
+  color: var(--ink-2); font-size: 11.5px; line-height: 1.62;
 }
-.deadline .dl {
-  font-size: 8.5px; font-weight: 700; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--bad);
-  writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+table.tbl tbody td:last-child { border-right: none; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.tbl .name {
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px;
+  letter-spacing: 0.035em; text-transform: uppercase; color: var(--ink); line-height: 1.12;
 }
-.deadline .dt { font-size: 12.5px; line-height: 1.7; color: var(--bad); font-weight: 700; }
-.action { font-size: 13px; line-height: 1.85; color: var(--ink); }
-.action .req {
-  counter-reset: r; list-style: none; margin: 12px 0;
-  border-left: 1px solid var(--accent-rim); padding-left: 16px;
+table.tbl .code { display: block; margin-top: 4px; font-size: 8.5px; letter-spacing: 0.16em; color: var(--ink-4); }
+table.tbl .noterow td {
+  background: var(--ground-up); padding: 10px 12px;
+  font-size: 10.5px; color: var(--ink-3); line-height: 1.72;
 }
-.action .req li {
-  counter-increment: r; position: relative;
-  padding: 6px 0 6px 34px; font-size: 12px; line-height: 1.75; color: var(--ink-2);
+table.tbl .noterow .m {
+  color: var(--accent-ink); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; font-size: 8.5px; margin-right: 9px;
 }
-.action .req li::before {
-  content: counter(r, decimal-leading-zero);
-  position: absolute; left: 0; top: 6px;
-  font-size: 9px; letter-spacing: 0.12em; font-weight: 700; color: var(--accent-ink);
-}
-.why { border-top: 1px solid var(--accent-rim); margin-top: 16px; padding-top: 14px; }
+tr.fit-best td { background: var(--ok-wash); border-top: 1px solid var(--ok); }
+tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px solid var(--ok); }
 
-/* ── 03 Visa Options ── */
-.opt {
-  border: 1px solid var(--rim); border-left: 3px solid var(--rim);
-  background: var(--ground-up); page-break-inside: var(--break); margin-bottom: 12px;
+/* chip + meter */
+.chip {
+  display: inline-block;
+  border: 1px solid var(--rim); background: transparent;
+  padding: 4px 8px; font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap;
 }
-.opt.best { border-left-color: var(--ok); }
-.opt.good { border-left-color: var(--accent); }
-.opt-head {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px;
-  padding: 12px 16px; border-bottom: 1px solid var(--rim-soft); flex-wrap: wrap;
-}
-.opt-rank {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 17px;
-  color: var(--ink-4); line-height: 1; margin-right: 2px;
-}
-.opt-name {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
-  text-transform: uppercase; letter-spacing: 0.01em; line-height: 1; color: var(--ink);
-}
-.opt-body { padding: 16px; }
-.opt-stay {
-  display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline;
-  padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--rim-soft);
-}
-.opt-stay .v { font-size: 12px; color: var(--ink); }
-.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rim-soft); margin-top: 14px; }
-.pc > div { padding: 10px 12px; }
-.pc > div:first-child { border-right: 1px solid var(--rim-soft); }
-.pc li { display: flex; gap: 8px; align-items: flex-start; font-size: 11px; line-height: 1.7; padding: 3px 0; color: var(--ink-2); list-style: none; }
-.pc li::before { content: '+'; color: var(--ok); font-weight: 700; flex-shrink: 0; }
-.pc .con li::before { content: '\\2212'; color: var(--bad); }
-.docs { border-top: 1px solid var(--rim-soft); margin-top: 14px; padding-top: 12px; }
-.docs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.docs a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--accent-rim); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; }
+.chip.best { border-color: var(--ok); color: var(--ok); background: var(--ok-wash); }
+.chip.good { border-color: var(--accent-rim); color: var(--accent-ink); background: var(--accent-wash); }
+.chip.cond { border-color: var(--rim); color: var(--ink-3); }
+.chip.t1 { border-color: var(--accent-rim); color: var(--accent-ink); }
+.chip.t4 { border-color: var(--rim); color: var(--ink-4); }
 
-/* ── 04/05 kv slabs ── */
-.kv { border: 1px solid var(--rim); page-break-inside: var(--break); }
-.kv-row { display: grid; grid-template-columns: 168px 1fr auto; gap: 16px; align-items: start; padding: 11px 14px; border-bottom: 1px solid var(--rim-soft); }
-.kv-row:last-child { border-bottom: none; }
-.kv-row .k { font-size: 8.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); padding-top: 3px; }
-.kv-row .v { font-size: 12px; line-height: 1.7; color: var(--ink-2); }
-.kv-row .v strong { color: var(--ink); font-weight: 700; }
+.meter { display: inline-flex; gap: 3px; align-items: center; }
+.meter i { display: block; width: 11px; height: 9px; border: 1px solid var(--rim); }
+.meter i.on { background: var(--accent); border-color: var(--accent); }
+.meter i.on.lo { background: var(--ok); border-color: var(--ok); }
+.meter i.on.hi { background: var(--bad); border-color: var(--bad); }
+.meter .lbl { margin-left: 8px; font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); }
 
-/* ── 07 Conflict ── */
-.cf { border: 1px solid var(--rim); page-break-inside: var(--break); margin-bottom: 10px; }
-.cf-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 8px 14px; background: var(--ground-up); border-bottom: 1px solid var(--rim-soft);
+/* ── CHECKLIST GRID ────────────────────────────────────────────── */
+.chk { border: 1px solid var(--rim); page-break-inside: var(--break); }
+.chk-r {
+  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px 80px;
+  border-bottom: 1px solid var(--rim-soft); align-items: stretch;
 }
-.cf-topic { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px; text-transform: uppercase; color: var(--ink); line-height: 1; }
-.cf-body { padding: 14px; }
-.cf-res { border-left: 3px solid var(--accent); background: var(--accent-wash); padding: 10px 12px; margin-top: 12px; }
-.cf-srcs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--rim-soft); }
-.srclink {
-  font-size: 9px; color: var(--ink-4); text-decoration: none;
-  border: 1px solid var(--rim); padding: 3px 7px; word-break: break-all;
+.chk-r:last-child { border-bottom: none; }
+.chk-r > div { padding: 12px 14px; border-right: 1px solid var(--rim-soft); }
+.chk-r > div:last-child { border-right: none; }
+.chk-box { display: flex; align-items: center; justify-content: center; background: var(--ground-up); color: var(--accent-ink); font-weight: 700; font-size: 13px; }
+.chk-name { color: var(--ink); font-size: 12px; }
+.chk-spec { color: var(--ink-3); font-size: 11px; }
+.chk-src { font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); text-align: right; }
+
+/* ── ALERT BLOCK ────────────────────────────────────────────────── */
+.alert {
+  border: 1px solid var(--accent-rim);
+  background: var(--accent-wash);
+  padding: 15px 17px;
+  page-break-inside: var(--break);
 }
-.cf-empty { padding: 14px; font-size: 11px; color: var(--ink-4); letter-spacing: 0.06em; }
+.alert + .alert { margin-top: 12px; }
+.alert.calm { border-color: var(--rim); background: var(--ground-up); }
+.alert-h {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); line-height: 1.1;
+}
+.alert-h .flag { font-size: 12px; color: var(--accent-ink); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.alert-d { margin-top: 4px; font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); }
+.alert-b { margin-top: 10px; font-size: 11.5px; line-height: 1.74; color: var(--ink-2); }
+.alert-meta {
+  margin-top: 11px; padding-top: 9px; border-top: 1px solid var(--accent-rim);
+  display: flex; gap: 20px; flex-wrap: wrap;
+  font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4);
+}
+.alert.calm .alert-meta { border-top-color: var(--rim-soft); }
+.alert-meta b { color: var(--ink-3); font-weight: 700; }
 
-/* ── 08 Citations ── */
-.cite { display: grid; grid-template-columns: 62px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--rim-soft); page-break-inside: var(--break); }
-.cite:last-child { border-bottom: none; }
-.cite .claim { font-size: 12px; line-height: 1.7; color: var(--ink); }
-.cite .url { display: block; margin-top: 4px; font-size: 10px; color: var(--accent-ink); text-decoration: none; word-break: break-all; border-bottom: 1px solid var(--accent-rim); }
-.cite .date { margin-top: 5px; font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); }
-.tierkey { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--rim); margin-top: 16px; page-break-inside: var(--break); }
-.tierkey > div { padding: 10px 12px; border-right: 1px solid var(--rim-soft); }
-.tierkey > div:last-child { border-right: none; }
-.tierkey .d { margin-top: 6px; font-size: 9px; line-height: 1.7; color: var(--ink-4); }
+/* ── DEPTH GATE ─────────────────────────────────────────────────── */
+.lockcard {
+  display: none; align-items: center; gap: 14px;
+  border: 1px solid var(--rim); background: var(--ground-up);
+  padding: 18px 20px;
+}
+.lock-icon { color: var(--ink-4); flex-shrink: 0; }
+.lock-icon svg { width: 16px; height: 16px; display: block; }
+.lock-text { font-size: 11.5px; color: var(--ink-4); line-height: 1.75; }
+.lock-link { color: var(--accent-ink); text-decoration: underline; }
 
+.doc[data-depth="quick"] #s5 .gatecontent,
+.doc[data-depth="quick"] #s7 .gatecontent,
+.doc[data-depth="quick"] #s9 .gatecontent { display: none; }
+.doc[data-depth="quick"] #s5 .lockcard,
+.doc[data-depth="quick"] #s7 .lockcard,
+.doc[data-depth="quick"] #s9 .lockcard { display: flex; }
+
+.doc[data-mode="print"][data-depth="quick"] #s5,
+.doc[data-mode="print"][data-depth="quick"] #s7,
+.doc[data-mode="print"][data-depth="quick"] #s9 { display: none !important; }
+@media print {
+  .doc[data-depth="quick"] #s5,
+  .doc[data-depth="quick"] #s7,
+  .doc[data-depth="quick"] #s9 { display: none !important; }
+}
+
+/* ── VERDICT / STATUS MARKS ────────────────────────────────────── */
+.vd { font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 9px; white-space: nowrap; }
+.vd.ok { color: var(--ok); }
+.vd.warn { color: var(--accent-ink); }
+.vd.bad { color: var(--bad); }
+.vd.dim { color: var(--ink-4); }
+
+/* ── CONFIDENCE READOUT ─────────────────────────────────────────── */
+.conf {
+  margin-top: 16px; border: 1px solid var(--rim);
+  display: grid; grid-template-columns: 230px minmax(0,1fr);
+  page-break-inside: var(--break);
+}
+.conf-l { padding: 16px 18px; border-right: 1px solid var(--rim-soft); background: var(--ground-up); }
+.conf-l .l { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); }
+.conf-l .v {
+  margin-top: 7px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+  font-size: 30px; line-height: 1; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ok);
+}
+.conf-r { padding: 16px 18px; font-size: 11.5px; line-height: 1.74; color: var(--ink-2); }
+
+/* ── FOOTER ─────────────────────────────────────────────────────── */
 .docfoot { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--rim); page-break-inside: var(--break); }
 .disc { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 10px; line-height: 1.85; color: var(--ink-3); }
 .disc .m { font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-ink); white-space: nowrap; }
@@ -497,506 +558,141 @@ ul.bul.num li::before {
   font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4);
 }
 
-/* locked section — depth gate for quick */
-.locked-card {
-  border: 1px solid var(--rim); background: var(--ground-up); padding: 18px 20px;
-  display: flex; align-items: center; gap: 14px;
+/* ── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 1240px) {
+  .doc { --sheet-pad: 34px 22px 60px; --rail-w: 244px; --rail-gap: 30px; }
 }
-.lock-icon { font-size: 16px; color: var(--ink-4); flex-shrink: 0; }
-.lock-text { font-size: 11px; color: var(--ink-4); line-height: 1.7; }
-.lock-link { color: var(--accent-ink); text-decoration: underline; }
-
-.stale-note { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--accent-rim); font-size: 10px; line-height: 1.75; color: var(--accent-ink); }
-
-@media (max-width: 1080px) {
-  .doc { --rail-w: 230px; --rail-gap: 26px; --sheet-pad: 26px; }
-}
-@media (max-width: 880px) {
+@media (max-width: 1000px) {
   .doc { --grid-cols: minmax(0,1fr); --rail-pos: static; --rail-w: 100%; --rail-gap: 0px; }
-  .rail { border-right: none; border-bottom: 1px solid var(--rim); padding-right: 0; padding-bottom: 20px; margin-bottom: 24px; max-height: none; }
-  .bd-body { padding-left: 0; }
-  .metastrip, .tierkey { grid-template-columns: 1fr 1fr; }
-  .pc { grid-template-columns: 1fr; }
-  .pc > div:first-child { border-right: none; border-bottom: 1px solid var(--rim-soft); }
-  .kv-row { grid-template-columns: 140px 1fr auto; }
+  .rail { max-height: none; overflow: visible; margin-bottom: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .rp + .rp { margin-top: 0; }
+  .rail .rp:last-child { grid-column: 1 / -1; }
+  .toc { display: grid; grid-template-columns: 1fr 1fr; }
+  .toc li:nth-last-child(2) { border-bottom: none; }
+  .toc li:nth-child(odd) { border-right: 1px solid var(--rim-soft); }
 }
-@media (max-width: 580px) {
+@media (max-width: 780px) {
+  .doc { --num-size: 42px; --title-size: 24px; }
+  .rail { grid-template-columns: 1fr; }
+  .toc { grid-template-columns: 1fr; }
+  .toc li:nth-child(odd) { border-right: none; }
+  .toc li:nth-last-child(2) { border-bottom: 1px solid var(--rim-soft); }
   .metastrip { grid-template-columns: 1fr 1fr; }
-  .kv-row { grid-template-columns: 1fr; }
-  .kv-row .k { padding-top: 0; }
-  .kv-row > span:last-child { display: none; }
+  .metastrip > div { border-left: none; border-top: 1px solid var(--rim-soft); }
+  .metastrip > div:nth-child(-n+2) { border-top: none; }
+  .metastrip > div:nth-child(even) { border-left: 1px solid var(--rim-soft); }
+  .act-body { grid-template-columns: minmax(0,1fr); }
+  .act-clock { border-left: none; border-top: 1px solid var(--accent-rim); }
+  .kv-r { grid-template-columns: minmax(0,1fr); }
+  .kv-k { border-right: none; border-bottom: 1px solid var(--rim-soft); }
+  .chk-r { grid-template-columns: 40px minmax(0,1fr); }
+  .chk-r > div:nth-child(3), .chk-r > div:nth-child(4) { grid-column: 2; border-top: 1px solid var(--rim-soft); border-right: none; text-align: left; }
+  .conf { grid-template-columns: minmax(0,1fr); }
+  .conf-l { border-right: none; border-bottom: 1px solid var(--rim-soft); }
 }
 `;
 
-// ── sub-components (pure functions, no hooks) ─────────────────────────────────
+// Collapse toggle + TOC scroll-spy (screen-only progressive enhancement)
+// Executes on initial HTML parse. For SPA navigation, collapse is non-functional
+// but all sections remain visible — acceptable since default state is open.
+const TOGGLE_JS = `
+(function(){
+  document.querySelectorAll('.sh-toggle').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var sec=btn.closest('.sec');
+      var collapsed=sec.classList.toggle('collapsed');
+      btn.setAttribute('aria-expanded',collapsed?'false':'true');
+    });
+  });
+  var links=[].slice.call(document.querySelectorAll('#bd-toc a'));
+  var targets=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  if(!links.length)return;
+  var spy=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting)return;
+      var i=targets.indexOf(en.target);
+      links.forEach(function(a,n){a.classList.toggle('on',n===i);});
+    });
+  },{rootMargin:'-78px 0px -62% 0px',threshold:0});
+  targets.forEach(function(t){t&&spy.observe(t);});
+  links[0].classList.add('on');
+})();
+`;
+
+// ── small shared components ────────────────────────────────────────────────
+
+function ConfBars({ level }: { level: 'high' | 'medium' | 'low' }) {
+  if (level === 'high') return (
+    <div className="bars"><i className="on" /><i className="on" /><i className="on" /><i className="on" /><i className="mid" /></div>
+  );
+  if (level === 'medium') return (
+    <div className="bars"><i className="on" /><i className="on" /><i className="mid" /><i /><i /></div>
+  );
+  return <div className="bars"><i className="mid" /><i /><i /><i /><i /></div>;
+}
+
+function Meter({ suitability }: { suitability: 'best' | 'good' | 'acceptable' }) {
+  if (suitability === 'best') return (
+    <span className="meter"><i className="on lo" /><i /><i /><i /><i /><span className="lbl">Low</span></span>
+  );
+  if (suitability === 'good') return (
+    <span className="meter"><i className="on" /><i className="on" /><i /><i /><i /><span className="lbl">Medium</span></span>
+  );
+  return (
+    <span className="meter"><i className="on hi" /><i className="on hi" /><i className="on hi" /><i className="on hi" /><i /><span className="lbl">High</span></span>
+  );
+}
 
 function TierChip({ tier }: { tier: 1 | 2 | 3 | 4 }) {
+  const cls = tier === 1 ? 'chip t1' : tier === 4 ? 'chip t4' : 'chip';
+  return <span className={cls}>Tier {tier}</span>;
+}
+
+function SuitChip({ suitability }: { suitability: 'best' | 'good' | 'acceptable' }) {
+  if (suitability === 'best') return <span className="chip best">Best fit</span>;
+  if (suitability === 'good') return <span className="chip good">Good fit</span>;
+  return <span className="chip cond">Conditional</span>;
+}
+
+const CHEVRON_SVG = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square">
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
+
+const LOCK_SVG = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="square">
+    <rect x={3} y={11} width={18} height={11} rx={0} />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+function Sh({ n, title, meta }: { n: number; title: string; meta?: string }) {
   return (
-    <span className={tierClass(tier)}>
-      <span className="sq" />
-      {tierLabel(tier)}
-    </span>
+    <header className="sh">
+      <span className="sh-n">{zeroPad(n)}</span>
+      <span className="sh-t">{title}</span>
+      <span className="sh-rule" />
+      {meta && <span className="sh-meta">{meta}</span>}
+      <button className="sh-toggle" aria-expanded="true" aria-label="Collapse section" title="Collapse section">
+        {CHEVRON_SVG}
+      </button>
+    </header>
   );
 }
 
-function Chip({ level, label }: { level: 'high' | 'medium' | 'low' | 'ok' | 'bad'; label: string }) {
-  const cls = level === 'high' ? 'high' : level === 'ok' ? 'ok' : level === 'bad' ? 'bad' : 'med';
-  return <span className={`chip ${cls}`}>{label}</span>;
-}
-
-function SecHead({ n, title, meta }: { n: number; title: string; meta?: React.ReactNode }) {
+function LockCard({ title }: { title: string }) {
   return (
-    <div className="sechead">
-      <span className="sec-n">{zeroPad(n)}</span>
-      <span className="sec-t">{title}</span>
-      {meta ? <span className="sec-m">{meta}</span> : <span />}
-    </div>
-  );
-}
-
-function KvRow({ label, value, tier }: { label: string; value: React.ReactNode; tier?: 1 | 2 | 3 | 4 }) {
-  return (
-    <div className="kv-row">
-      <span className="k">{label}</span>
-      <span className="v">{value}</span>
-      {tier !== undefined ? <TierChip tier={tier} /> : <span />}
-    </div>
-  );
-}
-
-function WarnBlock({ items }: { items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="warn">
-      <div className="lab">Warnings</div>
-      <ul className="bul">
-        {items.map((w, i) => <li key={i}>{noDash(w)}</li>)}
-      </ul>
-    </div>
-  );
-}
-
-function LockedCard({ title, depth }: { title: string; depth: string }) {
-  const label = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
-  return (
-    <div className="locked-card">
-      <span className="lock-icon" aria-hidden="true">
-        {/* inline SVG padlock */}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square">
-          <rect x="3" y="11" width="18" height="11" rx="0" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
-      </span>
+    <div className="lockcard">
+      <span className="lock-icon" aria-hidden="true">{LOCK_SVG}</span>
       <span className="lock-text">
-        {title} included in{' '}
-        <a className="lock-link" href="/app?depth=standard">Intel and Dossier</a>.{' '}
-        Current depth: {label}.
+        {title} included in <a className="lock-link" href="/app?depth=standard">Intel and Dossier</a>.
       </span>
     </div>
   );
 }
 
-// ── section renderers ─────────────────────────────────────────────────────────
-
-function ParsedSituationSection({ brief }: { brief: VisaBrief }) {
-  if (!brief.parsedSituation) return null;
-  return (
-    <section className="sec" id="s1">
-      <SecHead n={1} title="Parsed Situation" meta="What we understood" />
-      <div className="card" style={{ borderLeft: '3px solid var(--accent)', background: 'var(--accent-wash)' }}>
-        <p className="t" style={{ color: 'var(--ink)' }}>{noDash(brief.parsedSituation)}</p>
-      </div>
-    </section>
-  );
-}
-
-function RecommendedActionSection({ brief }: { brief: VisaBrief }) {
-  const ra = brief.recommendedAction;
-  const urgencyChip = <Chip level={ra.urgency === 'high' ? 'bad' : 'medium'} label={`Urgency · ${confidenceLabel(ra.urgency)}`} />;
-  const confChip = <Chip level={brief.confidenceScore.overall === 'high' ? 'high' : 'medium'} label={`Confidence ${confidenceLabel(brief.confidenceScore.overall)}`} />;
-
-  return (
-    <section className="sec" id="s2">
-      <SecHead n={2} title="Recommended Action" meta={urgencyChip} />
-      <div className="verdict">
-        <div className="verdict-bar">
-          <span className="l">Primary Recommendation</span>
-          {confChip}
-        </div>
-        <div className="verdict-body">
-          {ra.deadline && (
-            <div className="deadline">
-              <span className="dl">Deadline</span>
-              <span className="dt">{noDash(ra.deadline)}</span>
-            </div>
-          )}
-          <div className="action">
-            <p dangerouslySetInnerHTML={{ __html: withLinks(ra.action) }} />
-          </div>
-          <div className="why">
-            <div className="lab">Why</div>
-            <p className="t" dangerouslySetInnerHTML={{ __html: withLinks(ra.rationale) }} />
-          </div>
-          {ra.stalePolicyWarning && (
-            <div className="stale-note">
-              {noDash(ra.stalePolicyWarning)}
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function VisaOptionsSection({ brief, mode }: { brief: VisaBrief; mode: 'screen' | 'print' }) {
-  const t1Count = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
-  const meta = (
-    <>
-      {brief.visaOptions.length} ranked{t1Count > 0 && <> &middot; <TierChip tier={1} /></>}
-    </>
-  );
-  return (
-    <section className="sec" id="s3">
-      <SecHead n={3} title="Visa Options" meta={meta} />
-      {brief.visaOptions.map((opt, i) => (
-        <VisaOptionCard key={i} opt={opt} rank={i + 1} depth={brief.metadata.depth} mode={mode} />
-      ))}
-    </section>
-  );
-}
-
-function VisaOptionCard({ opt, rank, depth, mode }: { opt: VisaOption; rank: number; depth: string; mode: 'screen' | 'print' }) {
-  const suitClass = opt.suitability === 'best' ? 'best' : opt.suitability === 'good' ? 'good' : '';
-  const fitLabel = opt.suitability === 'best' ? 'Best Fit' : opt.suitability === 'good' ? 'Good Fit' : 'Acceptable';
-  const fitChip = opt.suitability === 'best' ? 'ok' : opt.suitability === 'good' ? 'high' : 'med';
-
-  return (
-    <article className={`opt ${suitClass}`}>
-      <div className="opt-head">
-        <span style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-          <span className="opt-rank">{zeroPad(rank)}</span>
-          <span className="opt-name">{opt.name}</span>
-        </span>
-        <span className={`chip ${fitChip}`}>{fitLabel}</span>
-      </div>
-      <div className="opt-body">
-        <div className="opt-stay">
-          <span className="lab mute" style={{ margin: 0 }}>Max Stay</span>
-          <span className="v">{noDash(opt.maxStay)}</span>
-        </div>
-        <p className="t">{noDash(opt.summary)}</p>
-        {(opt.pros.length > 0 || opt.cons.length > 0) && (
-          <div className="pc">
-            <div>
-              <div className="lab ok">Advantages</div>
-              <ul>
-                {opt.pros.map((p, i) => <li key={i}>{noDash(p)}</li>)}
-              </ul>
-            </div>
-            <div className="con">
-              <div className="lab bad">Constraints</div>
-              <ul>
-                {opt.cons.map((c, i) => <li key={i}>{noDash(c)}</li>)}
-              </ul>
-            </div>
-          </div>
-        )}
-        {depth !== 'quick' && opt.applicationDocs && opt.applicationDocs.length > 0 && (
-          <div className="docs">
-            <div className="docs-head">
-              <span className="lab" style={{ margin: 0 }}>Application Documents</span>
-              {opt.applicationUrl && (
-                <a href={opt.applicationUrl} target="_blank" rel="noopener noreferrer">Apply online &rarr;</a>
-              )}
-            </div>
-            <ul className="bul">
-              {opt.applicationDocs.map((d, i) => <li key={i}>{noDash(d)}</li>)}
-            </ul>
-          </div>
-        )}
-        {depth === 'quick' && mode !== 'print' && (
-          <div className="docs">
-            <div className="lock-text" style={{ fontSize: '11px', color: 'var(--ink-4)' }}>
-              Application documents included in{' '}
-              <a className="lock-link" href="/app?depth=standard">Intel and Dossier</a>.
-            </div>
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function EntryRequirementsSection({ brief }: { brief: VisaBrief }) {
-  const req = brief.entryRequirements;
-  const conf = brief.confidenceScore.perSection?.entryRequirements;
-
-  return (
-    <section className="sec" id="s4">
-      <SecHead n={4} title="Entry Requirements" meta={conf ? <Chip level={conf} label={`Confidence ${confidenceLabel(conf)}`} /> : undefined} />
-      <div className="kv">
-        {req.documents.length > 0 && (
-          <KvRow label="Required Documents" tier={1} value={
-            <ul className="bul" style={{ margin: '-4px 0' }}>
-              {req.documents.map((d, i) => <li key={i}>{noDash(d)}</li>)}
-            </ul>
-          } />
-        )}
-        {req.proofOfFunds && (
-          <KvRow label="Proof of Funds" tier={1} value={<strong>{noDash(req.proofOfFunds)}</strong>} />
-        )}
-        <KvRow label="Onward Ticket" tier={1} value={<strong>{req.onwardTicket ? 'Required' : 'Not required'}</strong>} />
-        {req.health.length > 0 && (
-          <KvRow label="Health" tier={2} value={req.health.map(noDash).join('. ')} />
-        )}
-        {req.notes.length > 0 && (
-          <KvRow label="Field Notes" tier={4} value={
-            <ul className="bul" style={{ margin: '-4px 0' }}>
-              {req.notes.map((n, i) => <li key={i}>{noDash(n)}</li>)}
-            </ul>
-          } />
-        )}
-      </div>
-    </section>
-  );
-}
-
-function BorderRunSection({ brief, locked, mode }: { brief: VisaBrief; locked: boolean; mode: 'screen' | 'print' }) {
-  if (locked) {
-    // Print omits the section entirely — an upgrade CTA is a screen-only
-    // interaction, never printed. Screen shows the CTA in its place.
-    if (mode === 'print') return null;
-    return (
-      <section className="sec" id="s5">
-        <SecHead n={5} title="Border Run Analysis" />
-        <LockedCard title="Border Run Analysis" depth={brief.metadata.depth} />
-      </section>
-    );
-  }
-  const analysis = brief.borderRunAnalysis;
-  const conf = brief.confidenceScore.perSection?.borderRun;
-
-  return (
-    <section className="sec" id="s5">
-      <SecHead n={5} title="Border Run Analysis" meta={conf ? <Chip level={conf} label={`Confidence ${confidenceLabel(conf)}`} /> : undefined} />
-      <div className="kv">
-        <KvRow label="Eligible" tier={1} value={<strong>{analysis.eligible ? 'Yes' : 'No'}</strong>} />
-        {analysis.limitsPerYear && (
-          <KvRow label="Annual Limit" tier={1} value={<strong>{noDash(analysis.limitsPerYear)}</strong>} />
-        )}
-        {analysis.recommendedCrossings.length > 0 && (
-          <KvRow label="Recommended Crossings" tier={2} value={
-            <ul className="bul num" style={{ margin: '-4px 0' }}>
-              {analysis.recommendedCrossings.map((c, i) => <li key={i}>{noDash(c)}</li>)}
-            </ul>
-          } />
-        )}
-        <KvRow label="Enforcement Posture" tier={4} value={noDash(analysis.enforcementPosture)} />
-      </div>
-      <WarnBlock items={analysis.warnings} />
-    </section>
-  );
-}
-
-function RecentChangesSection({ brief }: { brief: VisaBrief }) {
-  const changes = brief.recentChanges;
-  if (!changes.hasChanges && changes.items.length === 0) return null;
-
-  return (
-    <section className="sec" id="s6">
-      <SecHead n={6} title="Recent Changes" meta={<>Last 90 days &middot; <TierChip tier={1} /></>} />
-      <div className="card">
-        {changes.items.length > 0 && (
-          <ul className="bul num">
-            {changes.items.map((item, i) => <li key={i}>{noDash(item)}</li>)}
-          </ul>
-        )}
-        {changes.watchItems.length > 0 && (
-          <div className="warn">
-            <div className="lab">Watch Items</div>
-            <ul className="bul">
-              {changes.watchItems.map((w, i) => <li key={i}>{noDash(w)}</li>)}
-            </ul>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function ConflictSection({ brief, locked, mode }: { brief: VisaBrief; locked: boolean; mode: 'screen' | 'print' }) {
-  const report = brief.conflictReport;
-  const total = report.confirmed.length + report.contested.length + report.unverified.length;
-
-  if (locked) {
-    // Print omits the section entirely regardless of contested count — an
-    // upgrade CTA is a screen-only interaction, never printed.
-    if (mode === 'print') return null;
-    const contested = report.contested.length + report.unverified.length;
-    if (contested === 0) return null;
-    return (
-      <section className="sec" id="s7">
-        <SecHead n={7} title="Conflict Report" />
-        <LockedCard title={`Conflict Report (${contested} item${contested !== 1 ? 's' : ''})`} depth={brief.metadata.depth} />
-      </section>
-    );
-  }
-
-  return (
-    <section className="sec" id="s7">
-      <SecHead n={7} title="Conflict Report" meta={`${total} item${total !== 1 ? 's' : ''} · ${report.contested.length} contested`} />
-
-      {report.confirmed.length > 0 && (
-        <>
-          <div className="lab ok" style={{ marginTop: '4px' }}>Confirmed &middot; {report.confirmed.length}</div>
-          {report.confirmed.map((item, i) => (
-            <div key={i} className="cf">
-              <div className="cf-bar">
-                <span className="cf-topic">{item.topic}</span>
-                <span className="chip ok">Confirmed</span>
-              </div>
-              <div className="cf-body">
-                <p className="t">{noDash(item.description)}</p>
-                {item.sources.length > 0 && (
-                  <div className="cf-srcs">
-                    {item.sources.map((s, si) => (
-                      <a key={si} className="srclink" href={s} target="_blank" rel="noopener noreferrer">{s}</a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {report.contested.length > 0 && (
-        <>
-          <div className="lab" style={{ marginTop: '18px' }}>Contested &middot; {report.contested.length}</div>
-          {report.contested.map((item, i) => (
-            <div key={i} className="cf" style={{ borderLeft: '3px solid var(--accent)' }}>
-              <div className="cf-bar">
-                <span className="cf-topic">{item.topic}</span>
-                <span className="chip high">Contested</span>
-              </div>
-              <div className="cf-body">
-                <p className="t">{noDash(item.description)}</p>
-                {item.resolution && (
-                  <div className="cf-res">
-                    <div className="lab">Resolution</div>
-                    <p className="t">{noDash(item.resolution)}</p>
-                  </div>
-                )}
-                {item.sources.length > 0 && (
-                  <div className="cf-srcs">
-                    {item.sources.map((s, si) => (
-                      <a key={si} className="srclink" href={s} target="_blank" rel="noopener noreferrer">{s}</a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {report.unverified.length > 0 && (
-        <>
-          <div className="lab bad" style={{ marginTop: '18px' }}>Unverified &middot; {report.unverified.length}</div>
-          {report.unverified.map((item, i) => (
-            <div key={i} className="cf">
-              <div className="cf-bar">
-                <span className="cf-topic">{item.topic}</span>
-                <span className="chip bad">Unverified</span>
-              </div>
-              <div className="cf-body">
-                <p className="t">{noDash(item.description)}</p>
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {report.unverified.length === 0 && report.confirmed.length > 0 && (
-        <>
-          <div className="lab bad" style={{ marginTop: '18px' }}>Unverified &middot; 0</div>
-          <div className="cf"><div className="cf-empty">No unverified claims. Every statement traces to at least one Tier 1 or Tier 2 source.</div></div>
-        </>
-      )}
-    </section>
-  );
-}
-
-function CitationsSection({ brief }: { brief: VisaBrief }) {
-  const citations = brief.confidenceScore.sourceCitations;
-  if (citations.length === 0) return null;
-
-  return (
-    <section className="sec" id="s8">
-      <SecHead n={8} title="Source Citations" meta={`${citations.length} claim${citations.length !== 1 ? 's' : ''} · ${citations.filter(c => c.tier <= 2).length} sourced`} />
-      <div className="card" style={{ padding: '4px 20px' }}>
-        {citations.map((cite, i) => (
-          <div key={i} className="cite">
-            <TierChip tier={cite.tier} />
-            <span>
-              <span className="claim">{cite.claim}</span>
-              <a className="url" href={cite.url} target="_blank" rel="noopener noreferrer">{cite.url}</a>
-              {cite.publishedDate && (
-                <div className="date">{cite.publishedDate}</div>
-              )}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="tierkey">
-        <div><TierChip tier={1} /><div className="d">Government immigration portals, embassy sites. Authoritative.</div></div>
-        <div><TierChip tier={2} /><div className="d">IATA, Timatic, official travel advisories. High trust.</div></div>
-        <div><span className="tier"><span className="sq" />T3</span><div className="d">Reputable aggregators. Medium trust.</div></div>
-        <div><TierChip tier={4} /><div className="d">Community reports. Ground truth, no official authority.</div></div>
-      </div>
-    </section>
-  );
-}
-
-function ContingencySection({ brief, locked, mode }: { brief: VisaBrief; locked: boolean; mode: 'screen' | 'print' }) {
-  if (locked) {
-    // Print omits the section entirely — an upgrade CTA is a screen-only
-    // interaction, never printed. Screen shows the CTA in its place.
-    if (mode === 'print') return null;
-    return (
-      <section className="sec" id="s9">
-        <SecHead n={9} title="Contingency" />
-        <LockedCard title="Contingency Planning" depth={brief.metadata.depth} />
-      </section>
-    );
-  }
-
-  const c = brief.contingency;
-  return (
-    <section className="sec" id="s9">
-      <SecHead n={9} title="Contingency" meta="If things go wrong" />
-      <div className="kv">
-        {c.deniedEntrySteps.length > 0 && (
-          <KvRow label="If Denied Entry" value={
-            <ul className="bul num" style={{ margin: '-4px 0' }}>
-              {c.deniedEntrySteps.map((s, i) => <li key={i}>{noDash(s)}</li>)}
-            </ul>
-          } />
-        )}
-        <KvRow label="Overstay Scenario" tier={1} value={<span dangerouslySetInnerHTML={{ __html: withLinks(c.overstayScenario) }} />} />
-        {c.emergencyContacts.length > 0 && (
-          <KvRow label="Emergency Contacts" value={
-            <ul className="bul" style={{ margin: '-4px 0' }}>
-              {c.emergencyContacts.map((ec, i) => <li key={i}>{noDash(ec)}</li>)}
-            </ul>
-          } />
-        )}
-      </div>
-    </section>
-  );
-}
-
-// ── Rail ──────────────────────────────────────────────────────────────────────
+// ── section labels + conf keys ────────────────────────────────────────────────
 
 const SECTION_LABELS: [string, string][] = [
   ['s1', 'Parsed Situation'],
@@ -1010,7 +706,7 @@ const SECTION_LABELS: [string, string][] = [
   ['s9', 'Contingency'],
 ];
 
-const SECTION_CONF_KEYS = [
+const SECTION_CONF_KEYS: Array<string | undefined> = [
   undefined,
   'recommendedAction',
   'visaOptions',
@@ -1018,84 +714,479 @@ const SECTION_CONF_KEYS = [
   'borderRun',
   'recentChanges',
   'conflictReport',
-  'citations',
+  undefined,
   'contingency',
 ];
 
+// ── section renderers ──────────────────────────────────────────────────────────
+
+function ParsedSituationSection({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
+  const depth = brief.metadata.depth;
+  const depthFull = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
+  return (
+    <section className="sec" id="s1">
+      <Sh n={1} title="Parsed Situation" meta="Agent · Orchestrator" />
+      <div className="kv">
+        <div className="kv-r">
+          <div className="kv-k">Nationality</div>
+          <div className="kv-v">{meta.nationality}</div>
+        </div>
+        <div className="kv-r">
+          <div className="kv-k">Destination</div>
+          <div className="kv-v">{meta.destination}</div>
+        </div>
+        <div className="kv-r">
+          <div className="kv-k">Analysis depth</div>
+          <div className="kv-v">{depthFull}</div>
+        </div>
+        <div className="kv-r">
+          <div className="kv-k">Situation</div>
+          <div className="kv-v">{noDash(brief.parsedSituation)}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RecommendedActionSection({ brief }: { brief: VisaBrief }) {
+  const ra = brief.recommendedAction;
+  const daysNum = deadlineDays(ra.deadline);
+  return (
+    <section className="sec" id="s2">
+      <Sh n={2} title="Recommended Action" meta="Agent · Synthesis" />
+      <div className="act">
+        <div className="act-body">
+          <div className="act-main">
+            <div className="act-lab">Primary directive</div>
+            <div className="act-head">{noDash(ra.action)}</div>
+            <p className="act-note">{noDash(ra.rationale)}</p>
+            {ra.stalePolicyWarning && (
+              <p className="act-note" style={{ color: 'var(--accent-ink)', marginTop: '10px' }}>
+                {noDash(ra.stalePolicyWarning)}
+              </p>
+            )}
+          </div>
+          <div className="act-clock">
+            <div className="n">{daysNum}</div>
+            <div className="u">Days<br />remaining</div>
+          </div>
+        </div>
+        <div className="act-foot">
+          {ra.deadline && <span>Deadline <b>{ra.deadline}</b></span>}
+          <span>Urgency <b>{ra.urgency.toUpperCase()}</b></span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
+  const options = brief.visaOptions;
+  return (
+    <section className="sec" id="s3">
+      <Sh n={3} title="Visa Options" meta={`Agent · Official Policy · ${options.length} ranked`} />
+      <div className="scrollx">
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th style={{ width: '32%' }}>Instrument</th>
+              <th style={{ width: '14%' }}>Duration</th>
+              <th style={{ width: '16%' }}>Apply</th>
+              <th style={{ width: '16%' }}>Suitability</th>
+              <th style={{ width: '22%' }}>Friction</th>
+            </tr>
+          </thead>
+          <tbody>
+            {options.length === 0 ? (
+              <tr><td colSpan={5} style={{ color: 'var(--ink-4)' }}>No visa options available.</td></tr>
+            ) : options.flatMap((opt, i) => [
+              <tr key={`opt-${i}`} className={opt.suitability === 'best' ? 'fit-best' : undefined}>
+                <td><span className="name">{opt.name}</span></td>
+                <td className="num">{opt.maxStay}</td>
+                <td>
+                  {opt.applicationUrl
+                    ? <a href={opt.applicationUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-ink)', textDecoration: 'underline' }}>Apply online</a>
+                    : <span style={{ color: 'var(--ink-4)' }}>&mdash;</span>}
+                </td>
+                <td><SuitChip suitability={opt.suitability} /></td>
+                <td><Meter suitability={opt.suitability} /></td>
+              </tr>,
+              <tr key={`note-${i}`} className="noterow">
+                <td colSpan={5}>
+                  <span className="m">Note</span>
+                  {noDash(opt.summary)}
+                  {opt.cons.length > 0 && (
+                    <span style={{ color: 'var(--ink-4)', marginLeft: '8px' }}>
+                      {opt.cons.map(noDash).join('. ')}.
+                    </span>
+                  )}
+                </td>
+              </tr>,
+            ])}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function EntryRequirementsSection({ brief }: { brief: VisaBrief }) {
+  const req = brief.entryRequirements;
+  const conf = (brief.confidenceScore.perSection ?? {})['entryRequirements'];
+
+  type ChkItem = { name: string; spec: string; src: string };
+  const items: ChkItem[] = [];
+  for (const doc of req.documents) items.push({ name: doc, spec: '', src: 'T1' });
+  if (req.proofOfFunds) items.push({ name: 'Proof of funds', spec: req.proofOfFunds, src: 'T1' });
+  items.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required', src: 'T1' });
+  for (const h of req.health) items.push({ name: 'Health', spec: h, src: 'T2' });
+  for (const n of req.notes) items.push({ name: 'Note', spec: n, src: 'T4' });
+
+  return (
+    <section className="sec" id="s4">
+      <Sh n={4} title="Entry Requirements" meta={`Agent · Entry Requirements · ${items.length} items${conf ? ` · Conf ${conf}` : ''}`} />
+      <div className="chk">
+        {items.map((item, i) => (
+          <div key={i} className="chk-r">
+            <div className="chk-box">&#10003;</div>
+            <div className="chk-name">{noDash(item.name)}</div>
+            <div className="chk-spec">{noDash(item.spec)}</div>
+            <div className="chk-src">{item.src}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function BorderRunSection({ brief }: { brief: VisaBrief }) {
+  const analysis = brief.borderRunAnalysis;
+  const depth = brief.metadata.depth;
+  return (
+    <section className="sec" id="s5">
+      <Sh n={5} title="Border Run Analysis" meta="Agent · Border Run · T1 + T4 blend" />
+
+      <div className="gatecontent">
+        <div className="scrollx">
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th style={{ width: '16%' }}>Vector</th>
+                <th style={{ width: '36%' }}>Route / details</th>
+                <th style={{ width: '20%' }}>Annual cap</th>
+                <th style={{ width: '28%' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!analysis.eligible ? (
+                <tr>
+                  <td colSpan={4} style={{ color: 'var(--ink-3)' }}>
+                    Border runs not applicable for this combination.
+                  </td>
+                </tr>
+              ) : analysis.recommendedCrossings.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ color: 'var(--ink-3)' }}>
+                    {noDash(analysis.enforcementPosture)}
+                    {analysis.limitsPerYear && <span> Annual cap: {analysis.limitsPerYear}.</span>}
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {analysis.recommendedCrossings.map((crossing, i) => (
+                    <tr key={i}>
+                      <td><span className="name">Option {i + 1}</span></td>
+                      <td>{noDash(crossing)}</td>
+                      <td className="num">{analysis.limitsPerYear ?? <span className="vd ok">No hard cap</span>}</td>
+                      <td><span className="vd ok">Open</span></td>
+                    </tr>
+                  ))}
+                  <tr className="noterow">
+                    <td colSpan={4}>
+                      <span className="m">Enforcement posture</span>
+                      {noDash(analysis.enforcementPosture)}
+                    </td>
+                  </tr>
+                  {analysis.warnings.map((w, i) => (
+                    <tr key={`w-${i}`} className="noterow">
+                      <td colSpan={4}><span className="m">Warning</span>{noDash(w)}</td>
+                    </tr>
+                  ))}
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <LockCard title="Border Run Analysis" />
+    </section>
+  );
+}
+
+function RecentChangesSection({ brief }: { brief: VisaBrief }) {
+  const changes = brief.recentChanges;
+  if (!changes.hasChanges && changes.items.length === 0 && changes.watchItems.length === 0) return null;
+  return (
+    <section className="sec" id="s6">
+      <Sh n={6} title="Recent Changes" meta="Agent · Recent Changes · 90-day window" />
+      {changes.items.map((item, i) => (
+        <div key={i} className="alert">
+          <div className="alert-h"><span className="flag">&#9888;</span>{noDash(item).split('.')[0]}</div>
+          {noDash(item).split('.').slice(1).join('.').trim() && (
+            <p className="alert-b">{noDash(item).split('.').slice(1).join('.').trim()}.</p>
+          )}
+          <div className="alert-meta">
+            <span>Window <b>90 days</b></span>
+            <span>Source <b>Recent Changes agent</b></span>
+          </div>
+        </div>
+      ))}
+      {changes.watchItems.map((item, i) => (
+        <div key={`w-${i}`} className="alert calm">
+          <div className="alert-h">{noDash(item).split('.')[0]}</div>
+          {noDash(item).split('.').slice(1).join('.').trim() && (
+            <p className="alert-b">{noDash(item).split('.').slice(1).join('.').trim()}.</p>
+          )}
+          <div className="alert-meta">
+            <span>Status <b>Watch item</b></span>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function ConflictSection({ brief }: { brief: VisaBrief }) {
+  const report = brief.conflictReport;
+  const total = report.confirmed.length + report.contested.length + report.unverified.length;
+  const overallConf = brief.confidenceScore.overall;
+  const t1Count = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
+
+  type Row = { topic: string; description: string; sources: string[]; resolution?: string; status: 'confirmed' | 'contested' | 'unverified' };
+  const rows: Row[] = [
+    ...report.confirmed.map(item => ({ ...item, status: 'confirmed' as const })),
+    ...report.contested.map(item => ({ ...item, status: 'contested' as const })),
+    ...report.unverified.map(item => ({ ...item, status: 'unverified' as const })),
+  ];
+
+  return (
+    <section className="sec" id="s7">
+      <Sh n={7} title="Conflict Report" meta={`Agent · Conflict Resolver · ${total} items`} />
+
+      <div className="gatecontent">
+        <div className="scrollx">
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th style={{ width: '22%' }}>Topic</th>
+                <th style={{ width: '12%' }}>Status</th>
+                <th style={{ width: '36%' }}>Agent verdicts</th>
+                <th style={{ width: '30%' }}>Resolution</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 ? (
+                <tr><td colSpan={4} style={{ color: 'var(--ink-3)' }}>No conflicts detected. All sources in agreement.</td></tr>
+              ) : rows.map((row, i) => (
+                <tr key={i}>
+                  <td><span className="name">{row.topic}</span></td>
+                  <td>
+                    {row.status === 'confirmed' && <span className="vd ok">Confirmed</span>}
+                    {row.status === 'contested' && <span className="vd warn">Contested</span>}
+                    {row.status === 'unverified' && <span className="vd bad">Unverified</span>}
+                  </td>
+                  <td>
+                    {noDash(row.description)}
+                    {row.sources.length > 0 && (
+                      <div style={{ marginTop: '6px' }}>
+                        {row.sources.map((s, si) => (
+                          <a key={si} href={s} target="_blank" rel="noopener noreferrer"
+                            style={{ display: 'block', fontSize: '9px', color: 'var(--accent-ink)', wordBreak: 'break-all' }}>
+                            {urlDomain(s)}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    {row.resolution
+                      ? noDash(row.resolution)
+                      : <span style={{ color: 'var(--ink-4)' }}>&mdash;</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="conf">
+          <div className="conf-l">
+            <div className="l">Overall confidence</div>
+            <div className="v">{overallConf.charAt(0).toUpperCase() + overallConf.slice(1)}</div>
+            <ConfBars level={overallConf} />
+          </div>
+          <div className="conf-r">
+            {t1Count > 0 && `${t1Count} Tier 1 source${t1Count !== 1 ? 's' : ''} support the primary recommendation. `}
+            {report.confirmed.length} claim{report.confirmed.length !== 1 ? 's' : ''} confirmed
+            {report.contested.length > 0 ? `, ${report.contested.length} contested` : ''}
+            {report.unverified.length > 0 ? `, ${report.unverified.length} unverified` : ''}.
+            {report.unverified.length === 0 && ' No unverified claims. Every statement traces to at least one Tier 1 or Tier 2 source.'}
+          </div>
+        </div>
+      </div>
+
+      <LockCard title="Conflict Report" />
+    </section>
+  );
+}
+
+function CitationsSection({ brief }: { brief: VisaBrief }) {
+  const citations = brief.confidenceScore.sourceCitations;
+  if (citations.length === 0) return null;
+  const t1Count = citations.filter(c => c.tier === 1).length;
+  const t4Count = citations.filter(c => c.tier === 4).length;
+  return (
+    <section className="sec" id="s8">
+      <Sh n={8} title="Source Citations" meta={`${citations.length} sources · T1×${t1Count} T4×${t4Count}`} />
+      <div className="scrollx">
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th style={{ width: '8%' }}>Ref</th>
+              <th style={{ width: '28%' }}>Source</th>
+              <th style={{ width: '22%' }}>Domain</th>
+              <th style={{ width: '30%' }}>Scope of claim</th>
+              <th style={{ width: '12%' }}>Tier</th>
+            </tr>
+          </thead>
+          <tbody>
+            {citations.map((cite, i) => (
+              <tr key={i}>
+                <td className="num" style={{ color: 'var(--accent-ink)', fontWeight: 700 }}>S{i + 1}</td>
+                <td style={{ color: 'var(--ink)' }}>
+                  <a href={cite.url} target="_blank" rel="noopener noreferrer"
+                    style={{ color: 'var(--ink)', textDecoration: 'underline', wordBreak: 'break-all' }}>
+                    {urlDomain(cite.url)}
+                  </a>
+                  {cite.publishedDate && (
+                    <span style={{ display: 'block', marginTop: '3px', fontSize: '9px', color: 'var(--ink-4)' }}>
+                      {cite.publishedDate}
+                    </span>
+                  )}
+                </td>
+                <td className="num">{urlDomain(cite.url)}</td>
+                <td>{noDash(cite.claim)}</td>
+                <td><TierChip tier={cite.tier} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function ContingencySection({ brief }: { brief: VisaBrief }) {
+  const c = brief.contingency;
+  return (
+    <section className="sec" id="s9">
+      <Sh n={9} title="Contingency" meta="If things go wrong" />
+
+      <div className="gatecontent">
+        <div className="kv">
+          {c.deniedEntrySteps.length > 0 && (
+            <div className="kv-r">
+              <div className="kv-k">If denied entry</div>
+              <div className="kv-v">
+                <ol style={{ paddingLeft: '18px', margin: 0 }}>
+                  {c.deniedEntrySteps.map((s, i) => <li key={i} style={{ marginBottom: '4px' }}>{noDash(s)}</li>)}
+                </ol>
+              </div>
+            </div>
+          )}
+          <div className="kv-r">
+            <div className="kv-k">Overstay scenario</div>
+            <div className="kv-v" dangerouslySetInnerHTML={{ __html: withLinks(c.overstayScenario) }} />
+          </div>
+          {c.emergencyContacts.length > 0 && (
+            <div className="kv-r">
+              <div className="kv-k">Emergency contacts</div>
+              <div className="kv-v">
+                <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                  {c.emergencyContacts.map((ec, i) => <li key={i}>{noDash(ec)}</li>)}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <LockCard title="Contingency Planning" />
+    </section>
+  );
+}
+
+// ── Rail ──────────────────────────────────────────────────────────────────────
+
 function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
+  const perSection = brief.confidenceScore.perSection ?? {};
+  const overallConf = brief.confidenceScore.overall;
   const t1Count = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
   const confirmed = brief.conflictReport.confirmed.length;
   const contested = brief.conflictReport.contested.length;
   const unverified = brief.conflictReport.unverified.length;
-  const perSection = brief.confidenceScore.perSection ?? {};
-
-  const successCount = brief.metadata.agentStatuses.filter(s => s.status === 'success').length;
-  const totalCount = brief.metadata.agentStatuses.length;
+  const depth = brief.metadata.depth;
+  const depthTag = depth === 'quick' ? 'Qck' : depth === 'standard' ? 'Std' : 'Deep';
 
   return (
     <aside className="rail">
-      <div className="rail-id">
-        <div className="rail-kicker">Visa Intelligence Brief</div>
-        <div className="rail-route">
-          {meta.nationality}<br />
-          <em>&rarr;</em>&nbsp;{meta.destination}
-        </div>
-        <div className="rail-sub">
-          {meta.briefId && <>{meta.briefId}<br /></>}
-          {DEPTH_LABEL[brief.metadata.depth as 'quick' | 'standard' | 'deep'] ?? brief.metadata.depth} depth &middot; 9 sections<br />
-          {fmt(brief.metadata.generatedAt)}
+      {/* Panel 1 — route identity */}
+      <div className="rp">
+        <div className="rp-h">Visa Intelligence Brief<i /><span className="ct">{depthTag}</span></div>
+        <div className="rp-b">
+          <div className="route">
+            {meta.nationality}<br /><em>&rarr;</em>&nbsp;{meta.destination}
+          </div>
+          {meta.briefId && <div className="route-sub"><b>{meta.briefId}</b></div>}
         </div>
       </div>
 
-      <div className="ledger">
-        <div className="ledger-row big">
-          <span>Overall confidence</span>
-          <b>{confidenceLabel(brief.confidenceScore.overall)}</b>
+      {/* Panel 2 — confidence ledger */}
+      <div className="rp">
+        <div className="rp-h">Confidence Ledger<i /><span className="ct">&sect;07</span></div>
+        <div className="led-hero">
+          <div className="l">Overall confidence</div>
+          <div className="v">{overallConf.charAt(0).toUpperCase() + overallConf.slice(1)}</div>
+          <ConfBars level={overallConf} />
         </div>
-        {t1Count > 0 && (
-          <div className="ledger-row"><span>Tier 1 sources</span><b>{t1Count}</b></div>
-        )}
-        <div className="ledger-row"><span>Claims confirmed</span><b>{confirmed}</b></div>
-        <div className="ledger-row"><span>Claims contested</span><b>{contested}</b></div>
-        <div className="ledger-row"><span>Unverified</span><b>{unverified}</b></div>
+        <div className="metrics">
+          <div className="m-cell"><div className="m-k">Tier 1 src</div><div className="m-v">{t1Count}</div></div>
+          <div className="m-cell"><div className="m-k">Confirmed</div><div className={`m-v${confirmed > 0 ? ' good' : ''}`}>{confirmed}</div></div>
+          <div className="m-cell"><div className="m-k">Contested</div><div className="m-v">{contested}</div></div>
+          <div className="m-cell"><div className="m-k">Unverified</div><div className={`m-v${unverified === 0 ? ' nil' : ''}`}>{unverified}</div></div>
+        </div>
       </div>
 
-      <div className="rail-h">Contents</div>
-      <ul className="idx" id="bd-idx">
-        {SECTION_LABELS.map(([id, label], i) => {
-          const confKey = SECTION_CONF_KEYS[i];
-          const conf = confKey ? perSection[confKey] : undefined;
-          return (
-            <li key={id}>
-              <a href={`#${id}`}>
-                <span className="n">{zeroPad(i + 1)}</span>
-                <span>{label}</span>
-                <span className={sectionMark(conf)} />
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="rail-sub" style={{ marginTop: '10px' }}>
-        <span className="mark full" style={{ display: 'inline-block', verticalAlign: '-1px' }} /> High{' '}
-        <span className="mark warn" style={{ display: 'inline-block', verticalAlign: '-1px' }} /> Medium{' '}
-        <span className="mark none" style={{ display: 'inline-block', verticalAlign: '-1px' }} /> Not scored
-      </div>
-
-      <div className="rail-h">Agents</div>
-      <div className="rail-agents">
-        {brief.metadata.agentStatuses.map((s, i) => {
-          const key = (s.agent.charAt(0).toLowerCase() + s.agent.slice(1)) as keyof typeof AGENT_DISPLAY_LABELS;
-          const label = AGENT_DISPLAY_LABELS[key] ?? s.agent;
-          const failed = s.status === 'failed';
-          return (
-            <div key={i} className={`agentrow${failed ? ' failed' : ''}`}>
-              <span>{label}</span>
-              <TierChip tier={s.sourceTier} />
-              <span className="ms">{s.durationMs}ms</span>
-            </div>
-          );
-        })}
+      {/* Panel 3 — scroll-spy TOC */}
+      <div className="rp">
+        <div className="rp-h">Contents<i /><span className="ct">Conf</span></div>
+        <ul className="toc" id="bd-toc">
+          {SECTION_LABELS.map(([id, label], i) => {
+            const confKey = SECTION_CONF_KEYS[i];
+            const conf = confKey ? perSection[confKey] as 'high' | 'medium' | 'low' | undefined : undefined;
+            return (
+              <li key={id}>
+                <a href={`#${id}`}>
+                  <span className="n">{zeroPad(i + 1)}</span>
+                  <span className="t">{label}</span>
+                  <span className={confTagClass(conf)}>{confLabel(conf)}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="rp-foot">&mdash;&nbsp;not a scored claim</div>
       </div>
     </aside>
   );
@@ -1113,71 +1204,57 @@ export default function BriefDocument({
   mode?: 'screen' | 'print';
 }) {
   const depth = brief.metadata.depth;
-  const isQuick = depth === 'quick';
-  // Applies regardless of mode — a Quick-depth PDF must not leak gated
-  // sections. Each gated section decides separately whether to render an
-  // upgrade CTA (screen) or omit itself entirely (print, see LockedCard
-  // call sites below and VisaOptionCard's inline lock-text).
-  const lockDepthGated = isQuick;
-
+  const depthFull = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
   const successCount = brief.metadata.agentStatuses.filter(s => s.status === 'success').length;
   const totalCount = brief.metadata.agentStatuses.length;
 
   return (
-    <div className="doc" data-mode={mode}>
+    <div className="doc" data-mode={mode} data-depth={depth}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="sheet">
-        <div className="bd-grid">
+        <div className="grid">
           <Rail brief={brief} meta={meta} />
 
-          <main className="bd-body">
-            <header className="dochead">
-              <div className="brandline">
-                <span>VisaScout &middot; Visa Intelligence</span>
-                {meta.briefId && <span className="r">{meta.briefId}</span>}
+          <main className="body">
+            <header className="mast">
+              <div className="mast-top">
+                <div>
+                  <div className="mast-kicker">Visa Intelligence Brief &middot; {depthFull} Depth</div>
+                  <h1 className="mast-title">
+                    {meta.nationality}<span className="arr">&rarr;</span>{meta.destination}
+                  </h1>
+                </div>
+                <div className="mast-seal">
+                  {meta.briefId && <div className="id">{meta.briefId}</div>}
+                  <div className="st">
+                    Issued {fmt(brief.metadata.generatedAt)}<br />
+                    Agents {successCount} / {totalCount} resolved<br />
+                    Runtime {Math.round(brief.metadata.totalDurationMs / 1000)}s &middot; {brief.metadata.model}
+                  </div>
+                </div>
               </div>
-              <h1 className="h1">
-                {meta.nationality} <span className="arrow">&rarr;</span> {meta.destination}
-              </h1>
               <div className="metastrip">
-                <div className="metacell">
-                  <div className="k">Depth</div>
-                  <div className="v">{DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth}</div>
+                <div><div className="l">Passport</div><div className="v">{meta.nationality}</div></div>
+                <div><div className="l">Destination</div><div className="v">{meta.destination}</div></div>
+                <div><div className="l">Depth</div><div className="v">{depthFull}</div></div>
+                <div><div className="l">Agents</div><div className="v">{successCount}/{totalCount}</div></div>
+                <div>
+                  <div className="l">Confidence</div>
+                  <div className="v good">{brief.confidenceScore.overall.charAt(0).toUpperCase() + brief.confidenceScore.overall.slice(1)}</div>
                 </div>
-                <div className="metacell">
-                  <div className="k">Generated</div>
-                  <div className="v" style={{ fontSize: '14px', lineHeight: '1.2' }}>{fmt(brief.metadata.generatedAt)}</div>
-                </div>
-                <div className="metacell">
-                  <div className="k">Confidence</div>
-                  <div className="v acc">{confidenceLabel(brief.confidenceScore.overall)}</div>
-                </div>
-                <div className="metacell">
-                  <div className="k">Agents</div>
-                  <div className="v">{successCount} / {totalCount}</div>
-                </div>
-              </div>
-              {/* print-only: source provenance stats from the screen rail ledger */}
-              <div className="statline">
-                {brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length > 0 && (
-                  <span className="s">T1 sources <b>{brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length}</b></span>
-                )}
-                <span className="s">Confirmed <b>{brief.conflictReport.confirmed.length}</b></span>
-                <span className="s">Contested <b>{brief.conflictReport.contested.length}</b></span>
-                <span className="s">Unverified <b>{brief.conflictReport.unverified.length}</b></span>
               </div>
             </header>
 
-            <ParsedSituationSection brief={brief} />
+            <ParsedSituationSection brief={brief} meta={meta} />
             <RecommendedActionSection brief={brief} />
-            <VisaOptionsSection brief={brief} mode={mode} />
+            <VisaOptionsSection brief={brief} />
             <EntryRequirementsSection brief={brief} />
-            <BorderRunSection brief={brief} locked={lockDepthGated} mode={mode} />
+            <BorderRunSection brief={brief} />
             <RecentChangesSection brief={brief} />
-            <ConflictSection brief={brief} locked={lockDepthGated} mode={mode} />
+            <ConflictSection brief={brief} />
             <CitationsSection brief={brief} />
-            <ContingencySection brief={brief} locked={lockDepthGated} mode={mode} />
+            <ContingencySection brief={brief} />
 
             <footer className="docfoot">
               <div className="disc">
@@ -1186,13 +1263,16 @@ export default function BriefDocument({
               </div>
               <div className="colophon">
                 <span>VisaScout &middot; visascout.io &middot; &copy; 2026 Sabai Wave LLC</span>
-                <span>{DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth} depth &middot; {totalCount} agents &middot; {Math.round(brief.metadata.totalDurationMs / 1000)}s &middot; {brief.metadata.model}</span>
+                <span>{depthFull} depth &middot; {totalCount} agents &middot; {brief.metadata.model}</span>
                 <span>{fmt(brief.metadata.generatedAt)}</span>
               </div>
             </footer>
           </main>
         </div>
       </div>
+
+      {/* Collapse toggle + TOC scroll-spy — executes on initial HTML parse only */}
+      <script dangerouslySetInnerHTML={{ __html: TOGGLE_JS }} />
     </div>
   );
 }

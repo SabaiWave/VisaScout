@@ -9,9 +9,9 @@ import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
 
 // ─── Layout helpers ───────────────────────────────────────────────────────────
 
-function DevSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DevSection({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-8">
+    <div id={id} className="mb-8">
       <SectionHeading size="sm" className="mb-3">{title}</SectionHeading>
       <div
         className="p-4"
@@ -91,12 +91,57 @@ export default function DevPage() {
     }
   }
 
+  const NAV_LINKS = [
+    { href: '#s-flows',  label: 'Brief Flows' },
+    { href: '#s-states', label: 'States' },
+    { href: '#s-events', label: 'Log + Events' },
+    { href: '#s-debug',  label: 'Debug API' },
+    { href: '#s-users',  label: 'User Mgmt' },
+    { href: '#s-nav',    label: 'Page Nav' },
+  ];
+
   return (
-    <main className="px-4 sm:px-6 py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Sidebar */}
+      <aside style={{
+        width: 200, flexShrink: 0,
+        borderRight: '1px solid var(--color-border)',
+        position: 'sticky', top: 0, height: '100vh',
+        display: 'flex', flexDirection: 'column',
+        background: 'var(--color-bg-subtle)',
+      }}>
+        <div style={{ padding: '28px 20px 20px', fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 20, color: 'var(--color-text-primary)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+          Dev
+        </div>
+        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, padding: '0 12px', overflowY: 'auto' }}>
+          {NAV_LINKS.map(item => (
+            <a
+              key={item.href}
+              href={item.href}
+              style={{ display: 'block', padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', textDecoration: 'none', borderRadius: 4 }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-secondary)'; e.currentTarget.style.background = 'rgba(200,120,10,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-tertiary)', wordBreak: 'break-all', marginBottom: 6 }}>
+            {userId ?? '—'}
+          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-secondary)', background: 'rgba(200,120,10,0.15)', border: '1px solid rgba(200,120,10,0.3)', padding: '2px 6px' }}>
+            DEV
+          </span>
+        </div>
+      </aside>
+
+      {/* Content */}
+      <main style={{ flex: 1, minWidth: 0, padding: '32px 40px', maxWidth: 960 }}>
         <SectionHeading size="md" as="h1" subtitle="Admin gated" className="mb-8">DEV TOOLS</SectionHeading>
 
         {/* Brief Flows */}
-        <DevSection title="Brief Flows">
+        <DevSection id="s-flows" title="Brief Flows">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             Depth affects pipeline config + downstream logs. Dry Run defaults on. Toggle off to burn real API calls.
           </p>
@@ -173,7 +218,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* State simulation */}
-        <DevSection title="State Simulation">
+        <DevSection id="s-states" title="State Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             EACH NAVIGATES TO THE TARGET PAGE AND TRIGGERS THAT STATE ON MOUNT.
           </p>
@@ -210,7 +255,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Log & Event Simulation */}
-        <DevSection title="Log & Event Simulation">
+        <DevSection id="s-events" title="Log & Event Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB. CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
           </p>
@@ -352,7 +397,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Debug API */}
-        <DevSection title="Debug API">
+        <DevSection id="s-debug" title="Debug API">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB. ADMIN ONLY.
           </p>
@@ -366,7 +411,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* User Management */}
-        <DevSection title="User Management">
+        <DevSection id="s-users" title="User Management">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY. ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
             {userMgmtId.trim() === userId && (
@@ -471,7 +516,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Page navigation */}
-        <DevSection title="Page Navigation">
+        <DevSection id="s-nav" title="Page Navigation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB. /DEV STAYS OPEN AS HOME BASE.
           </p>
@@ -489,5 +534,6 @@ export default function DevPage() {
           </DevGrid>
         </DevSection>
       </main>
+    </div>
   );
 }

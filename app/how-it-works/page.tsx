@@ -3,6 +3,15 @@ import type { Metadata } from 'next';
 import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
+import { LegalPageShell } from '@/app/components/LegalPageShell';
+
+const TOC_ITEMS = [
+  { id: 's1', label: 'Overview' },
+  { id: 's2', label: 'Source Tiers' },
+  { id: 's3', label: 'Confidence Scores' },
+  { id: 's4', label: 'Conflict Resolution' },
+  { id: 's5', label: 'Community Intel' },
+];
 
 export const metadata: Metadata = {
   title: 'How It Works — VisaScout',
@@ -67,9 +76,10 @@ const CONFIDENCE_LEVELS = [
 
 export default function HowItWorksPage() {
   return (
-    <UtilityPageShell maxWidth="860px" mainClassName="space-y-20" excludeFooterLink="/how-it-works">
+    <UtilityPageShell maxWidth="1080px" mainClassName="space-y-20" excludeFooterLink="/how-it-works">
+      <LegalPageShell tocItems={TOC_ITEMS}>
         {/* Header */}
-        <section>
+        <section id="s1">
           <SectionHeading as="h1" size="md" className="mb-6">The research, explained.</SectionHeading>
           <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             The internet has plenty of visa information. Most of it is outdated, uncited, or contradictory. Here is exactly how we source, verify, and reconcile it.
@@ -77,7 +87,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Source tiers */}
-        <section>
+        <section id="s2">
           <SectionHeading
             size="md"
             subtitle="Not all sources are equal"
@@ -124,7 +134,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Confidence scores */}
-        <section>
+        <section id="s3">
           <SectionHeading
             size="md"
             subtitle="What confidence actually means"
@@ -165,7 +175,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Why contradictions are surfaced */}
-        <section>
+        <section id="s4">
           <SectionHeading
             size="md"
             subtitle="We don't pick a winner and hide the rest"
@@ -182,7 +192,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Why community intel is included */}
-        <section>
+        <section id="s5">
           <SectionHeading
             size="md"
             subtitle="Why Reddit and Nomad List are in here"
@@ -218,6 +228,7 @@ export default function HowItWorksPage() {
             <Link href="/app?depth=quick">Start free</Link>
           </Button>
         </section>
+      </LegalPageShell>
     </UtilityPageShell>
   );
 }

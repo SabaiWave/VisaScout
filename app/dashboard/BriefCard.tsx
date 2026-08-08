@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Trash2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { cardVariants } from './BriefGrid';
-import { ConfidenceBadge, DepthBadge } from '@/app/components/ui/Badge';
+import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 
 interface BriefRow {
@@ -20,12 +17,26 @@ interface BriefRow {
   rerun_count: number;
 }
 
+const DEPTH_COLOR: Record<string, string> = {
+  quick: '#10b981',
+  standard: '#c8780a',
+  deep: '#c8780a',
+};
+const CONF_COLOR: Record<string, string> = {
+  high: '#10b981',
+  medium: '#c8780a',
+  low: 'var(--color-text-tertiary)',
+};
+
 export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () => void }) {
+  const router = useRouter();
+  const [hovered, setHovered] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
   const isGenerating = ['queued', 'processing', 'pending'].includes(brief.payment_status);
+  const href = isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`;
 
   async function handleDelete() {
     setDeleting(true);
@@ -39,6 +50,12 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
     }
   }
 
+  if (deleted) return null;
+
+  const depthColor = DEPTH_COLOR[brief.depth] ?? '#c8780a';
+  const confColor = CONF_COLOR[brief.overall_confidence ?? ''] ?? 'var(--color-text-tertiary)';
+  const dateStr = new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+
   return (
     <>
       <ConfirmDialog
@@ -51,119 +68,74 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         loading={deleting}
       />
 
-      <AnimatePresence>
-        {!deleted && (
-          <motion.div
-            variants={cardVariants}
-            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18, ease: 'easeOut' } }}
-            style={{ height: '100%', willChange: 'transform, opacity' }}
-          >
-            <Link href={isGenerating ? `/brief/${brief.id}?pending=1` : `/brief/${brief.id}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }} onClick={(e) => { if (showConfirm || deleting) e.preventDefault(); }}>
-              <div
-          className="visa-track-card"
-          style={{
-            background: 'var(--color-bg-elevated)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '20px',
-            cursor: 'pointer',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-          }}
-        >
+      <div
+        className="db-row"
+        style={{ background: hovered ? 'var(--color-bg-elevated)' : 'transparent' }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onClick={() => { if (!showConfirm && !deleting) router.push(href); }}
+      >
+        {/* Destination */}
+        <div className="db-cell db-cell-dest">
+          <span className="db-dest">{brief.destination}</span>
+          {isGenerating && (
+            <span className="db-gen-dot" />
+          )}
+          {brief.degraded && !isGenerating && (
+            <span className="db-tag" style={{ color: '#c8780a' }}>DEGRADED</span>
+          )}
+        </div>
+
+        {/* Nationality */}
+        <div className="db-cell db-cell-hide-sm">
+          <span className="db-sub">{brief.nationality}</span>
+        </div>
+
+        {/* Depth badge */}
+        <div className="db-cell db-cell-badge db-cell-hide-sm">
+          <span className="db-badge" style={{ color: depthColor, borderColor: depthColor }}>
+            {brief.depth.toUpperCase()}
+          </span>
+        </div>
+
+        {/* Date */}
+        <div className="db-cell db-cell-date db-cell-hide-md">
+          <span className="db-sub">{dateStr}</span>
+        </div>
+
+        {/* Confidence */}
+        <div className="db-cell db-cell-badge">
+          {isGenerating ? (
+            <span className="db-badge" style={{ color: '#c8780a', borderColor: '#c8780a' }}>RUNNING</span>
+          ) : brief.overall_confidence ? (
+            <span className="db-badge" style={{ color: confColor, borderColor: confColor }}>
+              {brief.overall_confidence.toUpperCase()}
+            </span>
+          ) : (
+            <span className="db-sub">—</span>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="db-cell db-cell-actions" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowConfirm(true); }}
+            onClick={() => { if (!showConfirm) router.push(href); }}
+            className="db-view"
+            aria-label={`View ${brief.destination} brief`}
+          >
+            VIEW
+          </button>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="db-del"
             aria-label="Delete brief"
             title="Delete brief"
-            className="brief-delete-btn"
-            style={{
-              position: 'absolute',
-              top: '4px',
-              right: '4px',
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              color: 'var(--color-text-tertiary)',
-              borderRadius: 'var(--radius-sm)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '44px',
-              height: '44px',
-              flexShrink: 0,
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(239,68,68,0.85)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}
+            style={{ opacity: hovered ? 1 : 0 }}
           >
-            <Trash2 size={16} />
+            <Trash2 size={13} />
           </button>
-
-          <p style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '1rem',
-            fontWeight: 700,
-            color: 'var(--color-text-primary)',
-            margin: '0 0 2px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.03em',
-            paddingRight: '24px',
-          }}>
-            {brief.destination}
-          </p>
-          <p style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.8rem',
-            color: 'var(--color-text-tertiary)',
-            margin: '0 0 12px',
-          }}>
-            {brief.nationality}
-          </p>
-
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <DepthBadge depth={brief.depth as 'quick' | 'standard' | 'deep'} />
-            {isGenerating && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-amber)' }}>
-                <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-amber)', display: 'inline-block', flexShrink: 0 }} />
-                {(brief.rerun_count ?? 0) > 0 ? 'Regenerating' : 'Generating'}
-              </span>
-            )}
-            {!isGenerating && brief.overall_confidence && (
-              <ConfidenceBadge level={brief.overall_confidence as 'high' | 'medium' | 'low'} />
-            )}
-            {!isGenerating && brief.degraded && (
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                textTransform: 'uppercase' as const,
-                letterSpacing: '0.05em',
-                padding: '2px 8px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'rgba(245,158,11,0.12)',
-                color: 'var(--color-amber)',
-              }}>
-                DEGRADED
-              </span>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)' }}>
-              {new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
-              {' · '}
-              {new Date(brief.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC', hour12: false })} UTC
-            </span>
-            <ArrowRight size={15} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
-          </div>
         </div>
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
     </>
   );
 }

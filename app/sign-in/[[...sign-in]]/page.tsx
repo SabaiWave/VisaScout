@@ -21,9 +21,10 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-base)' }}>
+    <div className="min-h-screen flex flex-col relative" style={{ background: 'var(--color-bg-base)' }}>
+      <div className="chart-texture" aria-hidden="true" />
       <LandingNav />
-      <div className="flex-1 flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4 relative z-10">
         <SignIn forceRedirectUrl="/app" signUpUrl="/sign-up" />
       </div>
     </div>
