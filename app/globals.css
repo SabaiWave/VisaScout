@@ -180,7 +180,7 @@ h1, h2, h3 {
 }
 .pin-ring {
   transform: translate(-50%, -50%);
-  animation: pin-expand 2.8s ease-out infinite;
+  animation: pin-expand 3.6s ease-out infinite;
 }
 
 /* Agent row pulse animation */

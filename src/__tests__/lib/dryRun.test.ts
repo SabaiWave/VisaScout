@@ -90,9 +90,22 @@ describe('stripToDepth', () => {
       expect(result.conflictReport.unverified).toHaveLength(0);
     });
 
-    it('limits borderRun recommendedCrossings to 1', () => {
+    it('empties conflictReport.confirmed — delegates to redactForDepth, matches the real gate', () => {
       const result = stripToDepth(fixture, 'quick');
-      expect(result.borderRunAnalysis.recommendedCrossings).toHaveLength(1);
+      expect(result.conflictReport.confirmed).toHaveLength(0);
+    });
+
+    it('empties borderRun recommendedCrossings entirely — no partial preview', () => {
+      const result = stripToDepth(fixture, 'quick');
+      expect(result.borderRunAnalysis.recommendedCrossings).toHaveLength(0);
+      expect(result.borderRunAnalysis.eligible).toBe(false);
+    });
+
+    it('empties contingency', () => {
+      const result = stripToDepth(fixture, 'quick');
+      expect(result.contingency.deniedEntrySteps).toHaveLength(0);
+      expect(result.contingency.emergencyContacts).toHaveLength(0);
+      expect(result.contingency.overstayScenario).toBe('');
     });
 
     it('sets metadata.depth to quick', () => {

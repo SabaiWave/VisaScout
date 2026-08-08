@@ -242,7 +242,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
             ) : isProcessing ? (
               <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} pollForJob={row.payment_status === 'queued'} />
             ) : brief ? (
-              <BriefRenderer brief={brief} hideMetadata briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
+              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
               <div
                 className="px-4 py-3"

@@ -1,4 +1,5 @@
 import type { VisaBrief, VisaRequest, ConflictReport } from '../types/index';
+import { redactForDepth } from './depthGate';
 
 // Fixture imports — only loaded when DRY_RUN=true
 import visaRequestFixture from '../__fixtures__/agents/visaRequest.json';
@@ -29,17 +30,20 @@ export function stripToDepth(brief: VisaBrief, depth: Depth): VisaBrief {
   const b = JSON.parse(JSON.stringify(brief)) as VisaBrief;
 
   if (depth === 'quick') {
-    // Quick: 1 visa option, no applicationDocs, minimal conflict + notes
+    // Quick: 1 visa option, no applicationDocs, minimal notes. Locked-section
+    // redaction (borderRunAnalysis, contingency, conflictReport detail)
+    // delegates to redactForDepth — the same function the real synthesis
+    // path uses, so the DRY_RUN preview can never drift from the real gate
+    // again the way it did before (this used to keep 1 recommendedCrossing
+    // and leave conflictReport.confirmed fully populated at Quick).
     b.visaOptions = b.visaOptions.slice(0, 1).map(opt => {
       const { applicationDocs: _d, applicationUrl: _u, ...rest } = opt;
       void _d; void _u;
       return rest;
     });
     b.entryRequirements.notes = [];
-    b.conflictReport.contested = [];
-    b.conflictReport.unverified = [];
-    b.borderRunAnalysis.recommendedCrossings = b.borderRunAnalysis.recommendedCrossings.slice(0, 1);
     b.metadata.depth = 'quick';
+    return redactForDepth(b, 'quick');
   } else {
     // Standard: 2 visa options, applicationDocs included
     b.visaOptions = b.visaOptions.slice(0, 2);

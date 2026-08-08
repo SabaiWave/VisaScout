@@ -1,8 +1,10 @@
 import { existsSync } from 'fs';
+import { renderToStaticMarkup } from 'react-dom/server';
+import React from 'react';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { getSupabase } from '@/src/lib/supabase';
-import { generateBriefHtml } from '@/src/lib/pdfTemplate';
+import BriefDocument from '@/app/components/BriefDocument';
 import { log } from '@/src/lib/logger';
 import type { VisaBrief } from '@/src/types/index';
 
@@ -51,12 +53,30 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to parse brief' }, { status: 500 });
   }
 
-  const html = generateBriefHtml(brief, {
-    nationality: row.nationality,
-    destination: row.destination,
-    depth: row.depth,
-    createdAt: row.created_at,
-  });
+  const componentHtml = renderToStaticMarkup(
+    React.createElement(BriefDocument, {
+      brief,
+      meta: {
+        nationality: row.nationality,
+        destination: row.destination,
+        briefId: row.id,
+        generatedAt: row.created_at,
+      },
+      mode: 'print',
+    }),
+  );
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisaScout Brief — ${row.nationality} to ${row.destination}</title>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;">
+${componentHtml}
+</body>
+</html>`;
 
   let browser;
   try {

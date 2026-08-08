@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import { LandingNav, LANDING_AXIS } from './components/LandingNav';
 import { FooterLink } from './components/ui/FooterLink';
 import { ChartCornerMarks } from './components/ui/ChartCornerMarks';
+import { HeroMarkerEditor } from './components/dev/HeroMarkerEditor';
 
 import { clientConfig } from '@/config/client';
 import { destinationCount } from '@/src/config/destinations';
@@ -114,9 +115,26 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
 
 // ─── Hero ──────────────────────────────────────────────────────────────────
 
+// Positions are % of the hero image's own pixels (via object-fit: cover math
+// in HeroMarkerEditor, recomputed on resize) — NOT % of the viewport or the
+// layout box. This is what keeps them pinned to the same map feature (land,
+// not the bottom-center ocean gulf) at every window size. Press M in dev to
+// drag-edit and copy updated values. Text/form can drift relative to markers
+// at extreme aspect ratios since they're fixed to the layout grid instead —
+// accepted tradeoff, staying on land matters more than that alignment.
+const HERO_MARKERS = [
+  { top: '24%', left: '64%', size: 7, opacity: 1, rings: [0, 1.8] },
+  { top: '18%', left: '85%', size: 6, opacity: 1, rings: [0.4, 2.2] },
+  { top: '32%', left: '72%', size: 6, opacity: 1, rings: [1.1, 2.9] },
+  { top: '20%', left: '59%', size: 5, opacity: 1, rings: [0.7, 2.5] },
+  { top: '27%', left: '78%', size: 5, opacity: 1, rings: [1.4, 3.1] },
+  { top: '12%', left: '95%', size: 4, opacity: 1, rings: [0.6, 2.4] },
+];
+
 function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
   return (
-    <section className="relative overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)', borderBottom: '1px solid var(--color-border)' }}>
+    <section ref={sectionRef} className="relative overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)', borderBottom: '1px solid var(--color-border)' }}>
       <div className="absolute inset-0 z-0">
         <Image
           src="/hero/hero-landing.jpg"
@@ -137,56 +155,51 @@ function Hero() {
         />
       </div>
 
-      {/* Pulsing entry-point marker — CSS-driven, repositions free of the image */}
-      <div aria-hidden className="absolute z-[5]" style={{ top: '58%', left: '52%' }}>
-        <div className="relative" style={{ width: '7px', height: '7px' }}>
-          {[0, 0.95, 1.9].map((delay) => (
-            <span
-              key={delay}
-              className="pin-ring absolute rounded-full"
-              style={{ top: '50%', left: '50%', border: '1px solid var(--color-amber)', animationDelay: `${delay}s` }}
-            />
-          ))}
-          <span className="absolute inset-0" style={{ background: 'var(--color-amber)' }} />
-        </div>
-      </div>
+      {/* Pulsing map markers — positioned against the image's own object-fit: cover geometry (see HeroMarkerEditor), so they stay pinned to the same map feature regardless of viewport size. Press M in dev to drag-edit. */}
+      <HeroMarkerEditor markers={HERO_MARKERS} containerRef={sectionRef} />
 
-      <div className="relative z-[6] flex flex-col justify-center h-full px-6 lg:px-[72px]" style={{ minHeight: 'calc(100vh - 56px)', maxWidth: '780px' }}>
-        <div className="flex items-center gap-3.5 mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
-          <span style={{ width: '26px', height: '1px', background: 'var(--color-amber)' }} />
-          Chart Your Route
+      <div
+        className="relative z-[6] grid grid-cols-1 lg:grid-cols-[1fr_400px] items-center gap-10 lg:gap-16 h-full px-6 lg:px-[72px]"
+        style={{ minHeight: 'calc(100vh - 56px)', maxWidth: '1240px' }}
+      >
+        <div style={{ maxWidth: '640px' }}>
+          <div className="flex items-center gap-3.5 mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
+            <span style={{ width: '26px', height: '1px', background: 'var(--color-amber)' }} />
+            Chart Your Route
+          </div>
+          <h1
+            className="mb-7 text-balance"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(2.75rem, 8vw, 6rem)',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              lineHeight: 0.9,
+              letterSpacing: '-0.015em',
+              color: 'var(--color-text-primary)',
+              maxWidth: '13ch',
+            }}
+          >
+            Know the rules
+            <span className="block" style={{ paddingLeft: '1.4em' }}>before you land.</span>
+          </h1>
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.8125rem',
+              lineHeight: 1.95,
+              color: 'var(--color-text-secondary)',
+              maxWidth: '520px',
+              paddingLeft: '1.4em',
+              borderLeft: '1px solid var(--color-amber)',
+            }}
+          >
+            {copy.hero.subhead}
+          </p>
         </div>
-        <h1
-          className="mb-7 text-balance"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.75rem, 8vw, 6rem)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            lineHeight: 0.9,
-            letterSpacing: '-0.015em',
-            color: 'var(--color-text-primary)',
-            maxWidth: '13ch',
-          }}
-        >
-          Know the rules
-          <span className="block" style={{ paddingLeft: '1.4em' }}>before you land.</span>
-        </h1>
-        <p
-          className="mb-9"
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.8125rem',
-            lineHeight: 1.95,
-            color: 'var(--color-text-secondary)',
-            maxWidth: '520px',
-            paddingLeft: '1.4em',
-            borderLeft: '1px solid var(--color-amber)',
-          }}
-        >
-          {copy.hero.subhead}
-        </p>
-        <CoordForm ctaLabel={copy.hero.cta} />
+        <div className="w-full lg:justify-self-end" style={{ maxWidth: '400px' }}>
+          <CoordForm ctaLabel={copy.hero.cta} />
+        </div>
       </div>
     </section>
   );
@@ -203,21 +216,20 @@ const dataCells = [
 
 function DataStrip() {
   return (
-    <div className="relative grid" style={{ gridTemplateColumns: `${LANDING_AXIS} repeat(3, 1fr)`, borderBottom: '1px solid var(--color-border)' }}>
+    <div
+      className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
+      style={{ borderBottom: '1px solid var(--color-border)' }}
+    >
       {dataCells.map((cell, i) => (
         <div
           key={cell.label}
-          className="flex flex-col gap-2"
-          style={{
-            padding: '30px 24px',
-            borderRight: i < dataCells.length - 1 ? '1px solid var(--color-border)' : 'none',
-            paddingLeft: i === 0 ? '24px' : undefined,
-          }}
+          className={`flex flex-col gap-2 ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
+          style={{ padding: '30px 24px' }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
             {cell.label}
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: i === 0 ? '3.4rem' : '2.6rem', fontWeight: 900, lineHeight: 1, color: 'var(--color-amber)' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, color: 'var(--color-amber)' }}>
             {cell.value}
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-tertiary)', lineHeight: 1.6 }}>
@@ -343,12 +355,19 @@ function FAQ() {
   const items = copy.faq.items;
 
   return (
-    <div className="relative px-6 lg:pl-[72px] lg:pr-[72px] py-16" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <SecLabel>{copy.faq.title}</SecLabel>
-      <p className="mb-10 max-w-2xl" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.9, color: 'var(--color-text-secondary)' }}>
-        {copy.faq.subtitle}
-      </p>
-      <div className="max-w-3xl">
+    <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
+      <div className="px-6 lg:pl-[72px] lg:pr-8 py-16" style={{ borderRight: '1px solid var(--color-border)' }}>
+        <SecLabel>FAQ</SecLabel>
+        <h2
+          style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4.4vw, 3.5rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, color: 'var(--color-text-primary)', marginBottom: '20px' }}
+        >
+          {copy.faq.title}
+        </h2>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+          {copy.faq.subtitle}
+        </p>
+      </div>
+      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16">
         {items.map((item, i) => {
           const isOpen = open === i;
           return (
@@ -411,7 +430,7 @@ function CTA() {
           Sourced, conflict-resolved, confidence-scored. Free, and no account required.
         </p>
       </div>
-      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-start lg:items-end">
+      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center">
         <CoordForm ctaLabel="Get My Visa Brief — Free" align="center" />
       </div>
     </div>
@@ -424,22 +443,23 @@ function Footer() {
   return (
     <footer className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]">
       <div
-        className="px-6 lg:pl-[72px] lg:pr-8 py-6"
-        style={{ borderRight: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', lineHeight: 2 }}
+        className="px-6 lg:pl-[72px] lg:pr-8 py-6 flex items-center"
+        style={{ borderRight: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}
       >
         {clientConfig.brandName} &middot; &copy; {new Date().getFullYear()} Sabai Wave LLC
-        <br />
-        <FooterLink href="/terms" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Terms</FooterLink>
-        {' · '}
-        <FooterLink href="/privacy" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Privacy</FooterLink>
-        {' · '}
-        <FooterLink href="/contact" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Contact</FooterLink>
       </div>
       <div
-        className="px-6 lg:pl-12 lg:pr-[72px] py-6 flex items-center"
-        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-tertiary)', lineHeight: 2 }}
+        className="px-6 lg:pl-12 lg:pr-[72px] py-6 flex flex-col gap-2"
+        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-tertiary)', lineHeight: 1.7 }}
       >
-        {clientConfig.disclaimerText}
+        <span>{clientConfig.disclaimerText}</span>
+        <span style={{ letterSpacing: '0.06em' }}>
+          <FooterLink href="/terms" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Terms</FooterLink>
+          {' · '}
+          <FooterLink href="/privacy" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Privacy</FooterLink>
+          {' · '}
+          <FooterLink href="/contact" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Contact</FooterLink>
+        </span>
       </div>
     </footer>
   );
@@ -452,7 +472,7 @@ export default function LandingPage() {
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
       <div aria-hidden className="chart-texture" />
       <AxisRule />
-      <ChartCornerMarks />
+      <ChartCornerMarks bottomRight="" />
       <LandingNav />
       <Hero />
       <DataStrip />
