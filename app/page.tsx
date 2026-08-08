@@ -123,12 +123,12 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
 // at extreme aspect ratios since they're fixed to the layout grid instead —
 // accepted tradeoff, staying on land matters more than that alignment.
 const HERO_MARKERS = [
-  { top: '24%', left: '64%', size: 7, opacity: 1, rings: [0, 1.8] },
+  { top: '20.0%', left: '60.9%', size: 7, opacity: 1, rings: [0, 1.8] },
   { top: '18%', left: '85%', size: 6, opacity: 1, rings: [0.4, 2.2] },
-  { top: '32%', left: '72%', size: 6, opacity: 1, rings: [1.1, 2.9] },
-  { top: '20%', left: '59%', size: 5, opacity: 1, rings: [0.7, 2.5] },
-  { top: '27%', left: '78%', size: 5, opacity: 1, rings: [1.4, 3.1] },
-  { top: '12%', left: '95%', size: 4, opacity: 1, rings: [0.6, 2.4] },
+  { top: '77.5%', left: '78.2%', size: 6, opacity: 1, rings: [1.1, 2.9] },
+  { top: '33.1%', left: '40.8%', size: 5, opacity: 1, rings: [0.7, 2.5] },
+  { top: '36.5%', left: '79.7%', size: 5, opacity: 1, rings: [1.4, 3.1] },
+  { top: '21.7%', left: '25.0%', size: 4, opacity: 1, rings: [0.6, 2.4] },
 ];
 
 function Hero() {

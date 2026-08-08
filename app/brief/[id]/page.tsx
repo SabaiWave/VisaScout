@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { ArrowRight, ChevronLeft } from 'lucide-react';
+import { ArrowRight, ChevronLeft, AlertTriangle } from 'lucide-react';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefActions from '@/app/components/BriefActions';
@@ -207,58 +207,77 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
       {showHeader && <BriefHeader />}
 
       <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        <div className="max-w-[760px] mx-auto">
-          <div className="mb-6">
-            {userId && (
-              <a
-                href="/dashboard"
-                className="inline-flex items-center gap-1 mb-4 text-xs font-bold uppercase"
-                style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textDecoration: 'none' }}
-              >
-                <ChevronLeft size={12} />
-                Dashboard
-              </a>
-            )}
-            <SectionHeading size="md" as="h1">
-              {row.nationality} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {row.destination}
-            </SectionHeading>
-            <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
-              <BriefMeta depth={row.depth} generatedAt={row.created_at} />
-              {brief && <BriefCopyLink url={shareUrl} />}
-            </div>
-          </div>
-
-          <div>
-            {paymentNotCompleted ? (
-              <div
-                className="px-4 py-3"
-                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-amber)' }}
-              >
-                Payment was not completed. No brief was generated.{' '}
-                <a href="/app" style={{ color: 'var(--color-amber)', textDecoration: 'underline' }}>
-                  Start a new brief
+        {isProcessing ? (
+          <BriefProcessingBanner
+            briefId={row.id}
+            isActuallyDone={isActuallyDone}
+            pollForJob={row.payment_status === 'queued'}
+            nationality={row.nationality}
+            destination={row.destination}
+            depth={row.depth}
+            showDashboardLink={!!userId}
+          />
+        ) : (
+          <div className="max-w-[760px] mx-auto">
+            <div className="mb-6">
+              {userId && (
+                <a
+                  href="/dashboard"
+                  className="inline-flex items-center gap-1 mb-4 text-xs font-bold uppercase"
+                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textDecoration: 'none' }}
+                >
+                  <ChevronLeft size={12} />
+                  Dashboard
                 </a>
+              )}
+              <SectionHeading size="md" as="h1">
+                {row.nationality} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {row.destination}
+              </SectionHeading>
+              <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+                <BriefMeta depth={row.depth} generatedAt={row.created_at} />
+                {brief && <BriefCopyLink url={shareUrl} />}
               </div>
-            ) : isProcessing ? (
-              <BriefProcessingBanner briefId={row.id} isActuallyDone={isActuallyDone} pollForJob={row.payment_status === 'queued'} />
-            ) : brief ? (
-              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
-            ) : (
-              <div
-                className="px-4 py-3"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
-              >
-                Brief content unavailable.{' '}
-                <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
-                  Contact support
-                </a>{' '}
-                with reference: {row.id}
-              </div>
-            )}
-          </div>
+            </div>
 
-          {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} forceError={simPdfError} />}
-        </div>
+            <div>
+              {paymentNotCompleted ? (
+                /* State 5 Var A — Payment Not Completed card */
+                <div style={{ border: '1px solid var(--color-error-border)', background: 'var(--color-error-bg)', padding: 20 }}>
+                  <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
+                    <AlertTriangle size={16} aria-hidden="true" style={{ color: 'var(--color-secondary)' }} />
+                    Payment Not Completed
+                  </div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                    Your payment wasn&apos;t completed. The brief has not been generated.
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const }}>
+                    <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                      Complete Payment
+                    </a>
+                    <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                      New Brief
+                    </a>
+                  </div>
+                </div>
+              ) : brief ? (
+                <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
+              ) : (
+                <div
+                  className="px-4 py-3"
+                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
+                >
+                  Brief content unavailable.{' '}
+                  <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
+                    Contact support
+                  </a>{' '}
+                  with reference: {row.id}
+                </div>
+              )}
+            </div>
+
+            {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} forceError={simPdfError} />}
+          </div>
+        )}
       </main>
     </div>
   );

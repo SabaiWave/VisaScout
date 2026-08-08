@@ -131,6 +131,26 @@ const SKELETON_SECTIONS = [
   { headingWidth: '40%', lines: 3 },
 ] as const;
 
+export function SkeletonBriefPreview() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.9, duration: 0.4 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+    >
+      {SKELETON_SECTIONS.map((s, i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="skeleton-shimmer" style={{ height: 12, width: s.headingWidth, marginBottom: 2 }} />
+          {Array.from({ length: s.lines }).map((_, j) => (
+            <div key={j} className="skeleton-shimmer" style={{ height: 13, width: j === s.lines - 1 ? '70%' : '100%' }} />
+          ))}
+        </div>
+      ))}
+    </motion.div>
+  );
+}
+
 export function AgentsDeployedScreen({ children }: { children: React.ReactNode }) {
   return (
     <>

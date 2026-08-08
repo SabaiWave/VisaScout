@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect, Suspense } from 'react';
-import { ChevronRight, Check, ChevronDown, Zap, Search, FileText } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { ChevronRight, Check, ChevronDown, Zap, Search, FileText, XCircle, AlertTriangle, Lock } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
@@ -9,7 +9,6 @@ import { PRICES } from '@/src/lib/stripe';
 import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { AgentsDeployedScreen, AgentRowList, AGENT_DISPLAY_ORDER } from '@/app/components/AgentsDeployedScreen';
 
 import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
@@ -86,21 +85,7 @@ const DEPTH_CONFIG = {
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
-// Used only for typing SSE event data — display model uses agentDisplayCount instead.
-type AgentStatusEntry = {
-  agent: string;
-  status: 'queued' | 'running' | 'complete' | 'failed';
-  confidence?: string;
-  sourceTier?: number;
-  durationMs?: number;
-  error?: string;
-};
-
-type Phase = 'idle' | 'generating' | 'redirecting' | 'error';
-
-// Minimum ms between sequential agent reveal steps. Prevents instant cascade when agents
-// complete near-simultaneously (DRY_RUN / fast pipeline). Matches paid flow stagger feel.
-const MIN_REVEAL_STAGGER_MS = 400;
+type Phase = 'idle' | 'redirecting' | 'error' | 'auth-prompt';
 
 // ─── Field error ───────────────────────────────────────────────────────────
 
@@ -149,20 +134,8 @@ function AppContent() {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('trigger') === 'quick' ? 'generating' :
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
   );
-  const [agentsVisible, setAgentsVisible] = useState(
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('trigger') === 'quick'
-  );
-  const agentsVisibleRef = useRef(false);
-  const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const pendingBriefIdRef = useRef<string | null>(null);
-  // Sequential reveal model: agents complete visually top-to-bottom, one at a time.
-  const [agentDisplayCount, setAgentDisplayCount] = useState(0);
-  const agentDisplayCountRef = useRef(0);
-  const lastRevealRef = useRef(0);       // timestamp of last reveal (for min-stagger enforcement)
-  const revealScheduledRef = useRef(-1); // which idx currently has a pending reveal timer (-1 = none)
   const [nationality, setNationality] = useState(() => searchParams.get('nationality') || '');
   const [destination, setDestination] = useState(() => searchParams.get('destination') || '');
   const [visaType, setVisaType] = useState('');
@@ -171,7 +144,6 @@ function AppContent() {
   const [depth, setDepth] = useState<'quick' | 'standard' | 'deep'>(
     depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard'
   );
-  const backendStatusRef = useRef<Map<string, 'complete' | 'failed'>>(new Map());
   const wasCancelled = searchParams.get('cancelled') === 'true';
   const devSim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
   const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
@@ -195,146 +167,16 @@ function AppContent() {
   const [textareaFocused, setTextareaFocused] = useState(false);
   const [inviteInputFocused, setInviteInputFocused] = useState(false);
 
-  // Advance display count by one step, respecting MIN_REVEAL_STAGGER_MS between reveals.
-  // Cascades automatically — after revealing idx N, immediately checks if N+1 is ready.
-  // Only one reveal timer is active at a time (guarded by revealScheduledRef).
-  function scheduleNextReveal() {
-    const idx = agentDisplayCountRef.current;
-    if (idx >= AGENT_DISPLAY_ORDER.length) return;
-    if (revealScheduledRef.current === idx) return; // already scheduled
-
-    const nextAgent = AGENT_DISPLAY_ORDER[idx];
-    if (!backendStatusRef.current.has(nextAgent)) return; // not done yet — will be called again on completion
-
-    revealScheduledRef.current = idx;
-    const now = Date.now();
-    const delay = Math.max(0, lastRevealRef.current + MIN_REVEAL_STAGGER_MS - now);
-
-    const t = setTimeout(() => {
-      revealScheduledRef.current = -1;
-      lastRevealRef.current = Date.now();
-      agentDisplayCountRef.current = idx + 1;
-      setAgentDisplayCount(idx + 1);
-      scheduleNextReveal(); // cascade to next agent if already completed
-    }, delay);
-    revealTimersRef.current.push(t);
-  }
-
-  useEffect(() => {
-    agentsVisibleRef.current = agentsVisible;
-    if (!agentsVisible) {
-      revealTimersRef.current.forEach(t => clearTimeout(t));
-      revealTimersRef.current = [];
-      revealScheduledRef.current = -1;
-      return;
-    }
-    // agentsVisible just became true — reset display state and start cascading reveals
-    agentDisplayCountRef.current = 0;
-    setAgentDisplayCount(0);
-    lastRevealRef.current = 0;
-    revealScheduledRef.current = -1;
-    scheduleNextReveal(); // cascade through any agents already completed (DRY_RUN / fast pipeline)
-  }, [agentsVisible]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // When all 6 agents have revealed, pause briefly so the resolver row stays green,
-  // then redirect to the brief page. Matches the paid flow redirect behavior.
-  useEffect(() => {
-    if (agentDisplayCount < AGENT_DISPLAY_ORDER.length) return;
-    if (!pendingBriefIdRef.current) return;
-    const id = pendingBriefIdRef.current;
-    pendingBriefIdRef.current = null;
-    const t = setTimeout(() => {
-      router.push(`/brief/${id}`);
-    }, 600);
-    revealTimersRef.current.push(t);
-  }, [agentDisplayCount]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function runBriefStream(params: { nationality: string; destination: string; visaType?: string; freeform: string; depth: 'quick' | 'standard' | 'deep'; simDegraded?: boolean; forceDryRun?: boolean }) {
-    setPhase('generating');
-    setAgentsVisible(true);
-    agentDisplayCountRef.current = 0;
-    setAgentDisplayCount(0);
-    lastRevealRef.current = 0;
-    revealScheduledRef.current = -1;
-    try {
-      const response = await fetch('/api/brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params),
-      });
-
-      if (!response.ok) {
-        let errMsg = `Something went wrong (${response.status}). Try again or contact support.`;
-        const ct = response.headers.get('content-type') ?? '';
-        if (ct.includes('application/json')) {
-          try {
-            const err = await response.json() as { error?: string };
-            if (err.error) errMsg = err.error;
-          } catch { /* fall through to generic message */ }
-        }
-        if (response.status === 429) setCapReached(true);
-        throw new Error(errMsg);
-      }
-
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split('\n\n');
-        buffer = parts.pop() ?? '';
-
-        for (const part of parts) {
-          const line = part.trim();
-          if (!line.startsWith('data: ')) continue;
-          let data: Record<string, unknown>;
-          try { data = JSON.parse(line.slice(6)) as Record<string, unknown>; } catch { continue; }
-
-          switch (data.type) {
-            case 'brief_id':
-              if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
-              break;
-            case 'status': {
-              const entry = data as AgentStatusEntry;
-              if (entry.status === 'complete' || entry.status === 'failed') {
-                backendStatusRef.current = new Map([...backendStatusRef.current, [entry.agent, entry.status]]);
-                if (agentsVisibleRef.current) scheduleNextReveal();
-              }
-              break;
-            }
-            case 'complete':
-              backendStatusRef.current = new Map([...backendStatusRef.current, ['conflictResolver', 'complete']]);
-              if (data.briefId) pendingBriefIdRef.current = data.briefId as string;
-              if (agentsVisibleRef.current) scheduleNextReveal();
-              break;
-            case 'error':
-              throw new Error(data.message as string);
-          }
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-      setPhase('error');
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitted(true);
     if (!nationality || !destination || !freeform) return;
 
     if (!isSignedIn) {
-      try {
-        sessionStorage.setItem('visascout_form_state', JSON.stringify({ nationality, destination, visaType, freeform, depth }));
-      } catch { /* ignore storage errors */ }
-      router.push('/sign-in');
+      setPhase('auth-prompt');
       return;
     }
 
-    backendStatusRef.current = new Map();
     setError(null);
     setCapReached(false);
 
@@ -350,8 +192,31 @@ function AppContent() {
             return;
           }
         }
-      } catch { /* network error — let the stream handle it */ }
+      } catch { /* network error — let the main request handle it */ }
       setIsCheckingCap(false);
+
+      try {
+        const res = await fetch('/api/brief', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nationality, destination, visaType: visaType || undefined, freeform, depth }),
+        });
+        if (!res.ok) {
+          let errMsg = `Something went wrong (${res.status}). Try again or contact support.`;
+          const ct = res.headers.get('content-type') ?? '';
+          if (ct.includes('application/json')) {
+            try { const err = await res.json() as { error?: string }; if (err.error) errMsg = err.error; } catch { /* fall through */ }
+          }
+          if (res.status === 429) setCapReached(true);
+          throw new Error(errMsg);
+        }
+        const { briefId } = await res.json() as { briefId: string };
+        router.push(`/brief/${briefId}?pending=1`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+        setPhase('error');
+      }
+      return;
     }
 
     if (depth === 'standard' || depth === 'deep') {
@@ -389,25 +254,35 @@ function AppContent() {
         return;
       }
     }
-
-    await runBriefStream({ nationality, destination, visaType: visaType || undefined, freeform, depth });
   }
 
   // Dev: auto-fire quick brief when navigated from /dev with ?trigger=quick
   useEffect(() => {
     if (devTrigger !== 'quick' || !isSignedIn || !isLoaded) return;
-    backendStatusRef.current = new Map();
     setError(null);
-    setSubmitted(false);
-    void runBriefStream({
-      nationality: 'American',
-      destination: 'Thailand',
-      visaType: 'Visa Exemption',
-      freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
-      depth: (depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard') as 'quick' | 'standard' | 'deep',
-      simDegraded: devSimDegraded,
-      forceDryRun: devForceDryRun,
-    });
+    void (async () => {
+      try {
+        const res = await fetch('/api/brief', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nationality: 'American',
+            destination: 'Thailand',
+            visaType: 'Visa Exemption',
+            freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
+            depth: (depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard') as 'quick' | 'standard' | 'deep',
+            simDegraded: devSimDegraded,
+            forceDryRun: devForceDryRun,
+          }),
+        });
+        if (!res.ok) throw new Error('Dev trigger failed');
+        const { briefId } = await res.json() as { briefId: string };
+        router.push(`/brief/${briefId}?pending=1`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Dev trigger failed');
+        setPhase('error');
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devTrigger, isSignedIn, isLoaded]);
 
@@ -446,16 +321,7 @@ function AppContent() {
   }, [isSignedIn, isLoaded]);
 
   function handleReset() {
-    revealTimersRef.current.forEach(t => clearTimeout(t));
-    revealTimersRef.current = [];
-    pendingBriefIdRef.current = null;
-    agentDisplayCountRef.current = 0;
-    lastRevealRef.current = 0;
-    revealScheduledRef.current = -1;
-    setAgentDisplayCount(0);
-    setAgentsVisible(false);
     setPhase('idle');
-    backendStatusRef.current = new Map();
     setError(null);
     setSubmitted(false);
     setNationality('');
@@ -465,12 +331,9 @@ function AppContent() {
     setDepth('standard');
   }
 
-  // handleReset kept for future use (e.g. error state "Try again" button)
-  void handleReset;
-
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
 
-  if (!isLoaded && phase !== 'generating' && phase !== 'redirecting') {
+  if (!isLoaded && phase !== 'redirecting') {
     return (
       <div className="flex items-center justify-center py-20">
         <div
@@ -487,21 +350,42 @@ function AppContent() {
     <main className="relative z-10 max-w-[1120px] mx-auto px-6 py-12">
       <>
           {/* ── Form ── */}
-          {(phase === 'idle' || phase === 'error' || phase === 'redirecting') && (
-            <div className="max-w-[560px] mx-auto">
+          {phase !== 'auth-prompt' && (
+            <div className="max-w-[860px] mx-auto">
               <SectionHeading as="h1" size="md" className="mb-4">Generate Brief</SectionHeading>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Tell us your situation. We'll cross-check official sources, recent policy changes, and real traveler reports. One clear brief with every claim sourced.
               </p>
 
+              {/* State: Off-Topic Rejection (amber) or Pipeline Error (red) */}
               {error && !capReached && (
-                <div
-                  className="mb-6 px-4 py-3 text-sm border"
-                  style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: 'var(--color-error)' }}
-                >
-                  {error}{' '}
-                  <a href="/contact" style={{ color: 'var(--color-error)', textDecoration: 'underline', opacity: 0.8 }}>Contact us</a>
-                </div>
+                error.includes("doesn't appear to be about visa") ? (
+                  <div className="mb-6" style={{ border: '1px solid rgba(var(--color-secondary-rgb),0.3)', background: 'rgba(var(--color-secondary-rgb),0.06)', padding: 16 }}>
+                    <div className="flex items-center gap-2 mb-1.5" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>
+                      <AlertTriangle size={16} aria-hidden="true" />
+                      Out of Scope
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                      VisaScout covers visa intelligence for the 20 supported destinations. Your query doesn&apos;t appear to be about visa requirements or entry rules.
+                    </p>
+                    <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                      Try a Different Query
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mb-6" style={{ border: '1px solid var(--color-error-border)', background: 'var(--color-error-bg)', padding: 16 }}>
+                    <div className="flex items-center gap-2 mb-1.5" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-error)' }}>
+                      <XCircle size={16} aria-hidden="true" />
+                      Generation Failed
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                      We hit an issue processing your request. Please try again.
+                    </p>
+                    <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                      Try Again
+                    </button>
+                  </div>
+                )
               )}
 
 
@@ -622,20 +506,39 @@ function AppContent() {
                   </div>
                 </div>
 
-                {capReached && (
-                  <div
-                    className="px-4 py-3 border"
-                    style={{ background: 'var(--color-amber-subtle)', borderColor: 'rgba(245,158,11,0.35)' }}
-                  >
-                    <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-amber)' }}>
-                      Daily free brief limit reached
+                {/* State: Free Cap Reached (Var A) — replaces CTA */}
+                {capReached ? (
+                  <div style={{ border: '1px solid rgba(var(--color-secondary-rgb),0.3)', background: 'rgba(var(--color-secondary-rgb),0.06)', padding: 20 }}>
+                    <div className="flex items-center gap-2 mb-1.5" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>
+                      Daily Free Brief Limit Reached
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                      You&apos;ve used your free brief today. Upgrade to run an Intel or Dossier brief.
                     </p>
-                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                      You&apos;ve used your free brief. Select {DEPTH_LABEL.standard} or {DEPTH_LABEL.deep} above to continue with unlimited research.
-                    </p>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const }}>
+                      <button type="button" onClick={() => { setDepth('standard'); setCapReached(false); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                        Run Intel · ${(PRICES.standard.amount / 100).toFixed(2)}
+                      </button>
+                      <button type="button" onClick={() => { setDepth('deep'); setCapReached(false); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                        Run Dossier · ${(PRICES.deep.amount / 100).toFixed(2)}
+                      </button>
+                    </div>
+                    {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(var(--color-secondary-rgb),0.18)' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Have an invite code?</span>
+                        <input
+                          type="text"
+                          value={inviteCode}
+                          onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
+                          placeholder="VS-XXXX-XXXX"
+                          aria-label="Invite code"
+                          style={{ flex: 1, minWidth: 0, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-strong)', padding: '7px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-primary)', outline: 'none' }}
+                        />
+                        <button type="button" onClick={() => setShowInviteInput(true)} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '6px 14px', cursor: 'pointer' }}>Apply</button>
+                      </div>
+                    )}
                   </div>
-                )}
-
+                ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <Button
                     type="submit"
@@ -710,27 +613,47 @@ function AppContent() {
                     ) : null
                   )}
                 </div>
+                )} {/* end capReached else */}
               </form>
             </div>
           )}
 
-          {/* ── Generating ── */}
-          {phase === 'generating' && (
-            <div className="max-w-[760px] mx-auto">
-              {agentsVisible && (
-                <AgentsDeployedScreen>
-                  <AgentRowList
-                    displayCount={agentDisplayCount}
-                    failedAgents={Object.fromEntries(
-                      Array.from(backendStatusRef.current.entries())
-                        .filter(([, v]) => v === 'failed')
-                        .map(([k]) => [k, true])
-                    )}
-                  />
-                </AgentsDeployedScreen>
-              )}
+          {/* ── Auth Prompt (Sign-In card) ── */}
+          {phase === 'auth-prompt' && (
+            <div className="max-w-[860px] mx-auto">
+              <div style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', padding: 40, textAlign: 'center' }}>
+                <Lock size={32} aria-hidden="true" style={{ color: 'var(--color-text-tertiary)', margin: '0 auto', display: 'block' }} />
+                <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1.1, letterSpacing: '0.01em', textTransform: 'uppercase', color: 'var(--color-text-primary)', marginTop: 16 }}>
+                  Sign In to Generate
+                </h4>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--color-text-secondary)', marginTop: 8, marginBottom: 24 }}>
+                  Your brief is saved to your account so you can access it anytime.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try { sessionStorage.setItem('visascout_form_state', JSON.stringify({ nationality, destination, visaType, freeform, depth })); } catch { /* ignore */ }
+                    router.push('/sign-in');
+                  }}
+                  style={{ width: '100%', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  Sign In
+                </button>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 16 }}>
+                  Don&apos;t have an account?{' '}
+                  <a href="/sign-up" style={{ color: 'var(--color-secondary)', textDecoration: 'none', fontWeight: 700 }}>Sign up</a>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setPhase('idle')}
+                  style={{ marginTop: 14, fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  Back to form
+                </button>
+              </div>
             </div>
           )}
+
         </>
     </main>
     </div>
