@@ -3,7 +3,7 @@
 
 import type { VisaBrief, VisaOption, ConflictReport, SourceCitation, AgentStatus } from '@/src/types/index';
 import { DEPTH_LABEL } from '@/src/lib/depth';
-import { AGENT_DISPLAY_LABELS } from '@/app/components/AgentsDeployedScreen';
+import { AGENT_DISPLAY_LABELS } from '@/app/components/agentLabels';
 
 export interface BriefDocumentMeta {
   nationality: string;

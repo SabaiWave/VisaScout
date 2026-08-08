@@ -3,29 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, Clock, Loader2 } from 'lucide-react';
+import { AGENT_DISPLAY_ORDER, AGENT_DISPLAY_LABELS, type AgentKey } from '@/app/components/agentLabels';
 
 // Shared "Agents Deployed" screen — used by quick flow (app/app/page.tsx) and paid flow (app/brief/pending/page.tsx).
 // Children = the motion.div wrapping the agent rows (implementation differs per flow).
 
-export const AGENT_DISPLAY_ORDER = [
-  'officialPolicy',
-  'recentChanges',
-  'communityIntel',
-  'entryRequirements',
-  'borderRun',
-  'conflictResolver',
-] as const;
-
-export type AgentKey = (typeof AGENT_DISPLAY_ORDER)[number];
-
-export const AGENT_DISPLAY_LABELS: Record<AgentKey, string> = {
-  officialPolicy:    'Official Policy',
-  recentChanges:     'Recent Changes',
-  communityIntel:    'Community Intel',
-  entryRequirements: 'Entry Requirements',
-  borderRun:         'Border Run',
-  conflictResolver:  'Conflict Resolver',
-};
+export { AGENT_DISPLAY_ORDER, AGENT_DISPLAY_LABELS };
+export type { AgentKey };
 
 const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
