@@ -7,7 +7,7 @@ import { Button } from '@/app/components/ui/Button';
 import { BriefCard } from './BriefCard';
 
 const GRID_CSS = `
-  .db-list { border: 1px solid var(--color-border); }
+  .db-list { /* border from vs-rail */ }
   .db-head {
     display: grid;
     grid-template-columns: minmax(120px,2fr) minmax(100px,1.5fr) 80px 110px 80px 100px;
@@ -17,25 +17,17 @@ const GRID_CSS = `
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg-elevated);
   }
-  .db-head-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-  }
+  /* .db-head-label font props from global .vs-mono-label */
   .db-row {
     display: grid;
     grid-template-columns: minmax(120px,2fr) minmax(100px,1.5fr) 80px 110px 80px 100px;
     align-items: center;
     height: 64px;
     padding: 0 16px;
-    border-bottom: 1px solid var(--color-border);
     cursor: pointer;
     transition: background 0.1s;
+    /* border-bottom from vs-row */
   }
-  .db-row:last-child { border-bottom: none; }
   .db-cell { display: flex; align-items: center; gap: 8px; overflow: hidden; }
   .db-dest {
     font-family: var(--font-mono);
@@ -56,17 +48,7 @@ const GRID_CSS = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .db-badge {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border: 1px solid;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
+  /* .db-badge → use global .vs-badge */
   .db-gen-dot {
     width: 6px;
     height: 6px;
@@ -108,18 +90,7 @@ const GRID_CSS = `
     transition: color 0.15s, opacity 0.15s;
   }
   .db-del:hover { color: rgba(239,68,68,0.8); }
-  .db-empty {
-    border: 1px dashed var(--color-border);
-    padding: 48px 24px;
-    text-align: center;
-  }
-  .db-empty-text {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--color-text-tertiary);
-    letter-spacing: 0.04em;
-    margin-bottom: 20px;
-  }
+  /* .db-empty / .db-empty-text → use global .vs-empty / .vs-empty-text */
   @keyframes db-pulse { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
   @media (max-width: 860px) {
     .db-head,
@@ -171,8 +142,8 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
       <style dangerouslySetInnerHTML={{ __html: GRID_CSS }} />
 
       {visible.length === 0 ? (
-        <div className="db-empty">
-          <p className="db-empty-text">No briefs yet. Generate your first.</p>
+        <div className="vs-empty">
+          <p className="vs-empty-text">No briefs yet. Generate your first.</p>
           <a
             href="/app"
             style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none', display: 'inline-block' }}
@@ -181,15 +152,15 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
           </a>
         </div>
       ) : (
-        <div className="db-list" style={{ marginBottom: '2rem' }}>
+        <div className="db-list vs-rail" style={{ marginBottom: '2rem' }}>
           {/* Header row */}
           <div className="db-head" role="row">
-            <span className="db-head-label">Destination</span>
+            <span className="db-head-label vs-mono-label">Destination</span>
             <span className="db-head-label db-head-label-hide-sm">Nationality</span>
             <span className="db-head-label db-head-label-hide-sm">Depth</span>
             <span className="db-head-label db-head-label-hide-md">Date</span>
-            <span className="db-head-label">Confidence</span>
-            <span className="db-head-label" style={{ textAlign: 'right' }}>Actions</span>
+            <span className="db-head-label vs-mono-label">Confidence</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'right' }}>Actions</span>
           </div>
 
           {visible.map((brief) => (

@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { ChevronRight, Check, ChevronDown, Zap, Search, FileText, XCircle, AlertTriangle, Lock } from 'lucide-react';
+import { ChevronRight, Check, Zap, Search, FileText, XCircle, AlertTriangle, Lock } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
 import { PRICES } from '@/src/lib/stripe';
 import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
-import { Button } from '@/app/components/ui/Button';
 import { SearchableCombobox } from '@/app/components/ui/SearchableCombobox';
 
 // ─── Static data ───────────────────────────────────────────────────────────
@@ -184,12 +183,16 @@ function AppContent() {
     devSim === 'invalid-code' ? 'Invalid invite code.' :
     devSim === 'code-already-used' ? 'This invite code has already been used.' : null
   );
+  const [inviteErrorType, setInviteErrorType] = useState<'invalid' | 'already-used' | null>(
+    devSim === 'invalid-code' ? 'invalid' :
+    devSim === 'code-already-used' ? 'already-used' : null
+  );
   const [capReached, setCapReached] = useState(devSim === 'free-cap');
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingCap, setIsCheckingCap] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [inviteAccess, setInviteAccess] = useState(false);
-  const [showInviteInput, setShowInviteInput] = useState(false);
+  const [showInviteInput, setShowInviteInput] = useState(devSim === 'invalid-code' || devSim === 'code-already-used');
   const [textareaFocused, setTextareaFocused] = useState(false);
   const [inviteInputFocused, setInviteInputFocused] = useState(false);
 
@@ -262,9 +265,10 @@ function AppContent() {
               if (err.error) errMsg = err.error;
             } catch { /* fall through */ }
           }
-          // Invite code errors: stay on form so user can fix the code
+          // Invite code errors: stay on form so user can fix or dismiss
           if (inviteCode.trim() && (res.status === 400 || res.status === 409)) {
             setInviteCodeError(errMsg);
+            setInviteErrorType(res.status === 409 ? 'already-used' : 'invalid');
             setPhase('idle');
             return;
           }
@@ -318,8 +322,8 @@ function AppContent() {
   }, [devSim]);
 
   useEffect(() => {
-    if (devSim !== 'invalid-code' && devSim !== 'code-already-used') return;
-    fetch('/api/debug/sim?event=invite.invalid-code').catch(() => {});
+    if (devSim === 'invalid-code') fetch('/api/debug/sim?event=invite.invalid-code').catch(() => {});
+    else if (devSim === 'code-already-used') fetch('/api/debug/sim?event=invite.already-used').catch(() => {});
   }, [devSim]);
 
   useEffect(() => {
@@ -378,16 +382,20 @@ function AppContent() {
     <div className="relative">
       {/* Page-scoped layout CSS — namespaced app-* to avoid collision */}
       <style dangerouslySetInnerHTML={{ __html: `
+        /* ── Layout ── */
         .app-work { display: grid; grid-template-columns: 1fr 430px; min-height: 100vh; }
-        .app-work-l { padding: 48px 48px 80px; }
+        .app-work-l { padding: 0 48px 80px 64px; }
         .app-work-r { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-left: 1px solid var(--color-border); background: var(--color-bg-elevated); display: flex; flex-direction: column; }
+
+        /* ── Right rail panels (untouched) ── */
         .app-rp { border: 1px solid var(--color-border); }
-        .app-rp-h { display: flex; align-items: center; padding: 9px 12px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); background: var(--color-bg-base); gap: 0; }
-        .app-rp-h i { flex: 1; height: 1px; background: var(--color-border); margin: 0 10px; font-style: normal; display: block; }
-        .app-rp-ct { font-size: 8px; color: var(--color-text-tertiary); font-weight: 400; white-space: nowrap; }
+        .app-rp + .app-rp { margin-top: 14px; }
+        .app-rp-h { display: flex; align-items: center; padding: 9px 12px; font-family: var(--font-mono); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: var(--color-secondary); border-bottom: 1px solid var(--color-border); background: var(--color-bg-base); gap: 0; white-space: nowrap; }
+        .app-rp-h i { flex: 1; height: 1px; background: linear-gradient(to right, rgba(200,120,10,0.34), transparent); margin: 0 10px; font-style: normal; display: block; min-width: 10px; }
+        .app-rp-ct { font-size: 8px; color: var(--color-text-tertiary); letter-spacing: 0.14em; font-weight: 400; white-space: nowrap; }
         .app-rp-b { padding: 12px; }
-        .app-bfield { display: grid; grid-template-columns: 80px 1fr; padding: 7px 0; border-bottom: 1px solid var(--color-border); }
-        .app-bfield:last-child { border-bottom: none; padding-bottom: 0; }
+        .app-bfield { display: grid; grid-template-columns: 80px 1fr; padding: 7px 0; /* border-bottom from vs-row */ }
+        .app-bfield:last-child { padding-bottom: 0; }
         .app-bkey { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-tertiary); padding-top: 2px; }
         .app-bval { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-primary); }
         .app-bval.pending { color: var(--color-text-tertiary); font-style: italic; }
@@ -413,17 +421,47 @@ function AppContent() {
         .app-outline li:nth-child(n+9) { opacity: 0.1; }
         .app-panel-panels { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
         .app-panel-foot { border-top: 1px solid var(--color-border); padding: 10px 14px; font-family: var(--font-mono); font-size: 9px; color: var(--color-text-tertiary); flex-shrink: 0; }
-        .app-grp { margin-bottom: 28px; }
-        .app-grp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border); }
-        .app-grp-n { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--color-text-tertiary); }
-        .app-grp-t { font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-secondary); flex: 1; }
-        .app-grp-req { font-family: var(--font-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-secondary); border: 1px solid var(--color-secondary); padding: 2px 6px; }
-        .app-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
         .app-sq { display: inline-block; width: 5px; height: 5px; background: var(--color-secondary); margin-right: 6px; vertical-align: middle; }
+
+        /* ── Form groups ── */
+        .app-grp { padding: 34px 0; border-bottom: 1px solid rgba(255,255,255,0.05); max-width: 900px; }
+        .app-grp:last-of-type { border-bottom: none; }
+        .app-grp-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+        .app-grp-n { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--color-secondary); }
+        .app-grp-t { font-family: var(--font-display); font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-text-primary); }
+        .app-grp-req { margin-left: auto; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-tertiary); border: 1px solid rgba(255,255,255,0.08); padding: 3px 7px; }
+        .app-pair { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+        /* ── Coord-row inputs ── */
+        .app-coord-row { display: flex; border: 1px solid var(--color-border-strong); transition: border-color 0.15s; }
+        .app-coord-row:focus-within { border-color: var(--color-secondary); }
+        .app-coord-row.error { border-color: var(--color-error); }
+        .app-coord-row.disabled { opacity: 0.44; }
+        .app-coord-pfx { background: var(--color-bg-base); color: var(--color-secondary); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 0 14px; display: flex; align-items: center; white-space: nowrap; flex-shrink: 0; width: 154px; border-right: 1px solid var(--color-border); }
+        .app-coord-combo { flex: 1; min-width: 0; background: var(--color-bg-overlay); }
+        .app-coord-combo > div { width: 100%; }
+        .app-coord-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-overlay) !important; font-family: var(--font-mono) !important; padding-left: 14px !important; font-size: 1rem !important; }
+        @media (min-width: 768px) { .app-coord-combo input { font-size: 13px !important; } }
+        .app-coord-combo > ul { background: var(--color-bg-base) !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; top: 100% !important; left: -155px !important; right: 0 !important; padding: 0 !important; box-shadow: none !important; }
+        .app-coord-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 11px !important; padding: 9px 14px !important; border-bottom: 1px solid rgba(255,255,255,0.04) !important; }
+        .app-coord-combo > ul li:last-child { border-bottom: none !important; }
+        .app-field-note { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--color-text-tertiary); margin-top: 8px; }
+        .app-freetext { font-size: 1rem; }
+        @media (min-width: 768px) { .app-freetext { font-size: 13px !important; line-height: 1.85 !important; } }
+
+        /* ── Depth strip ── */
+        .app-depth-strip { border: 1px solid var(--color-border); max-width: 900px; }
+        .app-tier { display: grid; grid-template-columns: 44px 150px 1fr auto; align-items: center; gap: 16px; width: 100%; padding: 16px 18px 16px 0; background: transparent; cursor: pointer; text-align: left; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; transition: background .14s; }
+        .app-tier:last-child { border-bottom: none; }
+        .app-tier:hover { background: var(--color-bg-elevated); }
+        .app-tier.on { background: var(--color-bg-elevated); }
+
         @media (max-width: 960px) {
           .app-work { grid-template-columns: 1fr; }
           .app-work-l { padding: 32px 24px 56px; }
           .app-work-r { position: static; height: auto; border-left: none; border-top: 1px solid var(--color-border); }
+          .app-tier { grid-template-columns: 44px 1fr auto; }
+          .app-tier > :nth-child(3) { display: none; }
         }
       `}} />
 
@@ -434,10 +472,13 @@ function AppContent() {
         {/* ── LEFT — form ── */}
         <div className="app-work-l">
 
-          <div style={{ marginBottom: 36 }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', marginBottom: 8 }}>Intake</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.25rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.01em', color: 'var(--color-text-primary)', lineHeight: 1.05, marginBottom: 10 }}>Generate Brief</h1>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--color-text-secondary)', maxWidth: 560 }}>
+          <div style={{ padding: '56px 0 34px', borderBottom: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 20 }}>
+              <span style={{ width: 26, height: 1, background: 'var(--color-secondary)', display: 'block', flexShrink: 0 }} />
+              Intake
+            </div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 5.6vw, 88px)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, letterSpacing: '-0.01em', color: 'var(--color-text-primary)', marginBottom: 24 }}>Generate Brief</h1>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.95, color: 'var(--color-text-secondary)', maxWidth: 560, paddingLeft: '1.4em', borderLeft: '1px solid var(--color-secondary)' }}>
               Tell us your situation. We&apos;ll cross-check official sources, recent policy changes, and real traveler reports. One clear brief with every claim sourced.
             </p>
           </div>
@@ -517,36 +558,40 @@ function AppContent() {
                 </div>
                 <div className="app-pair" style={{ marginBottom: 10 }}>
                   <div>
-                    <label style={LABEL_STYLE} htmlFor="nationality">Nationality <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                    <SearchableCombobox
-                      id="nationality"
-                      options={NATIONALITIES}
-                      value={nationality}
-                      onChange={setNationality}
-                      placeholder="Select…"
-                      hasError={submitted && !nationality}
-                    />
+                    <div className={`app-coord-row${submitted && !nationality ? ' error' : ''}`}>
+                      <div className="app-coord-pfx">Nationality <svg width="4" height="7" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ marginLeft: 5, flexShrink: 0 }}><path d="M0 0L5 4L0 8Z" /></svg></div>
+                      <SearchableCombobox
+                        className="app-coord-combo"
+                        id="nationality"
+                        options={NATIONALITIES}
+                        value={nationality}
+                        onChange={setNationality}
+                        placeholder="Select…"
+                        hasError={submitted && !nationality}
+                      />
+                    </div>
                     {submitted && !nationality && <FieldError />}
                   </div>
                   <div>
-                    <label style={LABEL_STYLE} htmlFor="destination">Destination <span style={{ color: 'var(--color-error)' }}>*</span></label>
-                    <SearchableCombobox
-                      id="destination"
-                      options={DESTINATIONS}
-                      value={destination}
-                      onChange={v => { setDestination(v); setVisaType(''); }}
-                      placeholder="Select…"
-                      hasError={submitted && !destination}
-                    />
+                    <div className={`app-coord-row${submitted && !destination ? ' error' : ''}`}>
+                      <div className="app-coord-pfx">Destination <svg width="4" height="7" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ marginLeft: 5, flexShrink: 0 }}><path d="M0 0L5 4L0 8Z" /></svg></div>
+                      <SearchableCombobox
+                        className="app-coord-combo"
+                        id="destination"
+                        options={DESTINATIONS}
+                        value={destination}
+                        onChange={v => { setDestination(v); setVisaType(''); }}
+                        placeholder="Select…"
+                        hasError={submitted && !destination}
+                      />
+                    </div>
                     {submitted && !destination && <FieldError />}
                   </div>
                 </div>
-                <div>
-                  <label style={LABEL_STYLE} htmlFor="visaType">
-                    Current Visa Type
-                    <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(optional)</span>
-                  </label>
+                <div className={`app-coord-row${!destination ? ' disabled' : ''}`} style={{ marginTop: 8 }}>
+                  <div className="app-coord-pfx">Current Visa <svg width="4" height="7" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ marginLeft: 5, flexShrink: 0 }}><path d="M0 0L5 4L0 8Z" /></svg></div>
                   <SearchableCombobox
+                    className="app-coord-combo"
                     id="visaType"
                     options={visaTypeOptions}
                     value={visaType}
@@ -555,6 +600,7 @@ function AppContent() {
                     disabled={!destination}
                   />
                 </div>
+                <p className="app-field-note">Current visa type is optional. Unlocks once a destination is set.</p>
               </div>
 
               {/* Group 02 — Situation */}
@@ -564,30 +610,33 @@ function AppContent() {
                   <span className="app-grp-t">Describe Your Situation</span>
                   <span className="app-grp-req">Required</span>
                 </div>
-                <textarea
-                  id="freeform"
-                  value={freeform}
-                  onChange={e => setFreeform(e.target.value)}
-                  onFocus={() => setTextareaFocused(true)}
-                  onBlur={() => setTextareaFocused(false)}
-                  rows={5}
-                  maxLength={2000}
-                  aria-invalid={submitted && !freeform ? true : undefined}
-                  aria-required="true"
-                  placeholder="I'm arriving in Thailand on March 15 and staying about 28 days. I work remotely for a US company and I'm thinking about a quick border run to Malaysia to reset my stay."
-                  style={{
-                    ...INPUT_STYLE,
-                    resize: 'vertical',
-                    lineHeight: 1.75,
-                    minHeight: 130,
-                    border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`,
-                    boxShadow: textareaFocused ? '0 0 0 3px rgba(var(--color-secondary-rgb),0.18)' : 'none',
-                    transition: 'border-color 0.15s, box-shadow 0.15s',
-                  }}
-                />
-                <p className="text-xs mt-1 text-right" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                  {freeform.length}/2000
-                </p>
+                <div style={{ border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`, transition: 'border-color 0.15s' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-base)', padding: '0 14px', height: 30, borderBottom: '1px solid var(--color-border)' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Free Text · Normalized on Submit</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: freeform.length > 1800 ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}>{freeform.length} / 2000</span>
+                  </div>
+                  <textarea
+                    id="freeform"
+                    className="app-freetext"
+                    value={freeform}
+                    onChange={e => setFreeform(e.target.value)}
+                    onFocus={() => setTextareaFocused(true)}
+                    onBlur={() => setTextareaFocused(false)}
+                    rows={5}
+                    maxLength={2000}
+                    aria-invalid={submitted && !freeform ? true : undefined}
+                    aria-required="true"
+                    placeholder="I'm arriving in Thailand on March 15 and staying about 28 days. I work remotely for a US company and I'm thinking about a quick border run to Malaysia to reset my stay."
+                    style={{
+                      display: 'block', width: '100%', minHeight: 132, resize: 'vertical',
+                      background: 'var(--color-bg-elevated)', border: 'none',
+                      padding: '16px 14px', fontFamily: 'var(--font-mono)',
+                      fontSize: '1rem', lineHeight: 1.85,
+                      color: 'var(--color-text-primary)', outline: 'none',
+                      touchAction: 'manipulation',
+                    }}
+                  />
+                </div>
                 {submitted && !freeform && <FieldError />}
               </div>
 
@@ -598,39 +647,39 @@ function AppContent() {
                   <span className="app-grp-t">Research Depth</span>
                   <span className="app-grp-req">Required</span>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {BRIEF_DEPTHS.map(d => {
+                <div className="app-depth-strip">
+                  {BRIEF_DEPTHS.map((d, i) => {
                     const cfg = DEPTH_CONFIG[d];
-                    const Icon = cfg.icon;
                     const selected = depth === d;
+                    const isLast = i === BRIEF_DEPTHS.length - 1;
                     return (
                       <button
                         key={d}
                         type="button"
                         aria-pressed={selected}
                         onClick={() => setDepth(d)}
+                        className={`app-tier${selected ? ' on' : ''}`}
                         style={{
-                          padding: '14px 12px',
-                          border: `1px solid ${selected ? `rgba(${cfg.colorRgb},0.5)` : 'var(--color-border-strong)'}`,
-                          background: selected ? `rgba(${cfg.colorRgb},0.07)` : 'var(--color-bg-elevated)',
-                          boxShadow: selected ? `0 0 0 3px rgba(${cfg.colorRgb},0.15)` : 'none',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          outline: 'none',
-                          transition: 'border-color 0.15s, background 0.15s, box-shadow 0.15s',
+                          borderLeft: `3px solid ${selected ? cfg.color : 'transparent'}`,
+                          borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                          borderTop: 'none', borderRight: 'none',
                         }}
                       >
-                        <div style={{ marginBottom: 10 }}>
-                          <Icon size={16} aria-hidden="true" style={{ color: selected ? cfg.color : 'var(--color-text-tertiary)' }} />
+                        {/* Checkbox */}
+                        <div style={{ display: 'grid', placeItems: 'center' }}>
+                          <div style={{ width: 10, height: 10, border: `1px solid ${selected ? cfg.color : 'var(--color-border-strong)'}`, background: selected ? cfg.color : 'transparent' }} />
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: selected ? cfg.color : 'var(--color-text-primary)', marginBottom: 4 }}>
+                        {/* Name */}
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, color: selected ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}>
                           {cfg.label}
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700, color: selected ? cfg.color : 'var(--color-text-tertiary)', marginBottom: 8 }}>
-                          {cfg.price}
-                        </div>
-                        <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', lineHeight: 1.45 }}>
+                        {/* Description */}
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: selected ? 'var(--color-text-secondary)' : 'var(--color-text-tertiary)', minWidth: 0 }}>
                           {cfg.description}
+                        </div>
+                        {/* Price */}
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: selected ? cfg.color : 'var(--color-text-tertiary)', minWidth: 62, textAlign: 'right' }}>
+                          {cfg.price}
                         </div>
                       </button>
                     );
@@ -661,30 +710,30 @@ function AppContent() {
                       <input
                         type="text"
                         value={inviteCode}
-                        onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
+                        onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); setInviteErrorType(null); }}
                         placeholder="VS-XXXX-XXXX"
                         aria-label="Invite code"
-                        style={{ flex: 1, minWidth: 0, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-strong)', padding: '7px 12px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-primary)', outline: 'none' }}
+                        className="app-freetext"
+                        style={{ flex: 1, minWidth: 0, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-strong)', padding: '7px 12px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', outline: 'none' }}
                       />
                       <button type="button" onClick={() => setShowInviteInput(true)} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '6px 14px', cursor: 'pointer' }}>Apply</button>
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <Button
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: 900, paddingTop: 34 }}>
+                  <button
                     type="submit"
                     disabled={phase === 'redirecting' || isCheckingCap}
-                    className="w-full py-3"
-                    style={
-                      inviteAccess
-                        ? {}
-                        : depth === 'quick'
-                          ? { background: '#10b981', color: '#0a0a0a', boxShadow: '0 0 0 1px rgba(16,185,129,0.4), 0 0 24px rgba(16,185,129,0.2)' }
-                          : depth === 'standard'
-                            ? { background: 'var(--color-depth-standard)', color: 'var(--color-neutral)', boxShadow: '0 0 0 1px rgba(var(--color-secondary-rgb),0.4), 0 0 24px rgba(var(--color-secondary-rgb),0.2)' }
-                            : { background: 'var(--color-depth-deep)', color: 'var(--color-neutral)' }
-                    }
+                    style={{
+                      width: '100%', border: 'none', cursor: phase === 'redirecting' || isCheckingCap ? 'not-allowed' : 'pointer',
+                      opacity: phase === 'redirecting' || isCheckingCap ? 0.65 : 1,
+                      background: inviteAccess ? 'var(--color-secondary)' : depth === 'quick' ? '#10b981' : depth === 'standard' ? 'var(--color-secondary)' : 'var(--color-depth-deep)',
+                      color: depth === 'deep' ? '#0a0a0a' : '#060c12',
+                      fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+                      letterSpacing: '0.18em', textTransform: 'uppercase', padding: 19,
+                      transition: 'opacity 0.15s',
+                    }}
                   >
                     {isCheckingCap
                       ? 'Checking…'
@@ -697,7 +746,7 @@ function AppContent() {
                             : depth === 'standard'
                               ? `Generate Brief · $${(PRICES.standard.amount / 100).toFixed(2)}`
                               : `Generate Brief · $${(PRICES.deep.amount / 100).toFixed(2)}`}
-                  </Button>
+                  </button>
 
                   {process.env.NEXT_PUBLIC_ENABLE_INVITE_CODES === 'true' && (
                     inviteAccess ? (
@@ -713,31 +762,59 @@ function AppContent() {
                           style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
                         >
                           Have an invite code?
-                          <ChevronDown
-                            size={11}
-                            aria-hidden="true"
-                            style={{ transform: showInviteInput ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}
-                          />
+                          <svg width="7" height="4" viewBox="0 0 8 5" fill="currentColor" aria-hidden="true" style={{ transform: showInviteInput ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s', flexShrink: 0 }}><path d="M0 0L8 0L4 5Z" /></svg>
                         </button>
                         {showInviteInput && (
                           <div style={{ marginTop: 8 }}>
                             <input
                               type="text"
                               value={inviteCode}
-                              onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); }}
+                              onChange={e => { setInviteCode(e.target.value); setInviteCodeError(null); setInviteErrorType(null); }}
                               placeholder="Enter invite code"
                               onFocus={() => setInviteInputFocused(true)}
                               onBlur={() => setInviteInputFocused(false)}
+                              className="app-freetext"
                               style={{
                                 ...INPUT_STYLE,
+                                fontFamily: 'var(--font-mono)',
                                 border: `1px solid ${inviteCodeError ? 'var(--color-error)' : inviteInputFocused ? 'var(--color-secondary)' : 'var(--color-border-strong)'}`,
                                 boxShadow: inviteInputFocused && !inviteCodeError ? '0 0 0 3px rgba(var(--color-secondary-rgb),0.18)' : 'none',
                               }}
                             />
-                            {inviteCodeError && (
-                              <p className="mt-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1" style={{ color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
-                                <ChevronRight size={10} aria-hidden="true" /> {inviteCodeError}
-                              </p>
+                            {inviteErrorType === 'invalid' && (
+                              <div style={{ marginTop: 8, border: '1px solid rgba(200,120,10,0.3)', background: 'rgba(200,120,10,0.06)', padding: '12px 14px' }}>
+                                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
+                                  <AlertTriangle size={14} aria-hidden="true" />
+                                  Invalid Invite Code
+                                </div>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
+                                  That code wasn't recognized. Check for typos and try again.
+                                </p>
+                                <button type="button" onClick={() => { setInviteCode(''); setInviteCodeError(null); setInviteErrorType(null); }}
+                                  style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '5px 12px', cursor: 'pointer' }}>
+                                  Try a Different Code
+                                </button>
+                              </div>
+                            )}
+                            {inviteErrorType === 'already-used' && (
+                              <div style={{ marginTop: 8, border: '1px solid var(--color-error-border)', background: 'var(--color-error-bg)', padding: '12px 14px' }}>
+                                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-error)', marginBottom: 6 }}>
+                                  <XCircle size={14} aria-hidden="true" />
+                                  Code Already Used
+                                </div>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
+                                  This invite code has already been redeemed. Contact support if you think this is a mistake.
+                                </p>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
+                                  <a href="/contact" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-error)', border: '1px solid var(--color-error-border)', padding: '5px 12px', textDecoration: 'none', cursor: 'pointer' }}>
+                                    Contact Support
+                                  </a>
+                                  <button type="button" onClick={() => { setInviteCode(''); setInviteCodeError(null); setInviteErrorType(null); setShowInviteInput(false); }}
+                                    style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '5px 12px', cursor: 'pointer' }}>
+                                    Continue Without Code
+                                  </button>
+                                </div>
+                              </div>
                             )}
                           </div>
                         )}
@@ -764,19 +841,19 @@ function AppContent() {
                 Route<i></i><span className="app-rp-ct">{routeCompleted}/2 Set</span>
               </div>
               <div className="app-rp-b">
-                <div className="app-bfield">
+                <div className="app-bfield vs-row">
                   <div className="app-bkey">Passport</div>
                   <div className={`app-bval${nationality ? '' : ' pending'}`}>{nationality || 'Not set'}</div>
                 </div>
-                <div className="app-bfield">
+                <div className="app-bfield vs-row">
                   <div className="app-bkey">Destination</div>
                   <div className={`app-bval${destination ? '' : ' pending'}`}>{destination || 'Not set'}</div>
                 </div>
-                <div className="app-bfield">
+                <div className="app-bfield vs-row">
                   <div className="app-bkey">Status</div>
                   <div className={`app-bval${visaType ? '' : ' pending'}`}>{visaType || 'Unspecified'}</div>
                 </div>
-                <div className="app-bfield">
+                <div className="app-bfield vs-row">
                   <div className="app-bkey">Depth</div>
                   <div className="app-bval hi">{depthCfg.label} &middot; {depthCfg.price}</div>
                 </div>

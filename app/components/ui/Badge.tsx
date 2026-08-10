@@ -1,17 +1,6 @@
 import { DEPTH_LABEL } from '@/src/lib/depth';
 
-const badgeBase: React.CSSProperties = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: '0.7rem',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  padding: '2px 8px',
-  borderRadius: '4px',
-  display: 'inline-flex',
-  alignItems: 'center',
-  flexShrink: 0,
-};
+// font/spacing/shape via global .vs-badge — only color/bg vary per variant
 
 // ─── Confidence ──────────────────────────────────────────────────────────────
 
@@ -35,7 +24,7 @@ export function ConfidenceBadge({
   prefixed?: boolean;
 }) {
   return (
-    <span style={{ ...badgeBase, ...confidenceMap[level] }}>
+    <span className="vs-badge" style={{ flexShrink: 0, ...confidenceMap[level] }}>
       {prefixed ? confidenceLabelMap[level] : level.toUpperCase()}
     </span>
   );
@@ -51,7 +40,7 @@ const depthMap = {
 
 export function DepthBadge({ depth }: { depth: 'quick' | 'standard' | 'deep' }) {
   const style = depthMap[depth] ?? depthMap.quick;
-  return <span style={{ ...badgeBase, ...style }}>{DEPTH_LABEL[depth]}</span>;
+  return <span className="vs-badge" style={{ flexShrink: 0, ...style }}>{DEPTH_LABEL[depth]}</span>;
 }
 
 // ─── Tier ────────────────────────────────────────────────────────────────────
@@ -60,8 +49,9 @@ export function TierLabel({ tier }: { tier: 1 | 2 | 3 | 4 }) {
   const isTop = tier <= 1;
   return (
     <span
+      className="vs-badge"
       style={{
-        ...badgeBase,
+        flexShrink: 0,
         background: isTop ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
         color: isTop ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
         fontWeight: isTop ? 600 : 400,

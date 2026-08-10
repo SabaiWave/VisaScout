@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useId, KeyboardEvent } from 'react';
+import { Check } from 'lucide-react';
 
 interface SearchableComboboxProps {
   options: string[];
@@ -10,6 +11,7 @@ interface SearchableComboboxProps {
   disabled?: boolean;
   hasError?: boolean;
   id?: string;
+  className?: string;
 }
 
 export function SearchableCombobox({
@@ -20,6 +22,7 @@ export function SearchableCombobox({
   disabled = false,
   hasError = false,
   id,
+  className,
 }: SearchableComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -109,7 +112,7 @@ export function SearchableCombobox({
     : 'none';
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
+    <div ref={containerRef} className={className} style={{ position: 'relative', width: '100%' }}>
       {/* Trigger input */}
       <div style={{ position: 'relative' }}>
         <input
@@ -154,9 +157,7 @@ export function SearchableCombobox({
             display: 'flex',
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          <svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor" aria-hidden="true"><path d="M0 0L8 0L4 5Z" /></svg>
         </span>
       </div>
 
@@ -228,9 +229,7 @@ export function SearchableCombobox({
               >
                 {option}
                 {option === value && (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-secondary)', flexShrink: 0 }}>
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                  <Check size={12} strokeWidth={2.5} style={{ color: 'var(--color-secondary)', flexShrink: 0 }} />
                 )}
               </li>
             ))

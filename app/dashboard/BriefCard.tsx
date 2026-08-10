@@ -69,7 +69,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
       />
 
       <div
-        className="db-row"
+        className="db-row vs-row"
         style={{ background: hovered ? 'var(--color-bg-elevated)' : 'transparent' }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -93,7 +93,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
         {/* Depth badge */}
         <div className="db-cell db-cell-badge db-cell-hide-sm">
-          <span className="db-badge" style={{ color: depthColor, borderColor: depthColor }}>
+          <span className="vs-badge vs-badge-outline" style={{ color: depthColor, borderColor: depthColor }}>
             {brief.depth.toUpperCase()}
           </span>
         </div>
@@ -106,9 +106,9 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         {/* Confidence */}
         <div className="db-cell db-cell-badge">
           {isGenerating ? (
-            <span className="db-badge" style={{ color: '#c8780a', borderColor: '#c8780a' }}>RUNNING</span>
+            <span className="vs-badge vs-badge-outline" style={{ color: '#c8780a', borderColor: '#c8780a' }}>RUNNING</span>
           ) : brief.overall_confidence ? (
-            <span className="db-badge" style={{ color: confColor, borderColor: confColor }}>
+            <span className="vs-badge vs-badge-outline" style={{ color: confColor, borderColor: confColor }}>
               {brief.overall_confidence.toUpperCase()}
             </span>
           ) : (

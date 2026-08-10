@@ -91,53 +91,8 @@ export default function DevPage() {
     }
   }
 
-  const NAV_LINKS = [
-    { href: '#s-flows',  label: 'Brief Flows' },
-    { href: '#s-states', label: 'States' },
-    { href: '#s-events', label: 'Log + Events' },
-    { href: '#s-debug',  label: 'Debug API' },
-    { href: '#s-users',  label: 'User Mgmt' },
-    { href: '#s-nav',    label: 'Page Nav' },
-  ];
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
-      <aside style={{
-        width: 200, flexShrink: 0,
-        borderRight: '1px solid var(--color-border)',
-        position: 'sticky', top: 0, height: '100vh',
-        display: 'flex', flexDirection: 'column',
-        background: 'var(--color-bg-subtle)',
-      }}>
-        <div style={{ padding: '28px 20px 20px', fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 20, color: 'var(--color-text-primary)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-          Dev
-        </div>
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, padding: '0 12px', overflowY: 'auto' }}>
-          {NAV_LINKS.map(item => (
-            <a
-              key={item.href}
-              href={item.href}
-              style={{ display: 'block', padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', textDecoration: 'none', borderRadius: 4 }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-secondary)'; e.currentTarget.style.background = 'rgba(200,120,10,0.08)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-tertiary)', wordBreak: 'break-all', marginBottom: 6 }}>
-            {userId ?? '—'}
-          </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-secondary)', background: 'rgba(200,120,10,0.15)', border: '1px solid rgba(200,120,10,0.3)', padding: '2px 6px' }}>
-            DEV
-          </span>
-        </div>
-      </aside>
-
-      {/* Content */}
-      <main style={{ flex: 1, minWidth: 0, padding: '32px 40px', maxWidth: 960 }}>
+    <main style={{ padding: '32px 40px', maxWidth: 960 }}>
         <SectionHeading size="md" as="h1" subtitle="Admin gated" className="mb-8">DEV TOOLS</SectionHeading>
 
         {/* Brief Flows */}
@@ -533,7 +488,6 @@ export default function DevPage() {
             <DevButton label="Terms ↗"        href="/terms"                   newTab />
           </DevGrid>
         </DevSection>
-      </main>
-    </div>
+    </main>
   );
 }

@@ -2,6 +2,11 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+const NavTriangle = () => (
+  <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+    <path d="M0 0L5 4L0 8Z" />
+  </svg>
+);
 
 const MAX_WAIT_MS    = 6 * 60 * 1000; // 6 min → timeout state
 const HANDOFF_MS     = 90 * 1000;     // 90s → handoff message
@@ -70,14 +75,16 @@ const ESCAPE: React.CSSProperties = {
   borderBottom: '1px solid rgba(200,120,10,0.4)', paddingBottom: 2, marginBottom: 40,
 };
 const BTN_OUT: React.CSSProperties = {
-  display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
+  display: 'inline-flex', alignItems: 'center', gap: 8,
+  fontFamily: 'var(--font-mono)', fontSize: 11,
   fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
   color: 'var(--color-secondary)', background: 'transparent',
   border: '1px solid var(--color-secondary)', padding: '11px 22px',
   textDecoration: 'none', cursor: 'pointer',
 };
 const BTN_GHOST: React.CSSProperties = {
-  display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
+  display: 'inline-flex', alignItems: 'center', gap: 8,
+  fontFamily: 'var(--font-mono)', fontSize: 11,
   fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase',
   color: 'var(--color-text-secondary)', background: 'transparent',
   border: '1px solid var(--color-border-strong)', padding: '11px 22px',
@@ -170,7 +177,7 @@ function PendingContent() {
           and what travelers are actually seeing on the ground. Your brief is generating
           in the background. Feel free to head to My Briefs and check back.
         </p>
-        <a style={ESCAPE} href="/dashboard">Go to My Briefs &rarr;</a>
+        <a style={{ ...ESCAPE, display: 'inline-flex', alignItems: 'center', gap: 6 }} href="/dashboard">Go to My Briefs <NavTriangle /></a>
         <AgentCard
           label="5 agents · parallel"
           statuses={['running', 'running', 'running', 'running', 'running', 'queued']}
@@ -192,7 +199,7 @@ function PendingContent() {
           We&apos;ll show your brief there as soon as it&apos;s ready.
         </p>
         <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
-          <a style={BTN_OUT} href="/dashboard">Go to My Briefs &rarr;</a>
+          <a style={BTN_OUT} href="/dashboard">Go to My Briefs <NavTriangle /></a>
         </div>
         <AgentCard
           label="6 agents · parallel"
@@ -218,7 +225,7 @@ function PendingContent() {
           If it hasn&apos;t appeared after 10 minutes, contact support.
         </p>
         <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
-          <a style={BTN_OUT} href="/dashboard">Go to My Briefs &rarr;</a>
+          <a style={BTN_OUT} href="/dashboard">Go to My Briefs <NavTriangle /></a>
           <a style={BTN_GHOST} href={contactHref}>Contact Support</a>
         </div>
         <AgentCard
@@ -247,7 +254,7 @@ function PendingContent() {
         </div>
       )}
       <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
-        <a style={BTN_OUT} href={contactHref}>Contact Support &rarr;</a>
+        <a style={BTN_OUT} href={contactHref}>Contact Support <NavTriangle /></a>
       </div>
       <AgentCard
         label="halted"

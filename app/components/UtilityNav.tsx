@@ -9,17 +9,9 @@ import { Wordmark } from './ui/Wordmark';
 import { navLinkStyle, ctaLinkStyle } from './ui/navLinkStyles';
 import { NavDrawer, HamburgerButton, navDrawerSecondaryStyle, navDrawerPrimaryStyle } from './ui/MobileDrawer';
 
-interface UtilityNavProps {
-  /** Matches the page's own <main> max-width so the nav's inner row aligns
-   * with the content below it. */
-  maxWidth?: string;
-}
-
 // Landing-nav-derived top bar for legal/utility pages (How It Works, Terms,
-// Privacy, Contact) — same glyph + auth-aware links as LandingNav, minus the
-// landing-specific nav links and the asymmetric axis-grid (these pages stay
-// single-column, centered).
-export function UtilityNav({ maxWidth = '860px' }: UtilityNavProps) {
+// Privacy, Contact) — same glyph + auth-aware links as LandingNav, full-width.
+export function UtilityNav() {
   const { isSignedIn, isLoaded } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -29,7 +21,7 @@ export function UtilityNav({ maxWidth = '860px' }: UtilityNavProps) {
         className="relative z-10 border-b px-6 py-4"
         style={{ borderColor: 'var(--color-border-muted)', background: 'rgba(6,12,18,0.94)', backdropFilter: 'blur(10px)' }}
       >
-        <div className="mx-auto flex items-center justify-between" style={{ maxWidth }}>
+        <div className="flex items-center justify-between" style={{ padding: '0 8px' }}>
           <Link href="/" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
             <BrandGlyph size={18} />
             <Wordmark noLink />

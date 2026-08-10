@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Archive, ShieldCheck, Terminal, Zap } from 'lucide-react';
-import { Wordmark } from './ui/Wordmark';
+import { useClerk } from '@clerk/nextjs';
 import { BrandGlyph } from './ui/BrandGlyph';
+import { Wordmark } from './ui/Wordmark';
 import { SidebarAccount } from './SidebarAccount';
 
 interface AppSidebarProps {
@@ -13,110 +13,175 @@ interface AppSidebarProps {
   isSignedIn?: boolean;
 }
 
+const NAV_ITEM: React.CSSProperties = {
+  position: 'relative',
+  display: 'block',
+  padding: '11px 18px',
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  fontFamily: 'var(--font-mono)',
+  textDecoration: 'none',
+  color: 'var(--color-text-tertiary)',
+  background: 'transparent',
+  borderLeft: '2px solid transparent',
+  cursor: 'pointer',
+  width: '100%',
+  textAlign: 'left' as const,
+};
+
+const NAV_ITEM_ACTIVE: React.CSSProperties = {
+  ...NAV_ITEM,
+  color: 'var(--color-secondary)',
+  background: 'var(--color-bg-elevated)',
+  borderLeft: '2px solid var(--color-secondary)',
+};
+
 export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarProps) {
   const pathname = usePathname();
+  const { signOut } = useClerk();
 
-  const navItems = [
-    ...(isSignedIn ? [{ href: '/dashboard', label: 'MY BRIEFS', icon: Archive }] : []),
-    { href: '/app', label: 'GENERATE BRIEF', icon: Zap },
-    ...(isAdmin ? [{ href: '/admin', label: 'ADMIN', icon: ShieldCheck }] : []),
-    ...(showDev ? [{ href: '/dev', label: 'DEV', icon: Terminal }] : []),
+  const userItems = [
+    ...(isSignedIn ? [{ href: '/dashboard', label: 'MY BRIEFS' }] : []),
+    { href: '/app', label: 'GENERATE BRIEF' },
   ];
+
+  const systemItems = [
+    ...(isAdmin ? [{ href: '/admin', label: 'ADMIN' }] : []),
+    ...(showDev ? [{ href: '/dev', label: 'DEV' }] : []),
+  ];
+
+  function NavLink({ href, label }: { href: string; label: string }) {
+    const active = pathname === href || (href !== '/app' && pathname.startsWith(href + '/'));
+    return (
+      <Link
+        href={href}
+        style={active ? NAV_ITEM_ACTIVE : NAV_ITEM}
+        onMouseOver={e => {
+          if (!active) {
+            e.currentTarget.style.color = 'var(--color-text-secondary)';
+            e.currentTarget.style.background = 'var(--color-bg-elevated)';
+          }
+        }}
+        onMouseOut={e => {
+          if (!active) {
+            e.currentTarget.style.color = 'var(--color-text-tertiary)';
+            e.currentTarget.style.background = 'transparent';
+          }
+        }}
+      >
+        {label}
+      </Link>
+    );
+  }
+
+  function NavButton({ label, onClick }: { label: string; onClick: () => void }) {
+    return (
+      <button
+        onClick={onClick}
+        style={{ ...NAV_ITEM, border: 'none' }}
+        onMouseOver={e => {
+          e.currentTarget.style.color = 'var(--color-text-secondary)';
+          e.currentTarget.style.background = 'var(--color-bg-elevated)';
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.color = 'var(--color-text-tertiary)';
+          e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
 
   return (
     <aside
       className="hidden lg:flex"
       style={{
-        width: '240px',
+        width: '200px',
         flexShrink: 0,
         position: 'sticky',
         top: 0,
         height: '100vh',
         overflowY: 'auto',
         background: 'var(--color-bg-subtle)',
-        borderRight: '1px solid var(--color-border-muted)',
+        borderRight: '1px solid var(--color-border)',
         flexDirection: 'column',
-        padding: '2rem 1rem 1.5rem',
-        gap: '0.25rem',
       }}
     >
-      <Link href="/" className="flex items-center gap-2.5 px-2 mb-6" style={{ textDecoration: 'none' }}>
-        <BrandGlyph size={18} />
-        <Wordmark noLink />
-      </Link>
+      {/* Header */}
+      <div style={{ padding: '20px 18px 18px', borderBottom: '1px solid var(--color-border)' }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <BrandGlyph size={16} />
+          <Wordmark noLink />
+        </Link>
+      </div>
 
-      {navItems.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href;
-        return (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px 8px 9px',
-              borderLeft: `3px solid ${active ? 'var(--color-amber)' : 'transparent'}`,
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: active ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
-              background: active ? 'var(--color-secondary-subtle)' : 'transparent',
-              textDecoration: 'none',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-            }}
-          >
-            <Icon size={14} />
-            {label}
-          </Link>
-        );
-      })}
-
-      <div style={{ flex: 1 }} />
-      {isSignedIn ? (
-        <SidebarAccount />
-      ) : (
-        <div style={{ borderTop: '1px solid var(--color-border-muted)', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Link
-            href="/sign-in"
-            style={{
-              display: 'block',
-              padding: '8px 12px',
-              borderRadius: '0px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              textAlign: 'center',
-            }}
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/sign-up"
-            style={{
-              display: 'block',
-              padding: '8px 12px',
-              borderRadius: '0px',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: 'var(--color-secondary-light)',
-              background: 'var(--color-secondary-subtle)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              textAlign: 'center',
-            }}
-          >
-            Get Started
-          </Link>
+      {/* Nav */}
+      <div style={{ padding: '14px 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Primary items */}
+        <div>
+          {userItems.map(item => <NavLink key={item.href} {...item} />)}
         </div>
-      )}
+
+        {/* System group */}
+        {systemItems.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{
+              padding: '10px 18px 8px',
+              fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+              textTransform: 'uppercase', fontFamily: 'var(--font-mono)',
+              color: 'var(--color-text-tertiary)', opacity: 0.7,
+            }}>
+              System
+            </div>
+            {systemItems.map(item => <NavLink key={item.href} {...item} />)}
+          </div>
+        )}
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Account items — anchored to nav bottom */}
+        {isSignedIn && (
+          <div style={{ borderTop: '1px solid var(--color-border-muted)', paddingTop: 4 }}>
+            <NavLink href="/dashboard/account" label="Account Settings" />
+            <NavButton label="Sign Out" onClick={() => signOut({ redirectUrl: '/' })} />
+          </div>
+        )}
+
+        {!isSignedIn && (
+          <div style={{ borderTop: '1px solid var(--color-border)', padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <Link
+              href="/sign-in"
+              style={{
+                display: 'block', padding: '8px 0',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.08em',
+                color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase', textDecoration: 'none', textAlign: 'center',
+              }}
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              style={{
+                display: 'block', padding: '8px 0',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.08em',
+                color: 'var(--color-secondary)', background: 'var(--color-bg-elevated)',
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase', textDecoration: 'none', textAlign: 'center',
+              }}
+            >
+              Get Started
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Identity footer */}
+      {isSignedIn && <SidebarAccount isAdmin={isAdmin} />}
     </aside>
   );
 }

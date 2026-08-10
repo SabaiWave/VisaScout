@@ -263,9 +263,10 @@ export function TweaksPanel() {
   );
 }
 
-// Re-renders whenever the parent re-renders (any token change) — no local
-// state or effect needed, this is a pure derivation of current DOM state.
 function ContrastReadout() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   const read = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const rows = PAIRS.map(([label, fg, bg, min]) => {
     const f = read(fg), b = read(bg);

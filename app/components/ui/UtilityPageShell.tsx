@@ -22,7 +22,7 @@ export function UtilityPageShell({ maxWidth = '860px', mainClassName = '', exclu
         topLeft="VS-DOC · UTILITY PAGE"
         bottomRight="VISASCOUT · VISA INTELLIGENCE"
       />
-      <UtilityNav maxWidth={maxWidth} />
+      <UtilityNav />
       <main className={`relative z-10 mx-auto px-6 py-16 ${mainClassName}`} style={{ maxWidth }}>
         {children}
       </main>

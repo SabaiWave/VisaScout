@@ -442,3 +442,178 @@ h1, h2, h3 {
   color: var(--color-text-primary) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SHARED FORM UTILITIES — vs-label, vs-input, vs-textarea
+   vs-label font props defined in SHARED TYPOGRAPHY block above.
+   Use these on any page with form inputs. Do NOT duplicate in
+   page-level <style> blocks — update here, propagates everywhere.
+   ═══════════════════════════════════════════════════════════════ */
+
+.vs-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.vs-input,
+.vs-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  font-family: var(--font-mono);
+  font-size: 1rem; /* iOS: never below 16px on mobile — prevents auto-zoom */
+  color: var(--color-text-primary);
+  background: var(--color-bg-overlay);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  outline: none;
+  display: block;
+  transition: border-color 0.15s;
+}
+
+@media (min-width: 768px) {
+  .vs-input,
+  .vs-textarea { font-size: 13px; }
+}
+
+.vs-input:focus,
+.vs-textarea:focus { border-color: var(--color-secondary); }
+
+.vs-textarea { resize: vertical; line-height: 1.85; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED TYPOGRAPHY — vs-mono-label, vs-label
+   vs-mono-label: font-only (no layout). Use anywhere the HUD label
+   style is needed without block/margin context.
+   vs-label: form label = mono-label + block + margin-bottom.
+   ═══════════════════════════════════════════════════════════════ */
+
+.vs-mono-label,
+.vs-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.vs-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BADGE — vs-badge
+   Mono bordered chip. Color and borderColor set via inline style.
+   border-radius: 4px per HUD spec (square corners, not pill).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base badge — typography + spacing only. Compose with modifier below. */
+.vs-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+/* Outlined variant — border inherits currentColor (set via inline style color) */
+.vs-badge-outline { border: 1px solid; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ALERT BOXES — vs-alert-*
+   Full-width notice box with colored border and tinted bg.
+   Usage: <div class="vs-alert vs-alert-success">
+            <div class="vs-alert-title">...</div>
+            <div class="vs-alert-body">...</div>
+          </div>
+   ═══════════════════════════════════════════════════════════════ */
+
+.vs-alert {
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+}
+.vs-alert-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.vs-alert-body {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.vs-alert-success {
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.25);
+}
+.vs-alert-success .vs-alert-title { color: var(--color-success); }
+.vs-alert-error {
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+}
+.vs-alert-warning {
+  background: rgba(200,120,10,0.06);
+  border: 1px solid rgba(200,120,10,0.25);
+}
+.vs-alert-warning .vs-alert-title { color: var(--color-secondary); }
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE — vs-empty / vs-empty-text
+   Dashed bordered container for "no content yet" states.
+   ═══════════════════════════════════════════════════════════════ */
+
+.vs-empty {
+  border: 1px dashed var(--color-border);
+  padding: 48px 24px;
+  text-align: center;
+}
+.vs-empty-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.04em;
+  margin-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED RAIL/ROW UTILITIES — vs-rail, vs-row, vs-kv-*
+   Rail = bordered container. Row = divider row inside a rail.
+   KV = key-value row with dark label column + lighter value column.
+   ═══════════════════════════════════════════════════════════════ */
+
+.vs-rail { border: 1px solid var(--color-border); }
+
+.vs-row { border-bottom: 1px solid var(--color-border-muted); }
+.vs-row:last-child { border-bottom: none; }
+.vs-row-hover:hover { background: var(--color-bg-elevated); }
+
+/* Key-value layout: fixed label col (dark bg) + value col */
+.vs-kv { display: grid; grid-template-columns: 200px 1fr; }
+
+.vs-kv-k {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-base);
+  padding: 10px 14px;
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+}
+
+.vs-kv-v {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  padding: 10px 14px;
+  background: var(--color-bg-elevated);
+}
+

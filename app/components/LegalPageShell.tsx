@@ -11,15 +11,8 @@ const SHELL_CSS = `
     margin: 0 auto;
   }
   .lps-toc { position: sticky; top: 80px; height: fit-content; }
-  .lps-toc-head {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-    margin-bottom: 16px;
-  }
+  /* .lps-toc-head font props from global .vs-mono-label */
+  .lps-toc-head { margin-bottom: 16px; }
   .lps-link {
     display: block;
     font-family: var(--font-mono);
@@ -49,20 +42,26 @@ export function LegalPageShell({ tocItems, children }: { tocItems: TocItem[]; ch
 
   useEffect(() => {
     const ids = tocItems.map(t => t.id);
-    const elements = ids.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-    if (!elements.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
-        });
-      },
-      { rootMargin: '-10% 0px -75% 0px', threshold: 0 }
-    );
+    const onScroll = () => {
+      // At bottom of page → last section active
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8) {
+        setActiveId(ids[ids.length - 1]);
+        return;
+      }
+      // Last section whose heading has crossed 100px below viewport top
+      const threshold = window.scrollY + 100;
+      let current = ids[0];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= threshold) current = id;
+      }
+      setActiveId(current);
+    };
 
-    elements.forEach(el => observer.observe(el));
-    return () => observer.disconnect();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
   }, [tocItems]);
 
   return (
@@ -70,20 +69,21 @@ export function LegalPageShell({ tocItems, children }: { tocItems: TocItem[]; ch
       <style dangerouslySetInnerHTML={{ __html: SHELL_CSS }} />
       <div className="lps-wrap">
         <aside className="lps-toc" aria-label="Contents">
-          <div className="lps-toc-head">Contents</div>
+          <div className="lps-toc-head vs-mono-label">Contents</div>
           <nav>
             {tocItems.map(item => (
               <a
                 key={item.id}
                 href={`#${item.id}`}
                 className={`lps-link${activeId === item.id ? ' active' : ''}`}
+                onClick={() => setActiveId(item.id)}
               >
                 {item.label}
               </a>
             ))}
           </nav>
         </aside>
-        <div>
+        <div style={{ paddingBottom: '60vh' }}>
           {children}
         </div>
       </div>

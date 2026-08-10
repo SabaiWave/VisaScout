@@ -186,48 +186,8 @@ export default async function AdminPage() {
 
   const recentUsers = recentSignupsResult.data ?? [];
 
-  const SIDEBAR_LINKS = [
-    { href: '#s-briefs',   label: 'Briefs' },
-    { href: '#s-users',    label: 'Users' },
-    { href: '#s-cost',     label: 'Cost' },
-    { href: '#s-pipeline', label: 'Pipeline' },
-    { href: '#s-logs',     label: 'Logs' },
-  ];
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Page sidebar */}
-      <aside style={{
-        width: 200, flexShrink: 0,
-        position: 'sticky', top: 0, height: '100vh',
-        overflowY: 'auto', display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid var(--color-border)',
-        background: 'var(--color-bg-elevated)',
-        padding: '28px 0',
-      }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', padding: '0 20px', marginBottom: 24 }}>
-          Admin
-        </div>
-        <nav style={{ flex: 1 }}>
-          {SIDEBAR_LINKS.map(({ href, label }) => (
-            <a key={href} href={href} style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', textDecoration: 'none', padding: '7px 20px', borderLeft: '2px solid transparent', transition: 'color 0.12s, border-color 0.12s' }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-secondary)'; e.currentTarget.style.borderLeftColor = 'var(--color-secondary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderLeftColor = 'transparent'; }}>
-              {label}
-            </a>
-          ))}
-        </nav>
-        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', marginTop: 'auto' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#c8780a', background: 'rgba(200,120,10,0.1)', border: '1px solid rgba(200,120,10,0.3)', padding: '2px 8px', display: 'inline-block', marginBottom: 6 }}>
-            Admin
-          </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-tertiary)', wordBreak: 'break-all' as const }}>
-            {adminEmail}
-          </div>
-        </div>
-      </aside>
-
-      <main className="px-4 sm:px-6 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)', flex: 1, minWidth: 0 }}>
+    <main className="px-4 sm:px-6 py-6 sm:py-8" style={{ fontFamily: 'var(--font-body)' }}>
         <div style={{ maxWidth: '1120px' }}>
         <SectionHeading size="md" as="h1" className="mb-8">
           Operations Dashboard
@@ -598,7 +558,6 @@ export default async function AdminPage() {
         </Section>
       </div>
     </main>
-    </div>
   );
 }
 
