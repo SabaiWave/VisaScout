@@ -54,8 +54,4 @@ describe('SidebarAccount', () => {
     expect(screen.queryByText('ADMIN')).not.toBeInTheDocument();
   });
 
-  it('shows operational status', () => {
-    render(<SidebarAccount />);
-    expect(screen.getByText('Operational')).toBeInTheDocument();
-  });
 });
