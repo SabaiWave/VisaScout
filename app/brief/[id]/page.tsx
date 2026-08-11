@@ -1,17 +1,14 @@
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { ArrowRight, ChevronLeft, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
-import BriefActions from '@/app/components/BriefActions';
 import BriefRenderer from '@/app/components/BriefRenderer';
 import { BriefHeader } from '@/app/components/BriefHeader';
-import { BriefCopyLink } from '@/app/components/BriefCopyLink';
 import type { VisaBrief } from '@/src/types/index';
-import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { BriefMeta } from '@/app/components/ui/BriefMeta';
 import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
 import { BriefProcessingBanner } from './BriefProcessingBanner';
+import { BriefNavActions } from './BriefNavActions';
 
 const SIM_PDF_ERROR_ID = 'sim-pdf-error';
 const SIM_CONFIDENCE_HIGH_ID   = 'sim-confidence-high';
@@ -56,17 +53,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="max-w-[760px] mx-auto">
-            <div className="mb-8">
-              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Thailand</SectionHeading>
-              <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
-            </div>
-            <div className="mt-8">
-              <BriefRenderer brief={brief} hideMetadata />
-            </div>
-            <BriefActions url={`${appUrl}/brief/${id}`} briefId={id} depth="quick" />
+        <main style={{ paddingTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
+            <BriefNavActions url={`${appUrl}/brief/${id}`} briefId={id} depth="quick" />
           </div>
+          <BriefRenderer brief={brief} />
         </main>
       </div>
     );
@@ -95,17 +86,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="max-w-[760px] mx-auto">
-            <div className="mb-8">
-              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Portugal</SectionHeading>
-              <BriefMeta depth="standard" generatedAt={new Date().toISOString()} degraded className="mt-3" />
-            </div>
-            <div className="mt-8">
-              <BriefRenderer brief={brief} hideMetadata briefId={SIM_RERUN_CAP_ID} isPaidBrief canRerun={false} />
-            </div>
-            <BriefActions url={`${appUrl}/brief/${SIM_RERUN_CAP_ID}`} briefId={SIM_RERUN_CAP_ID} depth="standard" />
+        <main style={{ paddingTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
+            <BriefNavActions url={`${appUrl}/brief/${SIM_RERUN_CAP_ID}`} briefId={SIM_RERUN_CAP_ID} depth="standard" />
           </div>
+          <BriefRenderer brief={brief} briefId={SIM_RERUN_CAP_ID} isPaidBrief canRerun={false} />
         </main>
       </div>
     );
@@ -134,17 +119,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="max-w-[760px] mx-auto">
-            <div className="mb-8">
-              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Portugal</SectionHeading>
-              <BriefMeta depth="standard" generatedAt={new Date().toISOString()} degraded className="mt-3" />
-            </div>
-            <div className="mt-8">
-              <BriefRenderer brief={brief} hideMetadata briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
-            </div>
-            <BriefActions url={`${appUrl}/brief/${SIM_DEGRADED_ID}`} briefId={SIM_DEGRADED_ID} depth="standard" />
+        <main style={{ paddingTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
+            <BriefNavActions url={`${appUrl}/brief/${SIM_DEGRADED_ID}`} briefId={SIM_DEGRADED_ID} depth="standard" />
           </div>
+          <BriefRenderer brief={brief} briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
         </main>
       </div>
     );
@@ -158,17 +137,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
-        <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="max-w-[760px] mx-auto">
-            <div className="mb-8">
-              <SectionHeading size="md" as="h1">American <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> Thailand</SectionHeading>
-              <BriefMeta depth="quick" generatedAt={new Date().toISOString()} className="mt-3" />
-            </div>
-            <div className="mt-8">
-              <BriefRenderer brief={brief} hideMetadata />
-            </div>
-            <BriefActions url={`${appUrl}/brief/${SIM_PDF_ERROR_ID}`} briefId={SIM_PDF_ERROR_ID} depth="quick" forceError={true} />
+        <main style={{ paddingTop: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
+            <BriefNavActions url={`${appUrl}/brief/${SIM_PDF_ERROR_ID}`} briefId={SIM_PDF_ERROR_ID} depth="quick" />
           </div>
+          <BriefRenderer brief={brief} />
         </main>
       </div>
     );
@@ -206,77 +179,82 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
       {showHeader && <BriefHeader />}
 
-      <main className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <main style={{ paddingTop: '24px' }}>
         {isProcessing ? (
-          <BriefProcessingBanner
-            briefId={row.id}
-            isActuallyDone={isActuallyDone}
-            pollForJob={row.payment_status === 'queued'}
-            nationality={row.nationality}
-            destination={row.destination}
-            depth={row.depth}
-            showDashboardLink={!!userId}
-          />
+          <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8">
+            <BriefProcessingBanner
+              briefId={row.id}
+              isActuallyDone={isActuallyDone}
+              pollForJob={row.payment_status === 'queued'}
+              nationality={row.nationality}
+              destination={row.destination}
+              depth={row.depth}
+              showDashboardLink={!!userId}
+            />
+          </div>
         ) : (
-          <div className="max-w-[760px] mx-auto">
-            <div className="mb-6">
-              {userId && (
+          <>
+            {/* Nav bar: back link + action buttons */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                padding: '0 24px 16px',
+                flexWrap: 'wrap',
+              }}
+            >
+              {userId ? (
                 <a
                   href="/dashboard"
-                  className="inline-flex items-center gap-1 mb-4 text-xs font-bold uppercase"
-                  style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textDecoration: 'none' }}
+                  className="inline-flex items-center gap-1.5"
+                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
                 >
-                  <ChevronLeft size={12} />
+                  <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '5px solid currentColor', flexShrink: 0 }} />
                   Dashboard
                 </a>
+              ) : <span />}
+              {brief && (
+                <BriefNavActions url={shareUrl} briefId={row.id} depth={row.depth} />
               )}
-              <SectionHeading size="md" as="h1">
-                {row.nationality} <ArrowRight size={20} style={{ display: 'inline', verticalAlign: 'middle', position: 'relative', top: '-1px' }} /> {row.destination}
-              </SectionHeading>
-              <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
-                <BriefMeta depth={row.depth} generatedAt={row.created_at} />
-                {brief && <BriefCopyLink url={shareUrl} />}
+            </div>
+
+            {/* Brief body — full width for BriefDocument's 1180px layout */}
+            {paymentNotCompleted ? (
+              /* State 5 Var A — Payment Not Completed card */
+              <div className="max-w-[760px] mx-auto px-4" style={{ border: '1px solid var(--color-error-border)', background: 'var(--color-error-bg)', padding: 20 }}>
+                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
+                  <AlertTriangle size={16} aria-hidden="true" style={{ color: 'var(--color-secondary)' }} />
+                  Payment Not Completed
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                  Your payment wasn&apos;t completed. The brief has not been generated.
+                </p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const }}>
+                  <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                    Complete Payment
+                  </a>
+                  <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                    New Brief
+                  </a>
+                </div>
               </div>
-            </div>
-
-            <div>
-              {paymentNotCompleted ? (
-                /* State 5 Var A — Payment Not Completed card */
-                <div style={{ border: '1px solid var(--color-error-border)', background: 'var(--color-error-bg)', padding: 20 }}>
-                  <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
-                    <AlertTriangle size={16} aria-hidden="true" style={{ color: 'var(--color-secondary)' }} />
-                    Payment Not Completed
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
-                    Your payment wasn&apos;t completed. The brief has not been generated.
-                  </p>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const }}>
-                    <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                      Complete Payment
-                    </a>
-                    <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-strong)', padding: '8px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                      New Brief
-                    </a>
-                  </div>
-                </div>
-              ) : brief ? (
-                <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
-              ) : (
-                <div
-                  className="px-4 py-3"
-                  style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
-                >
-                  Brief content unavailable.{' '}
-                  <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
-                    Contact support
-                  </a>{' '}
-                  with reference: {row.id}
-                </div>
-              )}
-            </div>
-
-            {brief && <BriefActions url={shareUrl} briefId={row.id} depth={row.depth} forceError={simPdfError} />}
-          </div>
+            ) : brief ? (
+              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
+            ) : (
+              <div
+                className="max-w-[760px] mx-auto px-4 py-3"
+                style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
+              >
+                Brief content unavailable.{' '}
+                <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
+                  Contact support
+                </a>{' '}
+                with reference: {row.id}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

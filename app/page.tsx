@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LandingNav, LANDING_AXIS } from './components/LandingNav';
 import { FooterLink } from './components/ui/FooterLink';
 import { ChartCornerMarks } from './components/ui/ChartCornerMarks';
+import { LandingCoords } from './components/LandingCoords';
 import { HeroMarkerEditor } from './components/dev/HeroMarkerEditor';
 
 import { clientConfig } from '@/config/client';
@@ -51,6 +52,16 @@ function SecLabel({ children }: { children: React.ReactNode }) {
 
 // ─── Coordinate-style form (shared by hero + CTA) ───────────────────────────
 
+const LABEL_STYLE: React.CSSProperties = {
+  background: 'var(--color-border)', color: 'var(--color-amber)',
+  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.1em',
+  textTransform: 'uppercase', padding: '0 14px',
+};
+const INPUT_STYLE: React.CSSProperties = {
+  background: 'var(--color-bg-elevated)', border: 'none', padding: '13px 14px',
+  fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', outline: 'none',
+};
+
 function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) {
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
@@ -58,42 +69,40 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!destination) return;
     redirect(nationality, destination);
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 max-w-[440px] w-full">
       <div className="flex border" style={{ borderColor: 'var(--color-border)' }}>
-        <span
-          className="flex items-center flex-shrink-0 whitespace-nowrap"
-          style={{ background: 'var(--color-border)', color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 14px' }}
-        >
+        <span className="flex items-center flex-shrink-0 whitespace-nowrap" style={LABEL_STYLE}>
           Nationality
         </span>
         <input
           type="text"
           value={nationality}
           onChange={(e) => setNationality(e.target.value)}
-          placeholder="American, German, British…"
-          className="flex-1 min-w-0 outline-none"
-          style={{ background: 'var(--color-bg-elevated)', border: 'none', padding: '13px 14px', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--color-text-primary)' }}
+          placeholder="e.g. American, German, Thai…"
+          className="flex-1 min-w-0"
+          style={{ ...INPUT_STYLE, color: 'var(--color-text-primary)' }}
         />
       </div>
       <div className="flex border" style={{ borderColor: 'var(--color-border)' }}>
-        <span
-          className="flex items-center flex-shrink-0 whitespace-nowrap"
-          style={{ background: 'var(--color-border)', color: 'var(--color-amber)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 14px' }}
-        >
+        <span className="flex items-center flex-shrink-0 whitespace-nowrap" style={LABEL_STYLE}>
           Destination
         </span>
-        <input
-          type="text"
+        <select
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
-          placeholder="Thailand, Portugal…"
-          className="flex-1 min-w-0 outline-none"
-          style={{ background: 'var(--color-bg-elevated)', border: 'none', padding: '13px 14px', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--color-text-primary)' }}
-        />
+          className="flex-1 min-w-0"
+          style={{ ...INPUT_STYLE, color: destination ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', cursor: 'pointer', appearance: 'none' as const }}
+        >
+          <option value="" disabled>Select destination…</option>
+          {clientConfig.supportedDestinations.map((d) => (
+            <option key={d} value={d} style={{ color: 'var(--color-text-primary)', background: 'var(--color-bg-elevated)' }}>{d}</option>
+          ))}
+        </select>
       </div>
       <button
         type="submit"
@@ -292,7 +301,7 @@ function Method() {
 
 function briefSection(label: string) {
   return (
-    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: '14px 0 5px', borderTop: '1px solid var(--color-border-muted)', marginTop: '4px' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: '14px 0 5px', borderTop: '1px solid var(--color-border-muted)', marginTop: '4px' }}>
       {label}
     </div>
   );
@@ -300,11 +309,11 @@ function briefSection(label: string) {
 
 function briefField(key: string, value: string, hi?: boolean) {
   return (
-    <div className="grid vs-row" style={{ gridTemplateColumns: '160px 1fr', padding: '7px 0' }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
+    <div className="grid vs-row" style={{ gridTemplateColumns: '150px 1fr', alignItems: 'start', padding: '7px 0' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
         {key}
       </div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: hi ? 'var(--color-amber)' : 'var(--color-text-primary)', fontWeight: hi ? 700 : 400 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: hi ? 'var(--color-amber)' : 'var(--color-text-primary)', fontWeight: hi ? 700 : 400 }}>
         {value}
       </div>
     </div>
@@ -314,17 +323,17 @@ function briefField(key: string, value: string, hi?: boolean) {
 function visaOption(name: string, desc: string, cost: string, recommended?: boolean) {
   return (
     <div className="vs-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '9px 0' }}>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: recommended ? 'var(--color-amber)' : 'var(--color-text-tertiary)', flexShrink: 0, paddingTop: 1 }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: recommended ? 'var(--color-amber)' : 'var(--color-text-tertiary)', flexShrink: 0, paddingTop: 1 }}>
         {recommended ? '★' : '○'}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' as const }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, color: recommended ? 'var(--color-amber)' : 'var(--color-text-primary)' }}>{name}</span>
-          {recommended && <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 7, padding: '1px 5px' }}>RECOMMENDED</span>}
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700, color: recommended ? 'var(--color-amber)' : 'var(--color-text-primary)' }}>{name}</span>
+          {recommended && <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 8, padding: '1px 5px' }}>RECOMMENDED</span>}
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--color-text-secondary)', lineHeight: 1.7 }}>{desc}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-secondary)', lineHeight: 1.7 }}>{desc}</span>
       </div>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', color: 'var(--color-text-tertiary)', flexShrink: 0, paddingTop: 2 }}>{cost}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', flexShrink: 0, paddingTop: 2 }}>{cost}</span>
     </div>
   );
 }
@@ -332,10 +341,10 @@ function visaOption(name: string, desc: string, cost: string, recommended?: bool
 function checkItem(label: string, note?: string) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '4px 0' }}>
-      <span style={{ color: '#10b981', fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', flexShrink: 0 }}>✓</span>
+      <span style={{ color: 'var(--color-success)', fontFamily: 'var(--font-mono)', fontSize: '11px', flexShrink: 0 }}>✓</span>
       <div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-primary)' }}>{label}</span>
-        {note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--color-text-tertiary)', marginLeft: 7 }}>{note}</span>}
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)' }}>{label}</span>
+        {note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', marginLeft: 7 }}>{note}</span>}
       </div>
     </div>
   );
@@ -344,11 +353,11 @@ function checkItem(label: string, note?: string) {
 function flagItem(date: string, text: string, tier: string) {
   return (
     <div className="vs-row" style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.4375rem', color: 'var(--color-secondary)', paddingTop: 4, flexShrink: 0 }}>▲</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--color-secondary)', paddingTop: 4, flexShrink: 0 }}>▲</span>
       <div style={{ flex: 1 }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--color-text-tertiary)', marginRight: 8 }}>{date}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-primary)' }}>{text}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.4375rem', color: 'var(--color-text-tertiary)', marginLeft: 8, letterSpacing: '0.08em' }}>[{tier}]</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', marginRight: 8 }}>{date}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)' }}>{text}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-tertiary)', marginLeft: 8, letterSpacing: '0.08em' }}>[{tier}]</span>
       </div>
     </div>
   );
@@ -367,10 +376,10 @@ function BriefExhibit() {
         <div className="pt-1">
           <SecLabel>Exhibit A</SecLabel>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)', marginBottom: 16 }}>
-            A Standard Brief. Every claim sourced. Every recommendation ranked by confidence and source tier.
+            An Intel brief. 5 parallel agents. Every claim sourced and tier-tagged.
           </p>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
-            Conflict analysis and contingency planning are Dossier-only — shown locked below.
+            Border run analysis, conflict resolution, and contingency planning — all in one reconciled brief.
           </p>
         </div>
 
@@ -380,7 +389,7 @@ function BriefExhibit() {
           {/* Card header */}
           <div className="flex justify-between items-center flex-wrap gap-2" style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 8 }}>STANDARD</span>
+              <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 8 }}>INTEL</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
                 Thailand &middot; United States &middot; METV
               </span>
@@ -393,86 +402,46 @@ function BriefExhibit() {
 
           <div style={{ padding: '16px 20px' }}>
 
-            {/* §1 Situation */}
             {briefSection('§1  Situation')}
             {briefField('Passport', 'United States of America')}
             {briefField('Destination', 'Kingdom of Thailand')}
-            {briefField('Current Status', 'METV — Day 47 of 60')}
-            {briefField('Remaining', '13 days before overstay')}
+            {briefField('Current status', 'METV — Day 47 of 60 · 13 days remaining')}
             {briefField('Goal', 'Extend stay 30+ days in-country')}
 
-            {/* §2 Visa Options */}
-            {briefSection('§2  Visa Options — Ranked by Fit')}
+            {briefSection('§2  Visa Options')}
             {visaOption('TR Extension (In-Country)', 'Extend at Chaeng Watthana. No border exit. 30 days. 1-day processing.', '฿1,900', true)}
             {visaOption('TR Visa (Border Run)', 'Exit to nearest consulate. New 60-day TR. Higher friction, 1–2 day turnaround.', '฿2,000 + travel')}
-            {visaOption('LTR Visa', 'Long-term residency. Requires $80k+ annual income. Not applicable for short extension.', '$10,000 gov fee')}
 
-            {/* §3 Recommended Action */}
             {briefSection('§3  Recommended Action')}
             <div style={{ marginTop: 6, background: 'rgba(var(--color-secondary-rgb),0.06)', borderLeft: '2px solid var(--color-amber)', padding: '11px 14px' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
                 Deadline: Aug 19, 2026 · 13 days remaining
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', lineHeight: 1.9, color: 'var(--color-text-primary)' }}>
-                Apply TR extension at Chaeng Watthana before Aug 19. Fee ฿1,900. Required: passport, TM.7 form, one photo, departure card copy. August queues run 2–3 hrs — arrive by 08:00.
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.9, color: 'var(--color-text-primary)' }}>
+                Apply TR extension at Chaeng Watthana before Aug 19. Fee ฿1,900. Arrive by 08:00 — August queues run 2–3 hrs.
               </div>
             </div>
 
-            {/* §4 Entry Requirements */}
             {briefSection('§4  Entry Requirements')}
             {checkItem('Passport', 'Valid ≥6 months past intended departure')}
+            {checkItem('TM.7 form + photo', 'Download from immigration.go.th · 1x white background')}
             {checkItem('Proof of funds', '฿20,000 cash or bank statement')}
-            {checkItem('TM.7 Extension Form', 'Download from immigration.go.th')}
-            {checkItem('Passport photo', '1x white background, ≤6 months old')}
-            {checkItem('Onward ticket', 'Screenshot acceptable at Chaeng Watthana')}
 
-            {/* §5 Border Run */}
             {briefSection('§5  Border Run Analysis')}
-            {briefField('Enforcement posture', 'Moderate — consecutive exemptions flagged')}
-            {briefField('Mae Sot crossing', 'Open · avg 45 min (T4: Aug 2026)')}
-            {briefField('Poipet crossing', 'Open · stricter questioning reported (T4)')}
+            {briefField('Enforcement posture', 'Moderate — consecutive exemptions flagged at land borders')}
             {briefField('Verdict', 'TR extension preferred — avoids flag risk', true)}
 
-            {/* §6 Recent Changes */}
-            {briefSection('§6  Recent Changes — Last 90 Days')}
-            {flagItem('Jul 2026', 'Chaeng Watthana extended hours to 16:30 (was 16:00)', 'T1')}
-            {flagItem('Jun 2026', 'Walk-in METV processing resumed — backlog cleared', 'T1')}
+            {briefSection('§6  Recent Changes — 90 Days')}
+            {flagItem('Jul 2026', 'Chaeng Watthana extended hours to 16:30', 'T1')}
             {flagItem('May 2026', 'Poipet: 3 consecutive exemption limit now enforced', 'T4')}
 
-            {/* §7 Conflict Report — DOSSIER LOCKED */}
             {briefSection('§7  Conflict Report')}
-            <div style={{ position: 'relative' }}>
-              <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none', opacity: 0.45 }}>
-                {briefField('Official vs. Community', 'T1 states 30-day max; T4 reports 60-day grants at officer discretion')}
-                {briefField('IATA Timatic', 'Conflicts with community data on onward-ticket enforcement at BKK')}
-                {briefField('Resolution', 'T1 authoritative; T4 flags variance — monitor BKK port-of-entry', true)}
-              </div>
-              <div style={DOSSIER_LOCK}>
-                <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-text-secondary)', fontSize: 8, letterSpacing: '0.12em', background: 'var(--color-bg-base)', padding: '4px 12px' }}>
-                  DOSSIER ONLY
-                </span>
-              </div>
-            </div>
+            {briefField('Conflict', 'T1 states 30-day max; T4 reports 60-day grants at officer discretion')}
+            {briefField('Resolution', 'T1 authoritative — T4 flags variance, monitor port-of-entry', true)}
 
-            {/* §8 Contingency — DOSSIER LOCKED */}
             {briefSection('§8  Contingency')}
-            <div style={{ position: 'relative' }}>
-              <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none', opacity: 0.45 }}>
-                {briefField('If denied at Chaeng Watthana', 'File at local sub-district office same day')}
-                {briefField('If overstay occurs', '฿500/day fine, max ฿20,000 — pay at departure gate')}
-                {briefField('If deportation flagged', 'Voluntary departure within 24h avoids ban', true)}
-              </div>
-              <div style={DOSSIER_LOCK}>
-                <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-text-secondary)', fontSize: 8, letterSpacing: '0.12em', background: 'var(--color-bg-base)', padding: '4px 12px' }}>
-                  DOSSIER ONLY
-                </span>
-              </div>
-            </div>
-
-            {/* Sources */}
-            <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--color-border-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.5rem', color: 'var(--color-text-tertiary)', lineHeight: 2, letterSpacing: '0.04em' }}>
-              Thailand Immigration Bureau (T1) &middot; IATA Timatic (T2) &middot; r/ThailandTourism (T4) &middot; Royal Thai Police Notifications (T1) &middot; Chaeng Watthana walk-in reports (T4)
-            </div>
+            {briefField('If denied', 'File at local sub-district office same day')}
+            {briefField('If overstay', '฿500/day fine, max ฿20,000 — pay at departure gate')}
 
           </div>
         </div>
@@ -605,7 +574,8 @@ export default function LandingPage() {
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
       <div aria-hidden className="chart-texture" />
       <AxisRule />
-      <ChartCornerMarks bottomRight="" />
+      <ChartCornerMarks topLeft="" bottomRight="" />
+      <LandingCoords />
       <LandingNav />
       <Hero />
       <DataStrip />

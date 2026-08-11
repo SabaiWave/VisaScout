@@ -79,10 +79,13 @@
   --color-error-bg:     #1a0a0a;
   --color-error-border: #3d1515;
 
-  /* Depth badge colors */
-  --color-depth-quick:    #10b981;
-  --color-depth-standard: #c8780a;
-  --color-depth-deep:     #e8940e;
+  /* Depth tier colors — single source of truth. Change here, updates everywhere. */
+  --color-depth-quick:        #10b981;
+  --color-depth-quick-rgb:    16,185,129;
+  --color-depth-standard:     #6366F1;
+  --color-depth-standard-rgb: 99,102,241;
+  --color-depth-deep:         #f59e0b;
+  --color-depth-deep-rgb:     245,158,11;
 
   /* Legacy light-palette PDF tokens — superseded by the print stylesheet
      built during the BriefDocument unification. Do not extend; remove once
@@ -543,7 +546,7 @@ h1, h2, h3 {
   margin-bottom: 6px;
 }
 .vs-alert-body {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
 }
 .vs-alert-success {
@@ -574,7 +577,7 @@ h1, h2, h3 {
 }
 .vs-empty-text {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-tertiary);
   letter-spacing: 0.04em;
   margin-bottom: 20px;
@@ -611,7 +614,7 @@ h1, h2, h3 {
 
 .vs-kv-v {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-primary);
   padding: 10px 14px;
   background: var(--color-bg-elevated);

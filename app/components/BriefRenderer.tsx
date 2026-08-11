@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import BriefDocument from './BriefDocument';
 import { AGENT_DISPLAY_LABELS } from './agentLabels';
 import type { VisaBrief } from '@/src/types/index';
@@ -28,6 +28,75 @@ export default function BriefRenderer({
   const router = useRouter();
   const [rerunLoading, setRerunLoading] = useState(false);
   const [rerunError, setRerunError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    const { signal } = ac;
+
+    // Wire collapse toggles
+    document.querySelectorAll<HTMLElement>('.sh-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = btn.closest('.sec');
+        if (!sec) return;
+        const collapsed = sec.classList.toggle('collapsed');
+        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      }, { signal });
+    });
+
+    // Wire single expand/collapse all toggle
+    const toggleBtn = document.querySelector<HTMLElement>('.all-toggle');
+    let allCollapsed = false;
+    toggleBtn?.addEventListener('click', () => {
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll<HTMLElement>('.sec').forEach(sec => {
+        const t = sec.querySelector<HTMLElement>('.sh-toggle');
+        if (!t || getComputedStyle(t).display === 'none') return;
+        sec.classList.toggle('collapsed', allCollapsed);
+        t.setAttribute('aria-expanded', allCollapsed ? 'false' : 'true');
+      });
+      toggleBtn.setAttribute('data-state', allCollapsed ? 'collapsed' : 'expanded');
+    }, { signal });
+
+    // Wire TOC scroll-spy via scroll listener — more reliable than IntersectionObserver
+    // when sections are short/collapsed and multiple fit in the viewport at once.
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('#bd-toc a'));
+    const targets = links.map(a => document.querySelector(a.getAttribute('href') ?? ''));
+
+    function getScrollParent(el: Element | null): Element | Window {
+      if (!el) return window;
+      const ov = getComputedStyle(el).overflowY;
+      if (ov === 'auto' || ov === 'scroll') return el;
+      return getScrollParent(el.parentElement);
+    }
+    const scrollTarget = getScrollParent(document.querySelector('.doc'));
+
+    function updateToc() {
+      const NAV_OFFSET = 88; // nav height + buffer
+      let activeIdx = 0;
+      targets.forEach((t, i) => {
+        if (!(t instanceof Element)) return;
+        if (t.getBoundingClientRect().top <= NAV_OFFSET) activeIdx = i;
+      });
+      links.forEach((a, n) => a.classList.toggle('on', n === activeIdx));
+      const rail = document.querySelector<HTMLElement>('.rail');
+      const link = links[activeIdx];
+      if (rail && link) {
+        const linkTop = link.offsetTop;
+        const linkH = link.offsetHeight;
+        const railH = rail.clientHeight;
+        if (linkTop < rail.scrollTop || linkTop + linkH > rail.scrollTop + railH) {
+          rail.scrollTop = linkTop - railH / 2 + linkH / 2;
+        }
+      }
+    }
+
+    if (links.length) {
+      scrollTarget.addEventListener('scroll', updateToc, { signal, passive: true } as AddEventListenerOptions);
+      updateToc();
+    }
+
+    return () => { ac.abort(); };
+  }, [brief]);
 
   const failedAgents = brief.metadata?.agentStatuses?.filter(s => s.status === 'failed') ?? [];
   const failedAgentNames = failedAgents.map(s => {

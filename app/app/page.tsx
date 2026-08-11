@@ -87,8 +87,7 @@ const DEPTH_CONFIG = {
     label: 'Scout',
     price: 'Free',
     description: 'Is there a visa issue I need to know about?',
-    color: '#10b981',
-    colorRgb: '16,185,129',
+    color: 'var(--color-depth-quick)',
   },
   standard: {
     icon: Search,
@@ -96,7 +95,6 @@ const DEPTH_CONFIG = {
     price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
     description: 'Booking soon. Need all options on the table.',
     color: 'var(--color-depth-standard)',
-    colorRgb: '200,120,10',
   },
   deep: {
     icon: FileText,
@@ -104,7 +102,6 @@ const DEPTH_CONFIG = {
     price: `$${(PRICES.deep.amount / 100).toFixed(2)}`,
     description: "Complex situation or can't afford to be wrong.",
     color: 'var(--color-depth-deep)',
-    colorRgb: '251,191,36',
   },
 } as const;
 
@@ -159,7 +156,7 @@ function AppContent() {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap') ? 'error' : 'idle'
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap' || searchParams.get('sim') === 'off-topic') ? 'error' : 'idle'
   );
   const [nationality, setNationality] = useState(() => searchParams.get('nationality') || '');
   const [destination, setDestination] = useState(() => searchParams.get('destination') || '');
@@ -177,6 +174,7 @@ function AppContent() {
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     devSim === 'free-cap' ? `Daily free brief limit reached. Upgrade to ${DEPTH_LABEL.standard} or ${DEPTH_LABEL.deep} for unlimited research.` :
+    devSim === 'off-topic' ? "Your query doesn't appear to be about visa requirements or entry rules for a supported destination." :
     wasCancelled ? 'Payment was cancelled. Your brief was not generated.' : null
   );
   const [inviteCodeError, setInviteCodeError] = useState<string | null>(
@@ -363,7 +361,7 @@ function AppContent() {
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
 
-  if (!isLoaded && phase !== 'redirecting') {
+  if ((!isLoaded && phase !== 'redirecting') || (devTrigger === 'quick' && isLoaded && isSignedIn)) {
     return (
       <div className="flex items-center justify-center py-20">
         <div
@@ -383,9 +381,9 @@ function AppContent() {
       {/* Page-scoped layout CSS — namespaced app-* to avoid collision */}
       <style dangerouslySetInnerHTML={{ __html: `
         /* ── Layout ── */
-        .app-work { display: grid; grid-template-columns: 1fr 430px; min-height: 100vh; }
+        .app-work { display: grid; grid-template-columns: 1fr 360px; align-items: start; }
         .app-work-l { padding: 0 48px 80px 64px; }
-        .app-work-r { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-left: 1px solid var(--color-border); background: var(--color-bg-elevated); display: flex; flex-direction: column; }
+        .app-work-r { display: flex; flex-direction: column; }
 
         /* ── Right rail panels (untouched) ── */
         .app-rp { border: 1px solid var(--color-border); }
@@ -397,7 +395,7 @@ function AppContent() {
         .app-bfield { display: grid; grid-template-columns: 80px 1fr; padding: 7px 0; /* border-bottom from vs-row */ }
         .app-bfield:last-child { padding-bottom: 0; }
         .app-bkey { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-tertiary); padding-top: 2px; }
-        .app-bval { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-primary); }
+        .app-bval { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary); }
         .app-bval.pending { color: var(--color-text-tertiary); font-style: italic; }
         .app-bval.hi { color: var(--color-secondary); }
         .app-agent-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--color-border); font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); }
@@ -412,14 +410,14 @@ function AppContent() {
         .app-m-k { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 4px; }
         .app-m-v { font-family: var(--font-mono); font-size: 20px; font-weight: 700; line-height: 1; color: var(--color-secondary); }
         .app-outline { list-style: none; margin: 0; padding: 0; }
-        .app-outline li { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; font-family: var(--font-mono); font-size: 10.5px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); }
+        .app-outline li { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); }
         .app-outline li:first-child { padding-top: 0; }
         .app-outline li:last-child { border-bottom: none; padding-bottom: 0; }
         .app-outline .n { font-size: 8px; letter-spacing: 0.12em; color: var(--color-text-tertiary); min-width: 20px; }
         .app-outline li:nth-child(n+4) { opacity: 0.45; }
         .app-outline li:nth-child(n+7) { opacity: 0.2; }
         .app-outline li:nth-child(n+9) { opacity: 0.1; }
-        .app-panel-panels { padding: 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+        .app-panel-panels { padding: 80px 16px 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
         .app-panel-foot { border-top: 1px solid var(--color-border); padding: 10px 14px; font-family: var(--font-mono); font-size: 9px; color: var(--color-text-tertiary); flex-shrink: 0; }
         .app-sq { display: inline-block; width: 5px; height: 5px; background: var(--color-secondary); margin-right: 6px; vertical-align: middle; }
 
@@ -443,7 +441,7 @@ function AppContent() {
         .app-coord-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-overlay) !important; font-family: var(--font-mono) !important; padding-left: 14px !important; font-size: 1rem !important; }
         @media (min-width: 768px) { .app-coord-combo input { font-size: 13px !important; } }
         .app-coord-combo > ul { background: var(--color-bg-base) !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; top: 100% !important; left: -155px !important; right: 0 !important; padding: 0 !important; box-shadow: none !important; }
-        .app-coord-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 11px !important; padding: 9px 14px !important; border-bottom: 1px solid rgba(255,255,255,0.04) !important; }
+        .app-coord-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 12px !important; padding: 9px 14px !important; border-bottom: 1px solid rgba(255,255,255,0.04) !important; }
         .app-coord-combo > ul li:last-child { border-bottom: none !important; }
         .app-field-note { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--color-text-tertiary); margin-top: 8px; }
         .app-freetext { font-size: 1rem; }
@@ -459,7 +457,7 @@ function AppContent() {
         @media (max-width: 960px) {
           .app-work { grid-template-columns: 1fr; }
           .app-work-l { padding: 32px 24px 56px; }
-          .app-work-r { position: static; height: auto; border-left: none; border-top: 1px solid var(--color-border); }
+          .app-work-r { border-top: 1px solid var(--color-border); }
           .app-tier { grid-template-columns: 44px 1fr auto; }
           .app-tier > :nth-child(3) { display: none; }
         }
@@ -728,8 +726,8 @@ function AppContent() {
                     style={{
                       width: '100%', border: 'none', cursor: phase === 'redirecting' || isCheckingCap ? 'not-allowed' : 'pointer',
                       opacity: phase === 'redirecting' || isCheckingCap ? 0.65 : 1,
-                      background: inviteAccess ? 'var(--color-secondary)' : depth === 'quick' ? '#10b981' : depth === 'standard' ? 'var(--color-secondary)' : 'var(--color-depth-deep)',
-                      color: depth === 'deep' ? '#0a0a0a' : '#060c12',
+                      background: depthCfg.color,
+                      color: '#060c12',
                       fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
                       letterSpacing: '0.18em', textTransform: 'uppercase', padding: 19,
                       transition: 'opacity 0.15s',
@@ -787,7 +785,7 @@ function AppContent() {
                                   <AlertTriangle size={14} aria-hidden="true" />
                                   Invalid Invite Code
                                 </div>
-                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
                                   That code wasn't recognized. Check for typos and try again.
                                 </p>
                                 <button type="button" onClick={() => { setInviteCode(''); setInviteCodeError(null); setInviteErrorType(null); }}
@@ -802,7 +800,7 @@ function AppContent() {
                                   <XCircle size={14} aria-hidden="true" />
                                   Code Already Used
                                 </div>
-                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 10 }}>
                                   This invite code has already been redeemed. Contact support if you think this is a mistake.
                                 </p>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
@@ -822,7 +820,7 @@ function AppContent() {
                     ) : null
                   )}
 
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'center' }}>
                     This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
                   </p>
                 </div>

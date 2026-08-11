@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { BriefCard } from './BriefCard';
 
@@ -10,7 +9,7 @@ const GRID_CSS = `
   .db-list { /* border from vs-rail */ }
   .db-head {
     display: grid;
-    grid-template-columns: minmax(120px,2fr) minmax(100px,1.5fr) 80px 110px 80px 100px;
+    grid-template-columns: repeat(5, minmax(80px,1fr)) 80px;
     align-items: center;
     height: 36px;
     padding: 0 16px;
@@ -20,7 +19,7 @@ const GRID_CSS = `
   /* .db-head-label font props from global .vs-mono-label */
   .db-row {
     display: grid;
-    grid-template-columns: minmax(120px,2fr) minmax(100px,1.5fr) 80px 110px 80px 100px;
+    grid-template-columns: repeat(5, minmax(80px,1fr)) 80px;
     align-items: center;
     height: 64px;
     padding: 0 16px;
@@ -29,6 +28,8 @@ const GRID_CSS = `
     /* border-bottom from vs-row */
   }
   .db-cell { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+  .db-cell-badge { justify-content: center; }
+  .db-cell-center { justify-content: center; }
   .db-dest {
     font-family: var(--font-mono);
     font-size: 13px;
@@ -42,7 +43,7 @@ const GRID_CSS = `
   }
   .db-sub {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-tertiary);
     white-space: nowrap;
     overflow: hidden;
@@ -53,7 +54,7 @@ const GRID_CSS = `
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #c8780a;
+    background: var(--color-amber);
     flex-shrink: 0;
     animation: db-pulse 1.2s ease-in-out infinite;
   }
@@ -65,7 +66,7 @@ const GRID_CSS = `
     text-transform: uppercase;
     opacity: 0.8;
   }
-  .db-cell-actions { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .db-cell-actions { display: flex; align-items: center; gap: 8px; justify-content: center; }
   .db-view {
     font-family: var(--font-mono);
     font-size: 10px;
@@ -94,13 +95,13 @@ const GRID_CSS = `
   @keyframes db-pulse { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
   @media (max-width: 860px) {
     .db-head,
-    .db-row { grid-template-columns: minmax(120px,2fr) 80px 80px 100px; }
+    .db-row { grid-template-columns: minmax(100px,2fr) repeat(2, minmax(70px,1fr)) 80px; }
     .db-cell-hide-sm { display: none; }
     .db-head-label-hide-sm { display: none; }
   }
   @media (max-width: 600px) {
     .db-head,
-    .db-row { grid-template-columns: minmax(120px,2fr) 80px 100px; }
+    .db-row { grid-template-columns: minmax(100px,2fr) minmax(70px,1fr) 80px; }
     .db-cell-hide-md { display: none; }
     .db-head-label-hide-md { display: none; }
   }
@@ -156,11 +157,11 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
           {/* Header row */}
           <div className="db-head" role="row">
             <span className="db-head-label vs-mono-label">Destination</span>
-            <span className="db-head-label db-head-label-hide-sm">Nationality</span>
-            <span className="db-head-label db-head-label-hide-sm">Depth</span>
-            <span className="db-head-label db-head-label-hide-md">Date</span>
-            <span className="db-head-label vs-mono-label">Confidence</span>
-            <span className="db-head-label vs-mono-label" style={{ textAlign: 'right' }}>Actions</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Nationality</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Depth</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-md" style={{ textAlign: 'center' }}>Date</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Confidence</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Actions</span>
           </div>
 
           {visible.map((brief) => (
@@ -169,9 +170,9 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
-          {page > 1 && (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {totalPages > 1 && page > 1 && (
             <Button
               asChild
               variant="ghost"
@@ -180,15 +181,17 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
               style={{ borderColor: 'var(--color-border-strong)' }}
             >
               <Link href={`/dashboard?page=${page - 1}`}>
-                <ArrowLeft size={13} />
+                <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '6px solid currentColor' }} />
                 Prev
               </Link>
             </Button>
           )}
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
-            PAGE {page} OF {totalPages}
-          </span>
-          {page < totalPages && (
+          {totalPages > 1 && (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
+              PAGE {page} OF {totalPages}
+            </span>
+          )}
+          {totalPages > 1 && page < totalPages && (
             <Button
               asChild
               variant="ghost"
@@ -198,12 +201,15 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
             >
               <Link href={`/dashboard?page=${page + 1}`}>
                 Next
-                <ArrowRight size={13} />
+                <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid currentColor' }} />
               </Link>
             </Button>
           )}
         </div>
-      )}
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}>
+          Count: {effectiveTotal}
+        </span>
+      </div>
     </>
   );
 }

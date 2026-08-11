@@ -88,7 +88,7 @@ const CSS = `
   --chrome:       block;
   --chrome-flex:  flex;
   --texture:      1;
-  --nav-h:        0px;
+  --nav-h:        52px;
   --break:        auto;
   --scrollx:      auto;
 
@@ -106,7 +106,7 @@ const CSS = `
   background: var(--stage);
   color: var(--ink-2);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -207,7 +207,7 @@ const CSS = `
   font-size: 27px; font-weight: 900; line-height: 0.94;
   text-transform: uppercase; letter-spacing: -0.005em; color: var(--ink);
 }
-.route em { font-style: normal; color: var(--accent-ink); }
+.route .rarr { display: inline-block; vertical-align: middle; color: var(--accent-ink); width: 0.5em; height: 0.7em; margin-right: 0.1em; }
 .route-sub {
   margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rim-soft);
   font-size: 8.5px; letter-spacing: 0.11em; color: var(--ink-4); line-height: 1.95; text-transform: uppercase;
@@ -226,7 +226,7 @@ const CSS = `
 .bars { display: flex; gap: 4px; margin-top: 10px; }
 .bars i { flex: 1; height: 6px; background: var(--rim); display: block; }
 .bars i.on { background: var(--ok); }
-.bars i.mid { background: var(--accent); }
+.bars i.bad { background: var(--bad); }
 
 .metrics { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rim); }
 .m-cell { padding: 10px 12px; border-right: 1px solid var(--rim-soft); border-bottom: 1px solid var(--rim-soft); }
@@ -250,7 +250,7 @@ const CSS = `
   padding: 7px 11px 7px 9px;
   border-left: 2px solid transparent;
   text-decoration: none;
-  font-size: 10px; letter-spacing: 0.02em; color: var(--ink-3);
+  font-size: 11px; letter-spacing: 0.02em; color: var(--ink-3);
 }
 .toc a:hover { color: var(--ink); background: var(--ground-up); }
 .toc a.on { color: var(--ink); border-left-color: var(--accent); background: var(--accent-wash); }
@@ -267,14 +267,28 @@ const CSS = `
 .ctag.md { color: var(--accent-ink); border-color: var(--accent-rim); }
 .ctag.na { color: var(--ink-4); }
 
-.rp-foot {
-  padding: 9px 11px; border-top: 1px solid var(--rim-soft);
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4); line-height: 1.8;
+.doc-controls {
+  display: var(--chrome-flex); align-items: center; justify-content: flex-end;
+  padding: 14px 0;
 }
+.doc-controls + .sec { margin-top: 6px; }
+.all-toggle {
+  display: flex; align-items: center; gap: 5px;
+  background: transparent; border: 1px solid var(--rim-soft);
+  color: var(--ink-4); cursor: pointer;
+  font-size: 7.5px; font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 10px;
+}
+.all-toggle:hover { color: var(--ink); border-color: var(--accent-rim); }
+.all-toggle svg { width: 7px; height: 7px; flex-shrink: 0; }
+.all-toggle .s-col { display: none; }
+.all-toggle[data-state="collapsed"] .s-exp { display: none; }
+.all-toggle[data-state="collapsed"] .s-col { display: flex; align-items: center; gap: 5px; }
+.s-exp { display: flex; align-items: center; gap: 5px; }
 
 /* ── BODY + MASTHEAD ───────────────────────────────────────────── */
-.body { padding-left: var(--rail-gap); min-width: 0; }
-.doc[data-mode="print"] .body { padding-left: 0; }
+.body { padding-left: var(--rail-gap); min-width: 0; padding-bottom: 60vh; }
+.doc[data-mode="print"] .body { padding-left: 0; padding-bottom: 0; }
 
 .mast { border: 1px solid var(--rim); page-break-inside: var(--break); }
 .mast-top {
@@ -290,7 +304,7 @@ const CSS = `
   font-size: clamp(30px, 4vw, 46px); line-height: 0.9;
   letter-spacing: 0.005em; text-transform: uppercase; color: var(--ink);
 }
-.mast-title .arr { color: var(--accent-ink); margin: 0 0.14em; }
+.mast-title .arr { display: inline-block; vertical-align: middle; color: var(--accent-ink); width: 0.38em; height: 0.55em; margin: 0 0.2em -0.04em; }
 .mast-seal { text-align: right; white-space: nowrap; }
 .mast-seal .id {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
@@ -362,7 +376,7 @@ const CSS = `
   border-right: 1px solid var(--rim-soft);
   font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4);
 }
-.kv-v { padding: 11px 16px; color: var(--ink); }
+.kv-v { padding: 11px 16px; color: var(--ink); font-size: 13px; }
 .kv-v .dim { color: var(--ink-3); }
 .kv-v .hot { color: var(--accent-ink); font-weight: 700; }
 
@@ -374,15 +388,16 @@ const CSS = `
   page-break-inside: var(--break);
 }
 .act-body { display: grid; grid-template-columns: minmax(0,1fr) 190px; }
+.act-body.no-clock { grid-template-columns: minmax(0,1fr); }
 .act-main { padding: 18px 20px; }
-.act-lab { font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-ink); }
+.act-lab { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-ink); }
 .act-head {
   margin-top: 9px;
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
   font-size: 25px; line-height: 1.06; letter-spacing: 0.015em;
   text-transform: uppercase; color: var(--ink);
 }
-.act-note { margin-top: 11px; font-size: 11.5px; line-height: 1.72; color: var(--ink-2); }
+.act-note { margin-top: 11px; font-size: 12.5px; line-height: 1.72; color: var(--ink-2); }
 .act-clock {
   border-left: 1px solid var(--accent-rim);
   padding: 18px; text-align: center;
@@ -400,6 +415,11 @@ const CSS = `
   font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
 }
 .act-foot b { color: var(--ink); font-weight: 700; }
+.act-foot .dlabel { color: var(--bad); }
+.act-foot .urgency-push { margin-left: auto; }
+.act-foot .urgency-high b { color: var(--bad); }
+.act-foot .urgency-medium b { color: var(--accent-ink); }
+.act-foot .urgency-low b { color: var(--ok); }
 
 /* ── DATA TABLES ────────────────────────────────────────────────── */
 table.tbl {
@@ -412,7 +432,7 @@ table.tbl thead th {
   padding: 10px 12px; text-align: left; vertical-align: bottom;
   border-bottom: 1px solid var(--rim);
   border-right: 1px solid var(--rim-soft);
-  font-size: 8px; font-weight: 700; letter-spacing: 0.19em;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--ink-4); white-space: nowrap;
 }
 table.tbl thead th:last-child { border-right: none; }
@@ -420,7 +440,7 @@ table.tbl tbody td {
   padding: 12px; vertical-align: top;
   border-bottom: 1px solid var(--rim-soft);
   border-right: 1px solid var(--rim-soft);
-  color: var(--ink-2); font-size: 11.5px; line-height: 1.62;
+  color: var(--ink-2); font-size: 12.5px; line-height: 1.62;
 }
 table.tbl tbody td:last-child { border-right: none; }
 table.tbl tbody tr:last-child td { border-bottom: none; }
@@ -432,11 +452,11 @@ table.tbl .name {
 table.tbl .code { display: block; margin-top: 4px; font-size: 8.5px; letter-spacing: 0.16em; color: var(--ink-4); }
 table.tbl .noterow td {
   background: var(--ground-up); padding: 10px 12px;
-  font-size: 10.5px; color: var(--ink-3); line-height: 1.72;
+  font-size: 11.5px; color: var(--ink-3); line-height: 1.72;
 }
 table.tbl .noterow .m {
   color: var(--accent-ink); font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; font-size: 8.5px; margin-right: 9px;
+  text-transform: uppercase; font-size: 10px; margin-right: 9px;
 }
 tr.fit-best td { background: var(--ok-wash); border-top: 1px solid var(--ok); }
 tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px solid var(--ok); }
@@ -445,8 +465,8 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .chip {
   display: inline-block;
   border: 1px solid var(--rim); background: transparent;
-  padding: 4px 8px; font-size: 8.5px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap;
+  padding: 4px 8px; font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap;
 }
 .chip.best { border-color: var(--ok); color: var(--ok); background: var(--ok-wash); }
 .chip.good { border-color: var(--accent-rim); color: var(--accent-ink); background: var(--accent-wash); }
@@ -464,16 +484,32 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 /* ── CHECKLIST GRID ────────────────────────────────────────────── */
 .chk { border: 1px solid var(--rim); page-break-inside: var(--break); }
 .chk-r {
-  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px 80px;
+  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px;
   border-bottom: 1px solid var(--rim-soft); align-items: stretch;
 }
 .chk-r:last-child { border-bottom: none; }
 .chk-r > div { padding: 12px 14px; border-right: 1px solid var(--rim-soft); }
 .chk-r > div:last-child { border-right: none; }
-.chk-box { display: flex; align-items: center; justify-content: center; background: var(--ground-up); color: var(--accent-ink); font-weight: 700; font-size: 13px; }
-.chk-name { color: var(--ink); font-size: 12px; }
-.chk-spec { color: var(--ink-3); font-size: 11px; }
+.chk-box { display: flex; align-items: center; justify-content: center; background: var(--ground-up); color: var(--accent-ink); font-weight: 700; font-size: 16px; }
+.chk-name { color: var(--ink); font-size: 12.5px; }
+.chk-spec { color: var(--ink-3); font-size: 12px; }
 .chk-src { font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); text-align: right; }
+.chk-h {
+  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px;
+  background: var(--ground-up); border-bottom: 1px solid var(--rim);
+}
+.chk-h > span {
+  padding: 10px 14px; border-right: 1px solid var(--rim-soft);
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-4); white-space: nowrap;
+}
+.chk-h > span:last-child { border-right: none; }
+.chk-h > span:first-child { text-align: center; font-size: 16px; color: var(--accent-ink); letter-spacing: 0; }
+.chk-legend {
+  margin-top: 8px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-4); line-height: 1.6;
+}
+.chk-legend-mark { color: var(--accent-ink); font-size: 16px; line-height: 1; vertical-align: middle; }
 
 /* ── ALERT BLOCK ────────────────────────────────────────────────── */
 .alert {
@@ -485,13 +521,13 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .alert + .alert { margin-top: 12px; }
 .alert.calm { border-color: var(--rim); background: var(--ground-up); }
 .alert-h {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px;
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
   letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); line-height: 1.1;
 }
-.alert-h .flag { font-size: 12px; color: var(--accent-ink); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.alert-h .flag { flex-shrink: 0; font-size: 18px; color: var(--accent-ink); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 .alert-d { margin-top: 4px; font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); }
-.alert-b { margin-top: 10px; font-size: 11.5px; line-height: 1.74; color: var(--ink-2); }
+.alert-b { margin-top: 10px; font-size: 13px; line-height: 1.74; color: var(--ink-2); }
 .alert-meta {
   margin-top: 11px; padding-top: 9px; border-top: 1px solid var(--accent-rim);
   display: flex; gap: 20px; flex-wrap: wrap;
@@ -508,7 +544,7 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 }
 .lock-icon { color: var(--ink-4); flex-shrink: 0; }
 .lock-icon svg { width: 16px; height: 16px; display: block; }
-.lock-text { font-size: 11.5px; color: var(--ink-4); line-height: 1.75; }
+.lock-text { font-size: 12px; color: var(--ink-4); line-height: 1.75; }
 .lock-link { color: var(--accent-ink); text-decoration: underline; }
 
 .doc[data-depth="quick"] #s5 .gatecontent,
@@ -528,7 +564,7 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 }
 
 /* ── VERDICT / STATUS MARKS ────────────────────────────────────── */
-.vd { font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 9px; white-space: nowrap; }
+.vd { font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-size: 10px; white-space: nowrap; }
 .vd.ok { color: var(--ok); }
 .vd.warn { color: var(--accent-ink); }
 .vd.bad { color: var(--bad); }
@@ -546,12 +582,12 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
   margin-top: 7px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
   font-size: 30px; line-height: 1; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ok);
 }
-.conf-r { padding: 16px 18px; font-size: 11.5px; line-height: 1.74; color: var(--ink-2); }
+.conf-r { padding: 16px 18px; font-size: 13px; line-height: 1.74; color: var(--ink-2); }
 
 /* ── FOOTER ─────────────────────────────────────────────────────── */
 .docfoot { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--rim); page-break-inside: var(--break); }
-.disc { display: grid; grid-template-columns: auto 1fr; gap: 12px; font-size: 10px; line-height: 1.85; color: var(--ink-3); }
-.disc .m { font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-ink); white-space: nowrap; }
+.disc { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 12px; font-size: 11px; line-height: 1.85; color: var(--ink-3); }
+.disc .m { font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-ink); white-space: nowrap; text-decoration: none; }
 .colophon {
   margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rim-soft);
   display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
@@ -585,8 +621,10 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
   .act-clock { border-left: none; border-top: 1px solid var(--accent-rim); }
   .kv-r { grid-template-columns: minmax(0,1fr); }
   .kv-k { border-right: none; border-bottom: 1px solid var(--rim-soft); }
+  .chk-h { grid-template-columns: 40px minmax(0,1fr); }
+  .chk-h > span:last-child { display: none; }
   .chk-r { grid-template-columns: 40px minmax(0,1fr); }
-  .chk-r > div:nth-child(3), .chk-r > div:nth-child(4) { grid-column: 2; border-top: 1px solid var(--rim-soft); border-right: none; text-align: left; }
+  .chk-r > div:nth-child(3) { grid-column: 2; border-top: 1px solid var(--rim-soft); border-right: none; text-align: left; }
   .conf { grid-template-columns: minmax(0,1fr); }
   .conf-l { border-right: none; border-bottom: 1px solid var(--rim-soft); }
 }
@@ -623,12 +661,12 @@ const TOGGLE_JS = `
 
 function ConfBars({ level }: { level: 'high' | 'medium' | 'low' }) {
   if (level === 'high') return (
-    <div className="bars"><i className="on" /><i className="on" /><i className="on" /><i className="on" /><i className="mid" /></div>
+    <div className="bars"><i className="on" /><i className="on" /><i className="on" /><i className="on" /><i /></div>
   );
   if (level === 'medium') return (
-    <div className="bars"><i className="on" /><i className="on" /><i className="mid" /><i /><i /></div>
+    <div className="bars"><i className="on" /><i className="on" /><i /><i /><i /></div>
   );
-  return <div className="bars"><i className="mid" /><i /><i /><i /><i /></div>;
+  return <div className="bars"><i className="bad" /><i /><i /><i /><i /></div>;
 }
 
 function Meter({ suitability }: { suitability: 'best' | 'good' | 'acceptable' }) {
@@ -655,8 +693,8 @@ function SuitChip({ suitability }: { suitability: 'best' | 'good' | 'acceptable'
 }
 
 const CHEVRON_SVG = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="square">
-    <path d="M6 9l6 6 6-6" />
+  <svg viewBox="0 0 10 10" fill="currentColor">
+    <polygon points="5,9 1,2 9,2" />
   </svg>
 );
 
@@ -755,7 +793,7 @@ function RecommendedActionSection({ brief }: { brief: VisaBrief }) {
     <section className="sec" id="s2">
       <Sh n={2} title="Recommended Action" meta="Agent · Synthesis" />
       <div className="act">
-        <div className="act-body">
+        <div className={`act-body${daysNum === '—' ? ' no-clock' : ''}`}>
           <div className="act-main">
             <div className="act-lab">Primary directive</div>
             <div className="act-head">{noDash(ra.action)}</div>
@@ -766,14 +804,16 @@ function RecommendedActionSection({ brief }: { brief: VisaBrief }) {
               </p>
             )}
           </div>
-          <div className="act-clock">
-            <div className="n">{daysNum}</div>
-            <div className="u">Days<br />remaining</div>
-          </div>
+          {daysNum !== '—' && (
+            <div className="act-clock">
+              <div className="n">{daysNum}</div>
+              <div className="u">Days<br />remaining</div>
+            </div>
+          )}
         </div>
         <div className="act-foot">
-          {ra.deadline && <span>Deadline <b>{ra.deadline}</b></span>}
-          <span>Urgency <b>{ra.urgency.toUpperCase()}</b></span>
+          {ra.deadline && <span><span className="dlabel">Deadline</span> <b>{ra.deadline}</b></span>}
+          <span className={`urgency-push urgency-${ra.urgency}`}>Urgency <b>{ra.urgency.toUpperCase()}</b></span>
         </div>
       </div>
     </section>
@@ -834,27 +874,32 @@ function EntryRequirementsSection({ brief }: { brief: VisaBrief }) {
   const req = brief.entryRequirements;
   const conf = (brief.confidenceScore.perSection ?? {})['entryRequirements'];
 
-  type ChkItem = { name: string; spec: string; src: string };
+  type ChkItem = { name: string; spec: string };
   const items: ChkItem[] = [];
-  for (const doc of req.documents) items.push({ name: doc, spec: '', src: 'T1' });
-  if (req.proofOfFunds) items.push({ name: 'Proof of funds', spec: req.proofOfFunds, src: 'T1' });
-  items.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required', src: 'T1' });
-  for (const h of req.health) items.push({ name: 'Health', spec: h, src: 'T2' });
-  for (const n of req.notes) items.push({ name: 'Note', spec: n, src: 'T4' });
+  for (const doc of req.documents) items.push({ name: doc, spec: '' });
+  if (req.proofOfFunds) items.push({ name: 'Proof of funds', spec: req.proofOfFunds });
+  items.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required' });
+  for (const h of req.health) items.push({ name: 'Health', spec: h });
+  for (const n of req.notes) items.push({ name: 'Note', spec: n });
 
   return (
     <section className="sec" id="s4">
       <Sh n={4} title="Entry Requirements" meta={`Agent · Entry Requirements · ${items.length} items${conf ? ` · Conf ${conf}` : ''}`} />
       <div className="chk">
+        <div className="chk-h">
+          <span>&#10003;</span>
+          <span>Requirement</span>
+          <span>Details</span>
+        </div>
         {items.map((item, i) => (
           <div key={i} className="chk-r">
             <div className="chk-box">&#10003;</div>
             <div className="chk-name">{noDash(item.name)}</div>
             <div className="chk-spec">{noDash(item.spec)}</div>
-            <div className="chk-src">{item.src}</div>
           </div>
         ))}
       </div>
+      <div className="chk-legend"><span className="chk-legend-mark">&#10003;</span> Confirmed entry requirement based on official sources. Verify with embassy before travel.</div>
     </section>
   );
 }
@@ -864,7 +909,7 @@ function BorderRunSection({ brief }: { brief: VisaBrief }) {
   const depth = brief.metadata.depth;
   return (
     <section className="sec" id="s5">
-      <Sh n={5} title="Border Run Analysis" meta="Agent · Border Run · T1 + T4 blend" />
+      <Sh n={5} title="Border Run Analysis" meta="Agent · Border Run · Official + Community" />
 
       <div className="gatecontent">
         <div className="scrollx">
@@ -960,8 +1005,6 @@ function RecentChangesSection({ brief }: { brief: VisaBrief }) {
 function ConflictSection({ brief }: { brief: VisaBrief }) {
   const report = brief.conflictReport;
   const total = report.confirmed.length + report.contested.length + report.unverified.length;
-  const overallConf = brief.confidenceScore.overall;
-  const t1Count = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
 
   type Row = { topic: string; description: string; sources: string[]; resolution?: string; status: 'confirmed' | 'contested' | 'unverified' };
   const rows: Row[] = [
@@ -1020,20 +1063,7 @@ function ConflictSection({ brief }: { brief: VisaBrief }) {
           </table>
         </div>
 
-        <div className="conf">
-          <div className="conf-l">
-            <div className="l">Overall confidence</div>
-            <div className="v">{overallConf.charAt(0).toUpperCase() + overallConf.slice(1)}</div>
-            <ConfBars level={overallConf} />
-          </div>
-          <div className="conf-r">
-            {t1Count > 0 && `${t1Count} Tier 1 source${t1Count !== 1 ? 's' : ''} support the primary recommendation. `}
-            {report.confirmed.length} claim{report.confirmed.length !== 1 ? 's' : ''} confirmed
-            {report.contested.length > 0 ? `, ${report.contested.length} contested` : ''}
-            {report.unverified.length > 0 ? `, ${report.unverified.length} unverified` : ''}.
-            {report.unverified.length === 0 && ' No unverified claims. Every statement traces to at least one Tier 1 or Tier 2 source.'}
-          </div>
-        </div>
+
       </div>
 
       <LockCard title="Conflict Report" />
@@ -1048,7 +1078,7 @@ function CitationsSection({ brief }: { brief: VisaBrief }) {
   const t4Count = citations.filter(c => c.tier === 4).length;
   return (
     <section className="sec" id="s8">
-      <Sh n={8} title="Source Citations" meta={`${citations.length} sources · T1×${t1Count} T4×${t4Count}`} />
+      <Sh n={8} title="Source Citations" meta={`${citations.length} sources · ${t1Count} official · ${t4Count} community`} />
       <div className="scrollx">
         <table className="tbl">
           <thead>
@@ -1099,9 +1129,9 @@ function ContingencySection({ brief }: { brief: VisaBrief }) {
             <div className="kv-r">
               <div className="kv-k">If denied entry</div>
               <div className="kv-v">
-                <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                  {c.deniedEntrySteps.map((s, i) => <li key={i} style={{ marginBottom: '4px' }}>{noDash(s)}</li>)}
-                </ol>
+                {c.deniedEntrySteps.map((s, i) => (
+                  <div key={i} style={{ marginBottom: i < c.deniedEntrySteps.length - 1 ? '5px' : 0 }}>{noDash(s)}</div>
+                ))}
               </div>
             </div>
           )}
@@ -1113,9 +1143,9 @@ function ContingencySection({ brief }: { brief: VisaBrief }) {
             <div className="kv-r">
               <div className="kv-k">Emergency contacts</div>
               <div className="kv-v">
-                <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                  {c.emergencyContacts.map((ec, i) => <li key={i}>{noDash(ec)}</li>)}
-                </ul>
+                {c.emergencyContacts.map((ec, i) => (
+                  <div key={i} style={{ marginBottom: i < c.emergencyContacts.length - 1 ? '5px' : 0 }}>{noDash(ec)}</div>
+                ))}
               </div>
             </div>
           )}
@@ -1141,16 +1171,15 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
 
   return (
     <aside className="rail">
-      {/* Panel 1 — route identity */}
-      <div className="rp">
-        <div className="rp-h">Visa Intelligence Brief<i /><span className="ct">{depthTag}</span></div>
-        <div className="rp-b">
-          <div className="route">
-            {meta.nationality}<br /><em>&rarr;</em>&nbsp;{meta.destination}
+      {/* Panel 1 — brief reference */}
+      {meta.briefId && (
+        <div className="rp">
+          <div className="rp-h">Brief ID<i /><span className="ct">{depthTag}</span></div>
+          <div className="rp-b">
+            <div style={{ fontSize: '8.5px', letterSpacing: '0.11em', color: 'var(--ink-3)', lineHeight: 1.95, textTransform: 'uppercase', fontWeight: 700 }}>{meta.briefId}</div>
           </div>
-          {meta.briefId && <div className="route-sub"><b>{meta.briefId}</b></div>}
         </div>
-      </div>
+      )}
 
       {/* Panel 2 — confidence ledger */}
       <div className="rp">
@@ -1180,13 +1209,14 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
                 <a href={`#${id}`}>
                   <span className="n">{zeroPad(i + 1)}</span>
                   <span className="t">{label}</span>
-                  <span className={confTagClass(conf)}>{confLabel(conf)}</span>
+                  {(conf === 'medium' || conf === 'low') && (
+                    <span className={confTagClass(conf)}>{confLabel(conf)}</span>
+                  )}
                 </a>
               </li>
             );
           })}
         </ul>
-        <div className="rp-foot">&mdash;&nbsp;not a scored claim</div>
       </div>
     </aside>
   );
@@ -1207,6 +1237,7 @@ export default function BriefDocument({
   const depthFull = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
   const successCount = brief.metadata.agentStatuses.filter(s => s.status === 'success').length;
   const totalCount = brief.metadata.agentStatuses.length;
+  const officialSrcCount = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
 
   return (
     <div className="doc" data-mode={mode} data-depth={depth}>
@@ -1222,29 +1253,39 @@ export default function BriefDocument({
                 <div>
                   <div className="mast-kicker">Visa Intelligence Brief &middot; {depthFull} Depth</div>
                   <h1 className="mast-title">
-                    {meta.nationality}<span className="arr">&rarr;</span>{meta.destination}
+                    {meta.nationality}<svg className="arr" viewBox="0 0 7 10" fill="currentColor" aria-hidden="true"><polygon points="0,0 7,5 0,10"/></svg>{meta.destination}
                   </h1>
                 </div>
                 <div className="mast-seal">
-                  {meta.briefId && <div className="id">{meta.briefId}</div>}
                   <div className="st">
                     Issued {fmt(brief.metadata.generatedAt)}<br />
-                    Agents {successCount} / {totalCount} resolved<br />
-                    Runtime {Math.round(brief.metadata.totalDurationMs / 1000)}s &middot; {brief.metadata.model}
+                    Agents {successCount} / {totalCount} resolved
                   </div>
                 </div>
               </div>
               <div className="metastrip">
-                <div><div className="l">Passport</div><div className="v">{meta.nationality}</div></div>
-                <div><div className="l">Destination</div><div className="v">{meta.destination}</div></div>
                 <div><div className="l">Depth</div><div className="v">{depthFull}</div></div>
                 <div><div className="l">Agents</div><div className="v">{successCount}/{totalCount}</div></div>
+                <div><div className="l">Official Src</div><div className="v">{officialSrcCount}</div></div>
                 <div>
                   <div className="l">Confidence</div>
                   <div className="v good">{brief.confidenceScore.overall.charAt(0).toUpperCase() + brief.confidenceScore.overall.slice(1)}</div>
                 </div>
               </div>
             </header>
+
+            <div className="doc-controls">
+              <button className="all-toggle" data-state="expanded" aria-label="Toggle all sections">
+                <span className="s-exp">
+                  <svg viewBox="0 0 7 10" fill="currentColor"><polygon points="0,0 7,5 0,10" /></svg>
+                  Collapse All
+                </span>
+                <span className="s-col">
+                  <svg viewBox="0 0 10 10" fill="currentColor"><polygon points="5,9 1,2 9,2" /></svg>
+                  Expand All
+                </span>
+              </button>
+            </div>
 
             <ParsedSituationSection brief={brief} meta={meta} />
             <RecommendedActionSection brief={brief} />
@@ -1262,8 +1303,8 @@ export default function BriefDocument({
                 <span>{brief.disclaimer || 'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.'}</span>
               </div>
               <div className="colophon">
-                <span>VisaScout &middot; visascout.io &middot; &copy; 2026 Sabai Wave LLC</span>
-                <span>{depthFull} depth &middot; {totalCount} agents &middot; {brief.metadata.model}</span>
+                <span>visascout.io &middot; &copy; 2026</span>
+                <span>{depthFull} depth &middot; {totalCount} agents</span>
                 <span>{fmt(brief.metadata.generatedAt)}</span>
               </div>
             </footer>
@@ -1271,8 +1312,8 @@ export default function BriefDocument({
         </div>
       </div>
 
-      {/* Collapse toggle + TOC scroll-spy — executes on initial HTML parse only */}
-      <script dangerouslySetInnerHTML={{ __html: TOGGLE_JS }} />
+      {/* Collapse toggle + TOC scroll-spy — PDF/print only; React handles interactivity in screen mode */}
+      {mode === 'print' && <script dangerouslySetInnerHTML={{ __html: TOGGLE_JS }} />}
     </div>
   );
 }

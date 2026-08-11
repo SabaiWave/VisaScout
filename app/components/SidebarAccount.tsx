@@ -45,16 +45,6 @@ export function SidebarAccount({ isAdmin }: { isAdmin?: boolean }) {
         </div>
       </div>
 
-      {/* Env status */}
-      <div style={{
-        marginTop: 14, display: 'flex', alignItems: 'center', gap: 8,
-        fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-        letterSpacing: '0.07em', textTransform: 'uppercase',
-        color: 'var(--color-text-tertiary)',
-      }}>
-        <div style={{ width: 6, height: 6, background: 'var(--color-success)', flexShrink: 0 }} />
-        <span>Operational</span>
-      </div>
     </div>
   );
 }

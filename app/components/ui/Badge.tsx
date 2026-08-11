@@ -33,9 +33,9 @@ export function ConfidenceBadge({
 // ─── Depth ───────────────────────────────────────────────────────────────────
 
 const depthMap = {
-  quick:    { background: 'rgba(16,185,129,0.12)',  color: 'var(--color-depth-quick)' },
-  standard: { background: 'rgba(var(--color-secondary-rgb),0.12)',  color: 'var(--color-depth-standard)' },
-  deep:     { background: 'rgba(245,158,11,0.12)',  color: 'var(--color-depth-deep)' },
+  quick:    { background: 'rgba(var(--color-depth-quick-rgb),0.12)',    color: 'var(--color-depth-quick)' },
+  standard: { background: 'rgba(var(--color-depth-standard-rgb),0.12)', color: 'var(--color-depth-standard)' },
+  deep:     { background: 'rgba(var(--color-depth-deep-rgb),0.12)',     color: 'var(--color-depth-deep)' },
 } as const;
 
 export function DepthBadge({ depth }: { depth: 'quick' | 'standard' | 'deep' }) {

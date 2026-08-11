@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
+import { DEPTH_LABEL } from '@/src/lib/depth';
 
 interface BriefRow {
   id: string;
@@ -18,9 +19,9 @@ interface BriefRow {
 }
 
 const DEPTH_COLOR: Record<string, string> = {
-  quick: '#10b981',
-  standard: '#c8780a',
-  deep: '#c8780a',
+  quick:    'var(--color-depth-quick)',
+  standard: 'var(--color-depth-standard)',
+  deep:     'var(--color-depth-deep)',
 };
 const CONF_COLOR: Record<string, string> = {
   high: '#10b981',
@@ -52,7 +53,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
   if (deleted) return null;
 
-  const depthColor = DEPTH_COLOR[brief.depth] ?? '#c8780a';
+  const depthColor = DEPTH_COLOR[brief.depth] ?? 'var(--color-depth-standard)';
   const confColor = CONF_COLOR[brief.overall_confidence ?? ''] ?? 'var(--color-text-tertiary)';
   const dateStr = new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 
@@ -82,31 +83,31 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             <span className="db-gen-dot" />
           )}
           {brief.degraded && !isGenerating && (
-            <span className="db-tag" style={{ color: '#c8780a' }}>DEGRADED</span>
+            <span className="db-tag" style={{ color: 'var(--color-amber)' }}>DEGRADED</span>
           )}
         </div>
 
         {/* Nationality */}
-        <div className="db-cell db-cell-hide-sm">
+        <div className="db-cell db-cell-center db-cell-hide-sm">
           <span className="db-sub">{brief.nationality}</span>
         </div>
 
         {/* Depth badge */}
         <div className="db-cell db-cell-badge db-cell-hide-sm">
           <span className="vs-badge vs-badge-outline" style={{ color: depthColor, borderColor: depthColor }}>
-            {brief.depth.toUpperCase()}
+            {(DEPTH_LABEL[brief.depth as keyof typeof DEPTH_LABEL] ?? brief.depth).toUpperCase()}
           </span>
         </div>
 
         {/* Date */}
-        <div className="db-cell db-cell-date db-cell-hide-md">
+        <div className="db-cell db-cell-center db-cell-date db-cell-hide-md">
           <span className="db-sub">{dateStr}</span>
         </div>
 
         {/* Confidence */}
         <div className="db-cell db-cell-badge">
           {isGenerating ? (
-            <span className="vs-badge vs-badge-outline" style={{ color: '#c8780a', borderColor: '#c8780a' }}>RUNNING</span>
+            <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', borderColor: 'var(--color-amber)' }}>RUNNING</span>
           ) : brief.overall_confidence ? (
             <span className="vs-badge vs-badge-outline" style={{ color: confColor, borderColor: confColor }}>
               {brief.overall_confidence.toUpperCase()}
@@ -130,7 +131,6 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
             className="db-del"
             aria-label="Delete brief"
             title="Delete brief"
-            style={{ opacity: hovered ? 1 : 0 }}
           >
             <Trash2 size={13} />
           </button>
