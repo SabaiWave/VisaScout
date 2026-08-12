@@ -69,7 +69,6 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!destination) return;
     redirect(nationality, destination);
   }
 
@@ -107,7 +106,7 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
       <button
         type="submit"
         className="flex items-center justify-center gap-2 transition-opacity hover:opacity-85"
-        style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', padding: '15px', border: 'none', cursor: 'pointer' }}
+        style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', padding: '15px', border: 'none', cursor: 'pointer', lineHeight: 1 }}
       >
         {ctaLabel}<svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true"><path d="M0 0L5 4L0 8Z" /></svg>
       </button>
