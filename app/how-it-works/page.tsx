@@ -20,34 +20,10 @@ export const metadata: Metadata = {
 };
 
 const SOURCE_TIERS = [
-  {
-    tier: 'T1',
-    label: 'Official Government',
-    examples: 'Immigration portals, embassy sites (.gov, .go.th, .gov.vn)',
-    note: 'Slow to update but highest authority. T1 beats all other tiers regardless of recency.',
-    color: 'var(--color-success)',
-  },
-  {
-    tier: 'T2',
-    label: 'Official Advisories',
-    examples: 'IATA, Timatic, government travel advisories',
-    note: 'Regularly maintained. Trusted when T1 sources are absent or ambiguous.',
-    color: 'var(--color-secondary-light)',
-  },
-  {
-    tier: 'T3',
-    label: 'Reputable Aggregators',
-    examples: 'VisaHQ, Sherpa, iVisa',
-    note: 'Useful but derived from T1/T2. Used when official sources are hard to access directly.',
-    color: 'var(--color-amber)',
-  },
-  {
-    tier: 'T4',
-    label: 'Community',
-    examples: 'Reddit, Nomad List, Facebook groups, expat forums',
-    note: 'Not authoritative on rules, but often the first place enforcement reality shows up.',
-    color: 'var(--color-text-tertiary)',
-  },
+  { tier: 1, label: 'Official Government',  examples: 'Immigration portals, embassy sites (.gov, .go.th, .gov.vn)', note: 'Slow to update but highest authority. T1 beats all other tiers regardless of recency.' },
+  { tier: 2, label: 'Official Advisories',  examples: 'IATA, Timatic, government travel advisories',                 note: 'Regularly maintained. Trusted when T1 sources are absent or ambiguous.' },
+  { tier: 3, label: 'Reputable Aggregators', examples: 'VisaHQ, Sherpa, iVisa',                                      note: 'Useful but derived from T1/T2. Used when official sources are hard to access directly.' },
+  { tier: 4, label: 'Community',             examples: 'Reddit, Nomad List, Facebook groups, expat forums',          note: 'Not authoritative on rules, but often the first place enforcement reality shows up.' },
 ];
 
 const CONFIDENCE_LEVELS = [
@@ -127,7 +103,7 @@ export default function HowItWorksPage() {
             </p>
             <div className="space-y-2">
               {DEPTHS.map(d => (
-                <div key={d.label} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${d.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                <div key={d.label} style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
                   <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: d.color }}>
                     {d.label} · {d.price}
                   </p>
@@ -147,10 +123,10 @@ export default function HowItWorksPage() {
               Within the same tier, newer beats older. This is the ruleset, not a black box.
             </p>
             <div className="space-y-2">
-              {SOURCE_TIERS.map((t, i) => (
-                <div key={t.tier} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${t.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
-                  <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: t.color }}>
-                    Tier {i + 1}
+              {SOURCE_TIERS.map(t => (
+                <div key={t.tier} style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                  <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: `var(--color-tier-${t.tier})` }}>
+                    Tier {t.tier}
                   </p>
                   <p className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
                     {t.label}
@@ -171,7 +147,7 @@ export default function HowItWorksPage() {
             </p>
             <div className="space-y-2">
               {CONFIDENCE_LEVELS.map(c => (
-                <div key={c.level} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${c.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                <div key={c.level} style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
                   <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: c.color }}>
                     {c.level}
                   </p>

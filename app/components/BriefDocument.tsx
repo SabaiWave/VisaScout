@@ -513,8 +513,10 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .chip.best { border-color: var(--ok); color: var(--ok); background: var(--ok-wash); }
 .chip.good { border-color: var(--accent-rim); color: var(--accent-ink); background: var(--accent-wash); }
 .chip.cond { border-color: var(--rim); color: var(--ink-3); }
-.chip.t1 { border-color: var(--accent-rim); color: var(--accent-ink); }
-.chip.t4 { border-color: var(--rim); color: var(--ink-4); }
+.chip.t1 { border-color: rgba(34,197,94,0.4);  color: var(--color-tier-1, #22c55e); }
+.chip.t2 { border-color: rgba(56,189,248,0.4); color: var(--color-tier-2, #38bdf8); }
+.chip.t3 { border-color: rgba(251,146,60,0.4); color: var(--color-tier-3, #fb923c); }
+.chip.t4 { border-color: rgba(100,116,139,0.4); color: var(--color-tier-4, #64748b); }
 
 .meter { display: inline-flex; gap: 3px; align-items: center; }
 .meter i { display: block; width: 11px; height: 9px; border: 1px solid var(--rim); }
@@ -727,7 +729,7 @@ function Meter({ suitability }: { suitability: 'best' | 'good' | 'acceptable' })
 }
 
 function TierChip({ tier }: { tier: 1 | 2 | 3 | 4 }) {
-  const cls = tier === 1 ? 'chip t1' : tier === 4 ? 'chip t4' : 'chip';
+  const cls = `chip t${tier}`;
   return <span className={cls}>Tier {tier}</span>;
 }
 

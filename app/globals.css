@@ -87,6 +87,12 @@
   --color-depth-deep:         #f59e0b;
   --color-depth-deep-rgb:     245,158,11;
 
+  /* Source tier colors — single source of truth. Change here, updates everywhere. */
+  --color-tier-1: #22c55e;  /* green  — Official Government (highest authority) */
+  --color-tier-2: #38bdf8;  /* sky    — Official Advisories */
+  --color-tier-3: #fb923c;  /* orange — Reputable Aggregators */
+  --color-tier-4: #64748b;  /* slate  — Community (ground truth) */
+
   /* Legacy light-palette PDF tokens — superseded by the print stylesheet
      built during the BriefDocument unification. Do not extend; remove once
      that lands. */

@@ -46,15 +46,14 @@ export function DepthBadge({ depth }: { depth: 'quick' | 'standard' | 'deep' }) 
 // ─── Tier ────────────────────────────────────────────────────────────────────
 
 export function TierLabel({ tier }: { tier: 1 | 2 | 3 | 4 }) {
-  const isTop = tier <= 1;
   return (
     <span
       className="vs-badge"
       style={{
         flexShrink: 0,
-        background: isTop ? 'var(--color-secondary-subtle)' : 'var(--color-bg-overlay)',
-        color: isTop ? 'var(--color-secondary-light)' : 'var(--color-text-tertiary)',
-        fontWeight: isTop ? 600 : 400,
+        background: 'var(--color-bg-overlay)',
+        color: `var(--color-tier-${tier})`,
+        fontWeight: 600,
       }}
     >
       T{tier}
