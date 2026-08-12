@@ -406,7 +406,7 @@ function AppContent() {
         .app-coord-row:focus-within { border-color: var(--color-secondary); }
         .app-coord-row.error { border-color: var(--color-error); }
         .app-coord-row.disabled { opacity: 0.44; }
-        .app-coord-pfx { background: var(--color-bg-base); color: var(--color-secondary); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 0 14px; display: flex; align-items: center; white-space: nowrap; flex-shrink: 0; width: 154px; border-right: 1px solid var(--color-border); }
+        .app-coord-pfx { background: var(--color-bg-base); color: var(--color-secondary); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 0 14px; display: flex; align-items: center; line-height: 1; white-space: nowrap; flex-shrink: 0; width: 154px; border-right: 1px solid var(--color-border); }
         .app-coord-combo { flex: 1; min-width: 0; background: var(--color-bg-overlay); }
         .app-coord-combo > div { width: 100%; }
         .app-coord-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-overlay) !important; font-family: var(--font-mono) !important; padding-left: 14px !important; font-size: 1rem !important; }

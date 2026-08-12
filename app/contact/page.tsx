@@ -144,7 +144,7 @@ export default function ContactPage() {
             { href: '/terms#s5',     label: 'Refund Policy' },
             { href: '/terms#s3',     label: 'Legal Disclaimer' },
           ].map(({ href, label }) => (
-            <a key={href} href={href} className="ct-faq-link" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <a key={href} href={href} className="ct-faq-link" style={{ display: 'flex', alignItems: 'center', gap: 8, lineHeight: 1 }}>
               {label}
               <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true"><path d="M0 0L5 4L0 8Z" /></svg>
             </a>

@@ -117,7 +117,7 @@ export function BriefProcessingBanner({
         <div style={{ marginBottom: 24 }}>
           {showDashboardLink && (
             <Link href="/dashboard" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
+              display: 'inline-flex', alignItems: 'center', gap: 4, lineHeight: 1,
               fontFamily: MONO, fontSize: 9, fontWeight: 700,
               letterSpacing: '0.1em', textTransform: 'uppercase', color: C.ink4, textDecoration: 'none',
               marginBottom: 10,
