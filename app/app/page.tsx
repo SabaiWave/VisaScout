@@ -54,9 +54,9 @@ const NATIONALITIES = [
 // ─── Rail static data ──────────────────────────────────────────────────────
 
 const DEPTH_RAIL = {
-  quick:    { src: '3', time: '~60s',   output: '4-6 pp'   },
-  standard: { src: '5', time: '~90s',   output: '8-12 pp'  },
-  deep:     { src: '8', time: '~180s',  output: '16-24 pp' },
+  quick:    { src: '3', time: '~60s',   sources: '15' },
+  standard: { src: '5', time: '~90s',   sources: '25' },
+  deep:     { src: '8', time: '~180s',  sources: '40' },
 } as const;
 
 const RAIL_AGENTS = [
@@ -509,7 +509,7 @@ function AppContent() {
                   Payment Not Completed
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
-                  You left before completing payment. No charge was made and no brief was generated. Your inputs are still here if you&apos;d like to continue.
+                  You left before completing payment. No charge was made and no brief was generated.
                 </p>
                 <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', padding: '8px 20px', cursor: 'pointer' }}>
                   Start Over
@@ -904,7 +904,7 @@ function AppContent() {
                 <div className="app-m-cell"><div className="app-m-k">Agents</div><div className="app-m-v">5</div></div>
                 <div className="app-m-cell"><div className="app-m-k">Sources / Agent</div><div className="app-m-v">{railDepth.src}</div></div>
                 <div className="app-m-cell"><div className="app-m-k">Est. Time</div><div className="app-m-v">{railDepth.time}</div></div>
-                <div className="app-m-cell"><div className="app-m-k">Output</div><div className="app-m-v" style={{ fontSize: 14 }}>{railDepth.output}</div></div>
+                <div className="app-m-cell"><div className="app-m-k">Sources Total</div><div className="app-m-v">{railDepth.sources}</div></div>
               </div>
             </div>
 
