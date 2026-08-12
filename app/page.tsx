@@ -270,7 +270,7 @@ function DataStrip() {
         <motion.div
           key={cell.label}
           variants={fadeUp}
-          className={`flex flex-col gap-2 ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
+          className={`flex flex-col gap-2 items-center text-center ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
           style={{ padding: '30px 24px' }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
@@ -310,7 +310,7 @@ function Method() {
           Five sources.<br />One reconciled brief.
         </motion.h2>
         <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
-          Contradictions are common. Thailand&apos;s immigration portal says 30 days, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
+          Contradictions are common. Official portals say one thing, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
         </motion.p>
       </motion.div>
       <motion.div

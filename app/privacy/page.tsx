@@ -30,7 +30,7 @@ export default function PrivacyPage() {
       <LegalPageShell tocItems={TOC_ITEMS}>
         <SectionHeading as="h1" size="md" className="mb-2">Privacy Policy</SectionHeading>
         <p className="text-sm mb-10" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          Last updated: July 2026
+          Last updated: August 2026
         </p>
 
         <div className="space-y-8" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75 }}>
@@ -68,13 +68,13 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>5. Data Sharing</h2>
             <p className="mb-3">We do not sell your personal data. We share data only with service providers necessary to operate VisaScout. These providers process data under their own privacy policies and are not permitted to use your data for other purposes.</p>
             <ul className="space-y-1 list-none">
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Anthropic</strong> — AI processing (your report data is sent to generate briefs)</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Clerk</strong> — authentication (email, device info, IP address)</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Stripe</strong> — payment processing</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Supabase</strong> — database storage (report data and account records)</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Web search services</strong> — destination and visa type are passed to search queries to gather immigration data</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Error monitoring services</strong> — anonymized error context and stack traces for debugging</li>
-              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Server logging services</strong> — operational logs and request metadata</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>AI model provider</strong> — your report data (nationality, destination, situation) is sent to generate briefs</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Authentication provider</strong> — email address, device info, and IP address as part of sign-in</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Stripe</strong> — payment processing (card data handled entirely by Stripe)</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Database provider</strong> — report data and account records</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Web search provider</strong> — destination and visa type are passed to search queries to gather immigration data</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Error monitoring</strong> — anonymized error context for debugging</li>
+              <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Server logging</strong> — operational logs and anonymized request metadata</li>
               <li>• <strong style={{ color: 'var(--color-text-primary)' }}>Anonymous analytics</strong> — page-view counts with no personal identifiers</li>
             </ul>
           </section>
