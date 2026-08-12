@@ -94,7 +94,6 @@ export function ClerkThemeProvider({ children }: { children: React.ReactNode }) 
       appearance={{
         variables: darkVariables,
         elements: darkElements,
-        layout: { branded: false },
       }}
     >
       {children}
