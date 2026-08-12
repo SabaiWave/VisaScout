@@ -82,7 +82,7 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
           type="text"
           value={nationality}
           onChange={(e) => setNationality(e.target.value)}
-          placeholder="e.g. American, German, Thai…"
+          placeholder="e.g. British, Japanese, Brazilian…"
           className="flex-1 min-w-0"
           style={{ ...INPUT_STYLE, color: 'var(--color-text-primary)' }}
         />

@@ -613,7 +613,7 @@ function AppContent() {
                     maxLength={2000}
                     aria-invalid={submitted && !freeform ? true : undefined}
                     aria-required="true"
-                    placeholder="I'm arriving in Thailand on March 15 and staying about 28 days. I work remotely for a US company and I'm thinking about a quick border run to Malaysia to reset my stay."
+                    placeholder="I'm arriving in Portugal in two weeks and planning to stay 90 days. I'm a freelance developer and considering a border run to Morocco if I need to extend my stay."
                     style={{
                       display: 'block', width: '100%', minHeight: 132, resize: 'vertical',
                       background: 'var(--color-bg-elevated)', border: 'none',
