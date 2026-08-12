@@ -314,6 +314,56 @@ h1, h2, h3 {
   background-color: rgba(var(--color-secondary-rgb), 0.12) !important;
 }
 
+/* Clerk input placeholder — pseudo-elements not covered by * child selectors */
+.cl-formFieldInput::placeholder,
+[class*="cl-formFieldInput"]::placeholder,
+input[class*="cl-"]::placeholder {
+  color: #5f849e !important;
+  opacity: 1 !important;
+}
+
+/* Clerk "Last used" badge — exact class from DevTools */
+[class*="cl-lastAuthenticationStrategyBadge"] {
+  display: none !important;
+}
+
+/* Clerk footer — hide all children except the sign-up/sign-in action link */
+[class*="cl-footer"] > *:not([class*="cl-footerAction"]) {
+  display: none !important;
+}
+
+/* Breathing room below sign-up/sign-in redirect */
+[class*="cl-footerAction"] {
+  padding-bottom: 24px !important;
+}
+
+/* Clerk primary form submit (Save) — white text on amber */
+[class*="cl-formButtonPrimary"],
+[class*="cl-formButtonPrimary"] *,
+button[class*="cl-"][data-color="primary"],
+button[class*="cl-"][data-color="primary"] * {
+  color: #ffffff !important;
+}
+
+/* Clerk ghost primary buttons (Update profile, etc.) — amber text stays readable */
+[class*="cl-profileSectionPrimaryButton"],
+[class*="cl-profileSectionPrimaryButton"] * {
+  color: #c8780a !important;
+}
+
+/* Replace Clerk's → arrow with VisaScout ▲ triangle in Connect account button */
+button:has([data-localization-key*="connectedAccountsSection"]) svg {
+  display: none !important;
+}
+button:has([data-localization-key*="connectedAccountsSection"])::after {
+  content: ' ▶';
+  font-family: var(--font-mono);
+  font-size: 8px;
+  margin-left: 4px;
+  vertical-align: middle;
+  color: #c8780a;
+}
+
 /* Focus ring */
 :focus-visible {
   outline: none;

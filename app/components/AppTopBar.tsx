@@ -9,9 +9,11 @@ import { navLinkStyle } from './ui/navLinkStyles';
 export function AppTopBar() {
   return (
     <div
-      className="hidden lg:flex items-center justify-end gap-6 px-6 sticky top-0 z-30"
+      className="hidden lg:flex items-center justify-end gap-6 sticky top-0 z-30"
       style={{
         height: '52px',
+        paddingLeft: '40px',
+        paddingRight: '40px',
         background: 'rgba(6,12,18,0.94)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid var(--color-border-muted)',

@@ -120,8 +120,16 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
 
       {/* Nav */}
       <div style={{ padding: '14px 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Primary items */}
+        {/* Operations group */}
         <div>
+          <div style={{
+            padding: '10px 18px 8px',
+            fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+            textTransform: 'uppercase', fontFamily: 'var(--font-mono)',
+            color: 'var(--color-text-tertiary)', opacity: 0.7,
+          }}>
+            Operations
+          </div>
           {userItems.map(item => <NavLink key={item.href} {...item} />)}
         </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Share2, Printer, FileDown, Check } from 'lucide-react';
+import { Link2, FileDown, Check } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
 import { useAuth } from '@clerk/nextjs';
 
@@ -28,6 +28,7 @@ const BTN_BASE: React.CSSProperties = {
   textTransform: 'uppercase',
   cursor: 'pointer',
   borderRadius: 0,
+  lineHeight: 1,
 };
 
 const BTN_SOLID: React.CSSProperties = {
@@ -62,10 +63,6 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {});
-  }
-
-  function handlePrint() {
-    window.print();
   }
 
   async function handleDownload() {
@@ -117,12 +114,8 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
       <button style={{ ...BTN_BASE, color: copied ? 'var(--color-success)' : 'var(--color-text-tertiary)' }} onClick={handleShare}>
-        {copied ? <Check size={11} /> : <Share2 size={11} />}
-        {copied ? 'Copied' : 'Share'}
-      </button>
-      <button style={BTN_BASE} onClick={handlePrint}>
-        <Printer size={11} />
-        Print
+        {copied ? <Check size={11} /> : <Link2 size={11} />}
+        {copied ? 'Copied!' : 'Copy Link'}
       </button>
       <button style={{ ...BTN_SOLID, opacity: pdfLoading ? 0.6 : 1 }} onClick={handleDownload} disabled={pdfLoading}>
         <FileDown size={11} />

@@ -115,7 +115,7 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
         className={align === 'center' ? 'text-center' : ''}
         style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}
       >
-        Free &middot; No account required &middot; ~45s brief &middot; PDF included
+        Free &middot; No account required &middot; PDF included
       </div>
     </form>
   );
@@ -216,10 +216,10 @@ function Hero() {
 // ─── Data strip ────────────────────────────────────────────────────────────
 
 const dataCells = [
-  { label: 'Destinations Monitored', value: String(destinationCount), sub: 'SEA · East Asia · Europe · LatAm' },
-  { label: 'Parallel Agents', value: '5', sub: 'Simultaneous dispatch' },
+  { label: 'Destinations Monitored', value: String(destinationCount), sub: 'Southeast Asia · East Asia · Europe · Latin America' },
+  { label: 'Sections Covered', value: '8', sub: 'Entry to contingency' },
   { label: 'Source Tiers', value: 'T1–T4', sub: 'Gov to community' },
-  { label: 'Brief Time', value: '~45s', sub: 'Streamed · PDF export' },
+  { label: 'Brief Tiers', value: '3', sub: 'Scout, Intel, Dossier' },
 ];
 
 function DataStrip() {
@@ -352,13 +352,11 @@ function checkItem(label: string, note?: string) {
 
 function flagItem(date: string, text: string, tier: string) {
   return (
-    <div className="vs-row" style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--color-secondary)', paddingTop: 4, flexShrink: 0 }}>▲</span>
-      <div style={{ flex: 1 }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', marginRight: 8 }}>{date}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)' }}>{text}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-tertiary)', marginLeft: 8, letterSpacing: '0.08em' }}>[{tier}]</span>
-      </div>
+    <div className="vs-row" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--color-secondary)', flexShrink: 0, lineHeight: 1 }}>▲</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', flexShrink: 0 }}>{date}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)', flex: 1 }}>{text}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-tertiary)', flexShrink: 0, letterSpacing: '0.08em' }}>{tier}</span>
     </div>
   );
 }
@@ -374,12 +372,9 @@ function BriefExhibit() {
 
         {/* Left — description */}
         <div className="pt-1">
-          <SecLabel>Exhibit A</SecLabel>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)', marginBottom: 16 }}>
-            An Intel brief. 5 parallel agents. Every claim sourced and tier-tagged.
-          </p>
+          <SecLabel>Sample Brief</SecLabel>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
-            Border run analysis, conflict resolution, and contingency planning — all in one reconciled brief.
+            An Intel brief. Every claim sourced, tier-tagged, and conflict-resolved. This is a preview. Your full brief goes deeper on every section.
           </p>
         </div>
 
@@ -391,7 +386,7 @@ function BriefExhibit() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 8 }}>INTEL</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
-                Thailand &middot; United States &middot; METV
+                Visa Intelligence Brief
               </span>
             </div>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
@@ -402,46 +397,46 @@ function BriefExhibit() {
 
           <div style={{ padding: '16px 20px' }}>
 
-            {briefSection('§1  Situation')}
+            {briefSection('Situation')}
             {briefField('Passport', 'United States of America')}
             {briefField('Destination', 'Kingdom of Thailand')}
-            {briefField('Current status', 'METV — Day 47 of 60 · 13 days remaining')}
+            {briefField('Current status', 'METV. Day 47 of 60. 13 days remaining')}
             {briefField('Goal', 'Extend stay 30+ days in-country')}
 
-            {briefSection('§2  Visa Options')}
+            {briefSection('Visa Options')}
             {visaOption('TR Extension (In-Country)', 'Extend at Chaeng Watthana. No border exit. 30 days. 1-day processing.', '฿1,900', true)}
             {visaOption('TR Visa (Border Run)', 'Exit to nearest consulate. New 60-day TR. Higher friction, 1–2 day turnaround.', '฿2,000 + travel')}
 
-            {briefSection('§3  Recommended Action')}
+            {briefSection('Recommended Action')}
             <div style={{ marginTop: 6, background: 'rgba(var(--color-secondary-rgb),0.06)', borderLeft: '2px solid var(--color-amber)', padding: '11px 14px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
                 Deadline: Aug 19, 2026 · 13 days remaining
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.9, color: 'var(--color-text-primary)' }}>
-                Apply TR extension at Chaeng Watthana before Aug 19. Fee ฿1,900. Arrive by 08:00 — August queues run 2–3 hrs.
+                Apply TR extension at Chaeng Watthana before Aug 19. Fee ฿1,900. Arrive by 08:00. August queues run 2–3 hrs.
               </div>
             </div>
 
-            {briefSection('§4  Entry Requirements')}
+            {briefSection('Entry Requirements')}
             {checkItem('Passport', 'Valid ≥6 months past intended departure')}
             {checkItem('TM.7 form + photo', 'Download from immigration.go.th · 1x white background')}
             {checkItem('Proof of funds', '฿20,000 cash or bank statement')}
 
-            {briefSection('§5  Border Run Analysis')}
-            {briefField('Enforcement posture', 'Moderate — consecutive exemptions flagged at land borders')}
-            {briefField('Verdict', 'TR extension preferred — avoids flag risk', true)}
+            {briefSection('Border Run Analysis')}
+            {briefField('Enforcement posture', 'Moderate. Consecutive exemptions flagged at land borders')}
+            {briefField('Verdict', 'TR extension preferred. Lower flag risk.', true)}
 
-            {briefSection('§6  Recent Changes — 90 Days')}
+            {briefSection('Recent Changes, 90 Days')}
             {flagItem('Jul 2026', 'Chaeng Watthana extended hours to 16:30', 'T1')}
             {flagItem('May 2026', 'Poipet: 3 consecutive exemption limit now enforced', 'T4')}
 
-            {briefSection('§7  Conflict Report')}
+            {briefSection('Conflict Report')}
             {briefField('Conflict', 'T1 states 30-day max; T4 reports 60-day grants at officer discretion')}
-            {briefField('Resolution', 'T1 authoritative — T4 flags variance, monitor port-of-entry', true)}
+            {briefField('Resolution', 'T1 authoritative. T4 flags variance, monitor port-of-entry.', true)}
 
-            {briefSection('§8  Contingency')}
+            {briefSection('Contingency')}
             {briefField('If denied', 'File at local sub-district office same day')}
-            {briefField('If overstay', '฿500/day fine, max ฿20,000 — pay at departure gate')}
+            {briefField('If overstay', '฿500/day fine, max ฿20,000. Pay at departure gate.')}
 
           </div>
         </div>
@@ -533,7 +528,7 @@ function CTA() {
         </p>
       </div>
       <div className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center">
-        <CoordForm ctaLabel="Get My Visa Brief — Free" align="center" />
+        <CoordForm ctaLabel="Get My Free Visa Brief" align="center" />
       </div>
     </div>
   );
@@ -548,7 +543,7 @@ function Footer() {
         className="px-6 lg:pl-[72px] lg:pr-8 py-6 flex items-center"
         style={{ borderRight: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}
       >
-        {clientConfig.brandName} &middot; &copy; {new Date().getFullYear()} Sabai Wave LLC
+        {clientConfig.brandName} &middot; &copy; {new Date().getFullYear()}
       </div>
       <div
         className="px-6 lg:pl-12 lg:pr-[72px] py-6 flex flex-col gap-2"

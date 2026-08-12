@@ -8,7 +8,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 const darkVariables = {
   fontFamily: "'JetBrains Mono', monospace",
   colorPrimary: '#c8780a',       // --color-secondary / --color-amber
-  colorTextOnPrimaryBackground: '#060c12', // --color-neutral
+  colorTextOnPrimaryBackground: '#ffffff',  // white on amber = legible
   borderRadius: '0px',           // --radius-md
   colorBackground: '#0a1520',    // --color-bg-elevated
   colorInputBackground: '#0e1c28', // --color-bg-overlay
@@ -56,8 +56,8 @@ const darkElements = {
   profileSectionPrimaryButton: { color: '#c8780a' },
   profileSectionItem: { borderColor: '#1e3040' },
   accordionTriggerButton: { color: '#dceaf6' },
-  badge: { color: '#dceaf6', backgroundColor: '#0e1c28' },
-  badgePrimary: { backgroundColor: '#0e1c28', color: '#8fb2c8' },
+  badge: { display: 'none' },
+  badgePrimary: { display: 'none' },
   tableHead: { color: '#8fb2c8' },
   paginationButton: { color: '#8fb2c8' },
   paginationButtonIcon: { color: '#8fb2c8' },
@@ -94,6 +94,7 @@ export function ClerkThemeProvider({ children }: { children: React.ReactNode }) 
       appearance={{
         variables: darkVariables,
         elements: darkElements,
+        layout: { branded: false },
       }}
     >
       {children}

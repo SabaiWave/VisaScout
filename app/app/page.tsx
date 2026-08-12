@@ -54,9 +54,9 @@ const NATIONALITIES = [
 // ─── Rail static data ──────────────────────────────────────────────────────
 
 const DEPTH_RAIL = {
-  quick:    { src: '3', time: '~30s',  output: '4-6 pp'   },
-  standard: { src: '5', time: '~45s',  output: '8-12 pp'  },
-  deep:     { src: '8', time: '~90s',  output: '16-24 pp' },
+  quick:    { src: '3', time: '~60s',   output: '4-6 pp'   },
+  standard: { src: '5', time: '~90s',   output: '8-12 pp'  },
+  deep:     { src: '8', time: '~180s',  output: '16-24 pp' },
 } as const;
 
 const RAIL_AGENTS = [
@@ -756,8 +756,8 @@ function AppContent() {
                         <button
                           type="button"
                           onClick={() => setShowInviteInput(v => !v)}
-                          className="w-full flex items-center justify-center gap-1 text-xs uppercase"
-                          style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                          className="w-full flex items-center justify-center gap-1 uppercase"
+                          style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', fontWeight: 400, letterSpacing: '0.04em', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
                         >
                           Have an invite code?
                           <svg width="7" height="4" viewBox="0 0 8 5" fill="currentColor" aria-hidden="true" style={{ transform: showInviteInput ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s', flexShrink: 0 }}><path d="M0 0L8 0L4 5Z" /></svg>
@@ -820,7 +820,7 @@ function AppContent() {
                     ) : null
                   )}
 
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'center' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'center' }}>
                     This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
                   </p>
                 </div>

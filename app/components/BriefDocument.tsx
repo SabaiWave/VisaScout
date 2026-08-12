@@ -131,6 +131,24 @@ const CSS = `
   --rail-gap:   0px;
   --grid-cols:  minmax(0,1fr);
 }
+.doc[data-mode="print"] table.tbl { page-break-inside: auto; max-width: 100%; }
+.doc[data-mode="print"] table.tbl td,
+.doc[data-mode="print"] table.tbl th { word-break: break-word; overflow-wrap: break-word; }
+.doc[data-mode="print"] table.tbl .num { white-space: normal; }
+.doc[data-mode="print"] table.tbl thead th { white-space: normal; }
+.doc[data-mode="print"] table.tbl .name { font-size: 13px; }
+.doc[data-mode="print"] table.tbl .meter .lbl { display: none; }
+.doc[data-mode="print"] table.tbl thead th:last-child,
+.doc[data-mode="print"] table.tbl tbody td:last-child { border-right: 1px solid var(--rim) !important; }
+.doc[data-mode="print"] table.tbl tbody.opt-group { break-inside: avoid; page-break-inside: avoid; }
+.doc[data-mode="print"] table.tbl .noterow { break-before: avoid; page-break-before: avoid; }
+.doc[data-mode="print"] .scrollx { overflow: visible; }
+.doc[data-mode="print"] .chk-h { grid-template-columns: 40px minmax(0,1fr) 200px !important; }
+.doc[data-mode="print"] .chk-h > span:last-child { display: inline !important; }
+.doc[data-mode="print"] .chk-r { grid-template-columns: 40px minmax(0,1fr) 200px !important; }
+.doc[data-mode="print"] .chk-r > div:nth-child(3) { grid-column: 3 !important; border-top: none !important; }
+.doc[data-mode="print"] table.tbl thead { display: table-header-group; }
+.doc[data-mode="print"] table.tbl tbody tr { break-inside: avoid; page-break-inside: avoid; }
 
 @media print {
   .doc {
@@ -147,6 +165,33 @@ const CSS = `
   }
   @page { size: A4; margin: 16mm 15mm 18mm; }
   .doc::before { display: none !important; }
+  /* Table-level break-avoid is too greedy — browser ignores it when table > 1 page.
+     Let table break freely; lock each opt-group tbody instead. */
+  table.tbl { page-break-inside: auto; }
+  table.tbl td, table.tbl th { word-break: break-word; overflow-wrap: break-word; }
+  table.tbl .num { white-space: normal; }
+  table.tbl tbody.opt-group { break-inside: avoid; page-break-inside: avoid; }
+  table.tbl .noterow { break-before: avoid; page-break-before: avoid; }
+  table.tbl .meter .lbl { display: none; }
+  /* Restore 3-column checklist layout — mobile breakpoint collapses it to 2 */
+  .chk-h { grid-template-columns: 40px minmax(0,1fr) 200px !important; }
+  .chk-h > span:last-child { display: inline !important; }
+  .chk-r { grid-template-columns: 40px minmax(0,1fr) 200px !important; }
+  .chk-r > div:nth-child(3) { grid-column: 3 !important; border-top: none !important; }
+  /* Prevent table right-border clipping at print margin */
+  .scrollx { overflow: visible; }
+  table.tbl { max-width: 100%; }
+  /* Restore right outer border — td:last-child border-right:none eats it in collapse mode */
+  table.tbl thead th:last-child,
+  table.tbl tbody td:last-child { border-right: 1px solid var(--rim) !important; }
+  /* Scale down .name so it fits narrow columns without mid-word breaks */
+  table.tbl .name { font-size: 13px; }
+  /* Allow header labels to wrap rather than force table wider */
+  table.tbl thead th { white-space: normal; }
+  /* Repeat thead on each printed page */
+  table.tbl thead { display: table-header-group; }
+  /* Keep individual rows from splitting across pages */
+  table.tbl tbody tr { break-inside: avoid; page-break-inside: avoid; }
 }
 
 .doc::before {
@@ -176,11 +221,7 @@ const CSS = `
   top: calc(var(--nav-h) + 22px);
   align-self: start;
   min-width: 0;
-  max-height: calc(100vh - var(--nav-h) - 42px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--rim) transparent;
+  overflow-y: visible;
 }
 .doc[data-mode="print"] .rail { display: none !important; }
 @media print { .rail { display: none !important; } }
@@ -304,7 +345,7 @@ const CSS = `
   font-size: clamp(30px, 4vw, 46px); line-height: 0.9;
   letter-spacing: 0.005em; text-transform: uppercase; color: var(--ink);
 }
-.mast-title .arr { display: inline-block; vertical-align: middle; color: var(--accent-ink); width: 0.38em; height: 0.55em; margin: 0 0.2em -0.04em; }
+.mast-title .arr { display: inline-block; vertical-align: 0.12em; color: var(--accent-ink); width: 0.38em; height: 0.55em; margin: 0 0.2em; }
 .mast-seal { text-align: right; white-space: nowrap; }
 .mast-seal .id {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
@@ -312,7 +353,7 @@ const CSS = `
 }
 .mast-seal .st { margin-top: 5px; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-4); line-height: 1.9; }
 
-.metastrip { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); }
+.metastrip { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
 .metastrip > div { padding: 12px 14px; border-left: 1px solid var(--rim-soft); }
 .metastrip > div:first-child { border-left: none; }
 .metastrip .l { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); }
@@ -443,7 +484,8 @@ table.tbl tbody td {
   color: var(--ink-2); font-size: 12.5px; line-height: 1.62;
 }
 table.tbl tbody td:last-child { border-right: none; }
-table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl tbody:last-child tr:last-child td { border-bottom: none; }
+table.tbl tbody.opt-group { break-inside: avoid; }
 table.tbl .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 table.tbl .name {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px;
@@ -598,6 +640,10 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 @media (max-width: 1240px) {
   .doc { --sheet-pad: 34px 22px 60px; --rail-w: 244px; --rail-gap: 30px; }
 }
+/* At large viewports (>1240px) sheet auto-margin alone gives ~10-15px gap vs sidebar — add breathing room */
+@media (min-width: 1241px) {
+  .sheet { padding-left: 28px; padding-right: 28px; }
+}
 @media (max-width: 1000px) {
   .doc { --grid-cols: minmax(0,1fr); --rail-pos: static; --rail-w: 100%; --rail-gap: 0px; }
   .rail { max-height: none; overflow: visible; margin-bottom: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
@@ -613,10 +659,9 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
   .toc { grid-template-columns: 1fr; }
   .toc li:nth-child(odd) { border-right: none; }
   .toc li:nth-last-child(2) { border-bottom: 1px solid var(--rim-soft); }
-  .metastrip { grid-template-columns: 1fr 1fr; }
-  .metastrip > div { border-left: none; border-top: 1px solid var(--rim-soft); }
-  .metastrip > div:nth-child(-n+2) { border-top: none; }
-  .metastrip > div:nth-child(even) { border-left: 1px solid var(--rim-soft); }
+  .metastrip { grid-template-columns: 1fr 1fr 1fr; }
+  .metastrip > div { border-left: 1px solid var(--rim-soft); border-top: none; }
+  .metastrip > div:first-child { border-left: none; }
   .act-body { grid-template-columns: minmax(0,1fr); }
   .act-clock { border-left: none; border-top: 1px solid var(--accent-rim); }
   .kv-r { grid-template-columns: minmax(0,1fr); }
@@ -836,11 +881,11 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
               <th style={{ width: '22%' }}>Friction</th>
             </tr>
           </thead>
-          <tbody>
-            {options.length === 0 ? (
-              <tr><td colSpan={5} style={{ color: 'var(--ink-4)' }}>No visa options available.</td></tr>
-            ) : options.flatMap((opt, i) => [
-              <tr key={`opt-${i}`} className={opt.suitability === 'best' ? 'fit-best' : undefined}>
+          {options.length === 0 ? (
+            <tbody><tr><td colSpan={5} style={{ color: 'var(--ink-4)' }}>No visa options available.</td></tr></tbody>
+          ) : options.map((opt, i) => (
+            <tbody key={`opt-${i}`} className="opt-group">
+              <tr className={opt.suitability === 'best' ? 'fit-best' : undefined}>
                 <td><span className="name">{opt.name}</span></td>
                 <td className="num">{opt.maxStay}</td>
                 <td>
@@ -850,8 +895,8 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
                 </td>
                 <td><SuitChip suitability={opt.suitability} /></td>
                 <td><Meter suitability={opt.suitability} /></td>
-              </tr>,
-              <tr key={`note-${i}`} className="noterow">
+              </tr>
+              <tr className="noterow">
                 <td colSpan={5}>
                   <span className="m">Note</span>
                   {noDash(opt.summary)}
@@ -861,9 +906,9 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
                     </span>
                   )}
                 </td>
-              </tr>,
-            ])}
-          </tbody>
+              </tr>
+            </tbody>
+          ))}
         </table>
       </div>
     </section>
@@ -1167,7 +1212,7 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
   const contested = brief.conflictReport.contested.length;
   const unverified = brief.conflictReport.unverified.length;
   const depth = brief.metadata.depth;
-  const depthTag = depth === 'quick' ? 'Qck' : depth === 'standard' ? 'Std' : 'Deep';
+  const depthTag = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
 
   return (
     <aside className="rail">
@@ -1183,7 +1228,7 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
 
       {/* Panel 2 — confidence ledger */}
       <div className="rp">
-        <div className="rp-h">Confidence Ledger<i /><span className="ct">&sect;07</span></div>
+        <div className="rp-h">Confidence Ledger<i /></div>
         <div className="led-hero">
           <div className="l">Overall confidence</div>
           <div className="v">{overallConf.charAt(0).toUpperCase() + overallConf.slice(1)}</div>
@@ -1199,7 +1244,7 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
 
       {/* Panel 3 — scroll-spy TOC */}
       <div className="rp">
-        <div className="rp-h">Contents<i /><span className="ct">Conf</span></div>
+        <div className="rp-h">Contents<i /></div>
         <ul className="toc" id="bd-toc">
           {SECTION_LABELS.map(([id, label], i) => {
             const confKey = SECTION_CONF_KEYS[i];
@@ -1258,14 +1303,12 @@ export default function BriefDocument({
                 </div>
                 <div className="mast-seal">
                   <div className="st">
-                    Issued {fmt(brief.metadata.generatedAt)}<br />
-                    Agents {successCount} / {totalCount} resolved
+                    Issued {fmt(brief.metadata.generatedAt)}
                   </div>
                 </div>
               </div>
               <div className="metastrip">
                 <div><div className="l">Depth</div><div className="v">{depthFull}</div></div>
-                <div><div className="l">Agents</div><div className="v">{successCount}/{totalCount}</div></div>
                 <div><div className="l">Official Src</div><div className="v">{officialSrcCount}</div></div>
                 <div>
                   <div className="l">Confidence</div>
