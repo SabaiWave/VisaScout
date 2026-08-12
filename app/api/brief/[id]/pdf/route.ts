@@ -2,7 +2,7 @@ import { existsSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { getSupabase } from '@/src/lib/supabase';
-import { generateBriefHtml } from '@/src/lib/pdfTemplate';
+import { renderBriefHtml } from '@/src/lib/renderBriefHtml';
 import { log } from '@/src/lib/logger';
 import type { VisaBrief } from '@/src/types/index';
 
@@ -51,11 +51,11 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to parse brief' }, { status: 500 });
   }
 
-  const html = generateBriefHtml(brief, {
+  const html = await renderBriefHtml(brief, {
     nationality: row.nationality,
     destination: row.destination,
-    depth: row.depth,
-    createdAt: row.created_at,
+    briefId: row.id,
+    generatedAt: row.created_at,
   });
 
   let browser;

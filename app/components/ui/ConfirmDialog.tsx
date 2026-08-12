@@ -52,7 +52,7 @@ export function ConfirmDialog({
         style={{
           background: 'var(--color-bg-elevated)',
           border: '1px solid var(--color-border)',
-          borderRadius: '12px',
+          borderRadius: '0px',
           padding: '28px 28px 24px',
           maxWidth: '400px',
           width: '100%',
@@ -94,7 +94,7 @@ export function ConfirmDialog({
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               padding: '6px 16px',
-              borderRadius: '8px',
+              borderRadius: '0px',
               border: 'none',
               background: loading ? 'rgba(239,68,68,0.4)' : 'rgba(239,68,68,0.85)',
               color: '#fff',

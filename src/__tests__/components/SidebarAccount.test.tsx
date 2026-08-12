@@ -2,12 +2,12 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { useClerk } from '@clerk/nextjs';
+import { render, screen } from '@testing-library/react';
+import { useUser } from '@clerk/nextjs';
 import { SidebarAccount } from '@/app/components/SidebarAccount';
 
 jest.mock('@clerk/nextjs', () => ({
-  useClerk: jest.fn(),
+  useUser: jest.fn(),
 }));
 
 jest.mock('next/link', () => {
@@ -17,28 +17,41 @@ jest.mock('next/link', () => {
   return MockLink;
 });
 
-const mockSignOut = jest.fn();
-
 beforeEach(() => {
   jest.clearAllMocks();
-  (useClerk as unknown as jest.Mock).mockReturnValue({ signOut: mockSignOut });
+  (useUser as unknown as jest.Mock).mockReturnValue({ user: null });
 });
 
 describe('SidebarAccount', () => {
-  it('Account Settings links to /dashboard/account', () => {
+  it('shows fallback initials when no user', () => {
     render(<SidebarAccount />);
-    expect(screen.getByRole('link', { name: /account settings/i })).toHaveAttribute('href', '/dashboard/account');
+    expect(screen.getByText('??')).toBeInTheDocument();
   });
 
-  it('calls signOut with redirectUrl when Sign Out clicked', () => {
+  it('shows initials from user name', () => {
+    (useUser as unknown as jest.Mock).mockReturnValue({
+      user: { firstName: 'Alex', lastName: 'Smith', emailAddresses: [] },
+    });
     render(<SidebarAccount />);
-    fireEvent.click(screen.getByRole('button', { name: /sign out/i }));
-    expect(mockSignOut).toHaveBeenCalledWith({ redirectUrl: '/' });
+    expect(screen.getByText('AS')).toBeInTheDocument();
   });
 
-  it('renders both actions', () => {
+  it('shows email when user has email', () => {
+    (useUser as unknown as jest.Mock).mockReturnValue({
+      user: { firstName: null, lastName: null, emailAddresses: [{ emailAddress: 'alex@test.com' }] },
+    });
     render(<SidebarAccount />);
-    expect(screen.getByRole('link', { name: /account settings/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
+    expect(screen.getByText('alex@test.com')).toBeInTheDocument();
   });
+
+  it('shows ADMIN badge when isAdmin=true', () => {
+    render(<SidebarAccount isAdmin />);
+    expect(screen.getByText('ADMIN')).toBeInTheDocument();
+  });
+
+  it('hides ADMIN badge when isAdmin=false', () => {
+    render(<SidebarAccount isAdmin={false} />);
+    expect(screen.queryByText('ADMIN')).not.toBeInTheDocument();
+  });
+
 });

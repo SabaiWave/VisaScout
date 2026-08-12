@@ -9,6 +9,8 @@ import {
   Text,
 } from '@react-email/components';
 
+const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&display=swap');`;
+
 interface BriefReadyEmailProps {
   destination: string;
   briefUrl: string;
@@ -17,37 +19,33 @@ interface BriefReadyEmailProps {
 export default function BriefReadyEmail({ destination, briefUrl }: BriefReadyEmailProps) {
   return (
     <Html>
-      <Head />
+      <Head>
+        <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
+      </Head>
       <Preview>Your {destination} visa brief is ready.</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <Body style={styles.body} {...({ bgcolor: '#f0f0f0' } as any)}>
+        <Container style={styles.wrap}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Section style={styles.card} {...({ bgcolor: '#0a1520' } as any)}>
+            <Text style={styles.wordmark}>VISASCOUT</Text>
 
-          <Text style={styles.wordmark}>
-            <span style={{ color: '#6366F1' }}>{'// '}</span>VISASCOUT
-          </Text>
+            <Text style={styles.heading}>Your brief is ready.</Text>
 
-          <Text style={styles.heading}>Your brief is ready.</Text>
+            <Text style={styles.text}>
+              Your visa intelligence brief for{' '}
+              <strong style={{ color: '#dceaf6' }}>{destination}</strong> has finished
+              generating. Official rules, recent enforcement changes, and community intel. All in one place.
+            </Text>
 
-          <Text style={styles.text}>
-            Your visa intelligence brief for <strong>{destination}</strong> has finished generating.
-            Official rules, recent enforcement changes, and community intel — all in one place.
-          </Text>
+            <Section style={styles.btnSection}>
+              <Button href={briefUrl} style={styles.btn}>
+                VIEW YOUR BRIEF
+              </Button>
+            </Section>
 
-          <Section style={styles.btnSection}>
-            <Button href={briefUrl} style={styles.btn}>
-              VIEW YOUR BRIEF
-            </Button>
+            <Text style={styles.footer}>© 2026 visascout.io</Text>
           </Section>
-
-          <Text style={styles.disclaimer}>
-            This report aggregates publicly available information. Verify all visa requirements
-            with official sources before travel. Not legal advice.
-          </Text>
-
-          <Text style={styles.footer}>
-            © 2026 visascout.io
-          </Text>
-
         </Container>
       </Body>
     </Html>
@@ -56,68 +54,68 @@ export default function BriefReadyEmail({ destination, briefUrl }: BriefReadyEma
 
 const styles = {
   body: {
-    backgroundColor: '#f4f4f5',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    backgroundColor: '#f0f0f0',
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    margin: '0',
+    padding: '0',
   },
-  container: {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    border: '1px solid #e4e4e7',
-    margin: '40px auto',
-    padding: '40px',
+  wrap: {
     maxWidth: '560px',
+    margin: '40px auto',
+    padding: '0 16px',
+  },
+  card: {
+    backgroundColor: '#0a1520',
+    borderTop: '3px solid #c8780a',
+    border: '1px solid #1e3040',
+    padding: '40px',
   },
   wordmark: {
-    color: '#18181b',
-    fontSize: '16px',
+    color: '#c8780a',
+    fontSize: '11px',
     fontWeight: '700',
-    letterSpacing: '0.15em',
-    margin: '0 0 32px',
+    letterSpacing: '0.18em',
+    margin: '0 0 28px',
     fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   heading: {
-    color: '#18181b',
-    fontSize: '32px',
-    fontWeight: '700',
-    lineHeight: '1.2',
-    margin: '0 0 12px',
-    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    color: '#dceaf6',
+    fontSize: '42px',
+    fontWeight: '900',
+    lineHeight: '1.0',
+    textTransform: 'uppercase' as const,
+    margin: '0 0 20px',
+    fontFamily: "'Barlow Condensed', 'Arial Narrow', Impact, Arial, sans-serif",
+    letterSpacing: '-0.01em',
   },
   text: {
-    color: '#52525b',
-    fontSize: '15px',
+    color: '#8fb2c8',
+    fontSize: '14px',
     lineHeight: '1.75',
     margin: '0 0 28px',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
   },
   btnSection: {
     margin: '0 0 32px',
   },
   btn: {
-    backgroundColor: '#6366F1',
-    borderRadius: '6px',
-    color: '#ffffff',
-    fontSize: '13px',
+    backgroundColor: '#c8780a',
+    color: '#060c12',
+    fontSize: '11px',
     fontWeight: '700',
-    letterSpacing: '0.1em',
-    padding: '12px 24px',
+    letterSpacing: '0.12em',
+    padding: '12px 28px',
     textDecoration: 'none',
     display: 'inline-block',
+    whiteSpace: 'nowrap' as const,
     fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-  },
-  disclaimer: {
-    color: '#a1a1aa',
-    fontSize: '11px',
-    lineHeight: '1.6',
-    margin: '0 0 20px',
-    fontFamily: "'Geist', Helvetica, Arial, sans-serif",
-    borderTop: '1px solid #e4e4e7',
-    paddingTop: '16px',
   },
   footer: {
-    color: '#52525b',
-    fontSize: '12px',
+    color: '#5f849e',
+    fontSize: '11px',
     margin: '0',
     fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    borderTop: '1px solid #1e3040',
+    paddingTop: '16px',
   },
 };

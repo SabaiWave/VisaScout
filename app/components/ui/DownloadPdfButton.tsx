@@ -111,7 +111,7 @@ export function DownloadPdfButton({ briefId, depth, className, forceError }: Dow
       </Button>
       {error && (
         <div
-          className="rounded-lg px-4 py-3 border"
+          className="px-4 py-3 border"
           style={{ background: 'var(--color-error-bg)', borderColor: 'var(--color-error-border)' }}
         >
           <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: 'var(--color-error)' }}>

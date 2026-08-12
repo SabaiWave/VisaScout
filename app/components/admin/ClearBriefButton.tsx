@@ -31,7 +31,7 @@ export function ClearBriefButton({ userId }: { userId: string }) {
     }
   }
 
-  const color = state === 'done' ? 'rgba(99,102,241,0.8)' : state === 'error' ? 'var(--color-error)' : 'var(--color-text-tertiary)';
+  const color = state === 'done' ? 'rgba(var(--color-secondary-rgb),0.8)' : state === 'error' ? 'var(--color-error)' : 'var(--color-text-tertiary)';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

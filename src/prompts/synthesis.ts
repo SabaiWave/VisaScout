@@ -38,7 +38,7 @@ ${depthInstructions}
 SYNTHESIS RULES:
 - Do not use em dashes (—) in any field. Use a period or comma instead.
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
-- Recommended action must be specific, actionable, and include a deadline if applicable
+- recommendedAction.action must be a short headline directive (10 words max). No sentences, no steps, no caveats. Example: "Apply for TR/60 extension before day 60." All supporting detail, steps, and costs go in rationale (2-4 sentences).
 - If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
 - Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
 - For each visa type requiring pre-travel application (consulate, e-visa portal), populate applicationDocs with the required documents to submit and applicationUrl with the official portal URL. For on-arrival/visa-free options requiring no pre-application, omit both fields.
@@ -75,9 +75,9 @@ Return ONLY valid JSON (no markdown fences):
     }
   ],
   "recommendedAction": {
-    "action": "<specific action the traveler should take>",
+    "action": "<short headline directive, 10 words max — what to do, not how. Example: 'Apply for TR/60 extension before day 60.' Detailed steps go in rationale.>",
     "deadline": "<deadline if applicable, null otherwise>",
-    "rationale": "<1-2 sentences why>",
+    "rationale": "<2-4 sentences with the how, why, cost, and steps. This is the detailed explanation.>",
     "urgency": "<high|medium|low>",
     "stalePolicyWarning": "<⚠ warning string if Recent Changes failed, null otherwise>"
   },

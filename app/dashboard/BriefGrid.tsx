@@ -2,22 +2,110 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { motion, MotionConfig } from 'framer-motion';
 import { Button } from '@/app/components/ui/Button';
 import { BriefCard } from './BriefCard';
 
-const EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-const gridContainer = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
-};
-
-export const cardVariants = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EXPO } },
-};
+const GRID_CSS = `
+  .db-list { /* border from vs-rail */ }
+  .db-head {
+    display: grid;
+    grid-template-columns: minmax(120px,1fr) minmax(100px,1fr) minmax(80px,0.7fr) minmax(90px,0.8fr) minmax(80px,0.7fr) 80px;
+    align-items: center;
+    height: 36px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  /* .db-head-label font props from global .vs-mono-label */
+  .db-row {
+    display: grid;
+    grid-template-columns: minmax(120px,1fr) minmax(100px,1fr) minmax(80px,0.7fr) minmax(90px,0.8fr) minmax(80px,0.7fr) 80px;
+    align-items: center;
+    height: 64px;
+    padding: 0 16px;
+    cursor: pointer;
+    transition: background 0.1s;
+    /* border-bottom from vs-row */
+  }
+  .db-cell { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+  .db-cell-badge { justify-content: center; }
+  .db-cell-center { justify-content: center; }
+  .db-dest {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .db-sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* .db-badge → use global .vs-badge */
+  .db-gen-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-amber);
+    flex-shrink: 0;
+    animation: db-pulse 1.2s ease-in-out infinite;
+  }
+  .db-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .db-cell-actions { display: flex; align-items: center; gap: 8px; justify-content: center; }
+  .db-view {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .db-del {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    display: flex;
+    align-items: center;
+    transition: color 0.15s, opacity 0.15s;
+  }
+  .db-del:hover { color: rgba(239,68,68,0.8); }
+  /* .db-empty / .db-empty-text → use global .vs-empty / .vs-empty-text */
+  @keyframes db-pulse { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
+  @media (max-width: 860px) {
+    .db-head,
+    .db-row { grid-template-columns: minmax(100px,1.5fr) minmax(90px,1fr) minmax(80px,1fr) 80px; }
+    .db-cell-hide-sm { display: none; }
+    .db-head-label-hide-sm { display: none; }
+  }
+  @media (max-width: 600px) {
+    .db-head,
+    .db-row { grid-template-columns: minmax(100px,2fr) minmax(70px,1fr) 80px; }
+    .db-cell-hide-md { display: none; }
+    .db-head-label-hide-md { display: none; }
+  }
+`;
 
 const PAGE_SIZE = 12;
 
@@ -46,30 +134,45 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
     setDeletedIds((prev) => new Set([...prev, id]));
   }
 
+  const visible = briefs.filter(b => !deletedIds.has(b.id));
   const effectiveTotal = Math.max(0, total - deletedIds.size);
   const totalPages = Math.max(1, Math.ceil(effectiveTotal / PAGE_SIZE));
 
   return (
-    <MotionConfig reducedMotion="user">
-      <motion.div
-        variants={gridContainer}
-        initial="hidden"
-        animate="show"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        {briefs.map((brief) => (
-          <BriefCard key={brief.id} brief={brief} onDelete={() => handleDelete(brief.id)} />
-        ))}
-      </motion.div>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: GRID_CSS }} />
 
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
-          {page > 1 && (
+      {visible.length === 0 ? (
+        <div className="vs-empty">
+          <p className="vs-empty-text">No briefs yet. Generate your first.</p>
+          <a
+            href="/app"
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none', display: 'inline-block' }}
+          >
+            Generate Brief
+          </a>
+        </div>
+      ) : (
+        <div className="db-list vs-rail" style={{ marginBottom: '2rem' }}>
+          {/* Header row */}
+          <div className="db-head" role="row">
+            <span className="db-head-label vs-mono-label">Destination</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm">Nationality</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Depth</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-md" style={{ textAlign: 'center' }}>Date</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Status</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Actions</span>
+          </div>
+
+          {visible.map((brief) => (
+            <BriefCard key={brief.id} brief={brief} onDelete={() => handleDelete(brief.id)} />
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {totalPages > 1 && page > 1 && (
             <Button
               asChild
               variant="ghost"
@@ -78,15 +181,17 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
               style={{ borderColor: 'var(--color-border-strong)' }}
             >
               <Link href={`/dashboard?page=${page - 1}`}>
-                <ArrowLeft size={13} />
+                <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '6px solid currentColor' }} />
                 Prev
               </Link>
             </Button>
           )}
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
-            PAGE {page} OF {totalPages}
-          </span>
-          {page < totalPages && (
+          {totalPages > 1 && (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--color-text-tertiary)', padding: '0 0.5rem' }}>
+              PAGE {page} OF {totalPages}
+            </span>
+          )}
+          {totalPages > 1 && page < totalPages && (
             <Button
               asChild
               variant="ghost"
@@ -96,12 +201,15 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
             >
               <Link href={`/dashboard?page=${page + 1}`}>
                 Next
-                <ArrowRight size={13} />
+                <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid currentColor' }} />
               </Link>
             </Button>
           )}
         </div>
-      )}
-    </MotionConfig>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}>
+          Count: {effectiveTotal}
+        </span>
+      </div>
+    </>
   );
 }

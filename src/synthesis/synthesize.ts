@@ -3,6 +3,7 @@ import { buildSynthesisPrompt } from '../prompts/synthesis';
 import { parseJSON } from '../lib/parseJSON';
 import { recordUsage } from '../lib/cost';
 import { computeOverallConfidence } from './conflictResolver';
+import { redactForDepth } from '../lib/depthGate';
 import type {
   AgentResultEnvelope,
   ConflictReport,
@@ -91,13 +92,13 @@ export async function synthesizeBrief(
     depth,
   };
 
-  return {
+  return redactForDepth({
     ...brief,
     conflictReport,
     disclaimer:
       'This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.',
     metadata,
-  };
+  }, depth);
 }
 
 function statusFrom(result: { status: string; confidence: string; sourceTier: number; durationMs: number; error?: string }) {

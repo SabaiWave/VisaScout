@@ -39,7 +39,7 @@ export function SectionHeading({
       </Tag>
       <div
         className={cn('h-px section-heading-line', subtitle ? 'mb-4' : '')}
-        style={{ background: 'linear-gradient(to right, rgba(99,102,241,0.5), transparent)' }}
+        style={{ background: 'linear-gradient(to right, rgba(var(--color-secondary-rgb),0.5), transparent)' }}
       />
       {subtitle && (
         <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>
