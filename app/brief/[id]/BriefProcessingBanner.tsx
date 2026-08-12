@@ -28,6 +28,12 @@ const C = {
 const MONO = "'JetBrains Mono', monospace";
 const BARLOW = "'Barlow Condensed', sans-serif";
 
+const NavTriangle = () => (
+  <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+    <path d="M0 0L5 4L0 8Z" />
+  </svg>
+);
+
 const INJECTED_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&display=swap');
 @keyframes bpb-shimmer {
@@ -81,7 +87,6 @@ const AGENTS = [
   { label: 'ENTRY REQUIREMENTS', tier: 'T1',    queued: false },
   { label: 'COMMUNITY INTEL',    tier: 'T4',    queued: false },
   { label: 'BORDER RUN',         tier: 'T1·T4', queued: false },
-  { label: 'CONFLICT RESOLVER',  tier: '',      queued: true  },
 ];
 
 const SECTIONS = [
@@ -197,9 +202,9 @@ export function BriefProcessingBanner({
           <div style={{ border: `1px solid ${C.rim}`, marginBottom: 12 }}>
             <RpH label="BRIEF IDENTITY" meta={depthLabel} />
             <div style={{ padding: '14px 16px', background: C.groundUp }}>
-              <div style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 15, letterSpacing: '0.04em', marginBottom: 6, lineHeight: 1.1 }}>
+              <div style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 15, letterSpacing: '0.04em', marginBottom: 6, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ color: C.accent }}>{natDisplay}</span>
-                <span style={{ color: C.ink3, margin: '0 6px' }}>&rarr;</span>
+                <span style={{ color: C.ink3, display: 'flex', alignItems: 'center' }}><NavTriangle /></span>
                 <span style={{ color: C.ink }}>{destDisplay}</span>
               </div>
               <div style={{ fontFamily: MONO, fontSize: 9, color: C.ink4, letterSpacing: '0.08em', wordBreak: 'break-all' }}>
@@ -210,7 +215,7 @@ export function BriefProcessingBanner({
 
           {/* Panel 2: Pipeline */}
           <div style={{ border: `1px solid ${C.rim}`, marginBottom: 12 }}>
-            <RpH label="PIPELINE" meta="6 AGENTS" />
+            <RpH label="PIPELINE" meta="5 AGENTS" />
             <div style={{ borderLeft: `2px solid ${C.accent}` }}>
               {AGENTS.map((agent, i) => (
                 <div key={agent.label} style={{
@@ -271,17 +276,19 @@ export function BriefProcessingBanner({
                 &larr; Dashboard
               </Link>
             )}
-            <div style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 28, color: C.ink, textTransform: 'uppercase', lineHeight: 1, marginBottom: 6 }}>
+            <div style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 28, color: C.ink, textTransform: 'uppercase', lineHeight: 1, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ color: C.accent }}>{natDisplay}</span>
-              <span style={{ color: C.ink3, margin: '0 8px' }}>&rarr;</span>
+              <span style={{ color: C.ink3, display: 'flex', alignItems: 'center' }}><NavTriangle /></span>
               <span>{destDisplay}</span>
             </div>
             <div style={{ fontFamily: MONO, fontSize: 9, color: C.ink4, letterSpacing: '0.1em', marginBottom: 10 }}>
               {depthLabel} DEPTH
             </div>
-            <p style={{ fontFamily: MONO, fontSize: 10, color: C.ink3, lineHeight: 1.7 }}>
-              Your brief generates in the background.{' '}
-              <Link href="/dashboard" style={{ color: C.ink3, textDecoration: 'underline' }}>Navigate away safely.</Link>
+            <p style={{ fontFamily: MONO, fontSize: 12, color: C.ink3, lineHeight: 1.7 }}>
+              Brief generating in background.{' '}
+              <Link href="/dashboard" style={{ color: C.ink2, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                Navigate away safely <NavTriangle />
+              </Link>
             </p>
           </div>
 

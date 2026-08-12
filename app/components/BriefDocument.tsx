@@ -1347,7 +1347,7 @@ export default function BriefDocument({
               </div>
               <div className="colophon">
                 <span>visascout.io &middot; &copy; 2026</span>
-                <span>{depthFull} depth &middot; {totalCount} agents</span>
+                <span>{depthFull} depth</span>
                 <span>{fmt(brief.metadata.generatedAt)}</span>
               </div>
             </footer>

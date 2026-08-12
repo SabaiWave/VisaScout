@@ -180,7 +180,7 @@ function PendingContent() {
         <a style={{ ...ESCAPE, display: 'inline-flex', alignItems: 'center', gap: 6 }} href="/dashboard">Go to My Briefs <NavTriangle /></a>
         <AgentCard
           label="5 agents · parallel"
-          statuses={['running', 'running', 'running', 'running', 'running', 'queued']}
+          statuses={['running', 'running', 'running', 'running', 'running']}
         />
       </>
     );
@@ -202,8 +202,8 @@ function PendingContent() {
           <a style={BTN_OUT} href="/dashboard">Go to My Briefs <NavTriangle /></a>
         </div>
         <AgentCard
-          label="6 agents · parallel"
-          statuses={['running', 'running', 'running', 'running', 'running', 'running']}
+          label="5 agents · parallel"
+          statuses={['running', 'running', 'running', 'running', 'running']}
         />
       </>
     );
