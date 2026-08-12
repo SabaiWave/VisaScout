@@ -354,7 +354,7 @@ const CSS = `
 .mast-seal .st { margin-top: 5px; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-4); line-height: 1.9; }
 
 .metastrip { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
-.metastrip > div { padding: 12px 14px; border-left: 1px solid var(--rim-soft); }
+.metastrip > div { padding: 12px 14px; border-left: 1px solid var(--rim-soft); text-align: center; }
 .metastrip > div:first-child { border-left: none; }
 .metastrip .l { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-4); }
 .metastrip .v {
@@ -876,9 +876,9 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
         <table className="tbl">
           <thead>
             <tr>
-              <th style={{ width: '32%' }}>Instrument</th>
-              <th style={{ width: '14%' }}>Duration</th>
-              <th style={{ width: '16%' }}>Apply</th>
+              <th style={{ width: '26%' }}>Instrument</th>
+              <th style={{ width: '22%' }}>Duration</th>
+              <th style={{ width: '14%' }}>Apply</th>
               <th style={{ width: '16%' }}>Suitability</th>
               <th style={{ width: '22%' }}>Friction</th>
             </tr>
@@ -889,7 +889,7 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
             <tbody key={`opt-${i}`} className="opt-group">
               <tr className={opt.suitability === 'best' ? 'fit-best' : undefined}>
                 <td><span className="name">{opt.name}</span></td>
-                <td className="num">{opt.maxStay}</td>
+                <td style={{ wordBreak: 'break-word' }}>{opt.maxStay}</td>
                 <td>
                   {opt.applicationUrl
                     ? <a href={opt.applicationUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-ink)', textDecoration: 'underline' }}>Apply online</a>
@@ -1311,7 +1311,7 @@ export default function BriefDocument({
               </div>
               <div className="metastrip">
                 <div><div className="l">Depth</div><div className="v">{depthFull}</div></div>
-                <div><div className="l">Official Src</div><div className="v">{officialSrcCount}</div></div>
+                <div><div className="l">Official Sources</div><div className="v">{officialSrcCount}</div></div>
                 <div>
                   <div className="l">Confidence</div>
                   <div className="v good">{brief.confidenceScore.overall.charAt(0).toUpperCase() + brief.confidenceScore.overall.slice(1)}</div>
