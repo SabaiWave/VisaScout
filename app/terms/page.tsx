@@ -30,7 +30,7 @@ export default function TermsPage() {
       <LegalPageShell tocItems={TOC_ITEMS}>
         <SectionHeading as="h1" size="md" className="mb-2">Terms of Service</SectionHeading>
         <p className="text-sm mb-10" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          Last updated: May 2026
+          Last updated: August 2026
         </p>
 
         <div className="prose-content space-y-8" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75 }}>
@@ -42,7 +42,7 @@ export default function TermsPage() {
 
           <section id="s2">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>2. Description of Service</h2>
-            <p>VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies for Southeast Asian countries. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
+            <p>VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies across Southeast Asia, East Asia, Europe, and Latin America. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
           </section>
 
           <section id="s3">

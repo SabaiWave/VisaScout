@@ -43,7 +43,7 @@ export const clientConfig = {
         {
           tag: 'Last 90 Days',
           title: 'Recent Enforcement Reality',
-          body: 'Rules on paper versus what border officers are actually doing right now. Community reports from Reddit, Nomad List, and expat forums, checked against official sources.',
+          body: 'Rules on paper versus what enforcement has looked like based on recent reports. Community sources from Reddit, Nomad List, and expat forums, checked against official data.',
         },
         {
           tag: 'Per Claim',
@@ -111,8 +111,8 @@ export const clientConfig = {
           tag: 'Max Intel',
           price: '$11.99',
           priceNote: 'Per report',
-          description: 'For complex situations where being wrong is not an option. Every contradiction resolved, edge cases covered.',
-          features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Nationality-specific edge cases', 'Every contradiction resolved'],
+          description: 'For complex situations. Deeper sourcing, more community data, contradictions surfaced and resolved where sources agree.',
+          features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Nationality-specific edge cases', 'Contradictions surfaced and resolved'],
           cta: DEPTH_CTA.deep,
           href: '/app?depth=deep',
           highlight: false,
@@ -130,7 +130,7 @@ export const clientConfig = {
         },
         {
           q: 'How current is the data?',
-          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, so outdated travel blog posts never make it into your brief.',
+          a: 'Sources are pulled fresh on every run. The Recent Changes agent searches specifically for policy updates in the last 90 days, keeping stale travel blog content out of your brief.',
         },
         {
           q: 'What if official sources contradict each other?',

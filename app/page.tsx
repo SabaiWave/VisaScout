@@ -310,7 +310,7 @@ function Method() {
           Five sources.<br />One reconciled brief.
         </motion.h2>
         <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
-          Contradictions are common. Thailand&apos;s immigration portal says 30 days, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
+          Contradictions are common. Official portals say one thing, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
         </motion.p>
       </motion.div>
       <motion.div
