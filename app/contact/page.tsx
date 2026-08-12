@@ -130,9 +130,6 @@ export default function ContactPage() {
             Questions, bug reports, feedback, or partnership inquiries.
           </p>
 
-          <div className="ct-meta-label vs-mono-label">Response time</div>
-          <span className="ct-meta-val">We respond within 24 hours.</span>
-
           <div className="ct-meta-label vs-mono-label">Support email</div>
           <a href="mailto:support@visascout.io" className="ct-meta-link" style={{ display: 'block', marginBottom: 32 }}>
             support@visascout.io
@@ -157,7 +154,7 @@ export default function ContactPage() {
             <div className="vs-alert vs-alert-success">
               <div className="vs-alert-title">Message Sent</div>
               <div className="vs-alert-body">
-                We received your message and will reply to {email || 'your email'} within 24 hours.
+                We received your message and will reply to {email || 'your email'} shortly.
               </div>
             </div>
           ) : (
