@@ -67,14 +67,14 @@ describe('BriefCard — rendering', () => {
     expect(card).toHaveAttribute('aria-label', 'View Thailand brief');
   });
 
-  it('shows HIGH confidence badge when not generating', () => {
+  it('shows DONE badge when not generating', () => {
     render(<BriefCard brief={baseBrief} />);
-    expect(screen.getByText('HIGH')).toBeInTheDocument();
+    expect(screen.getByText('DONE')).toBeInTheDocument();
   });
 
-  it('shows MEDIUM confidence badge', () => {
+  it('shows DONE badge regardless of confidence level', () => {
     render(<BriefCard brief={{ ...baseBrief, overall_confidence: 'medium' }} />);
-    expect(screen.getByText('MEDIUM')).toBeInTheDocument();
+    expect(screen.getByText('DONE')).toBeInTheDocument();
   });
 
   it('shows DEGRADED tag when degraded=true', () => {

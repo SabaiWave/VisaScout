@@ -23,9 +23,11 @@ export default function BriefReadyEmail({ destination, briefUrl }: BriefReadyEma
         <style dangerouslySetInnerHTML={{ __html: FONT_IMPORT }} />
       </Head>
       <Preview>Your {destination} visa brief is ready.</Preview>
-      <Body style={styles.body} bgcolor="#f0f0f0">
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <Body style={styles.body} {...({ bgcolor: '#f0f0f0' } as any)}>
         <Container style={styles.wrap}>
-          <Section style={styles.card} bgcolor="#0a1520">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Section style={styles.card} {...({ bgcolor: '#0a1520' } as any)}>
             <Text style={styles.wordmark}>VISASCOUT</Text>
 
             <Text style={styles.heading}>Your brief is ready.</Text>
