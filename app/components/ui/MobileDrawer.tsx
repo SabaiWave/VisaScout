@@ -9,7 +9,7 @@ export const navDrawerLinkStyle: CSSProperties = {
   alignItems: 'center',
   gap: '10px',
   padding: '12px 14px',
-  borderRadius: '8px',
+  borderRadius: '0px',
   fontSize: '0.8rem',
   fontWeight: 600,
   color: 'var(--color-text-secondary)',
@@ -27,7 +27,7 @@ export const navDrawerSecondaryStyle: CSSProperties = {
   alignItems: 'center',
   gap: '10px',
   padding: '10px 14px',
-  borderRadius: '8px',
+  borderRadius: '0px',
   fontSize: '0.8rem',
   fontWeight: 600,
   color: 'var(--color-text-secondary)',
@@ -43,7 +43,7 @@ export const navDrawerSecondaryStyle: CSSProperties = {
 export const navDrawerPrimaryStyle: CSSProperties = {
   ...navDrawerLinkStyle,
   background: 'var(--color-secondary)',
-  color: '#ffffff',
+  color: 'var(--color-neutral)',
   border: 'none',
   justifyContent: 'center',
   gap: '8px',
@@ -132,9 +132,9 @@ export function NavDrawer({ open, onClose, children, side = 'right' }: NavDrawer
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              borderRadius: '6px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '0px',
               border: 'none',
               background: 'transparent',
               color: 'var(--color-text-tertiary)',
@@ -168,7 +168,7 @@ export function HamburgerButton({ onClick }: { onClick: () => void }) {
         width: '40px',
         height: '40px',
         padding: '8px',
-        borderRadius: '8px',
+        borderRadius: '0px',
         border: 'none',
         background: 'transparent',
         color: 'var(--color-text-secondary)',
@@ -176,9 +176,9 @@ export function HamburgerButton({ onClick }: { onClick: () => void }) {
         flexShrink: 0,
       }}
     >
-      <span style={{ display: 'block', height: '2px', background: 'currentColor', borderRadius: '1px' }} />
-      <span style={{ display: 'block', height: '2px', background: 'currentColor', borderRadius: '1px' }} />
-      <span style={{ display: 'block', height: '2px', background: 'currentColor', borderRadius: '1px' }} />
+      <span style={{ display: 'block', height: '2px', background: 'currentColor' }} />
+      <span style={{ display: 'block', height: '2px', background: 'currentColor' }} />
+      <span style={{ display: 'block', height: '2px', background: 'currentColor' }} />
     </button>
   );
 }

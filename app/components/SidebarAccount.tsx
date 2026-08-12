@@ -1,79 +1,50 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useClerk } from '@clerk/nextjs';
-import { Settings, LogOut } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 
-const navRowBase: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  width: '100%',
-  padding: '8px 12px',
-  borderRadius: '8px',
-  fontSize: '0.8rem',
-  fontWeight: 600,
-  fontFamily: 'var(--font-mono)',
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  textDecoration: 'none',
-  color: 'var(--color-text-secondary)',
-  transition: 'background 0.15s ease, color 0.15s ease',
-};
-
-function AccountLink({ icon, href, children }: { icon: React.ReactNode; href: string; children: React.ReactNode }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <Link
-      href={href}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        ...navRowBase,
-        background: hovered ? 'var(--color-secondary-subtle)' : 'transparent',
-        color: hovered ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
-      }}
-    >
-      {icon}
-      {children}
-    </Link>
-  );
+function initials(first?: string | null, last?: string | null, email?: string): string {
+  if (first && last) return (first[0] + last[0]).toUpperCase();
+  if (first) return first.slice(0, 2).toUpperCase();
+  if (email) return email.slice(0, 2).toUpperCase();
+  return '??';
 }
 
-function AccountButton({ icon, onClick, children }: { icon: React.ReactNode; onClick: () => void; children: React.ReactNode }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        ...navRowBase,
-        border: 'none',
-        cursor: 'pointer',
-        textAlign: 'left',
-        background: hovered ? 'var(--color-secondary-subtle)' : 'transparent',
-        color: hovered ? 'var(--color-secondary-light)' : 'var(--color-text-secondary)',
-      }}
-    >
-      {icon}
-      {children}
-    </button>
-  );
-}
+export function SidebarAccount({ isAdmin }: { isAdmin?: boolean }) {
+  const { user } = useUser();
 
-export function SidebarAccount() {
-  const { signOut } = useClerk();
+  const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
+  const init = initials(user?.firstName, user?.lastName, email);
 
   return (
-    <div style={{ borderTop: '1px solid var(--color-border-muted)', paddingTop: '0.5rem' }}>
-      <AccountLink icon={<Settings size={13} />} href="/dashboard/account">
-        Account Settings
-      </AccountLink>
-      <AccountButton icon={<LogOut size={13} />} onClick={() => signOut({ redirectUrl: '/' })}>
-        Sign Out
-      </AccountButton>
+    <div style={{ borderTop: '1px solid var(--color-border)', padding: '16px 18px' }}>
+      {/* Identity */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 26, height: 26, flexShrink: 0,
+          borderRadius: '50%',
+          border: '1px solid var(--color-border-strong)',
+          background: 'var(--color-bg-elevated)',
+          display: 'grid', placeItems: 'center',
+          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+          letterSpacing: '0.04em', color: 'var(--color-text-secondary)',
+        }}>
+          {init}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <span style={{
+            display: 'block',
+            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.02em',
+            color: 'var(--color-text-secondary)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{email || '—'}</span>
+          {isAdmin && (
+            <span className="vs-badge vs-badge-outline" style={{ marginTop: 5, fontSize: 8, color: 'var(--color-secondary)' }}>
+              ADMIN
+            </span>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, AlertTriangle } from 'lucide-react';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { DevButton } from '@/app/components/ui/DevButton';
@@ -9,9 +10,9 @@ import { BRIEF_DEPTHS, DEPTH_LABEL } from '@/src/lib/depth';
 
 // ─── Layout helpers ───────────────────────────────────────────────────────────
 
-function DevSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DevSection({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-8">
+    <div id={id} className="mb-8">
       <SectionHeading size="sm" className="mb-3">{title}</SectionHeading>
       <div
         className="p-4"
@@ -31,9 +32,13 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 
 export default function DevPage() {
   const { userId } = useAuth();
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [devBriefDepth, setDevBriefDepth] = useState<typeof BRIEF_DEPTHS[number]>('quick');
   const [devBriefDegraded, setDevBriefDegraded] = useState(false);
   const [devForceDryRun, setDevForceDryRun] = useState(true);
+  const [devGenerating, setDevGenerating] = useState(false);
+  const [devGenError, setDevGenError] = useState<string | null>(null);
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -91,18 +96,44 @@ export default function DevPage() {
     }
   }
 
+  async function handleDevGenerate() {
+    setDevGenerating(true);
+    setDevGenError(null);
+    try {
+      const res = await fetch('/api/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nationality: 'United States',
+          destination: 'Thailand',
+          visaType: 'Visa Exemption',
+          freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
+          depth: devBriefDepth,
+          simDegraded: devBriefDegraded,
+          forceDryRun: devForceDryRun,
+        }),
+      });
+      if (!res.ok) throw new Error(`Brief API returned ${res.status}`);
+      const { briefId } = await res.json() as { briefId: string };
+      startTransition(() => { router.push(`/brief/${briefId}?pending=1`); });
+    } catch (err) {
+      setDevGenerating(false);
+      setDevGenError(err instanceof Error ? err.message : 'Brief generation failed');
+    }
+  }
+
   return (
-    <main className="px-4 sm:px-6 py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+    <main style={{ padding: '32px 40px', maxWidth: 960 }}>
         <SectionHeading size="md" as="h1" subtitle="Admin gated" className="mb-8">DEV TOOLS</SectionHeading>
 
         {/* Brief Flows */}
-        <DevSection title="Brief Flows">
+        <DevSection id="s-flows" title="Brief Flows">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             Depth affects pipeline config + downstream logs. Dry Run defaults on. Toggle off to burn real API calls.
           </p>
           <div className="mb-3 flex items-center gap-4 flex-wrap">
             <div
-              className="inline-grid grid-cols-3 rounded overflow-hidden"
+              className="inline-grid grid-cols-3 overflow-hidden"
               style={{ border: '1px solid var(--color-border-strong)' }}
             >
               {BRIEF_DEPTHS.map((d, i) => (
@@ -115,7 +146,7 @@ export default function DevPage() {
                     fontFamily: 'var(--font-mono)',
                     letterSpacing: '0.06em',
                     background: devBriefDepth === d ? 'var(--color-secondary)' : 'var(--color-bg-base)',
-                    color: devBriefDepth === d ? '#fff' : 'var(--color-text-tertiary)',
+                    color: devBriefDepth === d ? 'var(--color-neutral)' : 'var(--color-text-tertiary)',
                     borderLeft: i > 0 ? '1px solid var(--color-border-strong)' : 'none',
                     cursor: 'pointer',
                   }}
@@ -127,7 +158,7 @@ export default function DevPage() {
             <button
               type="button"
               onClick={() => setDevBriefDegraded(d => !d)}
-              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors"
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.06em',
@@ -142,12 +173,12 @@ export default function DevPage() {
             <button
               type="button"
               onClick={() => setDevForceDryRun(d => !d)}
-              className="py-2 px-4 text-xs font-bold uppercase transition-colors rounded"
+              className="py-2 px-4 text-xs font-bold uppercase transition-colors"
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.06em',
                 border: '1px solid var(--color-border-strong)',
-                background: devForceDryRun ? 'rgba(99,102,241,0.15)' : 'rgba(239,68,68,0.1)',
+                background: devForceDryRun ? 'rgba(var(--color-secondary-rgb),0.15)' : 'rgba(239,68,68,0.1)',
                 color: devForceDryRun ? 'var(--color-secondary-light)' : 'var(--color-error)',
                 cursor: 'pointer',
               }}
@@ -155,34 +186,39 @@ export default function DevPage() {
               {devForceDryRun ? 'Dry Run: On' : 'Dry Run: Off'}
             </button>
           </div>
-          <a
-            href={`/app?trigger=quick&depth=${devBriefDepth}${devBriefDegraded ? '&sim_degraded=true' : ''}${devForceDryRun ? '&force_dry_run=true' : ''}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-bold uppercase transition-colors"
+          <button
+            type="button"
+            onClick={() => { void handleDevGenerate(); }}
+            disabled={devGenerating}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase transition-colors"
             style={{
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.06em',
-              background: 'var(--color-secondary)',
+              background: devGenerating ? 'var(--color-border-strong)' : 'var(--color-secondary)',
               color: '#fff',
-              textDecoration: 'none',
+              cursor: devGenerating ? 'not-allowed' : 'pointer',
+              border: 'none',
             }}
           >
-            Generate Brief <ArrowRight size={14} />
-          </a>
+            {devGenerating ? 'Generating...' : 'Generate Brief'} <ArrowRight size={14} />
+          </button>
+          {devGenError && (
+            <p className="text-xs mt-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-error)' }}>
+              {devGenError}
+            </p>
+          )}
         </DevSection>
 
         {/* State simulation */}
-        <DevSection title="State Simulation">
+        <DevSection id="s-states" title="State Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             EACH NAVIGATES TO THE TARGET PAGE AND TRIGGERS THAT STATE ON MOUNT.
           </p>
           <DevGrid>
             <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
+            <DevButton label="Main: Off-Topic Rejection ↗" sublabel="/app?sim=off-topic"        href="/app?sim=off-topic"          newTab />
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
-            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
-<DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
             <DevButton label="Main: Invalid Code ↗"       sublabel="/app?sim=invalid-code"      href="/app?sim=invalid-code"      newTab />
             <DevButton label="Main: Code Already Used ↗"  sublabel="/app?sim=code-already-used" href="/app?sim=code-already-used" newTab />
           </DevGrid>
@@ -210,7 +246,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Log & Event Simulation */}
-        <DevSection title="Log & Event Simulation">
+        <DevSection id="s-events" title="Log & Event Simulation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             FIRES REAL LOG/ANALYTICS CALLS VIA THE SAME CODE PATHS AS PRODUCTION. ALL ENTRIES TAGGED SIM:TRUE IN BETTERSTACK. OPENS IN NEW TAB. CHECK THE JSON RESPONSE TO CONFIRM WHAT WAS SENT.
           </p>
@@ -352,7 +388,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Debug API */}
-        <DevSection title="Debug API">
+        <DevSection id="s-debug" title="Debug API">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB. ADMIN ONLY.
           </p>
@@ -366,7 +402,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* User Management */}
-        <DevSection title="User Management">
+        <DevSection id="s-users" title="User Management">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             ENTER A USER ID BELOW. CLEAR BRIEFS RESETS BRIEF DATA ONLY. ACCOUNT KEPT. DELETE REMOVES ALL RECORDS + CLERK ACCOUNT (IRREVERSIBLE).
             {userMgmtId.trim() === userId && (
@@ -397,8 +433,8 @@ export default function DevPage() {
               style={{
                 padding: '0.5rem 1rem',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(99,102,241,0.4)',
-                background: 'rgba(99,102,241,0.1)',
+                border: '1px solid rgba(var(--color-secondary-rgb),0.4)',
+                background: 'rgba(var(--color-secondary-rgb),0.1)',
                 color: 'var(--color-secondary-light)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.75rem',
@@ -440,8 +476,8 @@ export default function DevPage() {
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
                 marginBottom: '6px',
-                border: `1px solid ${clearState === 'success' ? 'rgba(99,102,241,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                background: clearState === 'success' ? 'rgba(99,102,241,0.05)' : 'rgba(239,68,68,0.05)',
+                border: `1px solid ${clearState === 'success' ? 'rgba(var(--color-secondary-rgb),0.3)' : 'rgba(239,68,68,0.3)'}`,
+                background: clearState === 'success' ? 'rgba(var(--color-secondary-rgb),0.05)' : 'rgba(239,68,68,0.05)',
                 color: clearState === 'success' ? 'var(--color-secondary-light)' : 'var(--color-error)',
                 fontFamily: 'var(--font-mono)',
                 whiteSpace: 'pre-wrap',
@@ -471,7 +507,7 @@ export default function DevPage() {
         </DevSection>
 
         {/* Page navigation */}
-        <DevSection title="Page Navigation">
+        <DevSection id="s-nav" title="Page Navigation">
           <p className="text-xs mb-3 uppercase" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             OPENS IN NEW TAB. /DEV STAYS OPEN AS HOME BASE.
           </p>
@@ -488,6 +524,6 @@ export default function DevPage() {
             <DevButton label="Terms ↗"        href="/terms"                   newTab />
           </DevGrid>
         </DevSection>
-      </main>
+    </main>
   );
 }

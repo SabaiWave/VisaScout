@@ -1,12 +1,9 @@
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import Link from 'next/link';
 
 import { getSupabase } from '@/src/lib/supabase';
 import { getOrCreateUser } from '@/src/lib/users';
 import { isAdminUser } from '@/src/lib/adminAccess';
-import { SectionHeading } from '@/app/components/ui/SectionHeading';
-import { NavLink } from '@/app/components/ui/NavLink';
 import { BriefGrid } from './BriefGrid';
 import { DashboardAutoRefresh } from './DashboardAutoRefresh';
 
@@ -46,41 +43,18 @@ function EmptyState() {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
       justifyContent: 'center',
       minHeight: '52vh',
-      gap: 0,
-      textAlign: 'center',
     }}>
       <p style={{
-        fontFamily: 'var(--font-body)',
+        fontFamily: 'var(--font-mono)',
         fontSize: 'var(--text-sm)',
-        color: 'var(--color-text-secondary)',
-        margin: '0 0 24px',
+        color: 'var(--color-text-tertiary)',
+        margin: 0,
+        letterSpacing: '0.04em',
       }}>
         No briefs saved yet.
       </p>
-      <Link
-        href="/app"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '8px 12px',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 'var(--text-xs)',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: 'var(--color-text-secondary)',
-          textDecoration: 'none',
-          border: '1px solid var(--color-border-strong)',
-          borderRadius: 'var(--radius-md)',
-          background: 'transparent',
-        }}
-      >
-        + Generate Brief
-      </Link>
     </div>
   );
 }
@@ -98,18 +72,17 @@ export default async function DashboardPage({
   // Admin-only: sim=empty bypasses DB and renders the empty state
   if (params.sim === 'empty' && isAdminUser(clerkUser.id)) {
     return (
-      <>
-        <div className="hidden lg:flex items-center justify-end gap-1 px-4" style={{ height: '52px', borderBottom: '1px solid var(--color-border-muted)' }}>
-          <NavLink href="/">Home</NavLink>
-          <NavLink href="/contact">Contact</NavLink>
+      <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', margin: 0, lineHeight: 1.05 }}>
+            My Briefs
+          </h1>
+          <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral)', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none' }}>
+            Generate New Brief
+          </a>
         </div>
-        <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">MY BRIEFS</SectionHeading>
-          </div>
-          <EmptyState />
-        </div>
-      </>
+        <EmptyState />
+      </div>
     );
   }
 
@@ -123,33 +96,25 @@ export default async function DashboardPage({
   const hasActiveGeneration = briefs.some(b => ['queued', 'processing', 'pending'].includes(b.payment_status));
 
   return (
-    <>
-      {/* Desktop top bar */}
-      <div
-        className="hidden lg:flex items-center justify-end gap-1 px-4"
-        style={{
-          height: '52px',
-          borderBottom: '1px solid var(--color-border-muted)',
-        }}
-      >
-        <NavLink href="/">Home</NavLink>
-        <NavLink href="/contact">Contact</NavLink>
+    <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', margin: 0, lineHeight: 1.05 }}>
+          My Briefs
+        </h1>
+        <a
+          href="/app"
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral)', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none', whiteSpace: 'nowrap' as const }}
+        >
+          Generate New Brief
+        </a>
       </div>
 
-      <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <SectionHeading size="md" as="h1" subtitle="Your saved visa intelligence briefs">
-            MY BRIEFS
-          </SectionHeading>
-        </div>
-
-        <DashboardAutoRefresh hasGenerating={hasActiveGeneration} />
-        {briefs.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <BriefGrid briefs={briefs} total={total} page={page} />
-        )}
-      </div>
-    </>
+      <DashboardAutoRefresh hasGenerating={hasActiveGeneration} />
+      {briefs.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <BriefGrid briefs={briefs} total={total} page={page} />
+      )}
+    </div>
   );
 }

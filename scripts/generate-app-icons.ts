@@ -8,8 +8,14 @@ const TARGET = { file: path.join('app', 'apple-icon.png'), size: 180 };
 async function main() {
   const svgRaw = readFileSync(path.join(process.cwd(), 'app', 'icon.svg'), 'utf-8');
 
-  // Remove explicit width/height so CSS controls scaling; keep viewBox for proportional render
-  const svg = svgRaw.replace(/\s*width="[^"]*"/, '').replace(/\s*height="[^"]*"/, '');
+  // Remove explicit width/height from the root <svg> tag only (if present) so CSS controls
+  // scaling; keep viewBox for proportional render. Scoped to the opening <svg ...> tag —
+  // a global/unscoped replace would strip width/height off inner shapes (e.g. a background
+  // <rect width="32" height="32">) instead, silently zeroing them out.
+  const svg = svgRaw.replace(/<svg([^>]*)>/, (_match, attrs: string) => {
+    const cleaned = attrs.replace(/\s*width="[^"]*"/, '').replace(/\s*height="[^"]*"/, '');
+    return `<svg${cleaned}>`;
+  });
 
   const { size, file } = TARGET;
   const html = `<!DOCTYPE html>

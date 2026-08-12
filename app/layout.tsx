@@ -1,31 +1,31 @@
 import type { Metadata, Viewport } from 'next';
 
-import { Geist, DM_Serif_Display, JetBrains_Mono } from 'next/font/google';
+import { Barlow_Condensed, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { ClerkFontFix } from '@/app/components/ClerkFontFix';
-import { ThemeProvider } from '@/app/components/ThemeProvider';
 import { ClerkThemeProvider } from '@/app/components/ClerkThemeProvider';
 import { clientConfig } from '@/config/client';
 import './globals.css';
 
-const geist = Geist({
+// Cartographic Dark — single theme, no light mode. See DESIGN.md.
+const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-});
-
-const dmSerifDisplay = DM_Serif_Display({
-  subsets: ['latin'],
-  weight: '400',
+  weight: ['400', '500', '700', '800', '900'],
   variable: '--font-display',
   display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
+  weight: ['400', '700'],
   variable: '--font-mono',
   display: 'swap',
 });
+
+// Cartographic Dark has no separate body sans — JetBrains Mono is the only
+// body font. --font-body is aliased to --font-mono in globals.css rather than
+// loading the family twice; component code that reads var(--font-body) needs
+// no changes.
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -63,21 +63,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${geist.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${barlowCondensed.variable} ${jetbrainsMono.variable} h-full antialiased`}>
       <body
         className="min-h-full flex flex-col"
         style={{ background: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
       >
-        <ThemeProvider attribute="data-theme" defaultTheme="dark">
-          <ClerkThemeProvider>
-            {children}
-            <ClerkFontFix />
-          </ClerkThemeProvider>
-        </ThemeProvider>
+        <ClerkThemeProvider>
+          {children}
+          <ClerkFontFix />
+        </ClerkThemeProvider>
         <Analytics />
       </body>
     </html>

@@ -2,57 +2,76 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock } from 'lucide-react';
-import { Button } from '@/app/components/ui/Button';
+import Link from 'next/link';
+import { BriefRailSkeleton } from './BriefRailSkeleton';
+import { C, MONO, BARLOW, SK, SECTIONS } from './briefConstants';
 
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 8 * 60 * 1000;
-// Minimum time skeleton is shown before content is revealed — ensures the
-// GENERATING card → skeleton → content sequence is always visible even when
-// the brief completes faster than the user can navigate.
 const MIN_DISPLAY_MS = 10000;
 
-function SkeletonLine({ width = '100%', height = '14px' }: { width?: string; height?: string }) {
-  return (
-    <div
-      className="skeleton-shimmer"
-      style={{ width, height, borderRadius: '4px' }}
-    />
-  );
-}
+const NavTriangle = () => (
+  <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+    <path d="M0 0L5 4L0 8Z" />
+  </svg>
+);
 
-function SkeletonCard({ lines = 3, headingWidth = '40%' }: { lines?: number; headingWidth?: string }) {
+// ── Timeout state ─────────────────────────────────────────────────────────────
+
+function TimeoutState({ briefId }: { briefId: string }) {
+  const router = useRouter();
   return (
-    <div
-      style={{
-        background: 'var(--color-bg-elevated)',
-        border: '1px solid var(--color-border)',
-        borderRadius: '12px',
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-      }}
-    >
-      {/* Card heading row: heading bar only — no // prefix in skeleton */}
-      <div style={{ marginBottom: '4px' }}>
-        <SkeletonLine width={headingWidth} height="13px" />
+    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+      <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.accent, marginBottom: 12 }}>
+        Taking Longer Than Expected
+      </p>
+      <p style={{ fontFamily: MONO, fontSize: 10, color: C.ink3, maxWidth: 360, margin: '0 auto 12px', lineHeight: 1.7 }}>
+        Your brief is still running. Check your dashboard in a few minutes. If it doesn't appear, get in touch and we'll sort it out.
+      </p>
+      <p style={{ fontFamily: MONO, fontSize: 9, color: C.ink4, marginBottom: 20 }}>Ref: {briefId}</p>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+        <button
+          onClick={() => router.push('/dashboard')}
+          style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: C.accent, color: C.stage, border: 'none', padding: '8px 18px', cursor: 'pointer' }}
+        >
+          Go to Dashboard
+        </button>
+        <button
+          onClick={() => router.push(`/contact?ref=${briefId}`)}
+          style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: C.ink3, border: `1px solid ${C.rim}`, padding: '8px 18px', cursor: 'pointer' }}
+        >
+          Contact Us
+        </button>
       </div>
-      {Array.from({ length: lines }).map((_, i) => (
-        <SkeletonLine key={i} width={i === lines - 1 ? '70%' : '100%'} />
-      ))}
     </div>
   );
 }
 
-export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollForJob = false }: { briefId: string; isActuallyDone?: boolean; pollForJob?: boolean }) {
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function BriefProcessingBanner({
+  briefId,
+  isActuallyDone = false,
+  pollForJob = false,
+  nationality,
+  destination,
+  depth = 'quick',
+  showDashboardLink = false,
+}: {
+  briefId: string;
+  isActuallyDone?: boolean;
+  pollForJob?: boolean;
+  nationality?: string;
+  destination?: string;
+  depth?: string;
+  showDashboardLink?: boolean;
+}) {
   const router = useRouter();
   const [timedOut, setTimedOut] = useState(false);
   const [startTime] = useState(() => Date.now());
 
   useEffect(() => {
     if (isActuallyDone) {
-      // Brief is ready — enforce minimum skeleton display time before revealing content
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
       const t = setTimeout(() => {
@@ -61,14 +80,12 @@ export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollFor
       return () => clearTimeout(t);
     }
 
-    // Brief still running — claim the job (if queued) and poll for completion
     const tick = () => {
       if (Date.now() - startTime > TIMEOUT_MS) {
         setTimedOut(true);
         return false;
       }
       if (pollForJob) {
-        // Triggers job claim + pipeline start in poll route; fire-and-forget
         void fetch(`/api/brief/poll?brief_id=${briefId}`);
       }
       router.refresh();
@@ -82,47 +99,69 @@ export function BriefProcessingBanner({ briefId, isActuallyDone = false, pollFor
     return () => clearInterval(id);
   }, [isActuallyDone, briefId, pollForJob, router, startTime]);
 
-  if (timedOut) {
-    return (
-      <div className="rounded-lg border text-center px-5 py-10" style={{ background: 'var(--color-bg-elevated)', borderColor: 'rgba(245,158,11,0.3)' }}>
-        <div className="inline-flex items-center justify-center w-16 h-16 mb-5 mx-auto" style={{ background: 'rgba(245,158,11,0.1)', borderRadius: '4px', border: '1px solid rgba(245,158,11,0.2)' }}>
-          <Clock size={28} style={{ color: 'var(--color-amber)' }} />
-        </div>
-        <h2 className="text-lg font-bold uppercase mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-amber)', letterSpacing: '0.04em' }}>
-          Taking Longer Than Expected
-        </h2>
-        <div className="mb-5 mx-auto" style={{ height: 1, maxWidth: '200px', background: 'linear-gradient(to right, transparent, rgba(245,158,11,0.3), transparent)' }} />
-        <p className="text-sm leading-relaxed mb-4 mx-auto" style={{ color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
-          Your brief is still running. Check your dashboard in a few minutes. If it doesn&apos;t appear, get in touch and we&apos;ll sort it out.
-        </p>
-        <p className="text-xs mb-6" style={{ color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-          Ref: {briefId}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
-          <Button variant="secondary" onClick={() => router.push(`/contact?ref=${briefId}`)}>Contact Us</Button>
-        </div>
-      </div>
-    );
-  }
+  if (timedOut) return <TimeoutState briefId={briefId} />;
+
+  const depthLabel = depth === 'quick' ? 'SCOUT' : depth === 'standard' ? 'INTEL' : 'DOSSIER';
+  const natDisplay = nationality?.toUpperCase() ?? 'PASSPORT';
+  const destDisplay = destination?.toUpperCase() ?? 'DESTINATION';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Status pill */}
-      <div
-        className="flex items-center gap-2"
-        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
-      >
-        <span className="animate-pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-amber)', display: 'inline-block', flexShrink: 0 }} />
-        Generating brief — checking automatically
-      </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '268px minmax(0,1fr)', gap: 40, alignItems: 'start' }}>
 
-      {/* Skeleton cards mimicking brief section layout */}
-      <SkeletonCard headingWidth="55%" lines={2} />
-      <SkeletonCard headingWidth="35%" lines={4} />
-      <SkeletonCard headingWidth="45%" lines={3} />
-      <SkeletonCard headingWidth="40%" lines={3} />
-      <SkeletonCard headingWidth="50%" lines={2} />
+      {/* ── RAIL ── */}
+      <BriefRailSkeleton briefId={briefId} depthLabel={depthLabel} agentRunning />
+
+      {/* ── BODY ── */}
+      <div>
+        {/* Brief header */}
+        <div style={{ marginBottom: 24 }}>
+          {showDashboardLink && (
+            <Link href="/dashboard" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4, lineHeight: 1,
+              fontFamily: MONO, fontSize: 9, fontWeight: 700,
+              letterSpacing: '0.1em', textTransform: 'uppercase', color: C.ink4, textDecoration: 'none',
+              marginBottom: 10,
+            }}>
+              <span style={{ display: 'inline-flex', transform: 'rotate(180deg)' }}><NavTriangle /></span>
+              Dashboard
+            </Link>
+          )}
+          <div style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 28, color: C.ink, textTransform: 'uppercase', lineHeight: 1, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: C.accent }}>{natDisplay}</span>
+            <span style={{ color: C.ink3, display: 'flex', alignItems: 'center' }}><NavTriangle /></span>
+            <span>{destDisplay}</span>
+          </div>
+          <div style={{ fontFamily: MONO, fontSize: 9, color: C.ink4, letterSpacing: '0.1em', marginBottom: 10 }}>
+            {depthLabel} DEPTH
+          </div>
+          <p style={{ fontFamily: MONO, fontSize: 12, color: C.ink3, lineHeight: 1.7 }}>
+            Brief generating in background.{' '}
+            <Link href="/dashboard" style={{ color: C.accent, textDecoration: 'underline', textDecorationColor: 'rgba(200,120,10,0.4)' }}>
+              Navigate away safely.
+            </Link>
+          </p>
+        </div>
+
+        {/* Section skeletons */}
+        {SECTIONS.map((sec, i) => (
+          <div key={sec.n} style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 12 }}>
+              <span style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: 52, color: C.accent, lineHeight: 0.78 }}>
+                {sec.n}
+              </span>
+              <span style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: 30, textTransform: 'uppercase', color: C.ink }}>
+                {sec.t}
+              </span>
+              <span style={{ flex: 1, height: 1, background: C.rim, alignSelf: 'center' }} />
+            </div>
+            <div style={{ border: `1px solid ${C.rim}`, background: C.groundUp, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {Array.from({ length: sec.lines }).map((_, j) => (
+                <span key={j} style={{ ...SK, height: 13, width: j === sec.lines - 1 ? '60%' : '100%' }} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
