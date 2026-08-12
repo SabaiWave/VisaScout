@@ -372,8 +372,8 @@ function AppContent() {
     );
   }
 
-  const routeCompleted = (nationality ? 1 : 0) + (destination ? 1 : 0);
-  const readyToDispatch = routeCompleted === 2 && freeform.trim().length > 0;
+  const routeCompleted = (nationality ? 1 : 0) + (destination ? 1 : 0) + (freeform.trim().length > 0 ? 1 : 0) + 1; // depth always set
+  const readyToDispatch = nationality && destination && freeform.trim().length > 0;
   const depthCfg = DEPTH_CONFIG[depth];
   const railDepth = DEPTH_RAIL[depth];
 
@@ -842,7 +842,7 @@ function AppContent() {
             {/* Panel 01 — Route */}
             <div className="app-rp">
               <div className="app-rp-h">
-                Route<i></i><span className="app-rp-ct">{routeCompleted}/2 Set</span>
+                Route<i></i><span className="app-rp-ct">{routeCompleted}/4 Set</span>
               </div>
               <div className="app-rp-b">
                 <div className="app-bfield vs-row">
