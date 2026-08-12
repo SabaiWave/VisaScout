@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { ChevronRight, Check, Zap, Search, FileText, XCircle, AlertTriangle, Lock } from 'lucide-react';
+import { ChevronRight, Check, Zap, Search, FileText, XCircle, AlertTriangle, Lock, Info } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clientConfig } from '@/config/client';
@@ -500,6 +500,19 @@ function AppContent() {
                 </p>
                 <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
                   Try a Different Query
+                </button>
+              </div>
+            ) : wasCancelled ? (
+              <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-elevated)', padding: 16, marginBottom: 24 }}>
+                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: 6 }}>
+                  <Info size={16} aria-hidden="true" />
+                  Payment Not Completed
+                </div>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                  You left before completing payment. No charge was made and no brief was generated. Your inputs are still here if you&apos;d like to continue.
+                </p>
+                <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', padding: '8px 20px', cursor: 'pointer' }}>
+                  Start Over
                 </button>
               </div>
             ) : (
