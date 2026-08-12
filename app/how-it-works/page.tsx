@@ -30,8 +30,8 @@ const CONFIDENCE_LEVELS = [
   {
     level: 'Well Sourced',
     meaning: 'Act on this.',
-    definition: 'The official record is clear and corroborated. Two or more T1 sources agree — or 4 of 5 research agents reached the same conclusion with no contested claims.',
-    color: 'var(--color-success)',
+    definition: 'The official record is clear and corroborated. Two or more T1 sources agree, or 4 of 5 research agents reached the same conclusion with no contested claims.',
+    color: 'var(--color-tier-1)',
   },
   {
     level: 'Verify Key Details',
@@ -42,8 +42,8 @@ const CONFIDENCE_LEVELS = [
   {
     level: 'Verify Before Travel',
     meaning: 'Content is directional.',
-    definition: 'Check official embassy or government sources before making any decisions. Official sources are sparse and agent agreement is low — not a pipeline failure.',
-    color: 'var(--color-text-tertiary)',
+    definition: 'Check official embassy or government sources before making any decisions. Official sources are sparse and agent agreement is low. Not a pipeline failure.',
+    color: 'var(--color-error)',
   },
 ];
 
@@ -86,8 +86,8 @@ export default function HowItWorksPage() {
         <div className="prose-content space-y-8" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75 }}>
 
           <section id="s1">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Overview</h2>
-            <p>
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Overview</h2>
+            <p className="text-sm leading-relaxed">
               The internet has plenty of visa information. Most of it is outdated, uncited, or contradictory.
               VisaScout runs five parallel research agents against official immigration sources, recent policy news,
               and real traveler reports. A sixth agent reconciles contradictions. The result is one brief with every
@@ -96,8 +96,8 @@ export default function HowItWorksPage() {
           </section>
 
           <section id="s2">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Research Depths</h2>
-            <p className="mb-6">
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Research Depths</h2>
+            <p className="text-sm leading-relaxed mb-6">
               Every brief runs the same five agents. Depth controls how many sources each agent pulls.
               More sources means more coverage, more corroboration, and a higher total source count. But also more time.
             </p>
@@ -117,8 +117,8 @@ export default function HowItWorksPage() {
           </section>
 
           <section id="s3">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Source Tiers</h2>
-            <p className="mb-6">
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Source Tiers</h2>
+            <p className="text-sm leading-relaxed mb-6">
               Every fact in a VisaScout brief is tagged with a source tier. When sources conflict, higher tiers win.
               Within the same tier, newer beats older. This is the ruleset, not a black box.
             </p>
@@ -139,8 +139,8 @@ export default function HowItWorksPage() {
           </section>
 
           <section id="s4">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Confidence Scores</h2>
-            <p className="mb-6">
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Confidence Scores</h2>
+            <p className="text-sm leading-relaxed mb-6">
               Confidence scores are not AI-generated sentiment. They are a direct function of which sources were found
               and whether they agree. We never hide a low score. If we cannot verify something from official sources,
               we say so.
@@ -161,11 +161,11 @@ export default function HowItWorksPage() {
           </section>
 
           <section id="s5">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Conflict Resolution</h2>
-            <p className="mb-4">
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Conflict Resolution</h2>
+            <p className="text-sm leading-relaxed mb-4">
               Most travel resources pick one answer and hide the rest. We show you the full picture, including where sources disagree and why.
             </p>
-            <p>
+            <p className="text-sm leading-relaxed">
               The Thai immigration site says 30 days. A Nomad List thread from last month reports officers asking for proof of onward travel.
               Both are real data points. Choosing one and burying the other is how people get caught off guard.
               Every brief includes a conflict report: confirmed, contested, and unverified. Nothing hidden.
@@ -173,11 +173,11 @@ export default function HowItWorksPage() {
           </section>
 
           <section id="s6">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Community Intel</h2>
-            <p className="mb-4">
+            <h2 className="text-base font-bold uppercase mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>Community Intel</h2>
+            <p className="text-sm leading-relaxed mb-4">
               Official sources tell you the rules. Community sources tell you what is actually happening.
             </p>
-            <p>
+            <p className="text-sm leading-relaxed">
               Border enforcement changes faster than government websites update. Overstay crackdowns, new document checks
               at specific crossings, officers asking for proof of funds the rules do not require. This is where it shows
               up first. We include community sources not to override official rules, but to flag where reality is diverging
