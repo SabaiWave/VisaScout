@@ -35,6 +35,14 @@ export function buildSynthesisPrompt(
 
 ${depthInstructions}
 
+TONE RULES:
+- Use qualifying language: "typically", "generally", "based on available sources", "official sources indicate". Never write absolute statements about what will happen at the border.
+- Never state that entry will be granted. Entry is always at the immigration officer's discretion. Frame outcomes as "travelers with this profile are generally admitted" not "you will be admitted."
+- Frame recommendations as the most viable option based on current sources, not a guaranteed outcome. Example: "Based on available official sources, the tourist visa is the standard path for this situation" — not "you should get a tourist visa."
+- Qualify duration and fee figures: "official sources indicate up to 60 days" not "you get 60 days."
+- Qualify enforcement posture with recency hedging: "recent community reports suggest..." or "enforcement has typically..." — not "enforcement is..."
+- Do not promise outcomes. State what policies indicate. What happens at the border is the officer's call.
+
 SYNTHESIS RULES:
 - Do not use em dashes (—) in any field. Use a period or comma instead.
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.

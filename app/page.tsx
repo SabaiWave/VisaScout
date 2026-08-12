@@ -270,7 +270,7 @@ function DataStrip() {
         <motion.div
           key={cell.label}
           variants={fadeUp}
-          className={`flex flex-col gap-2 ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
+          className={`flex flex-col gap-2 items-center text-center ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
           style={{ padding: '30px 24px' }}
         >
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
