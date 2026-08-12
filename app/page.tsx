@@ -62,7 +62,7 @@ const INPUT_STYLE: React.CSSProperties = {
   fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', outline: 'none',
 };
 
-function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) {
+function CoordForm({ ctaLabel }: { ctaLabel: string }) {
   const [nationality, setNationality] = useState('');
   const [destination, setDestination] = useState('');
   const redirect = useBriefRedirect();
@@ -109,13 +109,13 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
         className="flex items-center justify-center gap-2 transition-opacity hover:opacity-85"
         style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', padding: '15px', border: 'none', cursor: 'pointer' }}
       >
-        {ctaLabel} <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ display: 'inline', verticalAlign: 'middle' }}><path d="M0 0L5 4L0 8Z" /></svg>
+        {ctaLabel}<svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true"><path d="M0 0L5 4L0 8Z" /></svg>
       </button>
       <div
-        className={align === 'center' ? 'text-center' : ''}
+        className="text-center"
         style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}
       >
-        Free &middot; No account required &middot; PDF included
+        Sources cited &middot; PDF included
       </div>
     </form>
   );
@@ -524,11 +524,11 @@ function CTA() {
           Your route.<br />Fully charted.
         </h2>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
-          Sourced, conflict-resolved, confidence-scored. Free, and no account required.
+          Sourced, conflict-resolved, confidence-scored. Every claim cited, every contradiction flagged.
         </p>
       </div>
       <div className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center">
-        <CoordForm ctaLabel="Get My Free Visa Brief" align="center" />
+        <CoordForm ctaLabel="Get My Free Visa Brief" />
       </div>
     </div>
   );
