@@ -66,7 +66,7 @@ const PAGE_CSS = `
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #060c12;
+    color: var(--color-neutral);
     background: var(--color-secondary);
     border: 1px solid var(--color-secondary);
     padding: 13px 32px;

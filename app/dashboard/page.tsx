@@ -101,7 +101,7 @@ export default async function DashboardPage({
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', margin: 0, lineHeight: 1.05 }}>
             My Briefs
           </h1>
-          <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#060c12', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none' }}>
+          <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral)', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none' }}>
             Generate New Brief
           </a>
         </div>
@@ -127,7 +127,7 @@ export default async function DashboardPage({
         </h1>
         <a
           href="/app"
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#060c12', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none', whiteSpace: 'nowrap' as const }}
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral)', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none', whiteSpace: 'nowrap' as const }}
         >
           Generate New Brief
         </a>

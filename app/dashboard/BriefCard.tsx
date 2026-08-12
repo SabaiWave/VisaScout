@@ -24,8 +24,8 @@ const DEPTH_COLOR: Record<string, string> = {
   deep:     'var(--color-depth-deep)',
 };
 const CONF_COLOR: Record<string, string> = {
-  high: '#10b981',
-  medium: '#c8780a',
+  high: 'var(--color-confidence-high)',
+  medium: 'var(--color-confidence-medium)',
   low: 'var(--color-text-tertiary)',
 };
 
@@ -71,10 +71,14 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
       <div
         className="db-row vs-row"
-        style={{ background: hovered ? 'var(--color-bg-elevated)' : 'transparent' }}
+        role="button"
+        tabIndex={0}
+        style={{ background: hovered ? 'var(--color-bg-elevated)' : 'transparent', cursor: 'pointer' }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onClick={() => { if (!showConfirm && !deleting) router.push(href); }}
+        onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !showConfirm && !deleting) router.push(href); }}
+        aria-label={`View ${brief.destination} brief`}
       >
         {/* Destination */}
         <div className="db-cell db-cell-dest">

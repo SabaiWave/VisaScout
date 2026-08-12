@@ -54,7 +54,7 @@ function SecLabel({ children }: { children: React.ReactNode }) {
 
 const LABEL_STYLE: React.CSSProperties = {
   background: 'var(--color-border)', color: 'var(--color-amber)',
-  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.1em',
+  fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.08em',
   textTransform: 'uppercase', padding: '0 14px',
 };
 const INPUT_STYLE: React.CSSProperties = {
@@ -107,13 +107,13 @@ function CoordForm({ ctaLabel, align }: { ctaLabel: string; align?: 'center' }) 
       <button
         type="submit"
         className="flex items-center justify-center gap-2 transition-opacity hover:opacity-85"
-        style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '15px', border: 'none', cursor: 'pointer' }}
+        style={{ background: 'var(--color-amber)', color: 'var(--color-neutral)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', padding: '15px', border: 'none', cursor: 'pointer' }}
       >
         {ctaLabel} <svg width="5" height="8" viewBox="0 0 5 8" fill="currentColor" aria-hidden="true" style={{ display: 'inline', verticalAlign: 'middle' }}><path d="M0 0L5 4L0 8Z" /></svg>
       </button>
       <div
         className={align === 'center' ? 'text-center' : ''}
-        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}
+        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)' }}
       >
         Free &middot; No account required &middot; PDF included
       </div>
@@ -234,7 +234,7 @@ function DataStrip() {
           className={`flex flex-col gap-2 ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
           style={{ padding: '30px 24px' }}
         >
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.625rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
             {cell.label}
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, color: 'var(--color-amber)' }}>
@@ -301,7 +301,7 @@ function Method() {
 
 function briefSection(label: string) {
   return (
-    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: '14px 0 5px', borderTop: '1px solid var(--color-border-muted)', marginTop: '4px' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: '14px 0 5px', borderTop: '1px solid var(--color-border-muted)', marginTop: '4px' }}>
       {label}
     </div>
   );
@@ -310,7 +310,7 @@ function briefSection(label: string) {
 function briefField(key: string, value: string, hi?: boolean) {
   return (
     <div className="grid vs-row" style={{ gridTemplateColumns: '150px 1fr', alignItems: 'start', padding: '7px 0' }}>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
         {key}
       </div>
       <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: hi ? 'var(--color-amber)' : 'var(--color-text-primary)', fontWeight: hi ? 700 : 400 }}>
@@ -385,11 +385,11 @@ function BriefExhibit() {
           <div className="flex justify-between items-center flex-wrap gap-2" style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', fontSize: 8 }}>INTEL</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>
                 Visa Intelligence Brief
               </span>
             </div>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: '0.5625rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-amber)', flexShrink: 0 }} />
               Confidence: High
             </span>
@@ -409,7 +409,7 @@ function BriefExhibit() {
 
             {briefSection('Recommended Action')}
             <div style={{ marginTop: 6, background: 'rgba(var(--color-secondary-rgb),0.06)', borderLeft: '2px solid var(--color-amber)', padding: '11px 14px' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
                 Deadline: Aug 19, 2026 · 13 days remaining
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.9, color: 'var(--color-text-primary)' }}>

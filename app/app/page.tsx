@@ -373,6 +373,7 @@ function AppContent() {
   }
 
   const routeCompleted = (nationality ? 1 : 0) + (destination ? 1 : 0);
+  const readyToDispatch = routeCompleted === 2 && freeform.trim().length > 0;
   const depthCfg = DEPTH_CONFIG[depth];
   const railDepth = DEPTH_RAIL[depth];
 
@@ -386,7 +387,7 @@ function AppContent() {
         .app-work-r { display: flex; flex-direction: column; }
 
         /* ── Right rail panels (untouched) ── */
-        .app-rp { border: 1px solid var(--color-border); }
+        .app-rp { border: 1px solid var(--color-border); background: var(--color-bg-elevated); }
         .app-rp + .app-rp { margin-top: 14px; }
         .app-rp-h { display: flex; align-items: center; padding: 9px 12px; font-family: var(--font-mono); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: var(--color-secondary); border-bottom: 1px solid var(--color-border); background: var(--color-bg-base); gap: 0; white-space: nowrap; }
         .app-rp-h i { flex: 1; height: 1px; background: linear-gradient(to right, rgba(200,120,10,0.34), transparent); margin: 0 10px; font-style: normal; display: block; min-width: 10px; }
@@ -461,6 +462,11 @@ function AppContent() {
           .app-tier { grid-template-columns: 44px 1fr auto; }
           .app-tier > :nth-child(3) { display: none; }
         }
+        @media (max-width: 480px) {
+          .app-work-l { padding: 24px 16px 40px; }
+          .app-tier { gap: 10px; padding: 14px 12px 14px 0; }
+          .app-depth-strip { max-width: 100%; }
+        }
       `}} />
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[480px] z-0" style={{ background: 'var(--bloom-app-bg)' }} />
@@ -471,7 +477,7 @@ function AppContent() {
         <div className="app-work-l">
 
           <div style={{ padding: '56px 0 34px', borderBottom: '1px solid var(--color-border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 20 }}>
               <span style={{ width: 26, height: 1, background: 'var(--color-secondary)', display: 'block', flexShrink: 0 }} />
               Intake
             </div>
@@ -516,9 +522,9 @@ function AppContent() {
           {phase === 'auth-prompt' ? (
             <div style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)', padding: 40, textAlign: 'center' }}>
               <Lock size={32} aria-hidden="true" style={{ color: 'var(--color-text-tertiary)', margin: '0 auto', display: 'block' }} />
-              <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1.1, letterSpacing: '0.01em', textTransform: 'uppercase', color: 'var(--color-text-primary)', marginTop: 16 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.5rem', lineHeight: 1.1, letterSpacing: '0.01em', textTransform: 'uppercase', color: 'var(--color-text-primary)', marginTop: 16 }}>
                 Sign In to Generate
-              </h4>
+              </h2>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.875rem', lineHeight: 1.6, color: 'var(--color-text-secondary)', marginTop: 8, marginBottom: 24 }}>
                 Your brief is saved to your account so you can access it anytime.
               </p>
@@ -528,7 +534,7 @@ function AppContent() {
                   try { sessionStorage.setItem('visascout_form_state', JSON.stringify({ nationality, destination, visaType, freeform, depth })); } catch { /* ignore */ }
                   router.push('/sign-in');
                 }}
-                style={{ width: '100%', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: '100%', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', padding: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 Sign In
               </button>
@@ -727,9 +733,9 @@ function AppContent() {
                       width: '100%', border: 'none', cursor: phase === 'redirecting' || isCheckingCap ? 'not-allowed' : 'pointer',
                       opacity: phase === 'redirecting' || isCheckingCap ? 0.65 : 1,
                       background: depthCfg.color,
-                      color: '#060c12',
+                      color: 'var(--color-neutral)',
                       fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                      letterSpacing: '0.18em', textTransform: 'uppercase', padding: 19,
+                      letterSpacing: '0.04em', textTransform: 'uppercase', padding: 19,
                       transition: 'opacity 0.15s',
                     }}
                   >
@@ -857,7 +863,7 @@ function AppContent() {
                 </div>
               </div>
               <div className="app-panel-foot">
-                <span className="app-sq" />{routeCompleted === 2 ? 'Ready to Dispatch' : 'Awaiting Dispatch'}
+                <span className="app-sq" />{readyToDispatch ? 'Ready to Dispatch' : 'Awaiting Dispatch'}
               </div>
             </div>
 

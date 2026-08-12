@@ -25,7 +25,7 @@ export function MobileNav({ isAdmin, showDev, isSignedIn = true }: { isAdmin: bo
         <HamburgerButton onClick={() => setOpen(true)} />
         <Wordmark />
         {/* Spacer keeps wordmark centered; drawer has account access */}
-        <div style={{ width: '40px' }} />
+        <div className="w-10" />
       </nav>
 
       <NavDrawer open={open} onClose={() => setOpen(false)} side="left">
