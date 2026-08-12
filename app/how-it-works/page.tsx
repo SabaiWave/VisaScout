@@ -95,7 +95,7 @@ const DEPTHS = [
     price: '$9.99',
     src: 8,
     total: 40,
-    time: '~3 min',
+    time: '~180s',
     note: 'Complex situation or you cannot afford to be wrong. 8 sources per agent, maximum coverage across all 5 research dimensions.',
     color: 'var(--color-depth-deep)',
   },
@@ -123,21 +123,18 @@ export default function HowItWorksPage() {
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>Research Depths</h2>
             <p className="mb-6">
               Every brief runs the same five agents. Depth controls how many sources each agent pulls.
-              More sources means more coverage, more corroboration, and a higher total source count — but also more time.
+              More sources means more coverage, more corroboration, and a higher total source count. But also more time.
             </p>
-            <div className="border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+            <div className="space-y-2">
               {DEPTHS.map(d => (
-                <div key={d.label} className="p-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span style={{ width: 3, height: 14, background: d.color, display: 'inline-block', flexShrink: 0 }} />
-                    <p className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: d.color }}>
-                      {d.label} · {d.price}
-                    </p>
-                  </div>
-                  <p className="text-base font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                    {d.src} sources per agent · {d.total} total · {d.time}
+                <div key={d.label} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${d.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                  <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: d.color }}>
+                    {d.label} · {d.price}
                   </p>
-                  <p className="text-sm leading-relaxed">{d.note}</p>
+                  <p className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
+                    {d.src} sources / agent · {d.total} total · {d.time}
+                  </p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{d.note}</p>
                 </div>
               ))}
             </div>
@@ -149,20 +146,17 @@ export default function HowItWorksPage() {
               Every fact in a VisaScout brief is tagged with a source tier. When sources conflict, higher tiers win.
               Within the same tier, newer beats older. This is the ruleset, not a black box.
             </p>
-            <div className="border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+            <div className="space-y-2">
               {SOURCE_TIERS.map((t, i) => (
-                <div key={t.tier} className="p-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span style={{ width: 3, height: 14, background: t.color, display: 'inline-block', flexShrink: 0 }} />
-                    <p className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: t.color }}>
-                      Tier {i + 1}
-                    </p>
-                  </div>
-                  <p className="text-base font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                <div key={t.tier} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${t.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                  <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: t.color }}>
+                    Tier {i + 1}
+                  </p>
+                  <p className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
                     {t.label}
                   </p>
-                  <p className="text-sm mb-1" style={{ fontFamily: 'var(--font-mono)' }}>{t.examples}</p>
-                  <p className="text-sm leading-relaxed">{t.note}</p>
+                  <p className="text-xs mb-1" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>{t.examples}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{t.note}</p>
                 </div>
               ))}
             </div>
@@ -175,19 +169,16 @@ export default function HowItWorksPage() {
               and whether they agree. We never hide a low score. If we cannot verify something from official sources,
               we say so.
             </p>
-            <div className="border divide-y" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-base)' }}>
+            <div className="space-y-2">
               {CONFIDENCE_LEVELS.map(c => (
-                <div key={c.level} className="p-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span style={{ width: 3, height: 14, background: c.color, display: 'inline-block', flexShrink: 0 }} />
-                    <p className="text-xs font-bold uppercase" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em', color: c.color }}>
-                      {c.level}
-                    </p>
-                  </div>
-                  <p className="text-base font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                <div key={c.level} style={{ border: '1px solid var(--color-border)', borderLeft: `3px solid ${c.color}`, background: 'var(--color-bg-elevated)', padding: '14px 18px' }}>
+                  <p className="text-xs font-bold uppercase mb-1" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', color: c.color }}>
+                    {c.level}
+                  </p>
+                  <p className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
                     {c.meaning}
                   </p>
-                  <p className="text-sm leading-relaxed">{c.definition}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{c.definition}</p>
                 </div>
               ))}
             </div>
