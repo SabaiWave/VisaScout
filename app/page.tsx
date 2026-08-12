@@ -15,6 +15,32 @@ import { destinationCount } from '@/src/config/destinations';
 
 const { landingPage: copy } = clientConfig;
 
+// ─── Animation variants ──────────────────────────────────────────────────────
+
+const EASE = [0.25, 0.1, 0.25, 1] as const;
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+};
+
+const fadeLeft = {
+  hidden: { opacity: 0, x: -32 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: EASE } },
+};
+
+const fadeRight = {
+  hidden: { opacity: 0, x: 90 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
+const stagger = (delay = 0.1) => ({
+  hidden: {},
+  show: { transition: { staggerChildren: delay } },
+});
+
+const VP = { once: true, margin: '-60px' } as const;
+
 function useBriefRedirect() {
   const router = useRouter();
   return (nationality: string, destination: string) => {
@@ -169,12 +195,13 @@ function Hero() {
         className="relative z-[6] grid grid-cols-1 lg:grid-cols-[1fr_400px] items-center gap-10 lg:gap-16 h-full px-6 lg:px-[72px]"
         style={{ minHeight: 'calc(100vh - 56px)', maxWidth: '1240px' }}
       >
-        <div style={{ maxWidth: '640px' }}>
-          <div className="flex items-center gap-3.5 mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
+        <motion.div style={{ maxWidth: '640px' }} variants={stagger(0.12)} initial="hidden" animate="show">
+          <motion.div variants={fadeLeft} className="flex items-center gap-3.5 mb-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--color-amber)' }}>
             <span style={{ width: '26px', height: '1px', background: 'var(--color-amber)' }} />
             Chart Your Route
-          </div>
-          <h1
+          </motion.div>
+          <motion.h1
+            variants={fadeUp}
             className="mb-7 text-balance"
             style={{
               fontFamily: 'var(--font-display)',
@@ -189,8 +216,9 @@ function Hero() {
           >
             Know the rules
             <span className="block" style={{ paddingLeft: '1.4em' }}>before you land.</span>
-          </h1>
-          <p
+          </motion.h1>
+          <motion.p
+            variants={fadeUp}
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8125rem',
@@ -202,11 +230,18 @@ function Hero() {
             }}
           >
             {copy.hero.subhead}
-          </p>
-        </div>
-        <div className="w-full lg:justify-self-end" style={{ maxWidth: '400px' }}>
+          </motion.p>
+        </motion.div>
+        <motion.div
+          className="w-full lg:justify-self-end"
+          style={{ maxWidth: '400px' }}
+          variants={fadeRight}
+          initial="hidden"
+          animate="show"
+          transition={{ duration: 0.55, ease: EASE, delay: 0.25 }}
+        >
           <CoordForm ctaLabel={copy.hero.cta} />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -223,13 +258,18 @@ const dataCells = [
 
 function DataStrip() {
   return (
-    <div
+    <motion.div
       className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
       style={{ borderBottom: '1px solid var(--color-border)' }}
+      variants={stagger(0.1)}
+      initial="hidden"
+      whileInView="show"
+      viewport={VP}
     >
       {dataCells.map((cell, i) => (
-        <div
+        <motion.div
           key={cell.label}
+          variants={fadeUp}
           className={`flex flex-col gap-2 ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
           style={{ padding: '30px 24px' }}
         >
@@ -242,9 +282,9 @@ function DataStrip() {
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--color-text-tertiary)', lineHeight: 1.6 }}>
             {cell.sub}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
@@ -254,21 +294,36 @@ function Method() {
   const steps = copy.howItWorks.steps;
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <div className="px-6 lg:pl-[72px] lg:pr-8 py-16" style={{ borderRight: '1px solid var(--color-border)' }}>
-        <SecLabel>Methodology</SecLabel>
-        <h2
+      <motion.div
+        className="px-6 lg:pl-[72px] lg:pr-8 py-16"
+        style={{ borderRight: '1px solid var(--color-border)' }}
+        variants={stagger(0.1)}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
+        <motion.div variants={fadeLeft}><SecLabel>Methodology</SecLabel></motion.div>
+        <motion.h2
+          variants={fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4.4vw, 3.5rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, color: 'var(--color-text-primary)', marginBottom: '20px' }}
         >
           Five sources.<br />One reconciled brief.
-        </h2>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        </motion.h2>
+        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           Contradictions are common. Thailand&apos;s immigration portal says 30 days, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
-        </p>
-      </div>
-      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16">
+        </motion.p>
+      </motion.div>
+      <motion.div
+        className="px-6 lg:pl-12 lg:pr-[72px] py-16"
+        variants={stagger(0.15)}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
         {steps.map((step, i) => (
-          <div
+          <motion.div
             key={step.number}
+            variants={fadeUp}
             className="grid gap-5"
             style={{
               gridTemplateColumns: '44px 1fr',
@@ -289,9 +344,9 @@ function Method() {
                 {step.body}
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -370,15 +425,15 @@ function BriefExhibit() {
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-start">
 
         {/* Left — description */}
-        <div className="pt-1">
+        <motion.div className="pt-1" variants={fadeLeft} initial="hidden" whileInView="show" viewport={VP}>
           <SecLabel>Sample Brief</SecLabel>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
             An Intel brief. Every claim sourced, tier-tagged, and conflict-resolved. This is a preview. Your full brief goes deeper on every section.
           </p>
-        </div>
+        </motion.div>
 
         {/* Right — sample brief card */}
-        <div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }}>
+        <motion.div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }} variants={fadeUp} initial="hidden" whileInView="show" viewport={VP}>
 
           {/* Card header */}
           <div className="flex justify-between items-center flex-wrap gap-2" style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}>
@@ -438,7 +493,7 @@ function BriefExhibit() {
             {briefField('If overstay', '฿500/day fine, max ฿20,000. Pay at departure gate.')}
 
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -452,22 +507,36 @@ function FAQ() {
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <div className="px-6 lg:pl-[72px] lg:pr-8 py-16" style={{ borderRight: '1px solid var(--color-border)' }}>
-        <SecLabel>FAQ</SecLabel>
-        <h2
+      <motion.div
+        className="px-6 lg:pl-[72px] lg:pr-8 py-16"
+        style={{ borderRight: '1px solid var(--color-border)' }}
+        variants={stagger(0.12)}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
+        <motion.div variants={fadeLeft}><SecLabel>FAQ</SecLabel></motion.div>
+        <motion.h2
+          variants={fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4.4vw, 3.5rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, color: 'var(--color-text-primary)', marginBottom: '20px' }}
         >
           {copy.faq.title}
-        </h2>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        </motion.h2>
+        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           {copy.faq.subtitle}
-        </p>
-      </div>
-      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16">
+        </motion.p>
+      </motion.div>
+      <motion.div
+        className="px-6 lg:pl-12 lg:pr-[72px] py-16"
+        variants={stagger(0.08)}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
         {items.map((item, i) => {
           const isOpen = open === i;
           return (
-            <div key={item.q} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
+            <motion.div key={item.q} variants={fadeUp} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : i)}
@@ -502,10 +571,10 @@ function FAQ() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -515,20 +584,34 @@ function FAQ() {
 function CTA() {
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <div className="px-6 lg:pl-[72px] lg:pr-8 py-16 flex flex-col justify-center" style={{ borderRight: '1px solid var(--color-border)' }}>
-        <SecLabel>Get Your Brief</SecLabel>
-        <h2
+      <motion.div
+        className="px-6 lg:pl-[72px] lg:pr-8 py-16 flex flex-col justify-center"
+        style={{ borderRight: '1px solid var(--color-border)' }}
+        variants={stagger(0.12)}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
+        <motion.div variants={fadeLeft}><SecLabel>Get Your Brief</SecLabel></motion.div>
+        <motion.h2
+          variants={fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5.4vw, 5.125rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.87, letterSpacing: '-0.015em', color: 'var(--color-text-primary)', marginBottom: '18px' }}
         >
           Your route.<br />Fully charted.
-        </h2>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        </motion.h2>
+        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           Sourced, conflict-resolved, confidence-scored. Every claim cited, every contradiction flagged.
-        </p>
-      </div>
-      <div className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center">
+        </motion.p>
+      </motion.div>
+      <motion.div
+        className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center"
+        variants={fadeRight}
+        initial="hidden"
+        whileInView="show"
+        viewport={VP}
+      >
         <CoordForm ctaLabel="Get My Free Visa Brief" />
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -537,7 +620,13 @@ function CTA() {
 
 function Footer() {
   return (
-    <footer className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]">
+    <motion.footer
+      className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]"
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="show"
+      viewport={VP}
+    >
       <div
         className="px-6 lg:pl-[72px] lg:pr-8 py-6 flex items-center"
         style={{ borderRight: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}
@@ -557,7 +646,7 @@ function Footer() {
           <FooterLink href="/contact" className="inline" style={{ fontFamily: 'inherit', fontSize: 'inherit', textTransform: 'uppercase' }}>Contact</FooterLink>
         </span>
       </div>
-    </footer>
+    </motion.footer>
   );
 }
 
