@@ -826,8 +826,8 @@ function AppContent() {
                     ) : null
                   )}
 
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'center' }}>
-                    This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice.
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'left' }}>
+                    This report aggregates publicly available information. Verify all visa requirements with official sources before travel.<br />Not legal advice.
                   </p>
                 </div>
               )}
