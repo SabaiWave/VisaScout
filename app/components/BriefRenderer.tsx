@@ -124,56 +124,58 @@ export default function BriefRenderer({
   }
 
   return (
-    <div>
+    <div style={{ maxWidth: 1180, margin: '0 auto', width: '100%' }}>
       {/* Degraded notice — shown when agents failed */}
       {failedAgents.length > 0 && (
         <div
           style={{
-            margin: '0 0 0 0',
-            padding: '14px 18px',
-            borderBottom: '1px solid rgba(245,158,11,0.25)',
-            background: 'rgba(245,158,11,0.06)',
+            borderLeft: '3px solid var(--color-amber)',
+            borderBottom: '1px solid var(--color-border)',
+            background: 'var(--color-bg-elevated)',
+            padding: '14px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            flexWrap: 'wrap',
           }}
         >
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: '6px', fontWeight: 700 }}>
-            {isPaidBrief ? 'Limited Data' : 'Data Note'}
-          </p>
-          {isPaidBrief && canRerun && briefId ? (
-            <>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '12px', lineHeight: '1.6' }}>
-                {failedAgentNames.join(', ')}{' '}{failedAgents.length === 1 ? 'was' : 'were'}{' '}unavailable during generation. Re-run to fetch fresh data. No additional charge.
-              </p>
-              <button
-                onClick={handleRerun}
-                disabled={rerunLoading}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  padding: '10px 16px',
-                  fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 700,
-                  background: 'rgba(245,158,11,0.15)',
-                  border: '1px solid rgba(245,158,11,0.4)',
-                  color: 'var(--color-amber)',
-                  cursor: rerunLoading ? 'default' : 'pointer',
-                  opacity: rerunLoading ? 0.5 : 1,
-                }}
-              >
-                <RefreshCw size={12} style={rerunLoading ? { animation: 'spin 1s linear infinite' } : {}} />
-                {rerunLoading ? 'Queuing Re-run...' : 'Re-run Brief'}
-              </button>
-              {rerunError && (
-                <p style={{ fontSize: '11px', color: 'var(--color-error)', marginTop: '6px' }}>
-                  {rerunError}
-                </p>
-              )}
-            </>
-          ) : (
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: '5px', fontWeight: 700 }}>
+              {isPaidBrief ? 'Limited Data' : 'Data Note'}
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.6', margin: 0 }}>
               {failedAgentNames.join(', ')}{' '}{failedAgents.length === 1 ? 'was' : 'were'}{' '}
-              {isPaidBrief
-                ? 'unavailable. Confidence is reduced for affected sections. Verify with official immigration sources before travel.'
-                : 'unavailable. Recommendations are based on available sources. Verify directly with official immigration portals before travel.'
+              {isPaidBrief && canRerun && briefId
+                ? 'unavailable during generation. Re-run to fetch fresh data. No additional charge.'
+                : isPaidBrief
+                  ? 'unavailable. Confidence is reduced for affected sections. Verify with official immigration sources before travel.'
+                  : 'unavailable. Recommendations are based on available sources. Verify directly with official immigration portals before travel.'
               }
             </p>
+            {rerunError && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-error)', marginTop: '6px' }}>
+                {rerunError}
+              </p>
+            )}
+          </div>
+          {isPaidBrief && canRerun && briefId && (
+            <button
+              onClick={handleRerun}
+              disabled={rerunLoading}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '7px', flexShrink: 0,
+                padding: '9px 16px',
+                fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700,
+                background: 'transparent',
+                border: '1px solid var(--color-amber)',
+                color: 'var(--color-amber)',
+                cursor: rerunLoading ? 'default' : 'pointer',
+                opacity: rerunLoading ? 0.5 : 1,
+              }}
+            >
+              <RefreshCw size={11} style={rerunLoading ? { animation: 'spin 1s linear infinite' } : {}} />
+              {rerunLoading ? 'Queuing...' : 'Re-run Brief'}
+            </button>
           )}
         </div>
       )}

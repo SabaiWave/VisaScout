@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useTransition } from 'react';
 import { ChevronRight, Check, Zap, Search, FileText, XCircle, AlertTriangle, Lock, Info } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -154,6 +154,7 @@ function AppContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
   const [phase, setPhase] = useState<Phase>(
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap' || searchParams.get('sim') === 'off-topic') ? 'error' : 'idle'
@@ -168,9 +169,6 @@ function AppContent() {
   );
   const wasCancelled = searchParams.get('cancelled') === 'true';
   const devSim = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('sim') : null;
-  const devTrigger = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' ? searchParams.get('trigger') : null;
-  const devSimDegraded = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('sim_degraded') === 'true';
-  const devForceDryRun = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && searchParams.get('force_dry_run') === 'true';
   const [error, setError] = useState<string | null>(
     devSim === 'error' ? '[Simulated] Brief generation failed. Try again or contact support.' :
     devSim === 'free-cap' ? `Daily free brief limit reached. Upgrade to ${DEPTH_LABEL.standard} or ${DEPTH_LABEL.deep} for unlimited research.` :
@@ -208,6 +206,7 @@ function AppContent() {
     setCapReached(false);
 
     if (depth === 'quick') {
+      setPhase('redirecting');
       setIsCheckingCap(true);
       try {
         const capRes = await fetch('/api/user/cap');
@@ -238,7 +237,7 @@ function AppContent() {
           throw new Error(errMsg);
         }
         const { briefId } = await res.json() as { briefId: string };
-        router.push(`/brief/${briefId}?pending=1`);
+        startTransition(() => { router.push(`/brief/${briefId}?pending=1`); });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unexpected error occurred');
         setPhase('error');
@@ -284,35 +283,6 @@ function AppContent() {
     }
   }
 
-  // Dev: auto-fire quick brief when navigated from /dev with ?trigger=quick
-  useEffect(() => {
-    if (devTrigger !== 'quick' || !isSignedIn || !isLoaded) return;
-    setError(null);
-    void (async () => {
-      try {
-        const res = await fetch('/api/brief', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nationality: 'American',
-            destination: 'Thailand',
-            visaType: 'Visa Exemption',
-            freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
-            depth: (depthParam === 'quick' || depthParam === 'deep' ? depthParam : 'standard') as 'quick' | 'standard' | 'deep',
-            simDegraded: devSimDegraded,
-            forceDryRun: devForceDryRun,
-          }),
-        });
-        if (!res.ok) throw new Error('Dev trigger failed');
-        const { briefId } = await res.json() as { briefId: string };
-        router.push(`/brief/${briefId}?pending=1`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Dev trigger failed');
-        setPhase('error');
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [devTrigger, isSignedIn, isLoaded]);
 
   useEffect(() => {
     if (devSim !== 'free-cap') return;
@@ -361,7 +331,7 @@ function AppContent() {
 
   const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
 
-  if ((!isLoaded && phase !== 'redirecting') || (devTrigger === 'quick' && isLoaded && isSignedIn)) {
+  if (!isLoaded && phase !== 'redirecting') {
     return (
       <div className="flex items-center justify-center py-20">
         <div
@@ -503,15 +473,15 @@ function AppContent() {
                 </button>
               </div>
             ) : wasCancelled ? (
-              <div style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-elevated)', padding: 16, marginBottom: 24 }}>
-                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: 6 }}>
+              <div style={{ border: '1px solid var(--color-border)', borderLeft: '3px solid var(--color-amber)', background: 'var(--color-bg-elevated)', padding: 16, marginBottom: 24 }}>
+                <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 6 }}>
                   <Info size={16} aria-hidden="true" />
                   Payment Not Completed
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
                   You left before completing payment. No charge was made and no brief was generated.
                 </p>
-                <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', padding: '8px 20px', cursor: 'pointer' }}>
+                <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-amber)', color: 'var(--color-bg-base)', border: '1px solid var(--color-amber)', padding: '8px 20px', cursor: 'pointer' }}>
                   Start Over
                 </button>
               </div>
@@ -752,11 +722,9 @@ function AppContent() {
                       transition: 'opacity 0.15s',
                     }}
                   >
-                    {isCheckingCap
-                      ? 'Checking…'
-                      : phase === 'redirecting'
-                        ? 'Starting…'
-                        : !isSignedIn
+                    {isCheckingCap || phase === 'redirecting'
+                      ? 'Generating…'
+                      : !isSignedIn
                           ? 'Sign In to Generate'
                           : depth === 'quick' || inviteAccess
                             ? 'Generate Brief · Free'
@@ -840,7 +808,7 @@ function AppContent() {
                   )}
 
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'left' }}>
-                    This report aggregates publicly available information. Verify all visa requirements with official sources before travel.<br />Not legal advice.
+                    For informational purposes only. <a href="/terms" style={{ color: 'var(--color-text-tertiary)', textDecoration: 'underline' }}>See terms.</a>
                   </p>
                 </div>
               )}
@@ -911,7 +879,7 @@ function AppContent() {
             {/* Panel 04 — Brief Outline */}
             <div className="app-rp">
               <div className="app-rp-h">
-                Brief Outline<i></i><span className="app-rp-ct">&sect;01&ndash;09</span>
+                Brief Outline<i></i><span className="app-rp-ct">01&ndash;09</span>
               </div>
               <div className="app-rp-b">
                 <ul className="app-outline">

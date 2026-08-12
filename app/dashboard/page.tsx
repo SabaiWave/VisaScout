@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import Link from 'next/link';
 
 import { getSupabase } from '@/src/lib/supabase';
 import { getOrCreateUser } from '@/src/lib/users';
@@ -44,41 +43,18 @@ function EmptyState() {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
       justifyContent: 'center',
       minHeight: '52vh',
-      gap: 0,
-      textAlign: 'center',
     }}>
       <p style={{
-        fontFamily: 'var(--font-body)',
+        fontFamily: 'var(--font-mono)',
         fontSize: 'var(--text-sm)',
-        color: 'var(--color-text-secondary)',
-        margin: '0 0 24px',
+        color: 'var(--color-text-tertiary)',
+        margin: 0,
+        letterSpacing: '0.04em',
       }}>
         No briefs saved yet.
       </p>
-      <Link
-        href="/app"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '8px 12px',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 'var(--text-xs)',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          color: 'var(--color-text-secondary)',
-          textDecoration: 'none',
-          border: '1px solid var(--color-border-strong)',
-          borderRadius: 'var(--radius-md)',
-          background: 'transparent',
-        }}
-      >
-        + Generate Brief
-      </Link>
     </div>
   );
 }

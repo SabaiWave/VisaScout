@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, AlertTriangle } from 'lucide-react';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { DevButton } from '@/app/components/ui/DevButton';
@@ -31,9 +32,13 @@ function DevGrid({ children }: { children: React.ReactNode }) {
 
 export default function DevPage() {
   const { userId } = useAuth();
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [devBriefDepth, setDevBriefDepth] = useState<typeof BRIEF_DEPTHS[number]>('quick');
   const [devBriefDegraded, setDevBriefDegraded] = useState(false);
   const [devForceDryRun, setDevForceDryRun] = useState(true);
+  const [devGenerating, setDevGenerating] = useState(false);
+  const [devGenError, setDevGenError] = useState<string | null>(null);
   const [userMgmtId, setUserMgmtId] = useState('');
   const [deleteState, setDeleteState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [deleteResult, setDeleteResult] = useState<string | null>(null);
@@ -88,6 +93,32 @@ export default function DevPage() {
     } catch (err) {
       setClearState('error');
       setClearResult(err instanceof Error ? err.message : 'Network error');
+    }
+  }
+
+  async function handleDevGenerate() {
+    setDevGenerating(true);
+    setDevGenError(null);
+    try {
+      const res = await fetch('/api/brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nationality: 'United States',
+          destination: 'Thailand',
+          visaType: 'Visa Exemption',
+          freeform: "I'm planning a 2 week trip to Thailand. How many days am I permitted to stay on a visa exemption? What are my visa options if I wanted to stay longer? What are the costs involved?",
+          depth: devBriefDepth,
+          simDegraded: devBriefDegraded,
+          forceDryRun: devForceDryRun,
+        }),
+      });
+      if (!res.ok) throw new Error(`Brief API returned ${res.status}`);
+      const { briefId } = await res.json() as { briefId: string };
+      startTransition(() => { router.push(`/brief/${briefId}?pending=1`); });
+    } catch (err) {
+      setDevGenerating(false);
+      setDevGenError(err instanceof Error ? err.message : 'Brief generation failed');
     }
   }
 
@@ -155,21 +186,27 @@ export default function DevPage() {
               {devForceDryRun ? 'Dry Run: On' : 'Dry Run: Off'}
             </button>
           </div>
-          <a
-            href={`/app?trigger=quick&depth=${devBriefDepth}${devBriefDegraded ? '&sim_degraded=true' : ''}${devForceDryRun ? '&force_dry_run=true' : ''}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => { void handleDevGenerate(); }}
+            disabled={devGenerating}
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase transition-colors"
             style={{
               fontFamily: 'var(--font-mono)',
               letterSpacing: '0.06em',
-              background: 'var(--color-secondary)',
+              background: devGenerating ? 'var(--color-border-strong)' : 'var(--color-secondary)',
               color: '#fff',
-              textDecoration: 'none',
+              cursor: devGenerating ? 'not-allowed' : 'pointer',
+              border: 'none',
             }}
           >
-            Generate Brief <ArrowRight size={14} />
-          </a>
+            {devGenerating ? 'Generating...' : 'Generate Brief'} <ArrowRight size={14} />
+          </button>
+          {devGenError && (
+            <p className="text-xs mt-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-error)' }}>
+              {devGenError}
+            </p>
+          )}
         </DevSection>
 
         {/* State simulation */}
@@ -182,8 +219,6 @@ export default function DevPage() {
             <DevButton label="Main: Off-Topic Rejection ↗" sublabel="/app?sim=off-topic"        href="/app?sim=off-topic"          newTab />
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
-            <DevButton label="Pending: Error ↗"          sublabel="/brief/pending?sim=error"   href="/brief/pending?sim=error"   newTab />
-<DevButton label="Pending: Timeout ↗"        sublabel="/brief/pending?sim=timeout" href="/brief/pending?sim=timeout" newTab />
             <DevButton label="Main: Invalid Code ↗"       sublabel="/app?sim=invalid-code"      href="/app?sim=invalid-code"      newTab />
             <DevButton label="Main: Code Already Used ↗"  sublabel="/app?sim=code-already-used" href="/app?sim=code-already-used" newTab />
           </DevGrid>

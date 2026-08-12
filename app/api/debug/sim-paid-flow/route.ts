@@ -69,7 +69,7 @@ export async function GET() {
     // No dev=true param: pending page enters real polling mode, not the dev brief API shortcut
     return new Response(null, {
       status: 302,
-      headers: { Location: `/brief/pending?brief_id=${briefId}&depth=${SIM_INPUT.depth}` },
+      headers: { Location: `/brief/${briefId}?pending=1` },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

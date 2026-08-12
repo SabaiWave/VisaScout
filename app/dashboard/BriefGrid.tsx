@@ -9,7 +9,7 @@ const GRID_CSS = `
   .db-list { /* border from vs-rail */ }
   .db-head {
     display: grid;
-    grid-template-columns: repeat(5, minmax(80px,1fr)) 80px;
+    grid-template-columns: minmax(120px,1fr) minmax(100px,1fr) minmax(80px,0.7fr) minmax(90px,0.8fr) minmax(80px,0.7fr) 80px;
     align-items: center;
     height: 36px;
     padding: 0 16px;
@@ -19,7 +19,7 @@ const GRID_CSS = `
   /* .db-head-label font props from global .vs-mono-label */
   .db-row {
     display: grid;
-    grid-template-columns: repeat(5, minmax(80px,1fr)) 80px;
+    grid-template-columns: minmax(120px,1fr) minmax(100px,1fr) minmax(80px,0.7fr) minmax(90px,0.8fr) minmax(80px,0.7fr) 80px;
     align-items: center;
     height: 64px;
     padding: 0 16px;
@@ -95,7 +95,7 @@ const GRID_CSS = `
   @keyframes db-pulse { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
   @media (max-width: 860px) {
     .db-head,
-    .db-row { grid-template-columns: minmax(100px,2fr) repeat(2, minmax(70px,1fr)) 80px; }
+    .db-row { grid-template-columns: minmax(100px,1.5fr) minmax(90px,1fr) minmax(80px,1fr) 80px; }
     .db-cell-hide-sm { display: none; }
     .db-head-label-hide-sm { display: none; }
   }
@@ -157,10 +157,10 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
           {/* Header row */}
           <div className="db-head" role="row">
             <span className="db-head-label vs-mono-label">Destination</span>
-            <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Nationality</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm">Nationality</span>
             <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Depth</span>
             <span className="db-head-label vs-mono-label db-head-label-hide-md" style={{ textAlign: 'center' }}>Date</span>
-            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Confidence</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Status</span>
             <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Actions</span>
           </div>
 

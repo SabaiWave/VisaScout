@@ -23,11 +23,6 @@ const DEPTH_COLOR: Record<string, string> = {
   standard: 'var(--color-depth-standard)',
   deep:     'var(--color-depth-deep)',
 };
-const CONF_COLOR: Record<string, string> = {
-  high: 'var(--color-confidence-high)',
-  medium: 'var(--color-confidence-medium)',
-  low: 'var(--color-text-tertiary)',
-};
 
 export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () => void }) {
   const router = useRouter();
@@ -54,7 +49,6 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
   if (deleted) return null;
 
   const depthColor = DEPTH_COLOR[brief.depth] ?? 'var(--color-depth-standard)';
-  const confColor = CONF_COLOR[brief.overall_confidence ?? ''] ?? 'var(--color-text-tertiary)';
   const dateStr = new Date(brief.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 
   return (
@@ -92,7 +86,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         </div>
 
         {/* Nationality */}
-        <div className="db-cell db-cell-center db-cell-hide-sm">
+        <div className="db-cell db-cell-hide-sm">
           <span className="db-sub">{brief.nationality}</span>
         </div>
 
@@ -108,16 +102,14 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
           <span className="db-sub">{dateStr}</span>
         </div>
 
-        {/* Confidence */}
+        {/* Status */}
         <div className="db-cell db-cell-badge">
           {isGenerating ? (
             <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-amber)', borderColor: 'var(--color-amber)' }}>RUNNING</span>
-          ) : brief.overall_confidence ? (
-            <span className="vs-badge vs-badge-outline" style={{ color: confColor, borderColor: confColor }}>
-              {brief.overall_confidence.toUpperCase()}
-            </span>
+          ) : brief.payment_status === 'error' ? (
+            <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}>ERROR</span>
           ) : (
-            <span className="db-sub">—</span>
+            <span className="vs-badge vs-badge-outline" style={{ color: 'var(--color-confidence-high)', borderColor: 'var(--color-confidence-high)' }}>DONE</span>
           )}
         </div>
 

@@ -117,7 +117,7 @@ export async function POST(req: Request) {
       log.info('checkout: invite bypass', { briefId, depth, userId, userEmail: user?.email ?? null, codeUsed: inviteCode?.trim() || 'returning_user' });
 
       return new Response(
-        JSON.stringify({ checkoutUrl: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}` }),
+        JSON.stringify({ checkoutUrl: `${baseUrl}/brief/${briefId}?pending=1` }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       );
     } catch (err) {
@@ -142,7 +142,7 @@ export async function POST(req: Request) {
         quantity: 1,
       }],
       metadata: { brief_id: briefId, user_id: userId, nationality, destination, depth },
-      success_url: `${baseUrl}/brief/pending?brief_id=${briefId}&depth=${depth}`,
+      success_url: `${baseUrl}/brief/${briefId}?pending=1`,
       cancel_url: `${baseUrl}/app?cancelled=true`,
     });
 
