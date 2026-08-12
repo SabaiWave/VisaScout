@@ -136,7 +136,7 @@ export async function POST(req: Request) {
       line_items: [{
         price_data: {
           currency: 'usd',
-          product_data: { name: `VisaScout ${depth.charAt(0).toUpperCase() + depth.slice(1)} Brief` },
+          product_data: { name: `VisaScout ${{ quick: 'Scout', standard: 'Intel', deep: 'Dossier' }[depth] ?? depth} Brief` },
           unit_amount: PRICES[depth].amount,
         },
         quantity: 1,
