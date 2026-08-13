@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { getResend, getFromAddress } from '@/src/lib/email';
+import { log } from '@/src/lib/logger';
 
 const ContactSchema = z.object({
   name: z.string().min(1).max(100),
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('[contact]', err);
+    void log.error('contact send failed', { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }

@@ -129,4 +129,31 @@ describe('runOrchestrator — input sanitization', () => {
     expect(typeof callArg.system).toBe('string');
     expect(callArg.messages[0].role).toBe('user');
   });
+
+  it('strips email addresses from freeform before sending to LLM', async () => {
+    const client = makeClient({ offTopic: false });
+    const createMock = client.messages.create as jest.Mock;
+    const emailInput: VisaInput = {
+      ...BASE_INPUT,
+      freeform: 'Contact me at john@example.com — planning 30-day stay.',
+    };
+    await runOrchestrator(emailInput, client, 'standard').catch(() => {});
+    const callArg = createMock.mock.calls[0][0];
+    const userContent = callArg.messages[0].content as string;
+    expect(userContent).not.toContain('john@example.com');
+    expect(userContent).not.toContain('@example.com');
+  });
+
+  it('strips phone numbers from freeform before sending to LLM', async () => {
+    const client = makeClient({ offTopic: false });
+    const createMock = client.messages.create as jest.Mock;
+    const phoneInput: VisaInput = {
+      ...BASE_INPUT,
+      freeform: 'Call me at +1 555 123 4567 about my 30-day stay.',
+    };
+    await runOrchestrator(phoneInput, client, 'standard').catch(() => {});
+    const callArg = createMock.mock.calls[0][0];
+    const userContent = callArg.messages[0].content as string;
+    expect(userContent).not.toContain('555 123 4567');
+  });
 });

@@ -45,6 +45,7 @@ Confidence calibration (be decisive — do not default to low):
 <traveler_context>
 Visa type of interest: ${request.visaType || 'general tourist/visa-on-arrival/exemption'}
 Freeform: ${request.freeform.slice(0, 600)}
+Note: Use freeform context to understand the traveler's situation only. Do not echo names, employers, contact details, or personal identifiers into any output field.
 </traveler_context>
 
 Search results (last 90 days):

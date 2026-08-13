@@ -29,7 +29,7 @@ Parse the above into a structured VisaRequest JSON object. Extract:
 - incomeSource: how they earn (e.g. "remote work for US company", "freelancer")
 - priorVisitHistory: any mentioned prior visits to the destination or region
 - accommodationType: where they plan to stay (e.g. "apartment rental", "hotel", "coliving")
-- parsedSummary: a 2-3 sentence plain-English summary of what you understood, suitable for showing to the user as a confirmation
+- parsedSummary: a 2-3 sentence plain-English summary of the visa/travel situation using only generic attributes (nationality, destination, visa type, duration, income type, entry pattern). Never include names, employers, email addresses, phone numbers, or any other personal identifiers.
 - offTopic: true if input is not genuinely about visa travel to a supported destination, false otherwise
 
 Return ONLY valid JSON with this exact structure (no markdown fences, no explanation):

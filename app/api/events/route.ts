@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { auth } from '@clerk/nextjs/server';
 import { trackEvent } from '@/src/lib/analytics';
+import { checkRateLimit } from '@/src/lib/rateLimit';
 
 const EventSchema = z.object({
   event: z.string().min(1).max(100),
@@ -17,6 +18,17 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const rateCheck = await checkRateLimit(userId);
+  if (!rateCheck.allowed) {
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(rateCheck.retryAfter ?? 60),
+      },
     });
   }
 
