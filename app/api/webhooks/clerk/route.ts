@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { render } from '@react-email/render';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import { trackEvent } from '@/src/lib/analytics';
+import { log } from '@/src/lib/logger';
 import { getSupabase } from '@/src/lib/supabase';
 import WelcomeEmail from '@/src/emails/welcome';
 
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
           html,
         });
       } catch (err) {
-        console.error('[clerk-webhook] welcome email failed', { email, err });
+        void log.error('clerk-webhook welcome email failed', { email, error: err instanceof Error ? err.message : String(err) });
       }
     }
   }

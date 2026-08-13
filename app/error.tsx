@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/app/components/ui/Button';
+import { log } from '@/src/lib/logger';
 
 export default function Error({
   error,
@@ -12,7 +13,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    void log.error('client error boundary', { errorMessage: error.message, digest: error.digest });
   }, [error]);
 
   return (

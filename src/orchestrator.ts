@@ -4,6 +4,7 @@ import { parseJSON } from './lib/parseJSON';
 import { recordUsage } from './lib/cost';
 import { log } from './lib/logger';
 import { OffTopicError } from './lib/errors';
+import { sanitizeFreeform, sanitizeShortField } from './lib/sanitize';
 import { DESTINATIONS } from './config/destinations';
 import { officialPolicyAgent } from './agents/officialPolicy';
 import { recentChangesAgent } from './agents/recentChanges';
@@ -28,19 +29,6 @@ export type AgentStatusEvent =
   | { agent: string; status: 'failed'; error?: string };
 
 const MODEL = 'claude-sonnet-4-6';
-
-function sanitizeFreeform(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, '')
-    .replace(/[^\w\s.,!?'"()\-:;@#%&+=[\]{}|\\/<>]/g, '')
-    .slice(0, 2000)
-    .trim();
-}
-
-// Strip angle brackets from short fields to prevent XML tag injection into the orchestrator prompt template
-function sanitizeShortField(text: string): string {
-  return text.replace(/[<>]/g, '').trim();
-}
 
 export async function runOrchestrator(
   input: VisaInput,

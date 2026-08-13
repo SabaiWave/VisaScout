@@ -55,4 +55,11 @@ describe('buildOrchestratorPrompt', () => {
     expect(system).not.toContain(INPUT.freeform);
     expect(system).not.toContain(INPUT.visaType);
   });
+
+  it('parsedSummary instruction prohibits personal identifiers', () => {
+    const { user } = buildOrchestratorPrompt(INPUT);
+    expect(user).toContain('parsedSummary');
+    expect(user.toLowerCase()).toContain('personal identifiers');
+    expect(user.toLowerCase()).toContain('names');
+  });
 });

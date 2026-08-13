@@ -42,7 +42,8 @@ export default function TermsPage() {
 
           <section id="s2">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>2. Description of Service</h2>
-            <p>VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies across Southeast Asia, East Asia, Europe, and Latin America. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
+            <p className="mb-3">VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies across Southeast Asia, East Asia, Europe, and Latin America. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
+            <p>Generated briefs may be shared via a unique link. Anyone with the link can view the brief&apos;s visa intelligence content. Shared briefs do not expose your account information, email address, or raw input — only the generated visa intelligence.</p>
           </section>
 
           <section id="s3">
@@ -69,7 +70,8 @@ export default function TermsPage() {
 
           <section id="s7">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>7. User Accounts</h2>
-            <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must provide accurate information during registration and keep your account information up to date.</p>
+            <p className="mb-3">You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must provide accurate information during registration and keep your account information up to date.</p>
+            <p>When describing your travel situation, you do not need to include your name, contact details, employer name, or other personal identifiers. We recommend against including such information, as generated briefs can be shared via a public link. Only visa-relevant context (nationality, destination, duration, entry pattern, income type) is needed to generate an accurate brief.</p>
           </section>
 
           <section id="s8">

@@ -12,6 +12,8 @@ interface SearchableComboboxProps {
   hasError?: boolean;
   id?: string;
   className?: string;
+  /** Remove input border/radius/shadow — use when parent wrapper provides the border */
+  borderless?: boolean;
 }
 
 export function SearchableCombobox({
@@ -23,6 +25,7 @@ export function SearchableCombobox({
   hasError = false,
   id,
   className,
+  borderless = false,
 }: SearchableComboboxProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -129,14 +132,14 @@ export function SearchableCombobox({
           onKeyDown={handleKeyDown}
           style={{
             width: '100%',
-            border: `1px solid ${borderColor}`,
-            borderRadius: 'var(--radius-md)',
+            border: borderless ? 'none' : `1px solid ${borderColor}`,
+            borderRadius: borderless ? 0 : 'var(--radius-md)',
             padding: '10px 36px 10px 14px',
             fontSize: '1rem',
             color: value && !open ? 'var(--color-text-primary)' : open ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
             background: disabled ? 'var(--color-bg-base)' : 'var(--color-bg-elevated)',
             outline: 'none',
-            boxShadow: focusRing,
+            boxShadow: borderless ? 'none' : focusRing,
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
             transition: 'border-color 0.15s, box-shadow 0.15s',

@@ -6,6 +6,7 @@ import { useClerk } from '@clerk/nextjs';
 import { BrandGlyph } from './ui/BrandGlyph';
 import { Wordmark } from './ui/Wordmark';
 import { SidebarAccount } from './SidebarAccount';
+import { Button } from './ui/Button';
 
 interface AppSidebarProps {
   isAdmin: boolean;
@@ -78,8 +79,10 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
 
   function NavButton({ label, onClick }: { label: string; onClick: () => void }) {
     return (
-      <button
+      <Button
+        variant="ghost"
         onClick={onClick}
+        className="text-left normal-case hover:opacity-100 w-full block"
         style={{ ...NAV_ITEM, border: 'none' }}
         onMouseOver={e => {
           e.currentTarget.style.color = 'var(--color-text-secondary)';
@@ -91,7 +94,7 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
         }}
       >
         {label}
-      </button>
+      </Button>
     );
   }
 

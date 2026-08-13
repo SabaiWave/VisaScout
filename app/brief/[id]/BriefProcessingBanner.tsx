@@ -109,7 +109,7 @@ export function BriefProcessingBanner({
     <div style={{ display: 'grid', gridTemplateColumns: '268px minmax(0,1fr)', gap: 40, alignItems: 'start' }}>
 
       {/* ── RAIL ── */}
-      <BriefRailSkeleton briefId={briefId} depthLabel={depthLabel} agentRunning />
+      <BriefRailSkeleton briefId={briefId} depthLabel={depthLabel} agentRunning isDone={isActuallyDone} />
 
       {/* ── BODY ── */}
       <div>

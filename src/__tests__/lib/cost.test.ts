@@ -1,13 +1,23 @@
+jest.mock('../../lib/logger', () => ({
+  log: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+import { log as logger } from '../../lib/logger';
 import { recordUsage, estimateCost, printCostSummary, resetUsage, calculateReportCost, getUsageLog, withUsageTracking } from '../../lib/cost';
+
+const mockLogInfo = logger.info as jest.Mock;
 
 describe('cost tracking', () => {
   beforeEach(() => {
     resetUsage();
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    mockLogInfo.mockClear();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
     resetUsage();
   });
 
@@ -39,43 +49,45 @@ describe('cost tracking', () => {
   });
 
   describe('recordUsage', () => {
-    it('logs usage to console when recording', async () => {
+    it('logs structured agent cost info when recording', async () => {
       await withUsageTracking(async () => {
         recordUsage({ agent: 'officialPolicy', inputTokens: 500, outputTokens: 200, tavilySearches: 1 });
-        expect(console.log).toHaveBeenCalledWith(
-          expect.stringContaining('officialPolicy')
-        );
+        expect(mockLogInfo).toHaveBeenCalledWith('agent cost', expect.objectContaining({ agent: 'officialPolicy' }));
       });
     });
 
-    it('includes token counts in log output', async () => {
+    it('includes token counts in structured log', async () => {
       await withUsageTracking(async () => {
         recordUsage({ agent: 'recentChanges', inputTokens: 1000, outputTokens: 500, tavilySearches: 2 });
-        expect(console.log).toHaveBeenCalledWith(
-          expect.stringContaining('1000in')
-        );
+        expect(mockLogInfo).toHaveBeenCalledWith('agent cost', expect.objectContaining({ inputTokens: 1000 }));
       });
     });
   });
 
   describe('printCostSummary', () => {
-    it('prints summary after recording usage', () => {
-      recordUsage({ agent: 'orchestrator', inputTokens: 200, outputTokens: 100, tavilySearches: 0 });
-      recordUsage({ agent: 'synthesis', inputTokens: 2000, outputTokens: 1500, tavilySearches: 0 });
+    it('logs structured summary after recording usage', async () => {
+      await withUsageTracking(async () => {
+        recordUsage({ agent: 'orchestrator', inputTokens: 200, outputTokens: 100, tavilySearches: 0 });
+        recordUsage({ agent: 'synthesis', inputTokens: 2000, outputTokens: 1500, tavilySearches: 0 });
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-      printCostSummary();
+        mockLogInfo.mockClear();
+        printCostSummary();
 
-      const calls = consoleSpy.mock.calls.map((c) => String(c[0]));
-      expect(calls.some((c) => c.includes('=== Cost Summary ==='))).toBe(true);
-      expect(calls.some((c) => c.includes('Total input tokens:'))).toBe(true);
-      expect(calls.some((c) => c.includes('Total output tokens:'))).toBe(true);
-      expect(calls.some((c) => c.includes('Estimated total cost:'))).toBe(true);
+        expect(mockLogInfo).toHaveBeenCalledWith('pipeline cost summary', expect.objectContaining({
+          totalInputTokens: 2200,
+          totalOutputTokens: 1600,
+          totalTavilySearches: 0,
+        }));
+      });
     });
 
-    it('prints zero totals when no usage has been recorded', () => {
-      printCostSummary();
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('$0.0000'));
+    it('logs zero totals when no usage has been recorded', async () => {
+      await withUsageTracking(async () => {
+        printCostSummary();
+        expect(mockLogInfo).toHaveBeenCalledWith('pipeline cost summary', expect.objectContaining({
+          estimatedCostUsd: 0,
+        }));
+      });
     });
 
     it('aggregates tokens across multiple agent calls', async () => {
@@ -83,24 +95,30 @@ describe('cost tracking', () => {
         recordUsage({ agent: 'a', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
         recordUsage({ agent: 'b', inputTokens: 200, outputTokens: 100, tavilySearches: 2 });
 
-        jest.clearAllMocks();
+        mockLogInfo.mockClear();
         printCostSummary();
 
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('300'));
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('3'));
+        expect(mockLogInfo).toHaveBeenCalledWith('pipeline cost summary', expect.objectContaining({
+          totalInputTokens: 300,
+          totalTavilySearches: 3,
+        }));
       });
     });
   });
 
   describe('resetUsage', () => {
-    it('clears accumulated usage so printCostSummary starts fresh', () => {
+    it('printCostSummary logs zero totals when called outside ALS context', () => {
+      // recordUsage outside withUsageTracking is a no-op (ALS store is null)
       recordUsage({ agent: 'test', inputTokens: 999, outputTokens: 999, tavilySearches: 10 });
       resetUsage();
 
-      jest.clearAllMocks();
+      mockLogInfo.mockClear();
       printCostSummary();
 
-      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('$0.0000'));
+      expect(mockLogInfo).toHaveBeenCalledWith('pipeline cost summary', expect.objectContaining({
+        totalInputTokens: 0,
+        estimatedCostUsd: 0,
+      }));
     });
   });
 
@@ -132,15 +150,15 @@ describe('cost tracking', () => {
       expect(result.estimatedCostUsd).toBeCloseTo(18.0, 5); // $3 in + $15 out
     });
 
-    it('does not modify the module-level log', async () => {
+    it('does not modify the ALS store', async () => {
       await withUsageTracking(async () => {
         recordUsage({ agent: 'recorded', inputTokens: 100, outputTokens: 50, tavilySearches: 0 });
         const externalUsages = [{ agent: 'external', inputTokens: 9999, outputTokens: 9999, tavilySearches: 10 }];
         calculateReportCost(externalUsages);
 
-        const log = getUsageLog();
-        expect(log).toHaveLength(1);
-        expect(log[0].agent).toBe('recorded');
+        const usageLog = getUsageLog();
+        expect(usageLog).toHaveLength(1);
+        expect(usageLog[0].agent).toBe('recorded');
       });
     });
   });
@@ -149,9 +167,9 @@ describe('cost tracking', () => {
     it('returns a copy of the current log', async () => {
       await withUsageTracking(async () => {
         recordUsage({ agent: 'test', inputTokens: 100, outputTokens: 50, tavilySearches: 1 });
-        const log = getUsageLog();
-        expect(log).toHaveLength(1);
-        expect(log[0].agent).toBe('test');
+        const usageLog = getUsageLog();
+        expect(usageLog).toHaveLength(1);
+        expect(usageLog[0].agent).toBe('test');
       });
     });
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
+import { Button } from '@/app/components/ui/Button';
 
 const PAGE_CSS = `
   .ct-split {
@@ -189,9 +190,15 @@ export default function ContactPage() {
               )}
 
               <div>
-                <button type="submit" disabled={status === 'submitting'} className="ct-send">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={status === 'submitting'}
+                  className="ct-send hover:opacity-100 disabled:opacity-50"
+                  style={{ letterSpacing: '0.06em', padding: '13px 32px', fontSize: '11px' }}
+                >
                   {status === 'submitting' ? 'Sending...' : 'Send Message'}
-                </button>
+                </Button>
               </div>
             </form>
           )}

@@ -77,6 +77,15 @@ describe('agent prompt traveler_context wrapping (H-02)', () => {
         expect(system).toContain('<traveler_context>');
         expect(system).toContain('<search_results>');
       });
+
+      it('traveler_context contains PII non-echo instruction', () => {
+        const { user } = builder(REQUEST, SEARCH_RESULTS);
+        const contextOpen = user.indexOf('<traveler_context>');
+        const contextClose = user.indexOf('</traveler_context>');
+        const inside = user.slice(contextOpen, contextClose + '</traveler_context>'.length);
+        expect(inside).toContain('Do not echo');
+        expect(inside.toLowerCase()).toContain('personal identifiers');
+      });
     });
   }
 });
@@ -94,6 +103,27 @@ describe('buildSynthesisPrompt SECURITY framing (H-03)', () => {
     const { system } = buildSynthesisPrompt(MOCK_ENVELOPE, MOCK_CONFLICT_REPORT, '');
     expect(system.toLowerCase()).toContain('never');
     expect(system.toLowerCase()).toContain('instructions');
+  });
+});
+
+describe('buildSynthesisPrompt PII guardrails', () => {
+  it('parsedSituation field description prohibits personal identifiers', () => {
+    const { system } = buildSynthesisPrompt(MOCK_ENVELOPE, MOCK_CONFLICT_REPORT, '');
+    expect(system).toContain('parsedSituation');
+    expect(system.toLowerCase()).toContain('personal identifiers');
+    expect(system.toLowerCase()).toContain('public-facing output');
+  });
+
+  it('SYNTHESIS RULES contain community content normalization', () => {
+    const { system } = buildSynthesisPrompt(MOCK_ENVELOPE, MOCK_CONFLICT_REPORT, '');
+    expect(system.toLowerCase()).toContain('discriminatory');
+    expect(system.toLowerCase()).toContain('neutral');
+  });
+
+  it('SYNTHESIS RULES contain applicationUrl verification requirement', () => {
+    const { system } = buildSynthesisPrompt(MOCK_ENVELOPE, MOCK_CONFLICT_REPORT, '');
+    expect(system.toLowerCase()).toContain('applicationurl');
+    expect(system.toLowerCase()).toContain('fabricate');
   });
 });
 
