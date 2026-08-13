@@ -200,7 +200,7 @@ export function HeroMarkerEditor({ markers: initialMarkers, containerRef }: Hero
                   style={{ top: '50%', left: '50%', border: '1px solid var(--color-amber)', animationDelay: `${delay}s` }}
                 />
               ))}
-              <span className="absolute inset-0" style={{ background: 'var(--color-amber)' }} />
+              <span className="absolute inset-0" style={{ background: 'var(--color-amber)', borderRadius: '50%' }} />
             </div>
             {isDev && editMode && (
               <span
