@@ -184,12 +184,15 @@ h1, h2, h3 {
 
 /* Hero entry-point marker — expanding pulse ring, distinct from the agent-row pulse below */
 @keyframes pin-expand {
-  0%   { width: 7px; height: 7px; opacity: 0.75; }
-  100% { width: 88px; height: 88px; opacity: 0; }
+  /* scale replaces width/height — compositor-only, no layout, no flicker on mobile scroll */
+  0%   { transform: translate(-50%, -50%) scale(1);    opacity: 0.75; }
+  100% { transform: translate(-50%, -50%) scale(12.6); opacity: 0; }
 }
 .pin-ring {
-  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
   animation: pin-expand 3.6s ease-out infinite;
+  will-change: transform, opacity;
 }
 
 /* Agent row pulse animation */

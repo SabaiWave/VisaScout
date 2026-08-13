@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'async_hooks';
+import { log } from './logger';
 
 export interface AgentUsage {
   agent: string;
@@ -32,17 +33,19 @@ export function withUsageTracking<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 export function recordUsage(usage: AgentUsage): void {
-  const log = als.getStore();
-  if (!log) return;
-  log.push(usage);
+  const store = als.getStore();
+  if (!store) return;
+  store.push(usage);
   const cost = estimateCost(usage);
-  const cacheInfo = (usage.cacheCreationInputTokens || usage.cacheReadInputTokens)
-    ? ` | cache write: ${usage.cacheCreationInputTokens ?? 0} / cache read: ${usage.cacheReadInputTokens ?? 0}`
-    : '';
-  console.log(
-    `[cost] ${usage.agent}: ${usage.inputTokens}in / ${usage.outputTokens}out tokens` +
-      ` | ${usage.tavilySearches} searches${cacheInfo} | ~$${cost.toFixed(4)}`
-  );
+  log.info('agent cost', {
+    agent: usage.agent,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    tavilySearches: usage.tavilySearches,
+    cacheWriteTokens: usage.cacheCreationInputTokens ?? 0,
+    cacheReadTokens: usage.cacheReadInputTokens ?? 0,
+    estimatedCostUsd: cost,
+  });
 }
 
 export function estimateCost(usage: AgentUsage): number {
@@ -81,16 +84,14 @@ export function printCostSummary(): void {
 
   const totalCost = usages.reduce((sum, u) => sum + estimateCost(u), 0);
 
-  console.log('\n=== Cost Summary ===');
-  console.log(`Total input tokens:  ${totals.inputTokens.toLocaleString()}`);
-  console.log(`Total output tokens: ${totals.outputTokens.toLocaleString()}`);
-  if (totals.cacheCreationInputTokens || totals.cacheReadInputTokens) {
-    console.log(`Cache write tokens:  ${totals.cacheCreationInputTokens.toLocaleString()}`);
-    console.log(`Cache read tokens:   ${totals.cacheReadInputTokens.toLocaleString()}`);
-  }
-  console.log(`Total Tavily searches: ${totals.tavilySearches}`);
-  console.log(`Estimated total cost: $${totalCost.toFixed(4)}`);
-  console.log('===================\n');
+  log.info('pipeline cost summary', {
+    totalInputTokens: totals.inputTokens,
+    totalOutputTokens: totals.outputTokens,
+    totalTavilySearches: totals.tavilySearches,
+    cacheWriteTokens: totals.cacheCreationInputTokens,
+    cacheReadTokens: totals.cacheReadInputTokens,
+    estimatedCostUsd: totalCost,
+  });
 }
 
 // No-op — scope management handled by withUsageTracking

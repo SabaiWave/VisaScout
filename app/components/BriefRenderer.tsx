@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
 import BriefDocument from './BriefDocument';
+import { Button } from '@/app/components/ui/Button';
 import { AGENT_DISPLAY_LABELS } from './agentLabels';
 import type { VisaBrief } from '@/src/types/index';
 
@@ -159,9 +160,11 @@ export default function BriefRenderer({
             )}
           </div>
           {isPaidBrief && canRerun && briefId && (
-            <button
+            <Button
+              variant="ghost"
               onClick={handleRerun}
               disabled={rerunLoading}
+              className="hover:opacity-100"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '7px', flexShrink: 0,
                 padding: '9px 16px',
@@ -175,7 +178,7 @@ export default function BriefRenderer({
             >
               <RefreshCw size={11} style={rerunLoading ? { animation: 'spin 1s linear infinite' } : {}} />
               {rerunLoading ? 'Queuing...' : 'Re-run Brief'}
-            </button>
+            </Button>
           )}
         </div>
       )}

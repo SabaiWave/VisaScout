@@ -1,4 +1,5 @@
 import { tavily } from '@tavily/core';
+import { log } from '../lib/logger';
 
 export interface TavilyResult {
   url: string;
@@ -55,7 +56,7 @@ export async function tavilySearch(
       score: r.score,
     }));
   } catch (err) {
-    console.error(`[tavily] search failed for query "${query}":`, err);
+    void log.error('tavily search failed', { query, error: err instanceof Error ? err.message : String(err) });
     return [];
   }
 }

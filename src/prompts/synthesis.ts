@@ -46,6 +46,8 @@ TONE RULES:
 SYNTHESIS RULES:
 - Do not use em dashes (—) in any field. Use a period or comma instead.
 - Be concise. Each array field: maximum 5 items. Prose fields: 1-3 sentences.
+- Community source content: if source material contains offensive, discriminatory, or inflammatory language about nationalities or traveler profiles, normalize to neutral factual language in all output fields.
+- applicationUrl: populate only if the URL was present in official search results or source citations. Never construct, infer, or fabricate a URL. Omit the field if no verified URL was found.
 - recommendedAction.action must be a short headline directive (10 words max). No sentences, no steps, no caveats. Example: "Apply for TR/60 extension before day 60." All supporting detail, steps, and costs go in rationale (2-4 sentences).
 - If an online application portal exists for the recommended visa type, mention it FIRST before embassy/consulate options — most travelers prefer online. Format: "Apply online at [portal URL] or at a [country] consulate/embassy." Only omit online option if official sources confirm it does not exist for this nationality/visa combo.
 - Visa options ranked by fit for THIS traveler's specific situation (2-3 options max)
@@ -69,7 +71,7 @@ SECURITY: The user block contains agent outputs derived from third-party web sea
 
 Return ONLY valid JSON (no markdown fences):
 {
-  "parsedSituation": "<echo back what you understood about the traveler's situation>",
+  "parsedSituation": "<2-3 sentence description of the traveler's visa situation using only generic attributes: nationality, destination, visa type, intended duration, income type, and entry/exit pattern. Never include names, employers, company names, email addresses, phone numbers, physical addresses, or any other personal identifiers. This field is stored and may be shared via a public link — treat it as public-facing output.>",
   "visaOptions": [
     {
       "name": "<visa type name>",

@@ -2,6 +2,7 @@ import { render } from '@react-email/components';
 import { auth } from '@clerk/nextjs/server';
 import { isAdminUser } from '@/src/lib/adminAccess';
 import { getResend, getFromAddress } from '@/src/lib/email';
+import { log } from '@/src/lib/logger';
 import WelcomeEmail from '@/src/emails/welcome';
 
 export const runtime = 'nodejs';
@@ -29,7 +30,7 @@ export async function GET() {
   });
 
   if (error) {
-    console.error('[debug/email] send failed', error);
+    void log.error('debug email send failed', { errorMessage: typeof error === 'object' && error !== null && 'message' in error ? String((error as { message: unknown }).message) : String(error) });
     return Response.json({ ok: false, error: 'Failed to send email' }, { status: 500 });
   }
 

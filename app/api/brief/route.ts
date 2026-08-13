@@ -18,6 +18,7 @@ import { hasInviteAccess, incrementInviteUsage } from '@/src/lib/inviteAccess';
 import { getOrCreateUser } from '@/src/lib/users';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
+import { sanitizeFreeform } from '@/src/lib/sanitize';
 import { render } from '@react-email/components';
 import { getResend, getFromAddress } from '@/src/lib/email';
 import BriefReadyEmail from '@/src/emails/brief-ready';
@@ -59,7 +60,7 @@ async function runFreePipeline(params: PipelineParams): Promise<void> {
       if (dryRun) {
         log.info('pipeline start [DRY_RUN]', { destination, depth: resolvedDepth, userEmail: user?.email ?? null });
         // Pass no-op send — pipeline saves to DB, client polls for completion
-        const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(() => {}, process.env.NODE_ENV === 'development', resolvedDepth, simDegraded);
+        const { brief: dryBrief, visaRequest: dryVisaRequest } = await runDryPipeline(() => {}, process.env.ENVIRONMENT === 'development', resolvedDepth, simDegraded);
 
         const dryRunPaymentStatus = resolvedDepth !== 'quick' ? 'paid' : undefined;
 
@@ -286,6 +287,7 @@ async function briefHandler(req: Request) {
   }
 
   const { nationality, destination, visaType, freeform, depth } = parsed.data;
+  const sanitizedFreeform = sanitizeFreeform(freeform);
 
   if (!SUPPORTED_DESTINATIONS.has(destination.trim().toLowerCase())) {
     return new Response(
@@ -303,7 +305,7 @@ async function briefHandler(req: Request) {
         status: 429,
         headers: {
           'Content-Type': 'application/json',
-          ...(rateCheck.retryAfter ? { 'Retry-After': String(rateCheck.retryAfter) } : {}),
+          'Retry-After': String(rateCheck.retryAfter ?? 60),
         },
       }
     );
@@ -364,7 +366,7 @@ async function briefHandler(req: Request) {
         nationality,
         destination,
         visa_type: visaType || null,
-        freeform_input: freeform,
+        freeform_input: sanitizedFreeform,
         depth: resolvedDepth,
         user_id: user?.id ?? null,
         payment_status: 'pending',
@@ -390,7 +392,7 @@ async function briefHandler(req: Request) {
     nationality,
     destination,
     visaType,
-    freeform,
+    freeform: sanitizedFreeform,
     resolvedDepth,
     dryRun,
     simDegraded,

@@ -51,6 +51,7 @@ Intended duration: ${request.intendedDuration || 'unknown'}
 Visa type: ${request.visaType || 'not specified'}
 Entry pattern: ${request.entryExitPattern || 'unknown'}
 Freeform: ${request.freeform.slice(0, 600)}
+Note: Use freeform context to understand the traveler's situation only. Do not echo names, employers, contact details, or personal identifiers into any output field.
 </traveler_context>
 
 Community search results:

@@ -118,6 +118,16 @@ export async function officialPolicyAgent(
     };
   }
   } // end while
-  // unreachable — while loop always returns
-  throw new Error('officialPolicy: retry loop exited without returning');
+  // unreachable — while loop always returns, but agents must never throw
+  return {
+    status: 'failed',
+    data: null,
+    confidence: 'low',
+    gaps: ['Official policy agent failed — retry loop exhausted'],
+    sourceTier: 4,
+    sourceUrls: [],
+    verified: false,
+    durationMs: Date.now() - start,
+    error: 'retry loop exhausted',
+  };
 }
