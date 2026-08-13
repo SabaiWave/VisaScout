@@ -42,6 +42,10 @@ const stagger = (delay = 0.1) => ({
 
 const VP = { once: true, margin: '-60px' } as const;
 
+// Mobile variants: opacity:1 in both states, duration:0 — instant visible, no animation
+const noAnim = { hidden: { opacity: 1, x: 0, y: 0 }, show: { opacity: 1, x: 0, y: 0, transition: { duration: 0 } } };
+const noAnimStagger = { hidden: {}, show: { transition: { staggerChildren: 0 } } };
+
 // Mobile context — detect once at mount, disable scroll animations on mobile to prevent shimmer
 const MobileCtx = createContext(false);
 const useMobile = () => useContext(MobileCtx);
@@ -271,15 +275,16 @@ function DataStrip() {
     <motion.div
       className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
       style={{ borderBottom: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
-      variants={isMobile ? {} : stagger(0.1)}
-      initial={isMobile ? false : 'hidden'}
+      variants={isMobile ? noAnimStagger : stagger(0.1)}
+      initial="hidden"
+      animate={isMobile ? 'show' : undefined}
       whileInView={isMobile ? undefined : 'show'}
       viewport={VP}
     >
       {dataCells.map((cell, i) => (
         <motion.div
           key={cell.label}
-          variants={fadeUp}
+          variants={isMobile ? noAnim : fadeUp}
           className={`flex flex-col gap-2 items-center text-center ${i === 0 ? 'lg:pl-[72px]' : ''} ${i === dataCells.length - 1 ? 'lg:pr-[72px]' : ''}`}
           style={{ padding: '30px 24px' }}
         >
@@ -308,34 +313,36 @@ function Method() {
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
         style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
-        variants={isMobile ? {} : stagger(0.1)}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnimStagger : stagger(0.1)}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
-        <motion.div variants={fadeLeft}><SecLabel>Methodology</SecLabel></motion.div>
+        <motion.div variants={isMobile ? noAnim : fadeLeft}><SecLabel>Methodology</SecLabel></motion.div>
         <motion.h2
-          variants={fadeLeft}
+          variants={isMobile ? noAnim : fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4.4vw, 3.5rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, color: 'var(--color-text-primary)', marginBottom: '20px' }}
         >
           Five sources.<br />One reconciled brief.
         </motion.h2>
-        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        <motion.p variants={isMobile ? noAnim : fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           Contradictions are common. Official portals say one thing, community reports say enforcement changed last month. VisaScout shows both, with source tier, date, and a confidence rating.
         </motion.p>
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
         style={{ willChange: isMobile ? 'auto' : 'transform, opacity' }}
-        variants={isMobile ? {} : stagger(0.15)}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnimStagger : stagger(0.15)}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         {steps.map((step, i) => (
           <motion.div
             key={step.number}
-            variants={fadeUp}
+            variants={isMobile ? noAnim : fadeUp}
             className="grid gap-5"
             style={{
               gridTemplateColumns: '44px 1fr',
@@ -438,7 +445,7 @@ function BriefExhibit() {
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-start">
 
         {/* Left — description */}
-        <motion.div className="pt-1" variants={isMobile ? {} : fadeLeft} initial={isMobile ? false : 'hidden'} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
+        <motion.div className="pt-1" variants={isMobile ? noAnim : fadeLeft} initial="hidden" animate={isMobile ? 'show' : undefined} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
           <SecLabel>Sample Brief</SecLabel>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
             An Intel brief. Every claim sourced, tier-tagged, and conflict-resolved. This is a preview. Your full brief goes deeper on every section.
@@ -446,7 +453,7 @@ function BriefExhibit() {
         </motion.div>
 
         {/* Right — sample brief card */}
-        <motion.div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }} variants={isMobile ? {} : fadeUp} initial={isMobile ? false : 'hidden'} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
+        <motion.div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }} variants={isMobile ? noAnim : fadeUp} initial="hidden" animate={isMobile ? 'show' : undefined} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
 
           {/* Card header */}
           <div className="flex justify-between items-center flex-wrap gap-2" style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}>
@@ -524,34 +531,36 @@ function FAQ() {
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
         style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
-        variants={isMobile ? {} : stagger(0.12)}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnimStagger : stagger(0.12)}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
-        <motion.div variants={fadeLeft}><SecLabel>FAQ</SecLabel></motion.div>
+        <motion.div variants={isMobile ? noAnim : fadeLeft}><SecLabel>FAQ</SecLabel></motion.div>
         <motion.h2
-          variants={fadeLeft}
+          variants={isMobile ? noAnim : fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4.4vw, 3.5rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, color: 'var(--color-text-primary)', marginBottom: '20px' }}
         >
           {copy.faq.title}
         </motion.h2>
-        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        <motion.p variants={isMobile ? noAnim : fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           {copy.faq.subtitle}
         </motion.p>
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
         style={{ willChange: isMobile ? 'auto' : 'transform, opacity' }}
-        variants={isMobile ? {} : stagger(0.08)}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnimStagger : stagger(0.08)}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         {items.map((item, i) => {
           const isOpen = open === i;
           return (
-            <motion.div key={item.q} variants={fadeUp} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
+            <motion.div key={item.q} variants={isMobile ? noAnim : fadeUp} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : i)}
@@ -603,27 +612,29 @@ function CTA() {
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16 flex flex-col justify-center"
         style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
-        variants={isMobile ? {} : stagger(0.12)}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnimStagger : stagger(0.12)}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
-        <motion.div variants={fadeLeft}><SecLabel>Get Your Brief</SecLabel></motion.div>
+        <motion.div variants={isMobile ? noAnim : fadeLeft}><SecLabel>Get Your Brief</SecLabel></motion.div>
         <motion.h2
-          variants={fadeLeft}
+          variants={isMobile ? noAnim : fadeLeft}
           style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 5.4vw, 5.125rem)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.87, letterSpacing: '-0.015em', color: 'var(--color-text-primary)', marginBottom: '18px' }}
         >
           Your route.<br />Fully charted.
         </motion.h2>
-        <motion.p variants={fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
+        <motion.p variants={isMobile ? noAnim : fadeUp} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
           Sourced, conflict-resolved, confidence-scored. Every claim cited, every contradiction flagged.
         </motion.p>
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center"
         style={{ willChange: isMobile ? 'auto' : 'transform, opacity', zIndex: 10, position: 'relative' }}
-        variants={isMobile ? {} : fadeRight}
-        initial={isMobile ? false : 'hidden'}
+        variants={isMobile ? noAnim : fadeRight}
+        initial="hidden"
+        animate={isMobile ? 'show' : undefined}
         whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
@@ -640,8 +651,9 @@ function Footer() {
   return (
     <motion.footer
       className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]"
-      variants={isMobile ? {} : fadeUp}
-      initial={isMobile ? false : 'hidden'}
+      variants={isMobile ? noAnim : fadeUp}
+      initial="hidden"
+      animate={isMobile ? 'show' : undefined}
       whileInView={isMobile ? undefined : 'show'}
       viewport={VP}
     >
