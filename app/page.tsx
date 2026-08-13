@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, useContext, createContext, useLayoutEffect, FormEvent } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +41,10 @@ const stagger = (delay = 0.1) => ({
 });
 
 const VP = { once: true, margin: '-60px' } as const;
+
+// Mobile context — detect once at mount, disable scroll animations on mobile to prevent shimmer
+const MobileCtx = createContext(false);
+const useMobile = () => useContext(MobileCtx);
 
 function useBriefRedirect() {
   const router = useRouter();
@@ -106,8 +110,8 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
         .lp-dest-row:focus-within { border-color: var(--color-secondary); }
         .lp-dest-combo { flex: 1; min-width: 0; position: static !important; }
         .lp-dest-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; font-family: var(--font-mono) !important; font-size: 0.8125rem !important; padding-left: 14px !important; }
-        .lp-dest-combo > ul { position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; box-shadow: none !important; }
-        .lp-dest-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 0.75rem !important; }
+        .lp-dest-combo > ul { position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; z-index: 50 !important; }
+        .lp-dest-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 0.75rem !important; background: var(--color-bg-elevated) !important; }
       ` }} />
       <div className="flex" style={{ border: '1px solid var(--color-border)', transition: 'border-color 0.15s' }}>
         <span className="flex items-center flex-shrink-0 whitespace-nowrap" style={LABEL_STYLE}>
@@ -262,13 +266,14 @@ const dataCells = [
 ];
 
 function DataStrip() {
+  const isMobile = useMobile();
   return (
     <motion.div
       className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
-      style={{ borderBottom: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
-      variants={stagger(0.1)}
-      initial="hidden"
-      whileInView="show"
+      style={{ borderBottom: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
+      variants={isMobile ? {} : stagger(0.1)}
+      initial={isMobile ? false : 'hidden'}
+      whileInView={isMobile ? undefined : 'show'}
       viewport={VP}
     >
       {dataCells.map((cell, i) => (
@@ -296,15 +301,16 @@ function DataStrip() {
 // ─── Method ────────────────────────────────────────────────────────────────
 
 function Method() {
+  const isMobile = useMobile();
   const steps = copy.howItWorks.steps;
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
-        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
-        variants={stagger(0.1)}
-        initial="hidden"
-        whileInView="show"
+        style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
+        variants={isMobile ? {} : stagger(0.1)}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         <motion.div variants={fadeLeft}><SecLabel>Methodology</SecLabel></motion.div>
@@ -320,10 +326,10 @@ function Method() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
-        style={{ willChange: 'transform, opacity' }}
-        variants={stagger(0.15)}
-        initial="hidden"
-        whileInView="show"
+        style={{ willChange: isMobile ? 'auto' : 'transform, opacity' }}
+        variants={isMobile ? {} : stagger(0.15)}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         {steps.map((step, i) => (
@@ -426,12 +432,13 @@ const DOSSIER_LOCK: React.CSSProperties = {
 };
 
 function BriefExhibit() {
+  const isMobile = useMobile();
   return (
     <div id="brief" className="relative px-6 lg:px-[72px] py-16" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-start">
 
         {/* Left — description */}
-        <motion.div className="pt-1" variants={fadeLeft} initial="hidden" whileInView="show" viewport={VP}>
+        <motion.div className="pt-1" variants={isMobile ? {} : fadeLeft} initial={isMobile ? false : 'hidden'} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
           <SecLabel>Sample Brief</SecLabel>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.95, color: 'var(--color-text-secondary)' }}>
             An Intel brief. Every claim sourced, tier-tagged, and conflict-resolved. This is a preview. Your full brief goes deeper on every section.
@@ -439,7 +446,7 @@ function BriefExhibit() {
         </motion.div>
 
         {/* Right — sample brief card */}
-        <motion.div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }} variants={fadeUp} initial="hidden" whileInView="show" viewport={VP}>
+        <motion.div className="vs-rail" style={{ background: 'var(--color-bg-elevated)' }} variants={isMobile ? {} : fadeUp} initial={isMobile ? false : 'hidden'} whileInView={isMobile ? undefined : 'show'} viewport={VP}>
 
           {/* Card header */}
           <div className="flex justify-between items-center flex-wrap gap-2" style={{ padding: '12px 20px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg-base)' }}>
@@ -508,6 +515,7 @@ function BriefExhibit() {
 // ─── FAQ ───────────────────────────────────────────────────────────────────
 
 function FAQ() {
+  const isMobile = useMobile();
   const [open, setOpen] = useState<number | null>(null);
   const items = copy.faq.items;
 
@@ -515,10 +523,10 @@ function FAQ() {
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
-        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
-        variants={stagger(0.12)}
-        initial="hidden"
-        whileInView="show"
+        style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
+        variants={isMobile ? {} : stagger(0.12)}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         <motion.div variants={fadeLeft}><SecLabel>FAQ</SecLabel></motion.div>
@@ -534,10 +542,10 @@ function FAQ() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
-        style={{ willChange: 'transform, opacity' }}
-        variants={stagger(0.08)}
-        initial="hidden"
-        whileInView="show"
+        style={{ willChange: isMobile ? 'auto' : 'transform, opacity' }}
+        variants={isMobile ? {} : stagger(0.08)}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         {items.map((item, i) => {
@@ -589,14 +597,15 @@ function FAQ() {
 // ─── CTA ───────────────────────────────────────────────────────────────────
 
 function CTA() {
+  const isMobile = useMobile();
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16 flex flex-col justify-center"
-        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
-        variants={stagger(0.12)}
-        initial="hidden"
-        whileInView="show"
+        style={{ borderRight: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
+        variants={isMobile ? {} : stagger(0.12)}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         <motion.div variants={fadeLeft}><SecLabel>Get Your Brief</SecLabel></motion.div>
@@ -612,10 +621,10 @@ function CTA() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center"
-        style={{ willChange: 'transform, opacity' }}
-        variants={fadeRight}
-        initial="hidden"
-        whileInView="show"
+        style={{ willChange: isMobile ? 'auto' : 'transform, opacity', zIndex: 10, position: 'relative' }}
+        variants={isMobile ? {} : fadeRight}
+        initial={isMobile ? false : 'hidden'}
+        whileInView={isMobile ? undefined : 'show'}
         viewport={VP}
       >
         <CoordForm ctaLabel="Get My Free Visa Brief" />
@@ -627,12 +636,13 @@ function CTA() {
 // ─── Footer ────────────────────────────────────────────────────────────────
 
 function Footer() {
+  const isMobile = useMobile();
   return (
     <motion.footer
       className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]"
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
+      variants={isMobile ? {} : fadeUp}
+      initial={isMobile ? false : 'hidden'}
+      whileInView={isMobile ? undefined : 'show'}
       viewport={VP}
     >
       <div
@@ -661,7 +671,10 @@ function Footer() {
 // ─── Page ──────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
+  const [isMobile, setIsMobile] = useState(false);
+  useLayoutEffect(() => { setIsMobile(window.innerWidth < 1024); }, []);
   return (
+    <MobileCtx.Provider value={isMobile}>
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
       <div aria-hidden className="chart-texture" />
       <AxisRule />
@@ -676,5 +689,6 @@ export default function LandingPage() {
       <CTA />
       <Footer />
     </div>
+    </MobileCtx.Provider>
   );
 }
