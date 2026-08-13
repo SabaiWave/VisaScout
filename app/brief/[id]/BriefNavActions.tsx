@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link2, FileDown, Check } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
 import { useAuth } from '@clerk/nextjs';
+import { Button } from '@/app/components/ui/Button';
 
 interface BriefNavActionsProps {
   url: string;
@@ -113,14 +114,14 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <button style={{ ...BTN_BASE, color: copied ? 'var(--color-success)' : 'var(--color-text-tertiary)' }} onClick={handleShare}>
+      <Button variant="ghost" className="hover:opacity-100" style={{ ...BTN_BASE, color: copied ? 'var(--color-success)' : 'var(--color-text-tertiary)' }} onClick={handleShare}>
         {copied ? <Check size={11} /> : <Link2 size={11} />}
         {copied ? 'Copied!' : 'Copy Link'}
-      </button>
-      <button style={{ ...BTN_SOLID, opacity: pdfLoading ? 0.6 : 1 }} onClick={handleDownload} disabled={pdfLoading}>
+      </Button>
+      <Button variant="ghost" className="hover:opacity-100" style={{ ...BTN_SOLID, opacity: pdfLoading ? 0.6 : 1 }} onClick={handleDownload} disabled={pdfLoading}>
         <FileDown size={11} />
         {pdfLoading ? 'Preparing…' : 'Download PDF'}
-      </button>
+      </Button>
       {pdfError && (
         <span style={{ fontSize: 10, color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
           {pdfError}

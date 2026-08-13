@@ -1,16 +1,17 @@
 import type React from 'react';
 
 export const C = {
-  stage:      '#060c12',
-  groundUp:   '#0a1520',
-  groundSub:  '#0e1c28',
-  rim:        '#1e3040',
-  rimSoft:    '#16242f',
-  accent:     '#c8780a',
-  accentRim:  'rgba(200,120,10,0.34)',
-  ink:        '#dceaf6',
-  ink2:       '#8fb2c8',
-  ink3:       '#5f849e',
+  stage:      'var(--color-bg-base)',
+  groundUp:   'var(--color-bg-elevated)',
+  groundSub:  'var(--color-bg-overlay)',
+  rim:        'var(--color-border)',
+  rimSoft:    'var(--color-border-muted)',
+  accent:     'var(--color-secondary)',
+  accentRim:  'rgba(var(--color-secondary-rgb),0.34)',
+  ink:        'var(--color-text-primary)',
+  ink2:       'var(--color-text-secondary)',
+  ink3:       'var(--color-text-tertiary)',
+  // Brief-specific: slightly darker than --color-text-tertiary (#5f849e), no global token equivalent
   ink4:       '#54809d',
 } as const;
 

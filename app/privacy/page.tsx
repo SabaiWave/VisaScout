@@ -12,11 +12,12 @@ const TOC_ITEMS = [
   { id: 's5',  label: '5. Data Sharing' },
   { id: 's6',  label: '6. Your Rights (GDPR)' },
   { id: 's7',  label: '7. Cookies' },
-  { id: 's8',  label: '8. Security' },
-  { id: 's9',  label: '9. Children' },
-  { id: 's10', label: '10. Changes to This Policy' },
-  { id: 's11', label: '11. CCPA' },
-  { id: 's12', label: '12. Contact' },
+  { id: 's8',  label: '8. Brief Generation and Sharing' },
+  { id: 's9',  label: '9. Security' },
+  { id: 's10', label: '10. Children' },
+  { id: 's11', label: '11. Changes to This Policy' },
+  { id: 's12', label: '12. CCPA' },
+  { id: 's13', label: '13. Contact' },
 ];
 
 export const metadata: Metadata = {
@@ -38,7 +39,7 @@ export default function PrivacyPage() {
           <section id="s1">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>1. Information We Collect</h2>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Account information:</strong> Email address provided during sign-up. We store your email to manage your account and send service-related communications. Our authentication provider also collects IP address, device type, and browser information as part of the sign-in process.</p>
-            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Report data:</strong> Nationality, destination country, visa type, and your freeform situation description — used to generate your visa brief.</p>
+            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Report data:</strong> Nationality, destination country, visa type, and your situation description — used to generate your visa brief. Generated briefs store only generic visa intelligence (nationality, destination, visa type, duration, entry pattern) and do not include names, contact details, or other personal identifiers.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Usage data:</strong> Pages visited and report generation events, collected anonymously. This data is not tied to your identity.</p>
             <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>Error and performance data:</strong> When errors occur, diagnostic information (stack traces, request context, browser version, OS version) is collected for debugging. Server-side operational logs may include anonymized request metadata.</p>
             <p><strong style={{ color: 'var(--color-text-primary)' }}>Payment information:</strong> Payment is processed by Stripe. We do not store card numbers or full payment details. Stripe may collect billing name and payment method metadata per their privacy policy.</p>
@@ -96,27 +97,32 @@ export default function PrivacyPage() {
 
           <section id="s7">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>7. Cookies</h2>
-            <p>We use session cookies required for authentication and anonymous analytics. We do not use advertising cookies or third-party tracking cookies.</p>
-            <p className="mt-3">We use strictly necessary cookies to manage your authenticated session (Clerk) and protect against automated abuse (Cloudflare). No tracking or advertising cookies are used.</p>
+            <p>We use strictly necessary cookies to manage your authenticated session and protect against automated abuse. We do not use advertising cookies or third-party tracking cookies.</p>
           </section>
 
           <section id="s8">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>8. Security</h2>
-            <p>All data is encrypted in transit. Access to stored data is restricted and access-controlled. We do not expose user data to the client beyond what is necessary to render your account.</p>
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>8. Brief Generation and Sharing</h2>
+            <p className="mb-3"><strong style={{ color: 'var(--color-text-primary)' }}>How we use your input:</strong> Your situation description is processed to extract the visa-relevant context needed to generate your brief. Generated briefs describe situations in generic terms — nationality, destination, visa type, duration, and entry pattern — and do not include names, contact details, or other personal identifiers.</p>
+            <p><strong style={{ color: 'var(--color-text-primary)' }}>Shared briefs:</strong> Briefs can be shared via a unique link. Anyone with the link can view the visa intelligence it contains. The link provides access to the generated brief only — it does not expose your account, email address, or the text you entered.</p>
           </section>
 
           <section id="s9">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>9. Children</h2>
-            <p>VisaScout is not directed at children under 13. We do not knowingly collect information from children under 13. If you believe we have collected such information, contact us immediately.</p>
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>9. Security</h2>
+            <p>All data is encrypted in transit. Access to stored data is restricted and access-controlled. We do not expose user data to the client beyond what is necessary to render your account.</p>
           </section>
 
           <section id="s10">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>10. Changes to This Policy</h2>
-            <p>We will notify registered users of material changes to this policy via email. Continued use of the Service after changes constitutes acceptance.</p>
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>10. Children</h2>
+            <p>VisaScout is not directed at children under 13. We do not knowingly collect information from children under 13. If you believe we have collected such information, contact us immediately.</p>
           </section>
 
           <section id="s11">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>11. California Privacy Rights (CCPA)</h2>
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>11. Changes to This Policy</h2>
+            <p>We will notify registered users of material changes to this policy via email. Continued use of the Service after changes constitutes acceptance.</p>
+          </section>
+
+          <section id="s12">
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>12. California Privacy Rights (CCPA)</h2>
             <p className="mb-3">If you are a California resident, you have the following rights under the California Consumer Privacy Act (CCPA):</p>
             <ul className="space-y-2 list-none mb-3">
               <li>• The right to know what personal information is collected about you</li>
@@ -126,8 +132,8 @@ export default function PrivacyPage() {
             <p><strong style={{ color: 'var(--color-text-primary)' }}>We do not sell your personal information.</strong> We do not share your data with third parties for their direct marketing purposes. To exercise your rights, contact us via our <a href="/contact" style={{ color: 'var(--color-secondary-light)' }}>contact form</a>.</p>
           </section>
 
-          <section id="s12">
-            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>12. Contact</h2>
+          <section id="s13">
+            <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>13. Contact</h2>
             <p>
               Privacy questions?{' '}
               <Link href="/contact" style={{ color: 'var(--color-secondary-light)' }}>

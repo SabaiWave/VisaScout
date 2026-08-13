@@ -12,6 +12,7 @@ import { HeroMarkerEditor } from './components/dev/HeroMarkerEditor';
 
 import { clientConfig } from '@/config/client';
 import { destinationCount } from '@/src/config/destinations';
+import { SearchableCombobox } from './components/ui/SearchableCombobox';
 
 const { landingPage: copy } = clientConfig;
 
@@ -100,7 +101,15 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 max-w-[440px] w-full">
-      <div className="flex border" style={{ borderColor: 'var(--color-border)' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .lp-dest-row { display: flex; border: 1px solid var(--color-border); transition: border-color 0.15s; position: relative; }
+        .lp-dest-row:focus-within { border-color: var(--color-secondary); }
+        .lp-dest-combo { flex: 1; min-width: 0; position: static !important; }
+        .lp-dest-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; font-family: var(--font-mono) !important; font-size: 0.8125rem !important; padding-left: 14px !important; }
+        .lp-dest-combo > ul { position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; box-shadow: none !important; }
+        .lp-dest-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 0.75rem !important; }
+      ` }} />
+      <div className="flex" style={{ border: '1px solid var(--color-border)', transition: 'border-color 0.15s' }}>
         <span className="flex items-center flex-shrink-0 whitespace-nowrap" style={LABEL_STYLE}>
           Nationality
         </span>
@@ -113,21 +122,17 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
           style={{ ...INPUT_STYLE, color: 'var(--color-text-primary)' }}
         />
       </div>
-      <div className="flex border" style={{ borderColor: 'var(--color-border)' }}>
+      <div className="lp-dest-row">
         <span className="flex items-center flex-shrink-0 whitespace-nowrap" style={LABEL_STYLE}>
           Destination
         </span>
-        <select
+        <SearchableCombobox
+          options={clientConfig.supportedDestinations}
           value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          className="flex-1 min-w-0"
-          style={{ ...INPUT_STYLE, color: destination ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)', cursor: 'pointer', appearance: 'none' as const }}
-        >
-          <option value="" disabled>Select destination…</option>
-          {clientConfig.supportedDestinations.map((d) => (
-            <option key={d} value={d} style={{ color: 'var(--color-text-primary)', background: 'var(--color-bg-elevated)' }}>{d}</option>
-          ))}
-        </select>
+          onChange={setDestination}
+          placeholder="Select destination…"
+          className="lp-dest-combo"
+        />
       </div>
       <button
         type="submit"
@@ -167,7 +172,7 @@ const HERO_MARKERS = [
 function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   return (
-    <section ref={sectionRef} className="relative overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)', borderBottom: '1px solid var(--color-border)' }}>
+    <section ref={sectionRef} className="relative overflow-hidden" style={{ minHeight: 'calc(100vh - 56px)', borderBottom: '1px solid var(--color-border)', willChange: 'transform' }}>
       <div className="absolute inset-0 z-0">
         <Image
           src="/hero/hero-landing.jpg"
@@ -260,7 +265,7 @@ function DataStrip() {
   return (
     <motion.div
       className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
-      style={{ borderBottom: '1px solid var(--color-border)' }}
+      style={{ borderBottom: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
       variants={stagger(0.1)}
       initial="hidden"
       whileInView="show"
@@ -296,7 +301,7 @@ function Method() {
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
-        style={{ borderRight: '1px solid var(--color-border)' }}
+        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
         variants={stagger(0.1)}
         initial="hidden"
         whileInView="show"
@@ -315,6 +320,7 @@ function Method() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
+        style={{ willChange: 'transform, opacity' }}
         variants={stagger(0.15)}
         initial="hidden"
         whileInView="show"
@@ -509,7 +515,7 @@ function FAQ() {
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16"
-        style={{ borderRight: '1px solid var(--color-border)' }}
+        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
         variants={stagger(0.12)}
         initial="hidden"
         whileInView="show"
@@ -528,6 +534,7 @@ function FAQ() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16"
+        style={{ willChange: 'transform, opacity' }}
         variants={stagger(0.08)}
         initial="hidden"
         whileInView="show"
@@ -586,7 +593,7 @@ function CTA() {
     <div className="relative grid grid-cols-1 lg:grid-cols-[38%_1fr]" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <motion.div
         className="px-6 lg:pl-[72px] lg:pr-8 py-16 flex flex-col justify-center"
-        style={{ borderRight: '1px solid var(--color-border)' }}
+        style={{ borderRight: '1px solid var(--color-border)', willChange: 'transform, opacity' }}
         variants={stagger(0.12)}
         initial="hidden"
         whileInView="show"
@@ -605,6 +612,7 @@ function CTA() {
       </motion.div>
       <motion.div
         className="px-6 lg:pl-12 lg:pr-[72px] py-16 flex flex-col justify-center items-center"
+        style={{ willChange: 'transform, opacity' }}
         variants={fadeRight}
         initial="hidden"
         whileInView="show"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type React from 'react';
 import { C, MONO, SK, AGENTS, SECTIONS } from './briefConstants';
 
 const INJECTED_CSS = `
@@ -8,6 +8,10 @@ const INJECTED_CSS = `
 @keyframes bpb-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+@keyframes bpb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
 }
 `;
 
@@ -27,23 +31,16 @@ function RpH({ label, meta }: { label: string; meta?: string }) {
   );
 }
 
-function ScanDots() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => (t + 1) % 3), 450);
-    return () => clearInterval(id);
-  }, []);
-  return <span style={{ display: 'inline-block', width: '3ch', textAlign: 'left' }}>{'...'.slice(0, tick + 1)}</span>;
-}
-
 export function BriefRailSkeleton({
   briefId,
   depthLabel,
   agentRunning = false,
+  isDone = false,
 }: {
   briefId?: string;
   depthLabel?: string;
   agentRunning?: boolean;
+  isDone?: boolean;
 }) {
   return (
     <>
@@ -76,13 +73,19 @@ export function BriefRailSkeleton({
                 borderBottom: i < AGENTS.length - 1 ? `1px solid ${C.rimSoft}` : 'none',
                 background: agentRunning ? C.groundUp : 'transparent',
               }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: agentRunning ? C.accent : C.ink4 }} />
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                  background: isDone ? 'var(--color-success)' : agentRunning ? C.accent : C.ink4,
+                  animation: agentRunning && !isDone ? 'bpb-pulse 2s ease-in-out infinite' : 'none',
+                }} />
                 <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: agentRunning ? C.ink : C.ink4, flex: 1 }}>
                   {agent.label}
                 </span>
-                <span style={{ fontFamily: MONO, fontSize: 8, color: agentRunning ? C.accent : C.ink4, letterSpacing: '0.04em' }}>
-                  {agentRunning ? <ScanDots /> : 'QUEUED'}
-                </span>
+                {!agentRunning && (
+                  <span style={{ fontFamily: MONO, fontSize: 8, color: C.ink4, letterSpacing: '0.04em' }}>
+                    QUEUED
+                  </span>
+                )}
               </div>
             ))}
           </div>
