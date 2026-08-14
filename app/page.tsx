@@ -68,7 +68,7 @@ function AxisRule() {
     <div
       aria-hidden
       className="hidden lg:block fixed top-0 bottom-0 z-[2] pointer-events-none"
-      style={{ left: LANDING_AXIS, width: '1px', background: 'var(--color-border-muted)' }}
+      style={{ left: LANDING_AXIS, width: '1px', background: 'var(--color-border)' }}
     />
   );
 }
@@ -266,15 +266,21 @@ function Hero() {
 const dataCells = [
   { label: 'Destinations Monitored', value: String(destinationCount), sub: 'Southeast Asia · East Asia · Europe · Latin America' },
   { label: 'Sections Covered', value: '8', sub: 'Entry to contingency' },
-  { label: 'Source Tiers', value: 'T1–T4', sub: 'Gov to community' },
+  { label: 'Source Tiers', value: 'T1 – T4', sub: 'Gov to community' },
   { label: 'Brief Tiers', value: '3', sub: 'Scout, Intel, Dossier' },
 ];
 
 function DataStrip() {
   const isMobile = useMobile();
   return (
+    <>
+    <style dangerouslySetInnerHTML={{ __html: `
+      @media (min-width: 1024px) {
+        .ds-grid { grid-template-columns: ${LANDING_AXIS} repeat(3, 1fr) !important; }
+      }
+    ` }} />
     <motion.div
-      className="relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:var(--color-border)]"
+      className="ds-grid relative grid grid-cols-1 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[color:rgba(255,255,255,0.06)]"
       style={{ borderBottom: '1px solid var(--color-border)', willChange: isMobile ? 'auto' : 'transform, opacity' }}
       variants={isMobile ? noAnimStagger : stagger(0.1)}
       initial="hidden"
@@ -301,6 +307,7 @@ function DataStrip() {
         </motion.div>
       ))}
     </motion.div>
+    </>
   );
 }
 
