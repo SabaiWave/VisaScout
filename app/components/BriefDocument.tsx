@@ -52,9 +52,12 @@ function confTagClass(c: 'high' | 'medium' | 'low' | undefined): string {
 
 function deadlineDays(dl?: string | null): string {
   if (!dl) return '—';
-  const m = dl.match(/(\d+)\s*day/i);
-  if (m) return m[1];
-  return '—';
+  // Relative rules ("3 days before arrival", "prior to departure") are not countdowns
+  if (/before arrival|prior to|days before|prior|before departure/i.test(dl)) return '—';
+  const parsed = new Date(dl);
+  if (isNaN(parsed.getTime())) return '—';
+  const days = Math.ceil((parsed.getTime() - Date.now()) / 86400000);
+  return days > 0 ? String(days) : '—';
 }
 
 // ── CSS ───────────────────────────────────────────────────────────────────────
@@ -1256,7 +1259,7 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
                 <a href={`#${id}`}>
                   <span className="n">{zeroPad(i + 1)}</span>
                   <span className="t">{label}</span>
-                  {(conf === 'medium' || conf === 'low') && (
+                  {conf && (
                     <span className={confTagClass(conf)}>{confLabel(conf)}</span>
                   )}
                 </a>
