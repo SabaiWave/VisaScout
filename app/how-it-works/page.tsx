@@ -4,6 +4,7 @@ import { UtilityPageShell } from '@/app/components/ui/UtilityPageShell';
 import { Button } from '@/app/components/ui/Button';
 import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { LegalPageShell } from '@/app/components/LegalPageShell';
+import { PRICES } from '@/src/lib/stripe';
 
 const TOC_ITEMS = [
   { id: 's1', label: 'Overview' },
@@ -59,7 +60,7 @@ const DEPTHS = [
   },
   {
     label: 'Intel',
-    price: '$5.99',
+    price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
     src: 5,
     total: 25,
     time: '~90s',
@@ -68,7 +69,7 @@ const DEPTHS = [
   },
   {
     label: 'Dossier',
-    price: '$9.99',
+    price: `$${(PRICES.deep.amount / 100).toFixed(2)}`,
     src: 8,
     total: 40,
     time: '~180s',

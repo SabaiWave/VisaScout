@@ -1,4 +1,5 @@
 import { DEPTH_LABEL, DEPTH_CTA } from '@/src/lib/depth';
+import { PRICES } from '@/src/lib/stripe';
 import { DESTINATIONS, ENABLED_REGIONS, REGION_LABELS, coverageLabel, destinationCount } from '@/src/config/destinations';
 
 export const clientConfig = {
@@ -98,7 +99,7 @@ export const clientConfig = {
         {
           name: DEPTH_LABEL.standard,
           tag: 'Popular',
-          price: '$5.99',
+          price: `$${(PRICES.standard.amount / 100).toFixed(2)}`,
           priceNote: 'Per report',
           description: 'Full picture for real decisions. Options compared, conflicts flagged, recent policy changes verified.',
           features: [`Everything in ${DEPTH_LABEL.quick}`, '5 sources per agent', 'Full conflict report', 'Full border run analysis', 'Contingency planning'],
@@ -109,7 +110,7 @@ export const clientConfig = {
         {
           name: DEPTH_LABEL.deep,
           tag: 'Max Intel',
-          price: '$11.99',
+          price: `$${(PRICES.deep.amount / 100).toFixed(2)}`,
           priceNote: 'Per report',
           description: 'For complex situations. Deeper sourcing, more community data, contradictions surfaced and resolved where sources agree.',
           features: [`Everything in ${DEPTH_LABEL.standard}`, '8 sources per agent', 'Wider community search', 'Nationality-specific edge cases', 'Contradictions surfaced and resolved'],
