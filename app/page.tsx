@@ -94,7 +94,8 @@ const LABEL_STYLE: React.CSSProperties = {
 };
 const INPUT_STYLE: React.CSSProperties = {
   background: 'var(--color-bg-elevated)', border: 'none', padding: '13px 14px',
-  fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', outline: 'none',
+  fontFamily: 'var(--font-mono)', fontSize: '1rem', outline: 'none',
+  touchAction: 'manipulation',
 };
 
 function CoordForm({ ctaLabel }: { ctaLabel: string }) {
@@ -113,7 +114,7 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
         .lp-dest-row { display: flex; border: 1px solid var(--color-border); transition: border-color 0.15s; position: relative; }
         .lp-dest-row:focus-within { border-color: var(--color-secondary); }
         .lp-dest-combo { flex: 1; min-width: 0; position: static !important; }
-        .lp-dest-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; font-family: var(--font-mono) !important; font-size: 0.8125rem !important; padding-left: 14px !important; }
+        .lp-dest-combo input { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; font-family: var(--font-mono) !important; font-size: 1rem !important; padding-left: 14px !important; touch-action: manipulation; }
         .lp-dest-combo > ul { position: absolute !important; top: 100% !important; left: 0 !important; right: 0 !important; border: 1px solid var(--color-secondary) !important; border-top: none !important; border-radius: 0 !important; box-shadow: none !important; background: var(--color-bg-elevated) !important; z-index: 50 !important; }
         .lp-dest-combo > ul li { border-radius: 0 !important; font-family: var(--font-mono) !important; font-size: 0.75rem !important; background: var(--color-bg-elevated) !important; }
       ` }} />
@@ -125,7 +126,7 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
           type="text"
           value={nationality}
           onChange={(e) => setNationality(e.target.value)}
-          placeholder="e.g. British, Japanese, Brazilian…"
+          placeholder="e.g. British, Japanese…"
           className="flex-1 min-w-0"
           style={{ ...INPUT_STYLE, color: 'var(--color-text-primary)' }}
         />
