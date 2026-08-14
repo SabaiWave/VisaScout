@@ -447,6 +447,12 @@ const DOSSIER_LOCK: React.CSSProperties = {
 
 function BriefExhibit() {
   const isMobile = useMobile();
+  const [deadline] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 12);
+    return d;
+  });
+  const deadlineStr = deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   return (
     <div id="brief" className="relative px-6 lg:px-[72px] py-16" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-start">
@@ -481,22 +487,22 @@ function BriefExhibit() {
             {briefSection('Situation')}
             {briefField('Passport', 'United States of America')}
             {briefField('Destination', 'Kingdom of Thailand')}
-            {briefField('Current status', 'METV. Day 47 of 60. 13 days remaining')}
+            {briefField('Current status', 'METV. Day 48 of 60. 12 days remaining')}
             {briefField('Goal', 'Extend stay 30+ days in-country')}
-
-            {briefSection('Visa Options')}
-            {visaOption('TR Extension (In-Country)', 'Extend at Chaeng Watthana. No border exit. 30 days. 1-day processing.', '฿1,900', true)}
-            {visaOption('TR Visa (Border Run)', 'Exit to nearest consulate. New 60-day TR. Higher friction, 1–2 day turnaround.', '฿2,000 + travel')}
 
             {briefSection('Recommended Action')}
             <div style={{ marginTop: 6, background: 'rgba(var(--color-secondary-rgb),0.06)', borderLeft: '2px solid var(--color-amber)', padding: '11px 14px' }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-amber)', marginBottom: 7 }}>
-                Deadline: Aug 19, 2026 · 13 days remaining
+                Deadline: {deadlineStr} · 12 days remaining
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.9, color: 'var(--color-text-primary)' }}>
-                Apply TR extension at Chaeng Watthana before Aug 19. Fee ฿1,900. Arrive by 08:00. August queues run 2–3 hrs.
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1.9, color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                Apply TR extension at Chaeng Watthana before {deadlineStr}. Fee ฿1,900. Arrive by 08:00.
               </div>
             </div>
+
+            {briefSection('Visa Options')}
+            {visaOption('TR Extension (In-Country)', 'Extend at Chaeng Watthana. No border exit. 30 days. 1-day processing.', '฿1,900', true)}
+            {visaOption('TR Visa (Border Run)', 'Exit to nearest consulate. New 60-day TR. Higher friction, 1–2 day turnaround.', '฿2,000 + travel')}
 
             {briefSection('Entry Requirements')}
             {checkItem('Passport', 'Valid ≥6 months past intended departure')}
