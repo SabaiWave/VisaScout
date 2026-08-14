@@ -144,20 +144,36 @@ export function SearchableCombobox({
             opacity: disabled ? 0.5 : 1,
             transition: 'border-color 0.15s, box-shadow 0.15s',
             fontFamily: 'var(--font-body)',
+            touchAction: 'manipulation',
           }}
         />
-        {/* Chevron */}
+        {/* Chevron — click to toggle open/close */}
         <span
           aria-hidden
+          onMouseDown={e => e.preventDefault()}
+          onClick={() => {
+            if (disabled) return;
+            if (open) {
+              setOpen(false);
+              setQuery('');
+              setActiveIdx(-1);
+              inputRef.current?.blur();
+            } else {
+              openDropdown();
+              inputRef.current?.focus();
+            }
+          }}
           style={{
             position: 'absolute',
             right: '12px',
             top: '50%',
             transform: `translateY(-50%) rotate(${open ? '180deg' : '0deg'})`,
             transition: 'transform 0.15s',
-            pointerEvents: 'none',
             color: 'var(--color-text-tertiary)',
             display: 'flex',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            padding: '4px',
+            touchAction: 'manipulation',
           }}
         >
           <svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor" aria-hidden="true"><path d="M0 0L8 0L4 5Z" /></svg>
