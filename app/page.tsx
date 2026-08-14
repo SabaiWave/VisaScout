@@ -126,7 +126,7 @@ function CoordForm({ ctaLabel }: { ctaLabel: string }) {
           type="text"
           value={nationality}
           onChange={(e) => setNationality(e.target.value)}
-          placeholder="e.g. British, Japanese…"
+          placeholder="Any nationality"
           className="flex-1 min-w-0"
           style={{ ...INPUT_STYLE, color: 'var(--color-text-primary)' }}
         />
@@ -414,11 +414,13 @@ function visaOption(name: string, desc: string, cost: string, recommended?: bool
 
 function checkItem(label: string, note?: string) {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '4px 0' }}>
-      <span style={{ color: 'var(--color-success)', fontFamily: 'var(--font-mono)', fontSize: '11px', flexShrink: 0 }}>✓</span>
-      <div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)' }}>{label}</span>
-        {note && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', marginLeft: 7 }}>{note}</span>}
+    <div className="grid vs-row" style={{ gridTemplateColumns: '150px 1fr', alignItems: 'start', padding: '7px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
+        <span style={{ color: 'var(--color-success)', flexShrink: 0 }}>✓</span>
+        <span>{label}</span>
+      </div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)', lineHeight: 1.6 }}>
+        {note}
       </div>
     </div>
   );
@@ -426,11 +428,15 @@ function checkItem(label: string, note?: string) {
 
 function flagItem(date: string, text: string, tier: string) {
   return (
-    <div className="vs-row" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '8px', color: 'var(--color-secondary)', flexShrink: 0, lineHeight: 1 }}>▲</span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', flexShrink: 0 }}>{date}</span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)', flex: 1 }}>{text}</span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-tertiary)', flexShrink: 0, letterSpacing: '0.08em' }}>{tier}</span>
+    <div className="grid vs-row" style={{ gridTemplateColumns: '150px 1fr', alignItems: 'start', padding: '7px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--color-text-tertiary)', paddingTop: '2px' }}>
+        <span style={{ color: 'var(--color-secondary)', fontSize: '8px', lineHeight: 1, flexShrink: 0 }}>▲</span>
+        <span>{date}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-text-primary)', flex: 1, lineHeight: 1.6 }}>{text}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--color-text-tertiary)', letterSpacing: '0.08em', flexShrink: 0, paddingTop: 2 }}>{tier}</span>
+      </div>
     </div>
   );
 }
