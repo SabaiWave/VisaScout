@@ -329,7 +329,7 @@ function AppContent() {
     setDepth('standard');
   }
 
-  const visaTypeOptions = destination ? (VISA_TYPES[destination] ?? []) : [];
+  const visaTypeOptions = destination ? ['— None —', ...(VISA_TYPES[destination] ?? [])] : [];
 
   if (!isLoaded && phase !== 'redirecting') {
     return (
@@ -582,7 +582,7 @@ function AppContent() {
                     id="visaType"
                     options={visaTypeOptions}
                     value={visaType}
-                    onChange={setVisaType}
+                    onChange={v => setVisaType(v === '— None —' ? '' : v)}
                     placeholder={destination ? 'Select visa type…' : 'Select destination first'}
                     disabled={!destination}
                   />
