@@ -10,32 +10,36 @@ const MODEL = 'claude-sonnet-4-6';
  * Deterministic confidence scoring using cross-agent agreement + source tier.
  * Overrides the LLM's overallConfidence after parsing.
  *
- * HIGH:   2+ Tier 1 agents succeeded, OR 4+/5 agents succeeded with zero contested claims
- * MEDIUM: 1 Tier 1 agent succeeded, OR majority (3+/5) succeeded with ≤1 contested claim
+ * Skipped agents (e.g. borderRun at Quick depth) are excluded from the denominator —
+ * only dispatched agents count toward agreement thresholds.
+ *
+ * HIGH:   2+ Tier 1 agents succeeded, OR 4+ dispatched agents agree with zero contested claims
+ * MEDIUM: 1 Tier 1 agent succeeded, OR majority (3+) dispatched agents agree with ≤1 contested claim
  * LOW:    all other cases (no Tier 1-2 coverage, significant conflicts, low agent agreement)
  */
 export function computeOverallConfidence(
   report: ConflictReport,
   envelope: AgentResultEnvelope
 ): 'high' | 'medium' | 'low' {
-  const agents = [
+  // Exclude intentionally skipped agents — only dispatched agents count toward agreement.
+  const dispatched = [
     envelope.officialPolicy,
     envelope.recentChanges,
     envelope.communityIntel,
     envelope.entryRequirements,
     envelope.borderRun,
-  ];
+  ].filter((a) => a.status !== 'skipped');
 
-  const succeeded = agents.filter((a) => a.status === 'success');
+  const succeeded = dispatched.filter((a) => a.status === 'success');
   const tier1Count = succeeded.filter((a) => a.sourceTier === 1).length;
   const contestedCount = report.contested.length;
 
-  // HIGH: 2+ Tier 1 sources confirmed, OR 4+/5 agents agree with zero contested claims
+  // HIGH: 2+ Tier 1 sources confirmed, OR 4+ dispatched agents agree with zero contested claims
   if (tier1Count >= 2 || (succeeded.length >= 4 && contestedCount === 0)) {
     return 'high';
   }
 
-  // MEDIUM: 1 Tier 1 source confirmed, OR majority (3+/5) agents agree with minor conflicts (≤1 contested)
+  // MEDIUM: 1 Tier 1 source confirmed, OR majority (3+) dispatched agents agree with ≤1 contested
   if (tier1Count >= 1 || (succeeded.length >= 3 && contestedCount <= 1)) {
     return 'medium';
   }

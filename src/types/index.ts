@@ -27,7 +27,7 @@ export interface VisaRequest extends VisaInput {
 }
 
 export interface AgentResult<T> {
-  status: 'success' | 'failed';
+  status: 'success' | 'failed' | 'skipped';
   data: T | null;
   confidence: 'high' | 'medium' | 'low';
   gaps: string[];
@@ -198,7 +198,7 @@ export interface ContingencySummary {
 
 export interface AgentStatus {
   agent: string;
-  status: 'success' | 'failed';
+  status: 'success' | 'failed' | 'skipped';
   confidence: 'high' | 'medium' | 'low';
   sourceTier: 1 | 2 | 3 | 4;
   durationMs: number;

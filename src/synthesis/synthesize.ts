@@ -32,6 +32,9 @@ export function buildDegradedContext(envelope: AgentResultEnvelope): string {
   if (envelope.borderRun.status === 'failed') {
     gaps.push('BorderRun agent failed — border run analysis based on official policy only, no community enforcement data available. Border crossing posture is unverified.');
   }
+  if (envelope.borderRun.status === 'skipped') {
+    gaps.push('BorderRun not dispatched at Quick depth — border run analysis not available.');
+  }
 
   return gaps.join('\n\n');
 }
@@ -101,9 +104,9 @@ export async function synthesizeBrief(
   }, depth);
 }
 
-function statusFrom(result: { status: string; confidence: string; sourceTier: number; durationMs: number; error?: string }) {
+function statusFrom(result: { status: 'success' | 'failed' | 'skipped'; confidence: string; sourceTier: number; durationMs: number; error?: string }) {
   return {
-    status: result.status as 'success' | 'failed',
+    status: result.status,
     confidence: result.confidence as 'high' | 'medium' | 'low',
     sourceTier: result.sourceTier as 1 | 2 | 3 | 4,
     durationMs: result.durationMs,
