@@ -1,4 +1,5 @@
 import type { VisaRequest, PromptResult } from '../types/index';
+import { OUTPUT_GUARDRAILS } from './shared';
 
 export function buildRecentChangesPrompt(
   request: VisaRequest,
@@ -38,7 +39,9 @@ Set verified=false if no Tier 1-2 sources confirmed the changes.
 Confidence calibration (be decisive — do not default to low):
 - high: policy changes confirmed by Tier 1 official sources (government announcements, official press releases with dates)
 - medium: Tier 2 sources OR reputable aggregators clearly attributing an official announcement; confirmed via multiple Tier 3 sources
-- low: Tier 4 only (community reports, forums) with no aggregator or official confirmation; OR no recent changes found from any source`,
+- low: Tier 4 only (community reports, forums) with no aggregator or official confirmation; OR no recent changes found from any source
+
+${OUTPUT_GUARDRAILS}`,
 
     user: `Analyzing recent visa policy changes for ${request.normalizedNationality} passport holders traveling to ${request.normalizedDestination}.
 

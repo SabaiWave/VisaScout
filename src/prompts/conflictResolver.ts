@@ -1,4 +1,5 @@
 import type { AgentResultEnvelope, PromptResult } from '../types/index';
+import { OUTPUT_GUARDRAILS } from './shared';
 
 export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): PromptResult {
   const summaries = {
@@ -63,7 +64,9 @@ Return ONLY valid JSON (no markdown fences):
     }
   ],
   "overallConfidence": "<high|medium|low>"
-}`,
+}
+
+${OUTPUT_GUARDRAILS}`,
 
     user: `Agent outputs:
 

@@ -93,11 +93,11 @@ export function BriefRailSkeleton({
 
         {/* Panel 3: Contents */}
         <div style={{ border: `1px solid ${C.rim}` }}>
-          <RpH label="CONTENTS" meta="LOADING" />
+          <RpH label="CONTENTS" meta="" />
           <div>
             {SECTIONS.map((sec, i) => (
               <div key={sec.n} style={{
-                display: 'grid', gridTemplateColumns: '19px minmax(0,1fr) auto',
+                display: 'grid', gridTemplateColumns: '19px minmax(0,1fr)',
                 alignItems: 'center', gap: 9,
                 padding: '7px 11px 7px 9px',
                 borderLeft: i === 0 ? `2px solid ${C.accent}` : '2px solid transparent',
@@ -110,7 +110,6 @@ export function BriefRailSkeleton({
                 <span style={{ fontFamily: MONO, fontSize: 11, color: i === 0 ? C.ink : C.ink3, letterSpacing: '0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {sec.t}
                 </span>
-                <span style={{ ...SK, width: 40, height: 6, flexShrink: 0 }} />
               </div>
             ))}
           </div>

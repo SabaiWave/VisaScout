@@ -36,6 +36,25 @@ function withLinks(text: string): string {
   );
 }
 
+// Split alert text into title + body without splitting on URL dots.
+// Looks for ". " followed by a capital letter within the first 110 chars.
+function splitAlertText(raw: string): { title: string; body: string } {
+  const text = noDash(raw).trim();
+  const breakMatch = text.match(/^(.{10,110})\.\s+(?=[A-Z])/);
+  if (breakMatch) {
+    return { title: breakMatch[1], body: text.slice(breakMatch[0].length).trim() };
+  }
+  if (text.length <= 90) return { title: text, body: '' };
+  // Long run-on with no sentence break — demote to body, no heading
+  return { title: '', body: text };
+}
+
+// Suppress items that are raw technical error messages — should not reach the renderer
+// after prompt guardrails, but defended here as a safety net.
+function isErrorItem(item: string): boolean {
+  return /agent failed|json parse|parse error|could not be assessed/i.test(item);
+}
+
 function confLabel(c: 'high' | 'medium' | 'low' | undefined): string {
   if (c === 'high') return 'High';
   if (c === 'medium') return 'Med';
@@ -531,18 +550,21 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 /* ── CHECKLIST GRID ────────────────────────────────────────────── */
 .chk { border: 1px solid var(--rim); page-break-inside: var(--break); }
 .chk-r {
-  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px;
+  display: grid; grid-template-columns: 44px minmax(0,1fr);
   border-bottom: 1px solid var(--rim-soft); align-items: stretch;
 }
 .chk-r:last-child { border-bottom: none; }
-.chk-r > div { padding: 12px 14px; border-right: 1px solid var(--rim-soft); }
-.chk-r > div:last-child { border-right: none; }
-.chk-box { display: flex; align-items: center; justify-content: center; background: var(--ground-up); color: var(--accent-ink); font-weight: 700; font-size: 16px; }
-.chk-name { color: var(--ink); font-size: 12.5px; }
-.chk-spec { color: var(--ink-3); font-size: 12px; }
-.chk-src { font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4); text-align: right; }
+.chk-box {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  padding: 12px 0;
+  border-right: 1px solid var(--rim-soft); background: var(--ground-up);
+  color: var(--accent-ink); font-weight: 700; font-size: 16px;
+}
+.chk-cell { padding: 12px 14px; }
+.chk-name { color: var(--ink); font-size: 12.5px; line-height: 1.5; }
+.chk-spec { margin-top: 4px; color: var(--ink-3); font-size: 11.5px; line-height: 1.55; }
 .chk-h {
-  display: grid; grid-template-columns: 44px minmax(0,1fr) 230px;
+  display: grid; grid-template-columns: 44px minmax(0,1fr);
   background: var(--ground-up); border-bottom: 1px solid var(--rim);
 }
 .chk-h > span {
@@ -552,11 +574,21 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 }
 .chk-h > span:last-child { border-right: none; }
 .chk-h > span:first-child { text-align: center; font-size: 16px; color: var(--accent-ink); letter-spacing: 0; }
+.chk-note {
+  padding: 9px 14px; font-size: 11.5px; color: var(--ink-3); line-height: 1.65;
+  background: var(--ground-up); border-bottom: 1px solid var(--rim-soft);
+}
+.chk-note:last-child { border-bottom: none; }
+.chk-note .m {
+  color: var(--accent-ink); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; font-size: 9.5px; margin-right: 8px;
+}
 .chk-legend {
   margin-top: 8px; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink-4); line-height: 1.6;
+  display: grid; grid-template-columns: 44px minmax(0,1fr); align-items: center;
 }
-.chk-legend-mark { color: var(--accent-ink); font-size: 16px; line-height: 1; vertical-align: middle; }
+.chk-legend-mark { color: var(--accent-ink); font-size: 16px; line-height: 1; text-align: center; }
 
 /* ── ALERT BLOCK ────────────────────────────────────────────────── */
 .alert {
@@ -568,9 +600,10 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .alert + .alert { margin-top: 12px; }
 .alert.calm { border-color: var(--rim); background: var(--ground-up); }
 .alert-h {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: flex-start; gap: 10px;
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;
   letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); line-height: 1.1;
+  word-break: break-word; overflow-wrap: anywhere;
 }
 .alert-h .flag { flex-shrink: 0; font-size: 18px; color: var(--accent-ink); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 .alert-d { margin-top: 4px; font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); }
@@ -601,13 +634,19 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .doc[data-depth="quick"] #s7 .lockcard,
 .doc[data-depth="quick"] #s9 .lockcard { display: flex; }
 
-.doc[data-mode="print"][data-depth="quick"] #s5,
-.doc[data-mode="print"][data-depth="quick"] #s7,
-.doc[data-mode="print"][data-depth="quick"] #s9 { display: none !important; }
+.doc[data-mode="print"][data-depth="quick"] #s5 .gatecontent,
+.doc[data-mode="print"][data-depth="quick"] #s7 .gatecontent,
+.doc[data-mode="print"][data-depth="quick"] #s9 .gatecontent { display: none !important; }
+.doc[data-mode="print"][data-depth="quick"] #s5 .lockcard,
+.doc[data-mode="print"][data-depth="quick"] #s7 .lockcard,
+.doc[data-mode="print"][data-depth="quick"] #s9 .lockcard { display: flex !important; }
 @media print {
-  .doc[data-depth="quick"] #s5,
-  .doc[data-depth="quick"] #s7,
-  .doc[data-depth="quick"] #s9 { display: none !important; }
+  .doc[data-depth="quick"] #s5 .gatecontent,
+  .doc[data-depth="quick"] #s7 .gatecontent,
+  .doc[data-depth="quick"] #s9 .gatecontent { display: none !important; }
+  .doc[data-depth="quick"] #s5 .lockcard,
+  .doc[data-depth="quick"] #s7 .lockcard,
+  .doc[data-depth="quick"] #s9 .lockcard { display: flex !important; }
 }
 
 /* ── VERDICT / STATUS MARKS ────────────────────────────────────── */
@@ -774,7 +813,7 @@ function LockCard({ title }: { title: string }) {
     <div className="lockcard">
       <span className="lock-icon" aria-hidden="true">{LOCK_SVG}</span>
       <span className="lock-text">
-        {title} included in <a className="lock-link" href="/app?depth=standard">Intel and Dossier</a>.
+        {title} included in Intel and Dossier. Upgrade at <a className="lock-link" href="https://www.visascout.io">visascout.io</a>
       </span>
     </div>
   );
@@ -907,7 +946,7 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
                   {noDash(opt.summary)}
                   {opt.cons.length > 0 && (
                     <span style={{ color: 'var(--ink-4)', marginLeft: '8px' }}>
-                      {opt.cons.map(noDash).join('. ')}.
+                      {opt.cons.map(c => noDash(c).replace(/\.+$/, '')).join('. ')}.
                     </span>
                   )}
                 </td>
@@ -925,31 +964,46 @@ function EntryRequirementsSection({ brief }: { brief: VisaBrief }) {
   const conf = (brief.confidenceScore.perSection ?? {})['entryRequirements'];
 
   type ChkItem = { name: string; spec: string };
-  const items: ChkItem[] = [];
-  for (const doc of req.documents) items.push({ name: doc, spec: '' });
-  if (req.proofOfFunds) items.push({ name: 'Proof of funds', spec: req.proofOfFunds });
-  items.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required' });
-  for (const h of req.health) items.push({ name: 'Health', spec: h });
-  for (const n of req.notes) items.push({ name: 'Note', spec: n });
+  const reqItems: ChkItem[] = [];
+  const noteItems: string[] = [];
+
+  for (const doc of req.documents) reqItems.push({ name: doc, spec: '' });
+
+  // Only add dedicated fields if not already present in documents[] to prevent duplicates
+  const docsText = req.documents.join(' ').toLowerCase();
+  if (req.proofOfFunds && !/proof of funds|sufficient funds/i.test(docsText)) {
+    reqItems.push({ name: 'Proof of funds', spec: req.proofOfFunds });
+  }
+  if (!/onward.*ticket|return.*ticket/i.test(docsText)) {
+    reqItems.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required' });
+  }
+  for (const h of req.health) reqItems.push({ name: 'Health requirement', spec: h });
+  for (const n of req.notes) noteItems.push(n);
 
   return (
     <section className="sec" id="s4">
-      <Sh n={4} title="Entry Requirements" meta={`Agent · Entry Requirements · ${items.length} items${conf ? ` · Conf ${conf}` : ''}`} />
+      <Sh n={4} title="Entry Requirements" meta={`Agent · Entry Requirements · ${reqItems.length} items${conf ? ` · Conf ${conf}` : ''}`} />
       <div className="chk">
         <div className="chk-h">
           <span>&#10003;</span>
           <span>Requirement</span>
-          <span>Details</span>
         </div>
-        {items.map((item, i) => (
+        {reqItems.map((item, i) => (
           <div key={i} className="chk-r">
             <div className="chk-box">&#10003;</div>
-            <div className="chk-name">{noDash(item.name)}</div>
-            <div className="chk-spec">{noDash(item.spec)}</div>
+            <div className="chk-cell">
+              <div className="chk-name">{noDash(item.name)}</div>
+              {item.spec && <div className="chk-spec">{noDash(item.spec)}</div>}
+            </div>
+          </div>
+        ))}
+        {noteItems.map((note, i) => (
+          <div key={`note-${i}`} className="chk-note">
+            <span className="m">Note</span>{noDash(note)}
           </div>
         ))}
       </div>
-      <div className="chk-legend"><span className="chk-legend-mark">&#10003;</span> Confirmed entry requirement based on official sources. Verify with embassy before travel.</div>
+      <div className="chk-legend"><span className="chk-legend-mark">&#10003;</span><span>Confirmed entry requirement based on official sources. Verify with embassy before travel.</span></div>
     </section>
   );
 }
@@ -1021,33 +1075,54 @@ function BorderRunSection({ brief }: { brief: VisaBrief }) {
 
 function RecentChangesSection({ brief }: { brief: VisaBrief }) {
   const changes = brief.recentChanges;
-  if (!changes.hasChanges && changes.items.length === 0 && changes.watchItems.length === 0) return null;
+  const agentFailed = brief.metadata.agentStatuses.some(
+    s => s.agent === 'RecentChanges' && s.status === 'failed'
+  );
+  const validItems = changes.items.filter(item => !isErrorItem(item));
+  const validWatchItems = changes.watchItems.filter(item => !isErrorItem(item));
+  const hasContent = validItems.length > 0 || validWatchItems.length > 0;
+
   return (
     <section className="sec" id="s6">
       <Sh n={6} title="Recent Changes" meta="Agent · Recent Changes · 90-day window" />
-      {changes.items.map((item, i) => (
-        <div key={i} className="alert">
-          <div className="alert-h"><span className="flag">&#9888;</span>{noDash(item).split('.')[0]}</div>
-          {noDash(item).split('.').slice(1).join('.').trim() && (
-            <p className="alert-b">{noDash(item).split('.').slice(1).join('.').trim()}.</p>
-          )}
+      {agentFailed && !hasContent && (
+        <div className="alert calm">
+          <div className="alert-h" style={{ fontSize: '13px', textTransform: 'none', letterSpacing: '0', fontFamily: 'var(--font-body, inherit)', fontWeight: 400 }}>
+            Recent policy changes could not be retrieved for this run. Verify current visa rules at the official immigration source before travel.
+          </div>
           <div className="alert-meta">
             <span>Window <b>90 days</b></span>
-            <span>Source <b>Recent Changes agent</b></span>
+            <span>Status <b>Data unavailable</b></span>
           </div>
         </div>
-      ))}
-      {changes.watchItems.map((item, i) => (
-        <div key={`w-${i}`} className="alert calm">
-          <div className="alert-h">{noDash(item).split('.')[0]}</div>
-          {noDash(item).split('.').slice(1).join('.').trim() && (
-            <p className="alert-b">{noDash(item).split('.').slice(1).join('.').trim()}.</p>
-          )}
-          <div className="alert-meta">
-            <span>Status <b>Watch item</b></span>
+      )}
+      {validItems.map((item, i) => {
+        const { title, body } = splitAlertText(item);
+        return (
+          <div key={i} className="alert">
+            {title && <div className="alert-h"><span className="flag">&#9888;</span>{title}</div>}
+            {body && <p className="alert-b">{body}</p>}
+            {!title && !body && <p className="alert-b">{noDash(item)}</p>}
+            <div className="alert-meta">
+              <span>Window <b>90 days</b></span>
+              <span>Source <b>Recent Changes agent</b></span>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+      {validWatchItems.map((item, i) => {
+        const { title, body } = splitAlertText(item);
+        return (
+          <div key={`w-${i}`} className="alert calm">
+            {title && <div className="alert-h">{title}</div>}
+            {body && <p className="alert-b">{body}</p>}
+            {!title && !body && <p className="alert-b">{noDash(item)}</p>}
+            <div className="alert-meta">
+              <span>Status <b>Watch item</b></span>
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -1259,9 +1334,6 @@ function Rail({ brief, meta }: { brief: VisaBrief; meta: BriefDocumentMeta }) {
                 <a href={`#${id}`}>
                   <span className="n">{zeroPad(i + 1)}</span>
                   <span className="t">{label}</span>
-                  {conf && (
-                    <span className={confTagClass(conf)}>{confLabel(conf)}</span>
-                  )}
                 </a>
               </li>
             );

@@ -1,4 +1,5 @@
 import type { VisaRequest, PromptResult } from '../types/index';
+import { OUTPUT_GUARDRAILS } from './shared';
 
 export function buildOfficialPolicyPrompt(
   request: VisaRequest,
@@ -39,7 +40,9 @@ Set verified=false if no Tier 1 government sources were found.
 Confidence calibration (be decisive — do not default to low):
 - high: core visa rules (stay duration, eligibility, fees) confirmed by Tier 1 sources with specific values
 - medium: Tier 1 source found but key details (exact fees, specific stay length) unconfirmed; OR primary source is Tier 2
-- low: NO Tier 1-2 source found, relying entirely on aggregators or community (Tier 3-4 only)`,
+- low: NO Tier 1-2 source found, relying entirely on aggregators or community (Tier 3-4 only)
+
+${OUTPUT_GUARDRAILS}`,
 
     user: `Analyzing visa policy for ${request.normalizedNationality} passport holders traveling to ${request.normalizedDestination}.
 
