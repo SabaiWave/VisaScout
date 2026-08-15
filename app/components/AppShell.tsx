@@ -25,6 +25,7 @@ export function AppShell({ isAdmin, showDev, isSignedIn = true, children }: AppS
           fontFamily: 'var(--font-mono)', fontSize: '0.5rem',
           letterSpacing: '0.1em', textTransform: 'uppercase',
           color: 'var(--color-text-tertiary)',
+          opacity: 0.35,
         }}
       >
         <div style={{ width: 5, height: 5, background: 'var(--color-success)', flexShrink: 0 }} />

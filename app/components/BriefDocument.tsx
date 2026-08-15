@@ -827,7 +827,7 @@ function LockCard({ title }: { title: string }) {
     <div className="lockcard">
       <span className="lock-icon" aria-hidden="true">{LOCK_SVG}</span>
       <span className="lock-text">
-        {title} included in Intel and Dossier. Upgrade at <a className="lock-link" href="https://www.visascout.io">visascout.io</a>
+        {title} included in Intel and Dossier.
       </span>
     </div>
   );
