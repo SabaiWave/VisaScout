@@ -163,22 +163,36 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
 
       <main style={{ paddingTop: '24px' }}>
         {isProcessing ? (
-          <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-8">
-            <BriefProcessingBanner
-              briefId={row.id}
-              isActuallyDone={isActuallyDone}
-              pollForJob={row.payment_status === 'queued'}
-              nationality={row.nationality}
-              destination={row.destination}
-              depth={row.depth}
-              showDashboardLink={!!userId}
-            />
-          </div>
+          <>
+            {userId && (
+              <div style={{ padding: '0 24px 12px' }}>
+                <a
+                  href="/dashboard"
+                  className="inline-flex items-center gap-1.5"
+                  style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
+                >
+                  <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '5px solid currentColor', flexShrink: 0 }} />
+                  Dashboard
+                </a>
+              </div>
+            )}
+            <div className="max-w-[1120px] mx-auto px-4 sm:px-6 pb-8">
+              <BriefProcessingBanner
+                briefId={row.id}
+                isActuallyDone={isActuallyDone}
+                pollForJob={row.payment_status === 'queued'}
+                nationality={row.nationality}
+                destination={row.destination}
+                depth={row.depth}
+                showDashboardLink={false}
+              />
+            </div>
+          </>
         ) : (
           <>
-            {/* Nav bar: back link — only for non-brief states (BriefRenderer owns this row when brief is ready) */}
-            {!brief && userId && (
-              <div style={{ padding: '0 24px 16px' }}>
+            {/* Nav bar: back link */}
+            {userId && (
+              <div style={{ padding: '0 24px 12px' }}>
                 <a
                   href="/dashboard"
                   className="inline-flex items-center gap-1.5"
@@ -211,7 +225,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
                 </div>
               </div>
             ) : brief ? (
-              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} showDashboardLink={!!userId} />
+              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
               <div
                 className="max-w-[760px] mx-auto px-4 py-3"
