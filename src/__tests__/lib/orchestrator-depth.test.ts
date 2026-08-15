@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { runOrchestrator } from '../../orchestrator';
-import type { VisaInput, AgentStatusEvent } from '../../orchestrator';
+import type { AgentStatusEvent } from '../../orchestrator';
+import type { VisaInput } from '../../types/index';
 
 jest.mock('@anthropic-ai/sdk');
 
