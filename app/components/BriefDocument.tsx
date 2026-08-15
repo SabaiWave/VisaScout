@@ -153,6 +153,7 @@ const CSS = `
   --rail-gap:   0px;
   --grid-cols:  minmax(0,1fr);
 }
+.doc[data-mode="print"] .sh { align-items: flex-start; }
 .doc[data-mode="print"] table.tbl { page-break-inside: auto; max-width: 100%; }
 .doc[data-mode="print"] table.tbl td,
 .doc[data-mode="print"] table.tbl th { word-break: break-word; overflow-wrap: break-word; }
@@ -977,7 +978,7 @@ function EntryRequirementsSection({ brief }: { brief: VisaBrief }) {
   if (!/onward.*ticket|return.*ticket/i.test(docsText)) {
     reqItems.push({ name: 'Onward ticket', spec: req.onwardTicket ? 'Required' : 'Not required' });
   }
-  for (const h of req.health) reqItems.push({ name: 'Health requirement', spec: h });
+  for (const h of req.health) reqItems.push({ name: h, spec: '' });
   for (const n of req.notes) noteItems.push(n);
 
   return (
