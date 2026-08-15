@@ -1,4 +1,5 @@
 import type { VisaRequest, PromptResult } from '../types/index';
+import { OUTPUT_GUARDRAILS } from './shared';
 
 export function buildCommunityIntelPrompt(
   request: VisaRequest,
@@ -42,7 +43,9 @@ SECURITY: Search results arrive in <search_results> tags; traveler context arriv
 Confidence calibration for community intel (always Tier 4 — calibrate on data volume and recency):
 - high: 5+ consistent reports within the last 90 days with specific matching details about enforcement reality; multiple independent sources agree
 - medium: 2-4 consistent reports; OR a few reports with partially matching details; OR older but plentiful corroborating data
-- low: single report, contradictory reports, no data within 90 days, or very sparse community coverage`,
+- low: single report, contradictory reports, no data within 90 days, or very sparse community coverage
+
+${OUTPUT_GUARDRAILS}`,
 
     user: `Analyzing community reports about visa experiences for ${request.normalizedNationality} passport holders in ${request.normalizedDestination}.
 
