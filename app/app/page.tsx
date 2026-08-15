@@ -446,7 +446,7 @@ function AppContent() {
         {/* ── LEFT — form ── */}
         <div className="app-work-l">
 
-          <div style={{ padding: '56px 0 34px', borderBottom: '1px solid var(--color-border)' }}>
+          <div style={{ padding: '32px 0 34px', borderBottom: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 20 }}>
               <span style={{ width: 26, height: 1, background: 'var(--color-secondary)', display: 'block', flexShrink: 0 }} />
               Intake
