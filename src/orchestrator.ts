@@ -118,7 +118,18 @@ export async function runOrchestrator(
     runWithStatus('recentChanges', () => recentChangesAgent(visaRequest, client, depth)),
     runWithStatus('communityIntel', () => communityIntelAgent(visaRequest, client, depth)),
     runWithStatus('entryRequirements', () => entryRequirementsAgent(visaRequest, client, depth)),
-    runWithStatus('borderRun', () => borderRunAgent(visaRequest, client, depth)),
+    depth === 'quick'
+      ? Promise.resolve<AgentResult<BorderRunOutput>>({
+          status: 'skipped',
+          data: null,
+          confidence: 'low',
+          gaps: ['borderRun not dispatched at Quick depth — output is gated'],
+          sourceTier: 4,
+          sourceUrls: [],
+          verified: false,
+          durationMs: 0,
+        })
+      : runWithStatus('borderRun', () => borderRunAgent(visaRequest, client, depth)),
   ]);
 
   // Retry Recent Changes once on Standard/Deep — Quick skips retry for cost reasons

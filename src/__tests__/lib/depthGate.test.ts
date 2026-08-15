@@ -63,5 +63,18 @@ describe('redactForDepth', () => {
       redactForDepth(fixture, 'quick');
       expect(fixture).toEqual(before);
     });
+
+    it('redactForDepth still produces inert borderRunAnalysis regardless of whether borderRun was dispatched', () => {
+      // Guard: redactForDepth operates on the VisaBrief output — it is agnostic to
+      // dispatch status. A Quick brief whose borderRun was skipped (not dispatched)
+      // passes through the same redaction path as one where borderRun was dispatched
+      // and succeeded. The output shape must be identical either way.
+      const result = redactForDepth(fixture, 'quick');
+      expect(result.borderRunAnalysis.eligible).toBe(false);
+      expect(result.borderRunAnalysis.recommendedCrossings).toEqual([]);
+      // enforcementPosture and warnings also inert — nothing from the pipeline leaks
+      expect(result.borderRunAnalysis.enforcementPosture).toBe('');
+      expect(result.borderRunAnalysis.warnings).toEqual([]);
+    });
   });
 });

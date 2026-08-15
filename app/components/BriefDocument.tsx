@@ -116,7 +116,7 @@ const CSS = `
   --scrollx:      auto;
 
   --sheet-w:      1180px;
-  --sheet-pad:    46px 0 70px;
+  --sheet-pad:    16px 0 70px;
   --sec-gap:      42px;
   --num-size:     52px;
   --title-size:   30px;
@@ -694,7 +694,7 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 
 /* ── RESPONSIVE ─────────────────────────────────────────────────── */
 @media (max-width: 1240px) {
-  .doc { --sheet-pad: 34px 22px 60px; --rail-w: 244px; --rail-gap: 30px; }
+  .doc { --sheet-pad: 16px 22px 60px; --rail-w: 244px; --rail-gap: 30px; }
 }
 /* At large viewports (>1240px) sheet auto-margin alone gives ~10-15px gap vs sidebar — add breathing room */
 @media (min-width: 1241px) {

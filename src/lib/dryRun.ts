@@ -63,15 +63,20 @@ export async function runDryPipeline(
   await delay(slow ? 800 : 400);
   send({ type: 'parsed', data: visaRequestFixture as VisaRequest });
 
+  // Mirror real pipeline: borderRun not dispatched at quick depth
+  const activeSequence = depth === 'quick'
+    ? AGENT_SEQUENCE.filter(e => e.agent !== 'borderRun')
+    : AGENT_SEQUENCE;
+
   // Step 2: all agents start immediately (they run in parallel in real pipeline)
-  for (const entry of AGENT_SEQUENCE) {
+  for (const entry of activeSequence) {
     send({ type: 'status', agent: entry.agent, status: 'running' });
   }
 
   // Step 3: agents complete with staggered delays (simulates parallel execution)
   // slow=true spreads completions ~1.5s apart so the yellow→green animation is visible in dev
   await Promise.all(
-    AGENT_SEQUENCE.map(async (entry) => {
+    activeSequence.map(async (entry) => {
       await delay(slow ? entry.slowDelay : entry.fastDelay);
       const failed = simDegraded && entry.agent === 'officialPolicy';
       send({
