@@ -17,7 +17,6 @@ export default function BriefRenderer({
   isPaidBrief = false,
   canRerun = false,
   initialPdfError,
-  showDashboardLink = false,
 }: {
   brief: VisaBrief;
   nationality?: string;
@@ -26,7 +25,6 @@ export default function BriefRenderer({
   isPaidBrief?: boolean;
   canRerun?: boolean;
   initialPdfError?: string;
-  showDashboardLink?: boolean;
   // legacy props — no longer used, accepted for backward compat during transition
   hideMetadata?: boolean;
   hideParsedSituation?: boolean;
@@ -209,17 +207,7 @@ export default function BriefRenderer({
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', width: '100%' }}>
       {briefId && (
-        <div className="brief-nav-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {showDashboardLink ? (
-            <a
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5"
-              style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}
-            >
-              <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '5px solid currentColor', flexShrink: 0 }} />
-              Dashboard
-            </a>
-          ) : <span />}
+        <div className="brief-nav-row" style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <BriefNavActions
             url={`${appUrl}/brief/${briefId}`}
             briefId={briefId}
