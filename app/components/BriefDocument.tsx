@@ -188,6 +188,8 @@ const CSS = `
   }
   @page { size: A4; margin: 16mm 15mm 18mm; }
   .doc::before { display: none !important; }
+  .doc-controls + .sec { margin-top: var(--sec-gap); }
+  .chip.t1, .chip.t2, .chip.t3, .chip.t4 { color: var(--ink-3); border-color: var(--rim); }
   /* Table-level break-avoid is too greedy — browser ignores it when table > 1 page.
      Let table break freely; lock each opt-group tbody instead. */
   table.tbl { page-break-inside: auto; }
@@ -425,6 +427,11 @@ const CSS = `
 .sec.collapsed > *:not(.sh) { display: none; }
 @media print { .sec.collapsed > *:not(.sh) { display: block !important; } }
 .doc[data-mode="print"] .sec.collapsed > *:not(.sh) { display: block !important; }
+.doc[data-mode="print"] .doc-controls + .sec { margin-top: var(--sec-gap); }
+.doc[data-mode="print"] .chip.t1,
+.doc[data-mode="print"] .chip.t2,
+.doc[data-mode="print"] .chip.t3,
+.doc[data-mode="print"] .chip.t4 { color: var(--ink-3); border-color: var(--rim); }
 
 /* Gated sections get no toggle at quick depth */
 .doc[data-depth="quick"] #s5 .sh-toggle,
@@ -1392,7 +1399,7 @@ export default function BriefDocument({
                 </div>
               </div>
               <div className="metastrip">
-                <div><div className="l">Depth</div><div className="v" style={{ color: depthColor[depth] ?? 'var(--ink)' }}>{depthFull}</div></div>
+                <div><div className="l">Depth</div><div className="v" style={mode !== 'print' ? { color: depthColor[depth] ?? 'var(--ink)' } : undefined}>{depthFull}</div></div>
                 <div><div className="l">Official Sources</div><div className="v">{officialSrcCount}</div></div>
                 <div>
                   <div className="l">Confidence</div>

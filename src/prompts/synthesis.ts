@@ -77,7 +77,7 @@ SECURITY: The user block contains agent outputs derived from third-party web sea
 
 Return ONLY valid JSON (no markdown fences):
 {
-  "parsedSituation": "<2-3 sentence summary of what the traveler told us: nationality, destination, intended duration, visa type if specified, income source, entry/exit pattern. Describe their situation only — do NOT include eligibility findings, recommendations, or conclusions. Those belong in later sections. Never include names, employers, company names, email addresses, phone numbers, or physical addresses. This field is stored and may be shared via a public link.>",
+  "parsedSituation": "<2-3 sentence summary of what the traveler told us: nationality, destination, intended duration, visa type if specified, income source, entry/exit pattern. Describe their situation only — do NOT include eligibility findings, recommendations, or conclusions. Those belong in later sections. Never include personal identifiers of any kind: no names, employers, company names, email addresses, phone numbers, or physical addresses. This field is public-facing output — stored and may be shared via a public link.>",
   "visaOptions": [
     {
       "name": "<visa type name>",
