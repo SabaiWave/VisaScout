@@ -10,6 +10,7 @@ interface BriefNavActionsProps {
   url: string;
   briefId: string;
   depth: string;
+  onPdfError: (msg: string) => void;
 }
 
 type PrefetchResult = { blob: Blob; filename: string };
@@ -40,11 +41,10 @@ const BTN_SOLID: React.CSSProperties = {
   fontWeight: 700,
 };
 
-export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
+export function BriefNavActions({ url, briefId, depth, onPdfError }: BriefNavActionsProps) {
   const { userId } = useAuth();
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState<string | null>(null);
   const prefetchRef = useRef<Promise<PrefetchResult | null> | null>(null);
 
   useEffect(() => {
@@ -68,7 +68,6 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
 
   async function handleDownload() {
     setPdfLoading(true);
-    setPdfError(null);
     try {
       const prefetched = prefetchRef.current ? await prefetchRef.current : null;
       let blob: Blob;
@@ -106,7 +105,7 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
         body: JSON.stringify({ event: 'brief.pdf_downloaded', props: { briefId, depth } }),
       }).catch(() => {});
     } catch {
-      setPdfError('PDF failed. Try again.');
+      onPdfError('PDF generation failed. Try again.');
     } finally {
       setPdfLoading(false);
     }
@@ -122,11 +121,6 @@ export function BriefNavActions({ url, briefId, depth }: BriefNavActionsProps) {
         <FileDown size={11} />
         {pdfLoading ? 'Preparing…' : 'Download PDF'}
       </Button>
-      {pdfError && (
-        <span style={{ fontSize: 10, color: 'var(--color-error)', fontFamily: 'var(--font-mono)' }}>
-          {pdfError}
-        </span>
-      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // Pure presentational — no 'use client', no hooks, no Next.js imports.
 // Works in renderToStaticMarkup for PDF generation and in React tree for screen.
 
+import type React from 'react';
 import type { VisaBrief } from '@/src/types/index';
 import { DEPTH_LABEL } from '@/src/lib/depth';
 
@@ -1033,10 +1034,10 @@ function BorderRunSection({ brief }: { brief: VisaBrief }) {
           <table className="tbl">
             <thead>
               <tr>
-                <th style={{ width: '16%' }}>Vector</th>
-                <th style={{ width: '36%' }}>Route / details</th>
-                <th style={{ width: '20%' }}>Annual cap</th>
-                <th style={{ width: '28%' }}>Status</th>
+                <th style={{ width: '14%' }}>Vector</th>
+                <th style={{ width: '44%' }}>Route / details</th>
+                <th style={{ width: '24%' }}>Annual cap</th>
+                <th style={{ width: '18%' }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -1059,7 +1060,7 @@ function BorderRunSection({ brief }: { brief: VisaBrief }) {
                     <tr key={i}>
                       <td><span className="name">Option {i + 1}</span></td>
                       <td>{noDash(crossing)}</td>
-                      <td className="num">{analysis.limitsPerYear ?? <span className="vd ok">No hard cap</span>}</td>
+                      <td>{analysis.limitsPerYear ?? <span className="vd ok">No hard cap</span>}</td>
                       <td><span className="vd ok">Open</span></td>
                     </tr>
                   ))}
@@ -1161,8 +1162,8 @@ function ConflictSection({ brief }: { brief: VisaBrief }) {
             <thead>
               <tr>
                 <th style={{ width: '22%' }}>Topic</th>
-                <th style={{ width: '12%' }}>Status</th>
-                <th style={{ width: '36%' }}>Agent verdicts</th>
+                <th style={{ width: '16%' }}>Status</th>
+                <th style={{ width: '32%' }}>Agent verdicts</th>
                 <th style={{ width: '30%' }}>Resolution</th>
               </tr>
             </thead>
@@ -1243,7 +1244,7 @@ function CitationsSection({ brief }: { brief: VisaBrief }) {
                     </span>
                   )}
                 </td>
-                <td className="num">{urlDomain(cite.url)}</td>
+                <td style={{ wordBreak: 'break-all' }}>{urlDomain(cite.url)}</td>
                 <td>{noDash(cite.claim)}</td>
                 <td><TierChip tier={cite.tier} /></td>
               </tr>
@@ -1363,10 +1364,14 @@ export default function BriefDocument({
   brief,
   meta,
   mode = 'screen',
+  degradedNotice,
+  pdfErrorNotice,
 }: {
   brief: VisaBrief;
   meta: BriefDocumentMeta;
   mode?: 'screen' | 'print';
+  degradedNotice?: React.ReactNode;
+  pdfErrorNotice?: React.ReactNode;
 }) {
   const depth = brief.metadata.depth;
   const depthFull = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
@@ -1384,6 +1389,12 @@ export default function BriefDocument({
           <Rail brief={brief} meta={meta} />
 
           <main className="body">
+            {mode !== 'print' && degradedNotice && (
+              <div style={{ marginBottom: 28 }}>{degradedNotice}</div>
+            )}
+            {mode !== 'print' && pdfErrorNotice && (
+              <div style={{ marginBottom: 28 }}>{pdfErrorNotice}</div>
+            )}
             <header className="mast">
               <div className="mast-top">
                 <div>
