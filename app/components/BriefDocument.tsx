@@ -153,7 +153,7 @@ const CSS = `
   --rail-gap:   0px;
   --grid-cols:  minmax(0,1fr);
 }
-.doc[data-mode="print"] .sh { align-items: flex-start; }
+.doc[data-mode="print"] .sh-row { align-items: flex-start; }
 .doc[data-mode="print"] table.tbl { page-break-inside: auto; max-width: 100%; }
 .doc[data-mode="print"] table.tbl td,
 .doc[data-mode="print"] table.tbl th { word-break: break-word; overflow-wrap: break-word; }
@@ -390,23 +390,26 @@ const CSS = `
 /* ── SECTION HEADER ────────────────────────────────────────────── */
 .sec { margin-top: var(--sec-gap); scroll-margin-top: calc(var(--nav-h) + 18px); }
 .sh {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 14px;
+  page-break-after: avoid; break-after: avoid;
+}
+.sh + * { page-break-before: avoid; break-before: avoid; }
+.sh-row {
   display: flex; align-items: baseline; gap: 14px;
-  padding-bottom: 10px; margin-bottom: 14px;
-  border-bottom: 1px solid var(--rim);
-  page-break-after: avoid;
 }
 .sh-n {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
   font-size: var(--num-size); line-height: 0.78;
-  letter-spacing: -0.01em; color: var(--accent-ink);
+  letter-spacing: -0.01em; color: var(--accent-ink); flex-shrink: 0;
 }
 .sh-t {
   font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
   font-size: var(--title-size); letter-spacing: 0.045em;
   text-transform: uppercase; color: var(--ink); line-height: 1;
 }
-.sh-rule { flex: 1; height: 1px; background: var(--rim); align-self: center; }
-.sh-meta { font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; }
+.sh-rule { width: 100%; height: 1px; background: var(--rim); }
+.sh-meta { font-size: 8.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; margin-left: auto; }
 
 .sh-toggle {
   display: var(--chrome-flex);
@@ -798,13 +801,15 @@ const LOCK_SVG = (
 function Sh({ n, title, meta }: { n: number; title: string; meta?: string }) {
   return (
     <header className="sh">
-      <span className="sh-n">{zeroPad(n)}</span>
-      <span className="sh-t">{title}</span>
+      <div className="sh-row">
+        <span className="sh-n">{zeroPad(n)}</span>
+        <span className="sh-t">{title}</span>
+        {meta && <span className="sh-meta">{meta}</span>}
+        <button className="sh-toggle" aria-expanded="true" aria-label="Collapse section" title="Collapse section">
+          {CHEVRON_SVG}
+        </button>
+      </div>
       <span className="sh-rule" />
-      {meta && <span className="sh-meta">{meta}</span>}
-      <button className="sh-toggle" aria-expanded="true" aria-label="Collapse section" title="Collapse section">
-        {CHEVRON_SVG}
-      </button>
     </header>
   );
 }
@@ -922,7 +927,7 @@ function VisaOptionsSection({ brief }: { brief: VisaBrief }) {
               <th style={{ width: '26%' }}>Instrument</th>
               <th style={{ width: '22%' }}>Duration</th>
               <th style={{ width: '14%' }}>Apply</th>
-              <th style={{ width: '16%' }}>Suitability</th>
+              <th style={{ width: '16%' }}>Fit</th>
               <th style={{ width: '22%' }}>Friction</th>
             </tr>
           </thead>
@@ -1358,6 +1363,7 @@ export default function BriefDocument({
 }) {
   const depth = brief.metadata.depth;
   const depthFull = DEPTH_LABEL[depth as 'quick' | 'standard' | 'deep'] ?? depth;
+  const depthColor: Record<string, string> = { quick: '#10b981', standard: '#6366F1', deep: '#f59e0b' };
   const successCount = brief.metadata.agentStatuses.filter(s => s.status === 'success').length;
   const totalCount = brief.metadata.agentStatuses.length;
   const officialSrcCount = brief.confidenceScore.sourceCitations.filter(c => c.tier === 1).length;
@@ -1386,7 +1392,7 @@ export default function BriefDocument({
                 </div>
               </div>
               <div className="metastrip">
-                <div><div className="l">Depth</div><div className="v">{depthFull}</div></div>
+                <div><div className="l">Depth</div><div className="v" style={{ color: depthColor[depth] ?? 'var(--ink)' }}>{depthFull}</div></div>
                 <div><div className="l">Official Sources</div><div className="v">{officialSrcCount}</div></div>
                 <div>
                   <div className="l">Confidence</div>
