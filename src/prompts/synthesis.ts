@@ -31,6 +31,24 @@ export function buildSynthesisPrompt(
 - Deep-dive every contested item in the conflict report
 - Include nationality-specific quirks and edge cases`;
 
+  const borderRunSchemaStr = depth === 'quick'
+    ? `"borderRunAnalysis": { "eligible": false, "limitsPerYear": null, "recommendedCrossings": [], "enforcementPosture": "", "warnings": [] }`
+    : `"borderRunAnalysis": {
+    "eligible": <true|false>,
+    "limitsPerYear": "<limit or null>",
+    "recommendedCrossings": ["<crossing>"],
+    "enforcementPosture": "<1-2 sentence assessment>",
+    "warnings": ["<warning>"]
+  }`;
+
+  const contingencySchemaStr = depth === 'quick'
+    ? `"contingency": { "deniedEntrySteps": [], "overstayScenario": "", "emergencyContacts": [] }`
+    : `"contingency": {
+    "deniedEntrySteps": ["<step to take if denied entry>"],
+    "overstayScenario": "<what happens and what to do if overstay occurs>",
+    "emergencyContacts": ["<relevant embassy or hotline>"]
+  }`;
+
   return {
     system: `You are a visa intelligence analyst. Synthesize all agent outputs into a comprehensive, actionable visa intelligence brief.
 
@@ -104,13 +122,7 @@ Return ONLY valid JSON (no markdown fences):
     "health": ["<health requirement or vaccination>"],
     "notes": ["<document-specific caveats only: enforcement quirks, edge cases for specific entry modes (air vs. land), or verification gaps for a specific document. Do NOT include visa duration disputes, fee ambiguity, or policy conflicts — those belong in visaOptions or recommendedAction. Never repeat info already stated elsewhere. Max 2 items.>"]
   },
-  "borderRunAnalysis": {
-    "eligible": <true|false>,
-    "limitsPerYear": "<limit or null>",
-    "recommendedCrossings": ["<crossing>"],
-    "enforcementPosture": "<1-2 sentence assessment>",
-    "warnings": ["<warning>"]
-  },
+  ${borderRunSchemaStr},
   "recentChanges": {
     "hasChanges": <true|false>,
     "items": ["<change description>"],
@@ -134,11 +146,7 @@ Return ONLY valid JSON (no markdown fences):
       }
     ]
   },
-  "contingency": {
-    "deniedEntrySteps": ["<step to take if denied entry>"],
-    "overstayScenario": "<what happens and what to do if overstay occurs>",
-    "emergencyContacts": ["<relevant embassy or hotline>"]
-  },
+  ${contingencySchemaStr},
   "disclaimer": "This report aggregates publicly available information. Verify all visa requirements with official sources before travel. Not legal advice."
 }
 
@@ -168,7 +176,11 @@ ENTRY REQUIREMENTS (${envelope.entryRequirements.status}):
 ${envelope.entryRequirements.status === 'success' ? JSON.stringify(envelope.entryRequirements.data) : 'FAILED'}
 
 BORDER RUN (${envelope.borderRun.status}):
-${envelope.borderRun.status === 'success' ? JSON.stringify(envelope.borderRun.data) : 'FAILED'}
+${envelope.borderRun.status === 'success'
+  ? JSON.stringify(envelope.borderRun.data)
+  : envelope.borderRun.status === 'skipped'
+  ? 'NOT DISPATCHED AT QUICK DEPTH'
+  : 'FAILED'}
 
 ${degradedContext ? `DATA GAPS (from failed agents):\n${degradedContext}` : ''}`,
   };

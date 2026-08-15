@@ -176,18 +176,9 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
           </div>
         ) : (
           <>
-            {/* Nav bar: back link + action buttons */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
-                padding: '0 24px 16px',
-                flexWrap: 'wrap',
-              }}
-            >
-              {userId ? (
+            {/* Nav bar: back link — only for non-brief states (BriefRenderer owns this row when brief is ready) */}
+            {!brief && userId && (
+              <div style={{ padding: '0 24px 16px' }}>
                 <a
                   href="/dashboard"
                   className="inline-flex items-center gap-1.5"
@@ -196,8 +187,8 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
                   <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '5px solid currentColor', flexShrink: 0 }} />
                   Dashboard
                 </a>
-              ) : <span />}
-            </div>
+              </div>
+            )}
 
             {/* Brief body — full width for BriefDocument's 1180px layout */}
             {paymentNotCompleted ? (
@@ -220,7 +211,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
                 </div>
               </div>
             ) : brief ? (
-              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
+              <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} showDashboardLink={!!userId} />
             ) : (
               <div
                 className="max-w-[760px] mx-auto px-4 py-3"

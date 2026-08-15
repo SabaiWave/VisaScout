@@ -114,7 +114,7 @@ export function AppSidebar({ isAdmin, showDev, isSignedIn = true }: AppSidebarPr
       }}
     >
       {/* Header */}
-      <div style={{ padding: '20px 18px 18px', borderBottom: '1px solid var(--color-border)' }}>
+      <div style={{ height: '52px', flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 18px', borderBottom: '1px solid var(--color-border)' }}>
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
           <BrandGlyph size={16} />
           <Wordmark noLink />

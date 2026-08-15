@@ -677,3 +677,11 @@ button:has([data-localization-key*="connectedAccountsSection"])::after {
   background: var(--color-bg-elevated);
 }
 
+
+
+/* Brief nav actions row — right padding mirrors BriefDocument's sheet horizontal padding
+   so buttons align with the mast card's right edge at every viewport width.
+   Default: 28px matches @media(min-width:1241px) .sheet { padding-right: 28px }
+   ≤1240px: 22px matches --sheet-pad: 34px 22px 60px */
+.brief-nav-row { padding: 0 28px 0; }
+@media (max-width: 1240px) { .brief-nav-row { padding: 0 22px 0; } }

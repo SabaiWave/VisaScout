@@ -2,21 +2,19 @@ import type { AgentResultEnvelope, PromptResult } from '../types/index';
 import { OUTPUT_GUARDRAILS } from './shared';
 
 export function buildConflictResolverPrompt(envelope: AgentResultEnvelope): PromptResult {
+  const agentSummary = (a: { status: string; data: unknown; error?: string }) =>
+    a.status === 'success' ? JSON.stringify(a.data) : `FAILED: ${a.error}`;
+
   const summaries = {
-    officialPolicy: envelope.officialPolicy.status === 'success'
-      ? JSON.stringify(envelope.officialPolicy.data)
-      : `FAILED: ${envelope.officialPolicy.error}`,
-    recentChanges: envelope.recentChanges.status === 'success'
-      ? JSON.stringify(envelope.recentChanges.data)
-      : `FAILED: ${envelope.recentChanges.error}`,
-    communityIntel: envelope.communityIntel.status === 'success'
-      ? JSON.stringify(envelope.communityIntel.data)
-      : `FAILED: ${envelope.communityIntel.error}`,
-    entryRequirements: envelope.entryRequirements.status === 'success'
-      ? JSON.stringify(envelope.entryRequirements.data)
-      : `FAILED: ${envelope.entryRequirements.error}`,
+    officialPolicy: agentSummary(envelope.officialPolicy),
+    recentChanges: agentSummary(envelope.recentChanges),
+    communityIntel: agentSummary(envelope.communityIntel),
+    entryRequirements: agentSummary(envelope.entryRequirements),
+    // borderRun is the only agent that can be skipped (at Quick depth)
     borderRun: envelope.borderRun.status === 'success'
       ? JSON.stringify(envelope.borderRun.data)
+      : envelope.borderRun.status === 'skipped'
+      ? 'NOT DISPATCHED: borderRun not dispatched at Quick depth — output is gated'
       : `FAILED: ${envelope.borderRun.error}`,
   };
 
