@@ -8,7 +8,6 @@ import { BriefHeader } from '@/app/components/BriefHeader';
 import type { VisaBrief } from '@/src/types/index';
 import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
 import { BriefProcessingBanner } from './BriefProcessingBanner';
-import { BriefNavActions } from './BriefNavActions';
 
 const SIM_PDF_ERROR_ID = 'sim-pdf-error';
 const SIM_CONFIDENCE_HIGH_ID   = 'sim-confidence-high';
@@ -16,6 +15,9 @@ const SIM_CONFIDENCE_MEDIUM_ID = 'sim-confidence-medium';
 const SIM_CONFIDENCE_LOW_ID    = 'sim-confidence-low';
 const SIM_DEGRADED_ID          = 'sim-degraded';
 const SIM_RERUN_CAP_ID         = 'sim-rerun-cap';
+// Fixture describes a US passport holder in Thailand
+const SIM_NATIONALITY = 'United States';
+const SIM_DESTINATION = 'Thailand';
 const CONFIDENCE_SIM_IDS = [SIM_CONFIDENCE_HIGH_ID, SIM_CONFIDENCE_MEDIUM_ID, SIM_CONFIDENCE_LOW_ID] as const;
 
 interface BriefRow {
@@ -32,7 +34,6 @@ interface BriefRow {
 export default async function BriefPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string>> }) {
   const { id } = await params;
   const sp = await searchParams;
-  const simPdfError = sp?.sim === 'pdf-error';
   const pendingParam = sp?.pending === '1';
 
   const { userId } = await auth();
@@ -49,15 +50,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
       confidenceScore: { ...base.confidenceScore, overall: level },
       conflictReport:  { ...base.conflictReport,  overallConfidence: level },
     };
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
         <main style={{ paddingTop: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
-            <BriefNavActions url={`${appUrl}/brief/${id}`} briefId={id} depth="quick" />
-          </div>
-          <BriefRenderer brief={brief} />
+          <BriefRenderer brief={brief} nationality={SIM_NATIONALITY} destination={SIM_DESTINATION} briefId={id} />
         </main>
       </div>
     );
@@ -82,15 +79,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         ],
       },
     };
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
         <main style={{ paddingTop: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
-            <BriefNavActions url={`${appUrl}/brief/${SIM_RERUN_CAP_ID}`} briefId={SIM_RERUN_CAP_ID} depth="standard" />
-          </div>
-          <BriefRenderer brief={brief} briefId={SIM_RERUN_CAP_ID} isPaidBrief canRerun={false} />
+          <BriefRenderer brief={brief} nationality={SIM_NATIONALITY} destination={SIM_DESTINATION} briefId={SIM_RERUN_CAP_ID} isPaidBrief canRerun={false} />
         </main>
       </div>
     );
@@ -115,15 +108,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         ],
       },
     };
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
         <main style={{ paddingTop: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
-            <BriefNavActions url={`${appUrl}/brief/${SIM_DEGRADED_ID}`} briefId={SIM_DEGRADED_ID} depth="standard" />
-          </div>
-          <BriefRenderer brief={brief} briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
+          <BriefRenderer brief={brief} nationality={SIM_NATIONALITY} destination={SIM_DESTINATION} briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
         </main>
       </div>
     );
@@ -133,15 +122,11 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
   if (id === SIM_PDF_ERROR_ID) {
     if (!isAdmin) notFound();
     const brief = visaBriefFixture as unknown as VisaBrief;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     return (
       <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
         {showHeader && <BriefHeader />}
         <main style={{ paddingTop: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
-            <BriefNavActions url={`${appUrl}/brief/${SIM_PDF_ERROR_ID}`} briefId={SIM_PDF_ERROR_ID} depth="quick" />
-          </div>
-          <BriefRenderer brief={brief} />
+          <BriefRenderer brief={brief} nationality={SIM_NATIONALITY} destination={SIM_DESTINATION} briefId={SIM_PDF_ERROR_ID} initialPdfError="PDF generation failed. Try again." />
         </main>
       </div>
     );
@@ -156,9 +141,6 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
   if (error || !data) notFound();
 
   const row = data as BriefRow;
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
-  const shareUrl = `${appUrl}/brief/${row.id}`;
 
   let brief: VisaBrief | null = null;
   if (row.brief_markdown) {
@@ -215,9 +197,6 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
                   Dashboard
                 </a>
               ) : <span />}
-              {brief && (
-                <BriefNavActions url={shareUrl} briefId={row.id} depth={row.depth} />
-              )}
             </div>
 
             {/* Brief body — full width for BriefDocument's 1180px layout */}

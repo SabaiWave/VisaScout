@@ -61,13 +61,14 @@ export function LandingCoords({ position = 'top-left' }: { position?: 'top-left'
   return (
     <div
       aria-hidden
-      className="hidden lg:block fixed z-0 pointer-events-none"
+      className="hidden lg:block fixed z-10 pointer-events-none"
       style={{
         ...pos,
         fontFamily: 'var(--font-mono)',
         fontSize: '0.55rem',
         letterSpacing: '0.1em',
         color: 'var(--color-text-tertiary)',
+        opacity: 0.35,
         lineHeight: 1.7,
       }}
     >
