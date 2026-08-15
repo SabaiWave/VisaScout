@@ -140,7 +140,7 @@ const CSS = `
   --accent-wash: #eeeeee; --accent-rim: #888888;
   --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
   --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
-  --chrome: none; --chrome-flex: none; --texture: 0; --break: avoid; --scrollx: visible;
+  --chrome: none; --chrome-flex: none; --texture: 0; --break: auto; --scrollx: visible;
 
   --sheet-w:    210mm;
   --sheet-pad:  16mm 15mm 18mm;
@@ -181,7 +181,7 @@ const CSS = `
     --accent-wash: #eeeeee; --accent-rim: #888888;
     --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
     --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
-    --chrome: none; --chrome-flex: none; --texture: 0; --break: avoid; --scrollx: visible;
+    --chrome: none; --chrome-flex: none; --texture: 0; --break: auto; --scrollx: visible;
     --sheet-w: 100%; --sheet-pad: 0; --sec-gap: 24px;
     --num-size: 40px; --title-size: 23px;
     --rail-pos: static; --rail-w: 0px; --rail-gap: 0px; --grid-cols: minmax(0,1fr);
