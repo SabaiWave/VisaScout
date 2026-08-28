@@ -228,7 +228,8 @@ export default function DevPage() {
             </span>
           </div>
           <DevGrid>
-            <DevButton label="Dashboard: Empty State ↗" sublabel="/dashboard?sim=empty" href="/dashboard?sim=empty" newTab />
+            <DevButton label="Dashboard: Empty State ↗"     sublabel="/dashboard?sim=empty"      href="/dashboard?sim=empty"      newTab />
+            <DevButton label="Dashboard: Error Row ↗"       sublabel="/dashboard?sim=error-row"   href="/dashboard?sim=error-row"  newTab />
           </DevGrid>
           <div className="mt-3 mb-2">
             <span className="text-xs uppercase font-bold tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-tertiary)' }}>
@@ -236,6 +237,7 @@ export default function DevPage() {
             </span>
           </div>
           <DevGrid>
+            <DevButton label="Brief: Generation Failed ↗"         sublabel="/brief/sim-error"             href="/brief/sim-error"             newTab />
             <DevButton label="Brief: PDF Error ↗"                sublabel="/brief/sim-pdf-error"         href="/brief/sim-pdf-error"         newTab />
             <DevButton label="Brief: Well Sourced ↗"             sublabel="/brief/sim-confidence-high"   href="/brief/sim-confidence-high"   newTab />
             <DevButton label="Brief: Verify Key Details ↗"       sublabel="/brief/sim-confidence-medium" href="/brief/sim-confidence-medium" newTab />

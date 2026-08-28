@@ -147,7 +147,7 @@ export const clientConfig = {
         },
         {
           q: 'Which countries do you cover?',
-          a: `${destinationCount} destinations across Southeast Asia, East Asia, Europe, and Latin America. The places nomads and long-stay travelers actually go. We cover the most common visa types per country. If we don't support a specific visa type yet, we say so clearly and point you to the right official source.`,
+          a: `${destinationCount} destinations across ${coverageLabel}. The places nomads and long-stay travelers actually go. We cover the most common visa types per country. If we don't support a specific visa type yet, we say so clearly and point you to the right official source.`,
         },
         {
           q: 'What if my brief fails to generate?',

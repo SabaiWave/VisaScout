@@ -1,7 +1,7 @@
 // src/config/destinations.ts — single source of truth for all destination logic
 // Agents call getGovDomains(). Never hand-maintain SUPPORTED_DESTINATION_NAMES or SCHENGEN_MEMBERS.
 
-export type Region = 'SEA' | 'East Asia' | 'Schengen' | 'Latin America';
+export type Region = 'SEA' | 'East Asia' | 'Schengen' | 'Latin America' | 'Middle East' | 'South Asia' | 'Caucasus';
 
 export interface DestinationConfig {
   name: string;             // canonical name passed to agents
@@ -18,6 +18,9 @@ export const ENABLED_REGIONS: Region[] = [
   'East Asia',
   'Schengen',
   'Latin America',
+  'Middle East',
+  'South Asia',
+  'Caucasus',
 ];
 
 const ALL_DESTINATIONS: DestinationConfig[] = [
@@ -420,6 +423,311 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       'Do not assume a specific visa-free duration or extension procedure — allowances vary by nationality; verify the user\'s specific entitlement from search results before advising. Do not cite specific M-10 processing time estimates — direct users to migracioncolombia.gov.co for current timelines. Investor visa has a minimum investment threshold — verify current requirement from official sources before citing a figure.',
   },
 
+  // ─── Schengen (new members) ────────────────────────────────────────────────
+  {
+    name: 'Italy',
+    aliases: ['Italy', 'Italia', 'IT'],
+    govDomains: [
+      'vistoperitalia.esteri.it',
+      'esteri.it',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'Elective Residency Visa',
+      'Self-Employment / Freelancer Visa',
+      'EU Blue Card',
+      'National D Visa',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      'Elective Residency Visa requires proof of passive income sufficient to support stay without working — verify current income threshold from search results; do not cite a specific figure. Self-employment visa (lavoro autonomo) requires a pre-approval (nulla osta) from the Italian Questura — surface this procedural requirement. Italy participates in EES biometric border registration — surface to visa-exempt travelers. Consular requirements and appointment availability vary significantly by country — always direct users to their local Italian consulate.',
+  },
+  {
+    name: 'Greece',
+    aliases: ['Greece', 'Hellas', 'GR'],
+    govDomains: [
+      'mfa.gr',
+      'migration.gov.gr',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'Digital Nomad Visa',
+      'Golden Visa (Investor Residence)',
+      'EU Blue Card',
+      'National D Visa',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      "Greece's Digital Nomad Visa minimum income threshold and application process — verify current requirements at mfa.gr before citing specifics. Golden Visa investment threshold has been raised in popular areas (Athens, Thessaloniki, Mykonos, Santorini) — do not cite the lower historical threshold; verify current minimum from search results. EES biometric border registration applies — surface to visa-exempt travelers.",
+  },
+  {
+    name: 'Czech Republic',
+    aliases: ['Czech Republic', 'Czechia', 'Česko', 'CZ'],
+    govDomains: [
+      'mzv.gov.cz',
+      'mvcr.cz',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'Employee Card (long-stay work)',
+      'EU Blue Card',
+      'National D Long-Stay Visa',
+      'Freelancer Trade License (živnostenský list)',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      'Czech Republic has been a Schengen member since 2007 — do not confuse with non-Schengen EU states. The živnostenský list (trade license) is a popular pathway for self-employed expats but requires a Czech tax presence — verify current requirements from search results. Employee Card processing timelines can be extended — advise users to verify current estimates at mvcr.cz. EES biometric border registration applies — surface to visa-exempt travelers.',
+  },
+  {
+    name: 'Poland',
+    aliases: ['Poland', 'Polska', 'PL'],
+    govDomains: [
+      'gov.pl',
+      'msz.gov.pl',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'Temporary Residence Permit',
+      'EU Blue Card',
+      'National D Visa',
+      'Work Permit (single-entry authorization)',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      'Temporary Residence Permit applications require in-person submission at a regional Voivode office — surface this procedural requirement; remote filing is not available. Work Permit processing timelines vary by Voivode — do not cite a universal estimate; direct users to the relevant regional office at gov.pl. Poland participates in EES biometric border registration — surface to visa-exempt travelers. Border crossing wait times at eastern land borders may be elevated — verify current conditions from search results if relevant to the user.',
+  },
+  {
+    name: 'Croatia',
+    aliases: ['Croatia', 'Hrvatska', 'HR'],
+    govDomains: [
+      'mvp.gov.hr',
+      'mup.gov.hr',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'Digital Nomad Temporary Stay',
+      'Temporary Stay Permit',
+      'Work Permit',
+      'National D Visa',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      'Croatia joined Schengen on 1 January 2023 — the 90/180 rule now applies; do not advise Croatia as a Schengen reset destination post-2023. The Digital Nomad Temporary Stay permit allows up to one year — verify current income threshold and application process at mup.gov.hr before citing specifics. EES biometric border registration applies — surface to visa-exempt travelers. Kuna replaced by Euro in 2023 — do not reference the Kuna.',
+  },
+  {
+    name: 'Hungary',
+    aliases: ['Hungary', 'Magyarország', 'HU'],
+    govDomains: [
+      'kormany.hu',
+      'bmbah.hu',
+      'ec.europa.eu',
+      'travel-europe.europa.eu',
+    ],
+    visaTypes: [
+      'Schengen Visa-Free (90/180)',
+      'Schengen C Tourist Visa',
+      'White Card (Digital Nomad Residence)',
+      'EU Blue Card',
+      'Guest Worker Permit',
+      'National D Visa',
+    ],
+    region: 'Schengen',
+    schengenMember: true,
+    notes:
+      "Hungary's White Card (digital nomad residence permit) allows up to one year — verify current minimum income threshold and application process at bmbah.hu before citing specifics. Guest Worker Permit is a distinct pathway from the EU Blue Card — verify current eligibility and sponsorship requirements from search results. EES biometric border registration applies — surface to visa-exempt travelers.",
+  },
+
+  // ─── Middle East ───────────────────────────────────────────────────────────
+  {
+    name: 'United Arab Emirates',
+    aliases: ['United Arab Emirates', 'UAE', 'Dubai', 'Abu Dhabi', 'AE'],
+    govDomains: [
+      'icp.gov.ae',
+      'mofaic.gov.ae',
+      'evisa.icp.gov.ae',
+      'gdrfad.gov.ae',
+    ],
+    visaTypes: [
+      'Visa on Arrival (varies by nationality)',
+      'Tourist Visa (30/60/90 days)',
+      'Freelancer / Remote Work Visa',
+      'Golden Visa (10-year long-term residence)',
+      'Green Visa (5-year self-sponsored)',
+      'Employment Residence Visa',
+    ],
+    region: 'Middle East',
+    notes:
+      "Dubai and Abu Dhabi share the same federal visa system — do not differentiate by emirate for visa types. Visa on Arrival eligibility and duration vary significantly by nationality — never generalize; verify the user's specific nationality entitlement at icp.gov.ae. The Green Visa (5-year self-sponsored) and Golden Visa (10-year for investors/talent) are distinct products — do not conflate them. Freelancer visa requires a permit from a relevant free zone authority — surface this multi-step requirement. UAE immigration policy evolves quickly — always verify current sponsor-free pathways from search results.",
+  },
+  {
+    name: 'Turkey',
+    aliases: ['Turkey', 'Türkiye', 'TR'],
+    govDomains: [
+      'evisa.gov.tr',
+      'mfa.gov.tr',
+      'goc.gov.tr',
+      'turkiye.gov.tr',
+    ],
+    visaTypes: [
+      'E-Visa (single/multiple entry, up to 90 days)',
+      'Visa on Arrival (limited nationalities)',
+      'Sticker Tourist Visa (consulate)',
+      'Short-Term Residence Permit',
+      'Work Permit',
+      'Digital Nomad Visa (verify current status)',
+    ],
+    region: 'Middle East',
+    notes:
+      "E-visa eligibility is nationality-dependent and not universal — verify the user's specific nationality at evisa.gov.tr before advising. Short-Term Residence Permit is the standard long-stay option for visitors — commonly applied for inside Turkey; verify current application requirements and processing times at goc.gov.tr. Turkey digital nomad visa has been announced — verify current launch status and application availability from search results before advising. Turkish Lira inflation affects cost-of-living — do not cite specific cost amounts; direct users to current sources.",
+  },
+
+  // ─── South Asia ────────────────────────────────────────────────────────────
+  {
+    name: 'India',
+    aliases: ['India', 'IN'],
+    govDomains: [
+      'indianvisaonline.gov.in',
+      'mea.gov.in',
+      'boi.gov.in',
+      'grfrvisa.gov.in',
+    ],
+    visaTypes: [
+      'e-Tourist Visa (30 days)',
+      'Tourist Visa (long-term, multiple entry)',
+      'Business Visa',
+      'Employment Visa',
+      'Conference Visa',
+      'Medical Visa',
+    ],
+    region: 'South Asia',
+    notes:
+      "India visa rules vary dramatically by nationality — do not generalize. Nationals of Pakistan, Bangladesh, and certain other countries face significant restrictions — always confirm the user's nationality against current eligibility before advising. e-Tourist Visa is available to most nationalities but has duration and purpose restrictions — do not conflate with the long-term Tourist Visa. Visa on Arrival is available only at specific airports for specific nationalities — verify current list at indianvisaonline.gov.in. Specific ports of entry required for some visa types — surface to travelers.",
+  },
+
+  // ─── Caucasus ──────────────────────────────────────────────────────────────
+  {
+    name: 'Georgia',
+    aliases: ['Georgia', 'Sakartvelo', 'GE'],
+    govDomains: [
+      'geoconsul.gov.ge',
+      'mfa.gov.ge',
+      'napr.gov.ge',
+      'evisa.gov.ge',
+    ],
+    visaTypes: [
+      'Visa-Free (365 days for eligible nationalities)',
+      'E-Visa',
+      'Temporary Residence Permit',
+      'Work Permit',
+      'Investment Residence',
+      'Diplomatic / Official Visa',
+    ],
+    region: 'Caucasus',
+    notes:
+      "Georgia's 365-day visa-free stay is a headline benefit but does NOT apply to all nationalities — verify the user's specific nationality at mfa.gov.ge before citing it. E-Visa is available as a fallback for nationalities not covered by visa-free access — verify eligibility at evisa.gov.ge. Temporary Residence Permit (TRP) is available for long-stay residents — commonly used by digital nomads who stay beyond the visa-free window. Tax residency rules in Georgia are favorable (flat rate) — surface if user mentions tax concerns, but note this is separate from immigration status and verify current rules from the Georgian Revenue Service. Property registration (NAPR) is a common parallel process for long-term residents — surface if relevant.",
+  },
+
+  // ─── Latin America (new) ───────────────────────────────────────────────────
+  {
+    name: 'Argentina',
+    aliases: ['Argentina', 'AR'],
+    govDomains: [
+      'cancilleria.gob.ar',
+      'migraciones.gob.ar',
+      'argentina.gob.ar',
+    ],
+    visaTypes: [
+      'Visa-Free (90 days, most nationalities)',
+      'Tourist Visa',
+      'Rentista Visa (passive income)',
+      'Retirement Visa (Jubilado)',
+      'Working Holiday (limited nationalities)',
+      'Permanent Residence',
+    ],
+    region: 'Latin America',
+    notes:
+      "Argentina's visa-free duration for most nationalities is 90 days, extendable once at migraciones.gob.ar — verify current extension procedure and fee from search results. Economic and political conditions in Argentina have been volatile — flag that visa processing timelines and administrative requirements may be subject to change; advise users to verify current status close to travel. Rentista and Jubilado visas require demonstrating ongoing income — verify current minimum thresholds from search results before citing figures. Do not endorse or explain unofficial currency exchange practices; reference only official BCRA exchange rates.",
+  },
+  {
+    name: 'Brazil',
+    aliases: ['Brazil', 'Brasil', 'BR'],
+    govDomains: [
+      'viajaobrasil.itamaraty.gov.br',
+      'portalconsular.itamaraty.gov.br',
+      'pf.gov.br',
+      'gov.br',
+    ],
+    visaTypes: [
+      'Visa-Free (90 days, varies by nationality)',
+      'Tourist Visa (Visto de Turismo)',
+      'Digital Nomad Visa (VITEM XIV)',
+      'Retirement / Passive Income Visa',
+      'Work Permit',
+      'Permanent Residence',
+    ],
+    region: 'Latin America',
+    notes:
+      "Visa-free eligibility for Brazil varies significantly by nationality — verify the user's specific nationality entitlement at viajaobrasil.itamaraty.gov.br before advising. The VITEM XIV (Digital Nomad Visa) allows up to one year — verify current minimum income threshold and application requirements from search results. Visa-free nationals can generally stay 90 days per 180-day period — verify current rules and extension availability at pf.gov.br. Entry documentation (onward ticket, proof of funds) is enforced at Brazilian airports — surface this to all travelers.",
+  },
+  {
+    name: 'Peru',
+    aliases: ['Peru', 'Perú', 'PE'],
+    govDomains: [
+      'rree.gob.pe',
+      'migraciones.gob.pe',
+    ],
+    visaTypes: [
+      'Visa-Free (183 days, most nationalities)',
+      'Tourist Visa',
+      'Business Visa',
+      'Temporary Resident Visa',
+      'Rentista Visa',
+      'Work Permit',
+    ],
+    region: 'Latin America',
+    notes:
+      "Peru is visa-free for most nationalities for up to 183 days — verify the user's specific nationality entitlement at rree.gob.pe before advising. The 183-day stay is not automatic — immigration officers may stamp a shorter initial period; advise travelers to request the full duration at the port of entry. Temporary Resident Visa is available for long-stay purposes (work, retirement, income) — verify current requirements at migraciones.gob.pe. Altitude acclimatization for Cusco and Andean destinations is outside VisaScout's scope — do not address it in the brief.",
+  },
+  {
+    name: 'Costa Rica',
+    aliases: ['Costa Rica', 'CR'],
+    govDomains: [
+      'migracion.go.cr',
+      'rree.go.cr',
+    ],
+    visaTypes: [
+      'Visa-Free (90 days, most nationalities)',
+      'Tourist Visa',
+      'Rentista Visa (passive income)',
+      'Pensionado (retirement)',
+      'Inversionista (investor)',
+      'Work Permit',
+    ],
+    region: 'Latin America',
+    notes:
+      "Costa Rica is visa-free for most nationalities for up to 90 days — verify current eligibility at rree.go.cr. Rentista Visa requires a certified monthly passive income — verify current minimum threshold from search results before citing a figure. Pensionado Visa requires a qualifying government pension — verify current minimum from search results. An onward ticket (salida) is technically required for visa-free entry and is sometimes enforced — surface this requirement. CAJA (public health insurance) enrollment is required for residency-based visa holders — surface as a procedural step if relevant.",
+  },
+
   // ─── Schengen bloc-level entry ────────────────────────────────────────────
   // Handles users who type "Schengen" without specifying a country.
   {
@@ -462,12 +770,34 @@ export const REGION_LABELS: Record<Region, string> = {
   'East Asia': 'East Asia',
   Schengen: 'Europe',
   'Latin America': 'Latin America',
+  'Middle East': 'Middle East',
+  'South Asia': 'South Asia',
+  Caucasus: 'Caucasus',
 };
 
-// "Southeast Asia, East Asia, Europe & Latin America" — auto-updates when ENABLED_REGIONS changes
-export const coverageLabel = ENABLED_REGIONS.map((r) => REGION_LABELS[r])
+// User-facing display groups — collapses internal region codes into broad labels for UI copy.
+// SEA, East Asia, South Asia, Caucasus all surface as "Asia" to avoid "Asia" appearing 4× in one line.
+// When adding a new Region: assign it a display group here.
+export const REGION_DISPLAY_GROUPS: Record<Region, string> = {
+  SEA: 'Asia',
+  'East Asia': 'Asia',
+  Schengen: 'Europe',
+  'Latin America': 'Latin America',
+  'Middle East': 'Middle East',
+  'South Asia': 'Asia',
+  Caucasus: 'Asia',
+};
+
+// Unique display groups in ENABLED_REGIONS order — deduplicates Asia sub-regions automatically
+const uniqueDisplayGroups = [...new Set(ENABLED_REGIONS.map((r) => REGION_DISPLAY_GROUPS[r]))];
+
+// "Asia, Europe, Latin America & Middle East" — auto-updates when ENABLED_REGIONS changes
+export const coverageLabel = uniqueDisplayGroups
   .join(', ')
   .replace(/, ([^,]+)$/, ' & $1');
+
+// "Asia · Europe · Latin America · Middle East" — dot-separated for stat cards
+export const coverageLabelDot = uniqueDisplayGroups.join(' · ');
 
 // Country count metric — auto-updates
 export const destinationCount = DESTINATIONS.length;

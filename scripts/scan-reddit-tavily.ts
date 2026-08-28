@@ -7,6 +7,22 @@
 //   - Search-ranked results, not strictly chronological
 //
 // Run: bash scripts/run.sh scripts/scan-reddit-tavily.ts
+//
+// ─── ADDING A DESTINATION ───────────────────────────────────────────────────
+// 1. src/config/destinations.ts — add the destination config entry
+// 2. scripts/scan-config.ts     — add subreddits + city keywords for that destination
+// 3. buildQueries() below       — add at least one targeted Tavily query
+// ────────────────────────────────────────────────────────────────────────────
+
+import {
+  SUBREDDIT_ALLOWLIST,
+  SUBREDDIT_DESTINATION_MAP,
+  SUPPORTED_DESTINATIONS,
+  DESTINATION_KEYWORDS,
+} from './scan-config'
+import { tavily } from '@tavily/core'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // === CONFIG ===
 const DAYS_BACK = 7               // how far back to search (Tavily re-index window)
@@ -19,78 +35,9 @@ const TAVILY_COST_PER_SEARCH = 0.005  // USD per query (estimate — verify at t
 // posts to a separate UNVERIFIED DATE section rather than mixing with dated results.
 const SHOW_UNDATED_SECTION = true  // set false to drop undated posts entirely
 
-// Subreddit allowlist — only tourism/nomad/expat-focused subs.
-// Deliberately excludes local-country subs (r/colombia, r/germany, r/korea, etc.) because
-// those are dominated by locals asking about visas TO the US/Canada/EU — pure noise for VisaScout.
-// To add a sub: add here + optionally add a targeted query in buildQueries().
-const SUBREDDIT_ALLOWLIST = new Set([
-  // General travel / nomad
-  'digitalnomad', 'digitalnomadlife', 'expats', 'livingabroad',
-  'travel', 'solotravel', 'backpacking', 'seabackpacking',
-  // SEA destination-focused subs (tourists/expats asking about staying there)
-  'thailandtourism', 'thailandexpats', 'thaivisa',
-  'vietnamtourism',
-  'bali',
-  'pinoytraveller',  // Filipino travelers asking about destinations — kept; home-app filter handles noise
-  // East Asia tourism subs
-  'japantourism',
-  'koreatravel',
-  // Europe expat subs (D7, long-stay visa discussions)
-  'portugalexpats',
-  'germanyexpats',
-  // General visa/immigration (mixed but high signal)
-  'immigration', 'visas',
-].map(s => s.toLowerCase()))
-
-// Maps subreddit → destination for post tagging.
-// General subs (digitalnomad, travel, etc.) omitted — destination inferred from title.
-const SUBREDDIT_DESTINATION_MAP: Record<string, string> = {
-  thailandtourism: 'Thailand', thailandexpats: 'Thailand', thaivisa: 'Thailand',
-  vietnamtourism: 'Vietnam',
-  bali: 'Indonesia',
-  // pinoytraveller intentionally omitted — sub is about Filipinos traveling anywhere,
-  // not specifically about the Philippines as a destination. Keyword scan handles routing.
-  japantourism: 'Japan',
-  koreatravel: 'South Korea',
-  portugalexpats: 'Portugal',
-  germanyexpats: 'Germany',
-}
-
-// Destinations VisaScout actually covers — used to filter posts about unsupported places.
-const SUPPORTED_DESTINATIONS = new Set([
-  'Thailand', 'Vietnam', 'Indonesia', 'Malaysia', 'Philippines',
-  'Cambodia', 'Laos', 'Myanmar', 'Singapore', 'Brunei',
-  'Japan', 'South Korea', 'Germany', 'Portugal', 'Spain',
-  'Netherlands', 'France', 'Mexico', 'Colombia', 'Schengen',
-])
-
-// Destination keywords — includes unsupported destinations so we can detect and filter them.
-// Supported ones route to ANSWER THESE / WORTH A LOOK; unsupported → NOISE.
-const DESTINATION_KEYWORDS: [string, string][] = [
-  // Supported
-  ['thailand', 'Thailand'], ['thai', 'Thailand'], ['bangkok', 'Thailand'], ['phuket', 'Thailand'], ['chiang mai', 'Thailand'],
-  ['vietnam', 'Vietnam'], ['hanoi', 'Vietnam'], ['ho chi minh', 'Vietnam'], ['saigon', 'Vietnam'], ['da nang', 'Vietnam'],
-  ['bali', 'Indonesia'], ['indonesia', 'Indonesia'],
-  ['malaysia', 'Malaysia'], ['kuala lumpur', 'Malaysia'],
-  ['philippines', 'Philippines'], ['manila', 'Philippines'], ['cebu', 'Philippines'],
-  ['cambodia', 'Cambodia'], ['phnom penh', 'Cambodia'], ['siem reap', 'Cambodia'],
-  ['laos', 'Laos'], ['myanmar', 'Myanmar'], ['singapore', 'Singapore'], ['brunei', 'Brunei'],
-  ['japan', 'Japan'], ['tokyo', 'Japan'], ['osaka', 'Japan'],
-  ['korea', 'South Korea'], ['seoul', 'South Korea'],
-  ['germany', 'Germany'], ['berlin', 'Germany'],
-  ['portugal', 'Portugal'], ['lisbon', 'Portugal'],
-  ['spain', 'Spain'], ['barcelona', 'Spain'], ['madrid', 'Spain'],
-  ['netherlands', 'Netherlands'], ['amsterdam', 'Netherlands'],
-  ['france', 'France'], ['paris', 'France'],
-  ['schengen', 'Schengen'],
-  ['mexico', 'Mexico'], ['cdmx', 'Mexico'],
-  ['colombia', 'Colombia'], ['medellin', 'Colombia'], ['bogota', 'Colombia'],
-  // Unsupported — detected so posts about them route to NOISE
-  ['taiwan', 'Taiwan'], ['hong kong', 'Hong Kong'], ['macau', 'Macau'],
-  ['united states', 'USA'], [' usa ', 'USA'], ['canada', 'Canada'],
-  ['united kingdom', 'UK'], [' uk ', 'UK'], ['australia', 'Australia'],
-  ['india', 'India'], ['dubai', 'UAE'], ['uae', 'UAE'], ['china', 'China'],
-]
+// SUBREDDIT_ALLOWLIST, SUBREDDIT_DESTINATION_MAP, SUPPORTED_DESTINATIONS, DESTINATION_KEYWORDS
+// are all derived from src/config/destinations.ts + scripts/scan-config.ts — imported above.
+// Do not hardcode destination lists here.
 
 // Signals that indicate applying for a visa from home (not in-country management).
 // These posts are lower GTM priority — VisaScout's pitch is in-country visa intelligence.
@@ -116,10 +63,6 @@ const CONTENT_POST_SIGNALS = [
 ]
 // ==============
 
-import { tavily } from '@tavily/core'
-import * as fs from 'fs'
-import * as path from 'path'
-
 const SEEN_POSTS_FILE = path.join(process.cwd(), 'outputs', 'scans', 'seen-posts.json')
 
 function loadSeenPosts(): Set<string> {
@@ -138,8 +81,10 @@ function saveSeenPosts(existing: Set<string>, newUrls: string[]): void {
 function buildQueries(): string[] {
   // No `after:` date operator — it's a Google operator that Tavily may not pass through.
   // Date filtering is handled by Tavily's `days` param + our ID-based estimation filter.
+  // NOTE: When adding a destination to src/config/destinations.ts, add at least one
+  //       broad query here and a subreddit-targeted query if a good sub exists.
   return [
-    // === Broad destination queries — each destination gets its own result pool ===
+    // === SEA — broad destination queries ===
     `site:reddit.com Thailand visa tourist extension border run question`,
     `site:reddit.com Vietnam visa e-visa entry requirements question`,
     `site:reddit.com Indonesia Bali tourist visa extension VOA question`,
@@ -147,19 +92,40 @@ function buildQueries(): string[] {
     `site:reddit.com Philippines visa tourist entry requirements question`,
     `site:reddit.com Cambodia Laos Myanmar tourist visa entry question`,
     `site:reddit.com Singapore visa entry requirements question`,
+    // === East Asia ===
     `site:reddit.com Japan tourist visa requirements question`,
     `site:reddit.com Korea tourist visa requirements question`,
-    `site:reddit.com digital nomad visa remote work question help`,
-    `site:reddit.com border run visa run overstay question`,
+    // === Europe — Schengen ===
     `site:reddit.com Schengen visa 90 day rule Germany question`,
     `site:reddit.com Portugal D7 visa digital nomad NHR question`,
     `site:reddit.com Spain Netherlands France tourist visa question`,
+    `site:reddit.com Italy visa long stay elective residency question`,
+    `site:reddit.com Greece digital nomad visa golden visa question`,
+    `site:reddit.com Czech Republic Prague visa residence permit question`,
+    `site:reddit.com Poland Krakow Warsaw visa residence permit question`,
+    `site:reddit.com Croatia digital nomad visa Schengen question`,
+    `site:reddit.com Hungary Budapest digital nomad white card visa question`,
+    // === Middle East ===
+    `site:reddit.com Dubai UAE visa residence golden visa freelancer question`,
+    `site:reddit.com Turkey Istanbul visa residence permit e-visa question`,
+    // === South Asia ===
+    `site:reddit.com India visa e-tourist long stay entry requirements question`,
+    // === Caucasus ===
+    `site:reddit.com Georgia Tbilisi visa free 365 days residence question`,
+    // === Latin America ===
     `site:reddit.com Mexico Colombia tourist visa long stay question`,
+    `site:reddit.com Argentina Buenos Aires visa rentista long stay question`,
+    `site:reddit.com Brazil digital nomad visa VITEM entry requirements question`,
+    `site:reddit.com Peru Lima visa tourist entry requirements question`,
+    `site:reddit.com Costa Rica rentista pensionado visa long stay question`,
+    // === Cross-destination / nomad themes ===
+    `site:reddit.com digital nomad visa remote work question help`,
+    `site:reddit.com border run visa run overstay question`,
     `site:reddit.com visa on arrival extension overstay fine question`,
     // === Subreddit-targeted — tourism/expat subs only, dedicated result pool ===
     `site:reddit.com/r/ThailandTourism visa extension border run`,
     `site:reddit.com/r/ThailandExpats visa LTR retirement extension`,
-    `site:reddit.com/r/digitalnomad visa question Southeast Asia`,
+    `site:reddit.com/r/digitalnomad visa question`,
     `site:reddit.com/r/digitalnomadlife visa entry question`,
     `site:reddit.com/r/bali visa extension VOA question`,
     `site:reddit.com/r/SEABackpacking visa entry question`,
@@ -170,6 +136,10 @@ function buildQueries(): string[] {
     `site:reddit.com/r/JapanTourism visa requirements question`,
     `site:reddit.com/r/PortugalExpats D7 visa digital nomad question`,
     `site:reddit.com/r/GermanyExpats visa long stay question`,
+    `site:reddit.com/r/ItalyTravel visa long stay residency question`,
+    `site:reddit.com/r/dubai visa residency golden visa freelancer question`,
+    `site:reddit.com/r/indiatravel visa e-tourist entry question`,
+    `site:reddit.com/r/costarica visa rentista pensionado long stay question`,
   ]
 }
 

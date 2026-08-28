@@ -5,11 +5,13 @@ import { isAdminUser } from '@/src/lib/adminAccess';
 import { getSupabase } from '@/src/lib/supabase';
 import BriefRenderer from '@/app/components/BriefRenderer';
 import { BriefHeader } from '@/app/components/BriefHeader';
+import { BriefErrorState } from '@/app/components/BriefErrorState';
 import type { VisaBrief } from '@/src/types/index';
 import visaBriefFixture from '@/src/__fixtures__/visaBrief.json';
 import { BriefProcessingBanner } from './BriefProcessingBanner';
 
 const SIM_PDF_ERROR_ID = 'sim-pdf-error';
+const SIM_ERROR_ID = 'sim-error';
 const SIM_CONFIDENCE_HIGH_ID   = 'sim-confidence-high';
 const SIM_CONFIDENCE_MEDIUM_ID = 'sim-confidence-medium';
 const SIM_CONFIDENCE_LOW_ID    = 'sim-confidence-low';
@@ -113,6 +115,28 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
         {showHeader && <BriefHeader />}
         <main style={{ paddingTop: 24 }}>
           <BriefRenderer brief={brief} nationality={SIM_NATIONALITY} destination={SIM_DESTINATION} briefId={SIM_DEGRADED_ID} isPaidBrief canRerun />
+        </main>
+      </div>
+    );
+  }
+
+  // Dev sim sentinel — brief generation failed state (payment_status: error, no content)
+  // Uses same BriefErrorState component as production — fires the same Sentry event on mount
+  if (id === SIM_ERROR_ID) {
+    if (!isAdmin) notFound();
+    return (
+      <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+        {showHeader && <BriefHeader />}
+        <main style={{ paddingTop: 24 }}>
+          {userId && (
+            <div style={{ padding: '0 24px 12px' }}>
+              <a href="/dashboard" className="inline-flex items-center gap-1.5" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 700 }}>
+                <span aria-hidden style={{ display: 'inline-block', width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderRight: '5px solid currentColor', flexShrink: 0 }} />
+                Dashboard
+              </a>
+            </div>
+          )}
+          <BriefErrorState briefId={SIM_ERROR_ID} />
         </main>
       </div>
     );
@@ -227,16 +251,7 @@ export default async function BriefPage({ params, searchParams }: { params: Prom
             ) : brief ? (
               <BriefRenderer brief={brief} nationality={row.nationality} destination={row.destination} briefId={row.id} isPaidBrief={row.depth !== 'quick' && row.payment_status === 'paid'} canRerun={row.depth !== 'quick' && row.payment_status === 'paid' && (row.rerun_count ?? 0) < 1} />
             ) : (
-              <div
-                className="max-w-[760px] mx-auto px-4 py-3"
-                style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error-border)', fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--color-error)' }}
-              >
-                Brief content unavailable.{' '}
-                <a href={`/contact?ref=${row.id}`} style={{ color: 'var(--color-error)', textDecoration: 'underline' }}>
-                  Contact support
-                </a>{' '}
-                with reference: {row.id}
-              </div>
+              <BriefErrorState briefId={row.id} />
             )}
           </>
         )}

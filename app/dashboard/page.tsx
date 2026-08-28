@@ -69,6 +69,34 @@ export default async function DashboardPage({
 
   const params = await searchParams;
 
+  // Admin-only: sim=error-row renders a fixture row with payment_status='error' (no DB)
+  if (params.sim === 'error-row' && isAdminUser(clerkUser.id)) {
+    const simBrief = {
+      id: 'sim-error',
+      created_at: new Date().toISOString(),
+      nationality: 'United States',
+      destination: 'Italy',
+      depth: 'quick',
+      overall_confidence: null,
+      payment_status: 'error',
+      degraded: false,
+      rerun_count: 0,
+    };
+    return (
+      <div className="px-4 sm:px-6 py-6 sm:py-8" style={{ maxWidth: '1120px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, textTransform: 'uppercase', letterSpacing: '0.02em', color: 'var(--color-text-primary)', margin: 0, lineHeight: 1.05 }}>
+            My Briefs
+          </h1>
+          <a href="/app" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-neutral)', background: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '10px 22px', textDecoration: 'none' }}>
+            Generate New Brief
+          </a>
+        </div>
+        <BriefGrid briefs={[simBrief]} total={1} page={1} />
+      </div>
+    );
+  }
+
   // Admin-only: sim=empty bypasses DB and renders the empty state
   if (params.sim === 'empty' && isAdminUser(clerkUser.id)) {
     return (

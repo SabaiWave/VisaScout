@@ -11,7 +11,7 @@ import { LandingCoords } from './components/LandingCoords';
 import { HeroMarkerEditor } from './components/dev/HeroMarkerEditor';
 
 import { clientConfig } from '@/config/client';
-import { destinationCount } from '@/src/config/destinations';
+import { destinationCount, coverageLabelDot } from '@/src/config/destinations';
 import { SearchableCombobox } from './components/ui/SearchableCombobox';
 
 const { landingPage: copy } = clientConfig;
@@ -264,7 +264,7 @@ function Hero() {
 // ─── Data strip ────────────────────────────────────────────────────────────
 
 const dataCells = [
-  { label: 'Destinations Monitored', value: String(destinationCount), sub: 'Southeast Asia · East Asia · Europe · Latin America' },
+  { label: 'Destinations Monitored', value: String(destinationCount), sub: coverageLabelDot },
   { label: 'Sections Covered', value: '8', sub: 'Entry to contingency' },
   { label: 'Source Tiers', value: 'T1 – T4', sub: 'Gov to community' },
   { label: 'Brief Tiers', value: '3', sub: 'Scout, Intel, Dossier' },
