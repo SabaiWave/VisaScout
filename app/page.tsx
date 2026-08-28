@@ -63,16 +63,6 @@ function useBriefRedirect() {
 
 // ─── Shared decorative chrome ───────────────────────────────────────────────
 
-function AxisRule() {
-  return (
-    <div
-      aria-hidden
-      className="hidden lg:block fixed top-0 bottom-0 z-[2] pointer-events-none"
-      style={{ left: LANDING_AXIS, width: '1px', background: 'var(--color-border)' }}
-    />
-  );
-}
-
 function SecLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
@@ -733,7 +723,6 @@ export default function LandingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
       <div aria-hidden className="chart-texture" />
-      <AxisRule />
       <ChartCornerMarks topLeft="" bottomRight="" />
       <LandingCoords />
       <LandingNav />
