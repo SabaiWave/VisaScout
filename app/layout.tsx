@@ -35,14 +35,29 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://visascout.io';
   const APP_URL = rawAppUrl.startsWith('http') ? rawAppUrl : `https://${rawAppUrl}`;
+  const description =
+    'Visa requirements for Thailand, Vietnam, Japan, and 31 more destinations — checked fresh from official sources, with real enforcement data. Free quick check, no credit card.';
   return {
     title: `VisaScout — ${clientConfig.tagline}`,
-    description:
-      'Know exactly what to do about your visa — sourced, confidence-scored, in under 60 seconds. Official policy + recent enforcement changes + real traveler experience.',
+    description,
+    keywords: [
+      'visa requirements',
+      'Thailand visa',
+      'Vietnam visa',
+      'Japan visa',
+      'Indonesia visa',
+      'digital nomad visa',
+      'long stay visa',
+      'visa check',
+      'immigration rules',
+      'border run rules',
+      'visa extension',
+      'tourist visa',
+    ],
     metadataBase: new URL(APP_URL),
     openGraph: {
       title: `VisaScout — ${clientConfig.tagline}`,
-      description: clientConfig.landingPage.hero.subhead,
+      description,
       url: APP_URL,
       siteName: clientConfig.brandName,
       images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `VisaScout — ${clientConfig.tagline}` }],
@@ -51,13 +66,16 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       card: 'summary_large_image',
       title: `VisaScout — ${clientConfig.tagline}`,
-      description: clientConfig.landingPage.hero.subhead,
+      description,
       images: ['/og-image.png'],
     },
     robots: {
       index: true,
       follow: true,
     },
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+      : {}),
   };
 }
 

@@ -17,7 +17,8 @@ const TOC_ITEMS = [
 
 export const metadata: Metadata = {
   title: 'How It Works — VisaScout',
-  description: 'How VisaScout sources, weights, and reconciles visa information to give you one trustworthy brief.',
+  description:
+    'How VisaScout researches visa requirements: official immigration sources, recent enforcement changes, and real traveler reports — reconciled and confidence-scored in one brief.',
 };
 
 const SOURCE_TIERS = [

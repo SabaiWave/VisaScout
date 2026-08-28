@@ -701,12 +701,37 @@ function Footer() {
 
 // ─── Page ──────────────────────────────────────────────────────────────────
 
+const FAQ_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: clientConfig.landingPage.faq.items.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
+
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'VisaScout',
+  url: 'https://visascout.io',
+  description: 'Visa requirements for Thailand, Vietnam, Japan, and 31 more destinations — checked fresh from official sources, with real enforcement data.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: 'https://visascout.io/app' },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function LandingPage() {
   const [isMobile, setIsMobile] = useState(false);
   useLayoutEffect(() => { setIsMobile(window.innerWidth < 1024); }, []);
   return (
     <MobileCtx.Provider value={isMobile}>
     <div style={{ background: 'var(--color-bg-base)', minHeight: '100vh' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
       <div aria-hidden className="chart-texture" />
       <AxisRule />
       <ChartCornerMarks topLeft="" bottomRight="" />
