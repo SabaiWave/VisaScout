@@ -115,13 +115,24 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
 
         {/* Actions */}
         <div className="db-cell db-cell-actions" onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={() => { if (!showConfirm) router.push(href); }}
-            className="db-view"
-            aria-label={`View ${brief.destination} brief`}
-          >
-            VIEW
-          </button>
+          {brief.payment_status === 'error' ? (
+            <button
+              onClick={() => router.push('/app')}
+              className="db-view"
+              aria-label={`Retry ${brief.destination} brief`}
+              title="Brief failed — generate a new one"
+            >
+              RETRY
+            </button>
+          ) : (
+            <button
+              onClick={() => { if (!showConfirm) router.push(href); }}
+              className="db-view"
+              aria-label={`View ${brief.destination} brief`}
+            >
+              VIEW
+            </button>
+          )}
           <button
             onClick={() => setShowConfirm(true)}
             className="db-del"
