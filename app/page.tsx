@@ -175,7 +175,6 @@ const HERO_MARKERS = [
   { top: '77.5%', left: '78.2%', size: 4, opacity: 1, rings: [1.1, 2.9] },
   { top: '33.1%', left: '40.8%', size: 4, opacity: 1, rings: [0.7, 2.5] },
   { top: '36.5%', left: '79.7%', size: 4, opacity: 1, rings: [1.4, 3.1] },
-  { top: '21.7%', left: '25.0%', size: 4, opacity: 1, rings: [0.6, 2.4] },
 ];
 
 function Hero() {
