@@ -7,9 +7,26 @@
 //   - Search-ranked results, not strictly chronological
 //
 // Run: bash scripts/run.sh scripts/scan-reddit-tavily.ts
+//
+// ─── ADDING A DESTINATION ───────────────────────────────────────────────────
+// 1. src/config/destinations.ts — add the destination config entry
+// 2. scripts/scan-config.ts     — add subreddits + city keywords for that destination
+// 3. buildQueries() below       — add at least one targeted Tavily query
+// ────────────────────────────────────────────────────────────────────────────
+
+import {
+  SUBREDDIT_ALLOWLIST,
+  SUBREDDIT_DESTINATION_MAP,
+  SUPPORTED_DESTINATIONS,
+  DESTINATION_KEYWORDS,
+} from './scan-config'
+import { tavily } from '@tavily/core'
+import * as fs from 'fs'
+import * as path from 'path'
 
 // === CONFIG ===
 const DAYS_BACK = 7               // how far back to search (Tavily re-index window)
+const MAX_POST_AGE_DAYS = 45      // drop posts older than this (ID-estimated) — tighter = fresher leads
 const MAX_RESULTS_PER_QUERY = 20  // Tavily results per search query
 const TAVILY_COST_PER_SEARCH = 0.005  // USD per query (estimate — verify at tavily.com/pricing)
 // Tavily's `days` filter uses re-indexing date, not post creation date.
@@ -17,57 +34,148 @@ const TAVILY_COST_PER_SEARCH = 0.005  // USD per query (estimate — verify at t
 // when Tavily returns it. When publishedDate is null (common for Reddit), we move
 // posts to a separate UNVERIFIED DATE section rather than mixing with dated results.
 const SHOW_UNDATED_SECTION = true  // set false to drop undated posts entirely
+
+// SUBREDDIT_ALLOWLIST, SUBREDDIT_DESTINATION_MAP, SUPPORTED_DESTINATIONS, DESTINATION_KEYWORDS
+// are all derived from src/config/destinations.ts + scripts/scan-config.ts — imported above.
+// Do not hardcode destination lists here.
+
+// Signals that indicate applying for a visa from home (not in-country management).
+// These posts are lower GTM priority — VisaScout's pitch is in-country visa intelligence.
+// Posts matching these get bucketed as APPLICATION POSTS, not ANSWER THESE.
+const HOME_APPLICATION_SIGNALS = [
+  'vfs', 'embassy appointment', 'consulate appointment',
+  'applying for visa', 'applied for visa', 'visa application',
+  'visa applicant', 'visa granted', 'visa approved',
+  'application approved', 'application rejected', 'application denied',
+  'granted se', 'granted me', 'single entry instead', 'multiple entry instead',
+  'how to apply for', 'document requirements', 'required documents',
+  'appointment slot', 'application form',
+  'f1 visa', 'h1b', 'h-1b', 'student visa application', 'work visa application',
+]
+
+// Signals that indicate a guide/listicle/content marketing post, not a genuine question.
+// These show up on r/digitalnomadlife etc. as SEO content — not GTM opportunities.
+const CONTENT_POST_SIGNALS = [
+  'beginner guide', 'complete guide', 'ultimate guide', 'complete beginner',
+  'how to start', 'how to become', 'everything you need to know',
+  'things i wish i knew', 'things you need to know', 'tips for beginners',
+  'step by step', 'comprehensive guide', '2026 guide', 'guide 2026',
+]
 // ==============
 
-import { tavily } from '@tavily/core'
-import * as fs from 'fs'
-import * as path from 'path'
+const SEEN_POSTS_FILE = path.join(process.cwd(), 'outputs', 'scans', 'seen-posts.json')
+
+function loadSeenPosts(): Set<string> {
+  try {
+    if (!fs.existsSync(SEEN_POSTS_FILE)) return new Set()
+    const data = JSON.parse(fs.readFileSync(SEEN_POSTS_FILE, 'utf-8'))
+    return new Set<string>(data.urls ?? [])
+  } catch { return new Set() }
+}
+
+function saveSeenPosts(existing: Set<string>, newUrls: string[]): void {
+  const all = [...new Set([...existing, ...newUrls])]
+  fs.writeFileSync(SEEN_POSTS_FILE, JSON.stringify({ urls: all }, null, 2), 'utf-8')
+}
 
 function buildQueries(): string[] {
   // No `after:` date operator — it's a Google operator that Tavily may not pass through.
   // Date filtering is handled by Tavily's `days` param + our ID-based estimation filter.
+  // NOTE: When adding a destination to src/config/destinations.ts, add at least one
+  //       broad query here and a subreddit-targeted query if a good sub exists.
   return [
-    // Broad topic queries
+    // === SEA — broad destination queries ===
     `site:reddit.com Thailand visa tourist extension border run question`,
     `site:reddit.com Vietnam visa e-visa entry requirements question`,
-    `site:reddit.com Bali Indonesia tourist visa extension question`,
-    `site:reddit.com Malaysia Philippines Cambodia visa question`,
-    `site:reddit.com Japan Korea tourist visa requirements question`,
+    `site:reddit.com Indonesia Bali tourist visa extension VOA question`,
+    `site:reddit.com Malaysia visa tourist entry requirements question`,
+    `site:reddit.com Philippines visa tourist entry requirements question`,
+    `site:reddit.com Cambodia Laos Myanmar tourist visa entry question`,
+    `site:reddit.com Singapore visa entry requirements question`,
+    // === East Asia ===
+    `site:reddit.com Japan tourist visa requirements question`,
+    `site:reddit.com Korea tourist visa requirements question`,
+    // === Europe — Schengen ===
+    `site:reddit.com Schengen visa 90 day rule Germany question`,
+    `site:reddit.com Portugal D7 visa digital nomad NHR question`,
+    `site:reddit.com Spain Netherlands France tourist visa question`,
+    `site:reddit.com Italy visa long stay elective residency question`,
+    `site:reddit.com Greece digital nomad visa golden visa question`,
+    `site:reddit.com Czech Republic Prague visa residence permit question`,
+    `site:reddit.com Poland Krakow Warsaw visa residence permit question`,
+    `site:reddit.com Croatia digital nomad visa Schengen question`,
+    `site:reddit.com Hungary Budapest digital nomad white card visa question`,
+    // === Middle East ===
+    `site:reddit.com Dubai UAE visa residence golden visa freelancer question`,
+    `site:reddit.com Turkey Istanbul visa residence permit e-visa question`,
+    // === South Asia ===
+    `site:reddit.com India visa e-tourist long stay entry requirements question`,
+    // === Caucasus ===
+    `site:reddit.com Georgia Tbilisi visa free 365 days residence question`,
+    // === Latin America ===
+    `site:reddit.com Mexico Colombia tourist visa long stay question`,
+    `site:reddit.com Argentina Buenos Aires visa rentista long stay question`,
+    `site:reddit.com Brazil digital nomad visa VITEM entry requirements question`,
+    `site:reddit.com Peru Lima visa tourist entry requirements question`,
+    `site:reddit.com Costa Rica rentista pensionado visa long stay question`,
+    // === Cross-destination / nomad themes ===
     `site:reddit.com digital nomad visa remote work question help`,
     `site:reddit.com border run visa run overstay question`,
-    `site:reddit.com Schengen visa Germany Portugal Spain Netherlands question`,
-    `site:reddit.com Mexico Colombia tourist visa long stay question`,
     `site:reddit.com visa on arrival extension overstay fine question`,
-    // Subreddit-targeted queries — higher signal, less noise
+    // === Subreddit-targeted — tourism/expat subs only, dedicated result pool ===
     `site:reddit.com/r/ThailandTourism visa extension border run`,
-    `site:reddit.com/r/digitalnomad visa question Southeast Asia`,
+    `site:reddit.com/r/ThailandExpats visa LTR retirement extension`,
+    `site:reddit.com/r/digitalnomad visa question`,
+    `site:reddit.com/r/digitalnomadlife visa entry question`,
     `site:reddit.com/r/bali visa extension VOA question`,
     `site:reddit.com/r/SEABackpacking visa entry question`,
     `site:reddit.com/r/expats visa long stay digital nomad`,
+    `site:reddit.com/r/travel visa question entry requirements`,
+    `site:reddit.com/r/VietnamTourism visa entry question`,
+    `site:reddit.com/r/PinoyTraveller visa stay extension`,
+    `site:reddit.com/r/JapanTourism visa requirements question`,
+    `site:reddit.com/r/PortugalExpats D7 visa digital nomad question`,
+    `site:reddit.com/r/GermanyExpats visa long stay question`,
+    `site:reddit.com/r/ItalyTravel visa long stay residency question`,
+    `site:reddit.com/r/dubai visa residency golden visa freelancer question`,
+    `site:reddit.com/r/indiatravel visa e-tourist entry question`,
+    `site:reddit.com/r/costarica visa rentista pensionado long stay question`,
   ]
 }
 
 const KEYWORDS = [
-  'visa', 'overstay', 'border run', 'visa run', 'METV', 'tourist visa',
-  'visa extension', 'immigration', 'work permit', 'entry requirements',
-  'digital nomad visa', 'nomad visa', 'remote work visa',
-  'e-visa', 'visa on arrival', 'VOA', 'schengen', 'multiple entry',
-  'visa free', 'overstay fine', '90 day', '180 day', '30 day',
+  // Generic
+  'visa', 'overstay', 'border run', 'visa run', 'tourist visa', 'visa extension',
+  'entry requirements', 'immigration', 'work permit', 'multiple entry',
+  'e-visa', 'visa on arrival', 'VOA', 'visa free', 'overstay fine',
+  'visa exemption', 're-entry permit', 'entry ban', 'blacklist',
+  'proof of funds', 'onward ticket', 'immigration officer',
+  // Duration markers
+  '90 day', '90-day rule', '180 day', '30 day', '60 day',
+  // Nomad / long-stay
+  'digital nomad visa', 'nomad visa', 'remote work visa', 'LTR visa', 'retirement visa',
+  // Destination-specific
+  'METV', 'STV', 'schengen', 'D7 visa', 'NHR', 'golden visa',
 ]
 
 const QUESTION_STARTERS = [
   'how', 'can i', 'can we', 'should i', 'does', 'do i', 'is it', 'is there',
   'anyone', 'what is', 'what are', 'which', 'when', 'where can', 'has anyone',
-  'advice', 'help',
+  'advice', 'help', 'thinking about', 'planning to', 'looking for',
+  'wondering', 'need help', 'want to', 'trying to', 'confused about',
+  'question about', 'need advice',
 ]
 
 interface Post {
   url: string
   subreddit: string
+  destination: string | null
   title: string
   body: string
   matchedKeywords: string[]
   isQuestion: boolean
+  isHomeApplication: boolean
+  isContentPost: boolean
   estimatedDate: Date | null
   dateIsEstimated: boolean
 }
@@ -110,11 +218,21 @@ function formatDate(date: Date, estimated: boolean): string {
   return estimated ? `~${iso}` : iso
 }
 
-type Category = 'priority' | 'worthLook' | 'noise'
+type Category = 'priority' | 'worthLook' | 'homeApp' | 'noise'
 
 function extractSubreddit(url: string): string {
   const match = url.match(/reddit\.com\/r\/([^/]+)/)
   return match ? match[1] : 'unknown'
+}
+
+function detectDestination(subreddit: string, title: string, body: string): string | null {
+  const fromSub = SUBREDDIT_DESTINATION_MAP[subreddit.toLowerCase()]
+  if (fromSub) return fromSub
+  const text = `${title} ${body}`.toLowerCase()
+  for (const [kw, dest] of DESTINATION_KEYWORDS) {
+    if (text.includes(kw)) return dest
+  }
+  return null
 }
 
 function matchKeywords(text: string): string[] {
@@ -128,7 +246,21 @@ function detectQuestion(title: string): boolean {
   return QUESTION_STARTERS.some(w => lower.startsWith(w) || lower.includes(` ${w} `))
 }
 
+function detectHomeApplication(title: string, body: string): boolean {
+  const text = `${title} ${body.slice(0, 300)}`.toLowerCase()
+  return HOME_APPLICATION_SIGNALS.some(s => text.includes(s))
+}
+
+function detectContentPost(title: string): boolean {
+  const lower = title.toLowerCase()
+  return CONTENT_POST_SIGNALS.some(s => lower.includes(s))
+}
+
 function categorize(post: Post): Category {
+  if (post.isContentPost) return 'noise'
+  // Detected destination is unsupported → VisaScout can't help, skip
+  if (post.destination && !SUPPORTED_DESTINATIONS.has(post.destination)) return 'noise'
+  if (post.isHomeApplication) return 'homeApp'
   if (post.isQuestion && post.matchedKeywords.length > 0) return 'priority'
   if (post.isQuestion || post.matchedKeywords.length > 0) return 'worthLook'
   return 'noise'
@@ -144,8 +276,9 @@ function formatPost(post: Post, cat: Category): string {
   const dateTag = post.estimatedDate
     ? ` · ${formatDate(post.estimatedDate, post.dateIsEstimated)}`
     : ''
+  const destTag = post.destination ? ` · ${post.destination}` : ''
   const kwTag = post.matchedKeywords.length > 0 ? ` · [${post.matchedKeywords.slice(0, 3).join(', ')}]` : ''
-  const header = `[r/${post.subreddit}${dateTag}${kwTag}]`
+  const header = `[r/${post.subreddit}${dateTag}${destTag}${kwTag}]`
   const title = `"${post.title}"`
   const lines = [header, title]
   if (cat === 'priority') {
@@ -185,6 +318,7 @@ async function main() {
     process.exit(1)
   }
 
+  const seenPosts = loadSeenPosts()
   const startMs = Date.now()
   const client = tavily({ apiKey })
   const seen = new Set<string>()
@@ -195,10 +329,13 @@ async function main() {
   let dupeCount = 0
   let nonThreadCount = 0
   let tooOldCount = 0
+  let wrongSubCount = 0
+  let alreadySeenCount = 0
 
   // Breakdown maps
   const subredditMap = new Map<string, number>()
   const keywordMap = new Map<string, number>()
+  const destinationMap = new Map<string, number>()
 
   const QUERIES = buildQueries()
 
@@ -225,10 +362,14 @@ async function main() {
         const idEstimate = tavilyDate ? null : estimateDateFromRedditId(r.url)
         const estimatedDate: Date | null = tavilyDate ?? idEstimate?.date ?? null
         const dateIsEstimated = !tavilyDate && !!idEstimate
-        // 90-day ID filter — Tavily `days` re-indexes old posts when they get new comments.
-        // Without this, 2022 posts resurface and pollute results. Posts with no estimable
-        // date (null) pass through to the undated section rather than being dropped.
-        if (estimatedDate !== null && !isWithinDays(estimatedDate, 90)) { tooOldCount++; continue }
+        // Age filter — Tavily `days` re-indexes old posts when they get new comments.
+        // MAX_POST_AGE_DAYS tighter than 90d → fresher GTM leads, fewer stale threads.
+        if (estimatedDate !== null && !isWithinDays(estimatedDate, MAX_POST_AGE_DAYS)) { tooOldCount++; continue }
+
+        const sub = extractSubreddit(r.url)
+        if (!SUBREDDIT_ALLOWLIST.has(sub.toLowerCase())) { wrongSubCount++; continue }
+
+        if (seenPosts.has(r.url)) { alreadySeenCount++; continue }
 
         seen.add(r.url)
 
@@ -236,9 +377,10 @@ async function main() {
         const body = r.content ?? ''
         const searchText = `${title} ${body}`
         const matched = matchKeywords(searchText)
-        const sub = extractSubreddit(r.url)
+        const destination = detectDestination(sub, title, body)
 
         subredditMap.set(sub, (subredditMap.get(sub) ?? 0) + 1)
+        if (destination) destinationMap.set(destination, (destinationMap.get(destination) ?? 0) + 1)
         for (const kw of matched) {
           keywordMap.set(kw, (keywordMap.get(kw) ?? 0) + 1)
         }
@@ -246,10 +388,13 @@ async function main() {
         results.push({
           url: r.url,
           subreddit: sub,
+          destination,
           title,
           body,
           matchedKeywords: matched,
           isQuestion: detectQuestion(title),
+          isHomeApplication: detectHomeApplication(title, body),
+          isContentPost: detectContentPost(title),
           estimatedDate,
           dateIsEstimated,
         })
@@ -282,12 +427,14 @@ async function main() {
 
   const priority = dated.filter(p => categorize(p) === 'priority').sort(byDateDesc)
   const worthLook = dated.filter(p => categorize(p) === 'worthLook').sort(byDateDesc)
+  const homeApp = dated.filter(p => categorize(p) === 'homeApp').sort(byDateDesc)
   const noise = dated.filter(p => categorize(p) === 'noise').sort(byDateDesc)
   const totalActionable = priority.length + worthLook.length
   const keptCount = results.length
 
   const topSubs = topEntries(subredditMap, 8)
   const topKws = topEntries(keywordMap, 6)
+  const topDests = topEntries(destinationMap, 8)
 
   const header = [
     HEAVY,
@@ -295,14 +442,14 @@ async function main() {
     HEAVY,
     ``,
     `  Run       ${runTime}`,
-    `  Period    Last ${DAYS_BACK} days`,
+    `  Period    Last ${DAYS_BACK} days  ·  Max post age ${MAX_POST_AGE_DAYS}d`,
     `  Duration  ${durationSec}s   Cost ~$${costEst} (${QUERIES.length} queries × $${TAVILY_COST_PER_SEARCH})`,
     ``,
     `  Funnel    ${rawCount} raw  →  ${keptCount} kept`,
-    `            (${dupeCount} dupes  ·  ${nonThreadCount} non-thread  ·  ${tooOldCount} >90d old)`,
+    `            (${dupeCount} dupes  ·  ${nonThreadCount} non-thread  ·  ${tooOldCount} >45d old  ·  ${wrongSubCount} off-topic sub  ·  ${alreadySeenCount} already seen)`,
     `  Results   ${dated.length} dated (${confirmedCount} confirmed · ${estimatedCount} ID-estimated)  ·  ${undated.length} undated`,
     ``,
-    `  Actionable  ${totalActionable}  (${priority.length} answer these · ${worthLook.length} worth a look · ${noise.length} noise)`,
+    `  Actionable  ${totalActionable}  (${priority.length} answer these · ${worthLook.length} worth a look · ${homeApp.length} applications · ${noise.length} noise)`,
     HEAVY,
   ].join('\n')
 
@@ -311,8 +458,9 @@ async function main() {
     body = `  No matching posts found. Try increasing DAYS_BACK or expanding queries.`
   } else {
     const sections = [
-      renderSection('ANSWER THESE  (unanswered questions)', priority, 'priority'),
+      renderSection('ANSWER THESE  (in-country visa questions)', priority, 'priority'),
       renderSection('WORTH A LOOK', worthLook, 'worthLook'),
+      renderSection('APPLICATION POSTS  (applying from home — lower GTM priority)', homeApp, 'homeApp'),
       renderSection('NOISE', noise, 'noise'),
     ]
     if (SHOW_UNDATED_SECTION && undated.length > 0) {
@@ -325,15 +473,21 @@ async function main() {
     body = sections.filter(Boolean).join('\n\n')
   }
 
+  // Mark actionable posts as seen so future runs skip them
+  const actionableUrls = [...priority, ...worthLook].map(p => p.url)
+  if (actionableUrls.length > 0) saveSeenPosts(seenPosts, actionableUrls)
+
   const statsFooter = [
     LINE,
     `  STATS`,
     LINE,
-    topSubs ? `  Subreddits  ${topSubs}` : `  Subreddits  (none with results)`,
-    topKws   ? `  Keywords    ${topKws}`   : `  Keywords    (no matches)`,
+    topSubs  ? `  Subreddits    ${topSubs}`    : `  Subreddits    (none with results)`,
+    topDests ? `  Destinations  ${topDests}`   : `  Destinations  (none detected)`,
+    topKws   ? `  Keywords      ${topKws}`     : `  Keywords      (no matches)`,
     ``,
     `  Note: ~YYYY-MM-DD = date estimated from Reddit post ID (±2 days).`,
     `        Cost estimate uses $${TAVILY_COST_PER_SEARCH}/query — verify at tavily.com/pricing.`,
+    `        Actionable posts written to outputs/scans/seen-posts.json (delete to reset).`,
     HEAVY,
     `  Done. Review threads above and respond manually.`,
     HEAVY,

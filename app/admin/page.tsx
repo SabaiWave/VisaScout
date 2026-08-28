@@ -7,6 +7,7 @@ import { SectionHeading } from '@/app/components/ui/SectionHeading';
 import { ClearBriefButton } from '@/app/components/admin/ClearBriefButton';
 import { RetryBriefButton } from '@/app/components/admin/RetryBriefButton';
 import { ForceQueueButton } from '@/app/components/admin/ForceQueueButton';
+import { DismissBriefButton } from '@/app/components/admin/DismissBriefButton';
 import { RevokeEarlyAccessButton } from '@/app/components/admin/RevokeEarlyAccessButton';
 
 async function getAdminMetrics() {
@@ -87,7 +88,7 @@ async function getAdminMetrics() {
 interface StuckBrief {
   id: string;
   created_at: string;
-  nationality: string;
+  nationality: string | null;
   destination: string;
   depth: string;
   payment_status: string;
@@ -246,9 +247,10 @@ export default async function AdminPage() {
         <Section id="s-briefs" title="STUCK BRIEFS">
           <div className="mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[
-              { n: '1', label: 'No Stripe session', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
+              { n: '1', label: 'No Stripe session (paid)', action: 'Resend webhook in Stripe dashboard', color: 'var(--color-error)' },
               { n: '2', label: 'Session exists, no job', action: 'Force Queue', color: 'var(--color-secondary-light)' },
               { n: '3', label: 'Job stuck or failed', action: 'Retry', color: 'var(--color-amber)' },
+              { n: '4', label: 'Quick brief — pipeline died', action: 'Dismiss', color: 'var(--color-text-tertiary)' },
             ].map(({ n, label, action, color }) => (
               <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
                 <span style={{ color, fontWeight: 700, flexShrink: 0 }}>{n}</span>
@@ -265,10 +267,10 @@ export default async function AdminPage() {
             </p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+              <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                 <thead>
                   <tr style={{ color: 'var(--color-text-tertiary)', borderBottom: '1px solid var(--color-border)' }}>
-                    {['Brief ID', 'Destination', 'Depth', 'Created', 'Payment', 'Stripe Session', 'Job', 'Action'].map(h => (
+                    {['Brief ID', 'Nationality', 'Destination', 'Depth', 'Created', 'Status', 'Stripe', 'Job', 'Action'].map(h => (
                       <th key={h} style={{ padding: '0.4rem 0.75rem', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -283,14 +285,26 @@ export default async function AdminPage() {
                     const jobFailed = job?.status === 'failed';
                     const jobRunning = job && !jobStuck && !jobFailed;
 
-                    // Determine step
-                    const step = !hasSession ? 1 : !job ? 2 : (jobStuck || jobFailed) ? 3 : 0;
+                    // Step 4: quick (free) brief with no session = pipeline was killed, not a Stripe issue
+                    // Step 1: paid brief (non-quick) with no session = Stripe webhook missed
+                    const step = !hasSession && b.depth === 'quick' ? 4
+                               : !hasSession ? 1
+                               : !job ? 2
+                               : (jobStuck || jobFailed) ? 3
+                               : 0;
                     const stepColor = step === 1 ? 'var(--color-error)' : step === 2 ? 'var(--color-secondary-light)' : step === 3 ? 'var(--color-amber)' : 'var(--color-text-tertiary)';
+
+                    const createdDate = new Date(b.created_at);
+                    const createdStr = createdDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                      + ' ' + createdDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
                     return (
                       <tr key={b.id} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', fontSize: '0.65rem' }}>
                           {b.id.slice(0, 8)}…
+                        </td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)' }}>
+                          {b.nationality ?? '—'}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-primary)', textTransform: 'uppercase' }}>
                           {b.destination}
@@ -299,23 +313,27 @@ export default async function AdminPage() {
                           {b.depth}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
-                          {new Date(b.created_at).toLocaleTimeString()}
+                          {createdStr}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: stepColor, textTransform: 'uppercase' }}>
                           {b.payment_status}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.65rem' }}>
                           {hasSession
-                            ? <span style={{ color: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Check size={12} />{b.stripe_session_id!.slice(0, 14)}&hellip;</span>
-                            : <span style={{ color: 'var(--color-error)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><X size={12} />None</span>
+                            ? <span title="Stripe checkout session exists" style={{ color: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Check size={12} /></span>
+                            : <span title="No Stripe session — free brief or webhook never fired" style={{ color: 'var(--color-error)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><X size={12} /></span>
                           }
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase' }}>
                           {!job ? '—' : jobRunning ? <span style={{ color: 'var(--color-secondary-light)' }}>Running</span> : <span style={{ color: jobFailed ? 'var(--color-error)' : 'var(--color-amber)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>{job.status}{jobStuck && <AlertTriangle size={10} />}</span>}
                         </td>
                         <td style={{ padding: '0.5rem 0.75rem', whiteSpace: 'nowrap' }}>
+                          <span style={{ marginRight: '0.4rem', color: stepColor, fontWeight: 700, fontSize: '0.65rem' }}>{step > 0 ? step : '…'}</span>
+                          {step === 4 && (
+                            <DismissBriefButton briefId={b.id} />
+                          )}
                           {step === 1 && (
-                            <span style={{ color: 'var(--color-error)', fontSize: '0.65rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><ArrowRight size={10} />Resend in Stripe</span>
+                            <span title="Go to Stripe dashboard → Developers → Webhooks → find checkout.session.completed event → Resend" style={{ color: 'var(--color-error)', fontSize: '0.65rem', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'help' }}><ArrowRight size={10} />Resend in Stripe</span>
                           )}
                           {step === 2 && (
                             <ForceQueueButton briefId={b.id} />

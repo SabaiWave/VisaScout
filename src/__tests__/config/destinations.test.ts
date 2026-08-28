@@ -40,12 +40,16 @@ describe('DESTINATIONS', () => {
     expect(schengenNames).toContain('Spain');
   });
 
-  it('contains Mexico and Colombia', () => {
+  it('contains Latin America destinations', () => {
     const latinAmericaDestinations = DESTINATIONS.filter((d) => d.region === 'Latin America');
-    expect(latinAmericaDestinations).toHaveLength(2);
+    expect(latinAmericaDestinations.length).toBeGreaterThanOrEqual(2);
     const latinAmericaNames = latinAmericaDestinations.map((d) => d.name);
     expect(latinAmericaNames).toContain('Mexico');
     expect(latinAmericaNames).toContain('Colombia');
+    expect(latinAmericaNames).toContain('Argentina');
+    expect(latinAmericaNames).toContain('Brazil');
+    expect(latinAmericaNames).toContain('Peru');
+    expect(latinAmericaNames).toContain('Costa Rica');
   });
 
   it('SUPPORTED_DESTINATION_NAMES derives from DESTINATIONS', () => {

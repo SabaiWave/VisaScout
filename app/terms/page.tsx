@@ -42,7 +42,7 @@ export default function TermsPage() {
 
           <section id="s2">
             <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>2. Description of Service</h2>
-            <p className="mb-3">VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies across Southeast Asia, East Asia, Europe, and Latin America. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
+            <p className="mb-3">VisaScout is an information aggregation service that synthesizes publicly available information about visa requirements and immigration policies across Southeast Asia, East Asia, Europe, Latin America, the Middle East, South Asia, and the Caucasus. The Service does not provide legal advice, immigration legal services, or visa application processing.</p>
             <p>Generated briefs may be shared via a unique link. Anyone with the link can view the brief&apos;s visa intelligence content. Shared briefs do not expose your account information, email address, or raw input — only the generated visa intelligence.</p>
           </section>
 
