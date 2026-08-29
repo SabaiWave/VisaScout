@@ -20,7 +20,7 @@ export const clientConfig = {
       eyebrow: 'Visa intelligence, every claim sourced.',
       h1: "Know your visa situation. Before it's a problem.",
       subhead:
-        'You found six answers. Three contradict each other. Two are years old. VisaScout reconciles all of it. One brief. Every claim sourced.',
+        'Official rules say one thing. Travelers report another. VisaScout reconciles both. One brief, every claim sourced.',
       cta: 'Start free',
       ctaHref: '/app?depth=quick',
       metrics: [
