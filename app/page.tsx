@@ -228,8 +228,6 @@ function Hero() {
               lineHeight: 1.95,
               color: 'var(--color-text-secondary)',
               maxWidth: '520px',
-              paddingLeft: '1.4em',
-              borderLeft: '1px solid var(--color-amber)',
             }}
           >
             {copy.hero.subhead}
@@ -254,9 +252,9 @@ function Hero() {
 
 const dataCells = [
   { label: 'Destinations Monitored', value: String(destinationCount), sub: coverageLabelDot },
-  { label: 'Sections Covered', value: '8', sub: 'Entry to contingency' },
-  { label: 'Source Tiers', value: 'T1 – T4', sub: 'Gov to community' },
-  { label: 'Brief Tiers', value: '3', sub: 'Scout, Intel, Dossier' },
+  { label: 'Sections Covered', value: '8', sub: 'Requirements to contingency plan' },
+  { label: 'Source Tiers', value: 'T1 – T4', sub: 'Official sources to ground truth' },
+  { label: 'Analysis Depth', value: '3', sub: 'Quick scan to deep dive' },
 ];
 
 function DataStrip() {
@@ -345,8 +343,7 @@ function Method() {
               gridTemplateColumns: '44px 1fr',
               padding: '24px 0',
               paddingLeft: `${i * 40}px`,
-              borderTop: i === 0 ? '1px solid var(--color-border-muted)' : undefined,
-              borderBottom: '1px solid var(--color-border-muted)',
+              borderBottom: i === steps.length - 1 ? undefined : '1px solid var(--color-border-muted)',
             }}
           >
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 900, color: 'var(--color-amber)', lineHeight: 1 }}>
@@ -569,7 +566,7 @@ function FAQ() {
         {items.map((item, i) => {
           const isOpen = open === i;
           return (
-            <motion.div key={item.q} variants={isMobile ? noAnim : fadeUp} style={{ borderBottom: '1px solid var(--color-border-muted)' }}>
+            <motion.div key={item.q} variants={isMobile ? noAnim : fadeUp} style={{ borderBottom: i === items.length - 1 ? undefined : '1px solid var(--color-border-muted)' }}>
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : i)}
