@@ -25,7 +25,7 @@ export async function GET(req: Request) {
   const { data, error } = await getSupabase()
     .from('briefs')
     .select('id, payment_status, created_at, destination, depth, nationality')
-    .in('payment_status', ['pending', 'queued'])
+    .in('payment_status', ['queued'])
     .lt('created_at', thresholdTime)
     .not('user_id', 'is', null)
     .order('created_at', { ascending: true })
