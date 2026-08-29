@@ -369,9 +369,9 @@ function Method() {
 
 // ─── Brief exhibit ───────────────────────────────────────────────────────
 
-function briefSection(label: string) {
+function briefSection(label: string, first?: boolean) {
   return (
-    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: '14px 0 5px', borderTop: '1px solid var(--color-border-muted)', marginTop: '4px' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-text-tertiary)', padding: first ? '4px 0 5px' : '14px 0 5px', borderTop: first ? 'none' : '1px solid var(--color-border-muted)', marginTop: first ? '0' : '4px' }}>
       {label}
     </div>
   );
@@ -478,9 +478,9 @@ function BriefExhibit() {
             </span>
           </div>
 
-          <div style={{ padding: '16px 20px' }}>
+          <div className="sb-rows" style={{ padding: '16px 20px' }}>
 
-            {briefSection('Situation')}
+            {briefSection('Situation', true)}
             {briefField('Passport', 'United States of America')}
             {briefField('Destination', 'Kingdom of Thailand')}
             {briefField('Current status', 'METV. Day 48 of 60. 12 days remaining')}
