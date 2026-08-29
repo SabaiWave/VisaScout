@@ -254,7 +254,7 @@ const dataCells = [
   { label: 'Destinations Monitored', value: String(destinationCount), sub: coverageLabelDot },
   { label: 'Sections Covered', value: '8', sub: 'Requirements to contingency plan' },
   { label: 'Source Tiers', value: 'T1 – T4', sub: 'Official sources to ground truth' },
-  { label: 'Analysis Depth', value: '3', sub: 'Quick scan to deep dive' },
+  { label: 'Analysis Depth', value: '3', sub: 'Quick · Standard · Deep' },
 ];
 
 function DataStrip() {
