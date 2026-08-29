@@ -650,6 +650,8 @@ button:has([data-localization-key*="connectedAccountsSection"])::after {
 
 .vs-row { border-bottom: 1px solid var(--color-border-muted); }
 .vs-row:last-child { border-bottom: none; }
+/* Sample brief on landing page: section borderTop is the sole divider — no row borders */
+.sb-rows .vs-row { border-bottom: none; }
 .vs-row-hover:hover { background: var(--color-bg-elevated); }
 
 /* Key-value layout: fixed label col (dark bg) + value col */
