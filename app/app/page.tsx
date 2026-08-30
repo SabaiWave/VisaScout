@@ -599,7 +599,7 @@ function AppContent() {
                 </div>
                 <div style={{ border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`, transition: 'border-color 0.15s' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-base)', padding: '0 14px', height: 30, borderBottom: '1px solid var(--color-border)' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Free Text · Normalized on Submit</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Describe Freely</span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: freeform.length > 1800 ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}>{freeform.length} / 2000</span>
                   </div>
                   <textarea
