@@ -135,12 +135,12 @@ const CSS = `
 }
 
 .doc[data-mode="print"] {
-  --stage: #ffffff; --ground: #ffffff; --ground-up: #f0f0f0; --ground-sub: #e4e4e4;
-  --rim: #aaaaaa; --rim-soft: #d4d4d4;
-  --accent: #111111; --accent-ink: #111111; --accent-hot: #000000;
-  --accent-wash: #eeeeee; --accent-rim: #888888;
-  --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
-  --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
+  --stage: #f8f9fb; --ground: #ffffff; --ground-up: #f1f4f8; --ground-sub: #e8ecf0;
+  --rim: #c8d2dc; --rim-soft: #dde3ea;
+  --accent: #c8780a; --accent-ink: #b36d08; --accent-hot: #e8940e;
+  --accent-wash: rgba(200,120,10,0.08); --accent-rim: rgba(200,120,10,0.28);
+  --ink: #1a2030; --ink-2: #2d3a4a; --ink-3: #4a5a6a; --ink-4: #6a7a8a;
+  --ok: #0d9668; --ok-wash: rgba(13,150,104,0.08); --bad: #c0392b; --bad-wash: rgba(192,57,43,0.08);
   --chrome: none; --chrome-flex: none; --texture: 0; --break: auto; --scrollx: visible;
 
   --sheet-w:    210mm;
@@ -176,12 +176,12 @@ const CSS = `
 
 @media print {
   .doc {
-    --stage: #ffffff; --ground: #ffffff; --ground-up: #f0f0f0; --ground-sub: #e4e4e4;
-    --rim: #aaaaaa; --rim-soft: #d4d4d4;
-    --accent: #111111; --accent-ink: #111111; --accent-hot: #000000;
-    --accent-wash: #eeeeee; --accent-rim: #888888;
-    --ink: #0a0a0a; --ink-2: #2a2a2a; --ink-3: #555555; --ink-4: #777777;
-    --ok: #0a0a0a; --ok-wash: #eeeeee; --bad: #555555; --bad-wash: #e6e6e6;
+    --stage: #f8f9fb; --ground: #ffffff; --ground-up: #f1f4f8; --ground-sub: #e8ecf0;
+    --rim: #c8d2dc; --rim-soft: #dde3ea;
+    --accent: #c8780a; --accent-ink: #b36d08; --accent-hot: #e8940e;
+    --accent-wash: rgba(200,120,10,0.08); --accent-rim: rgba(200,120,10,0.28);
+    --ink: #1a2030; --ink-2: #2d3a4a; --ink-3: #4a5a6a; --ink-4: #6a7a8a;
+    --ok: #0d9668; --ok-wash: rgba(13,150,104,0.08); --bad: #c0392b; --bad-wash: rgba(192,57,43,0.08);
     --chrome: none; --chrome-flex: none; --texture: 0; --break: auto; --scrollx: visible;
     --sheet-w: 100%; --sheet-pad: 0; --sec-gap: 24px;
     --num-size: 40px; --title-size: 23px;
