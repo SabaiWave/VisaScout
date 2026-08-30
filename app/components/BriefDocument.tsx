@@ -683,7 +683,7 @@ tr.fit-best + tr.noterow td { background: var(--ok-wash); border-bottom: 1px sol
 .conf-r { padding: 16px 18px; font-size: 13px; line-height: 1.74; color: var(--ink-2); }
 
 /* ── FOOTER ─────────────────────────────────────────────────────── */
-.docfoot { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--rim); page-break-inside: var(--break); }
+.docfoot { margin-top: 16px; padding-top: 0; page-break-inside: var(--break); }
 .disc { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 12px; font-size: 11px; line-height: 1.85; color: var(--ink-3); }
 .disc .m { font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-ink); white-space: nowrap; text-decoration: none; }
 .colophon {
