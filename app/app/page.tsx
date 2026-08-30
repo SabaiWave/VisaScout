@@ -395,8 +395,8 @@ function AppContent() {
         /* ── Form groups ── */
         .app-grp { padding: 34px 0; border-bottom: 1px solid rgba(255,255,255,0.05); max-width: 900px; }
         .app-grp:last-of-type { border-bottom: none; }
-        .app-grp-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
-        .app-grp-n { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--color-secondary); }
+        .app-grp-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 18px; }
+        .app-grp-n { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--color-secondary); }
         .app-grp-t { font-family: var(--font-display); font-size: 19px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-text-primary); }
         .app-grp-req { margin-left: auto; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-tertiary); border: 1px solid rgba(255,255,255,0.08); padding: 3px 7px; }
         .app-pair { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -446,13 +446,13 @@ function AppContent() {
         {/* ── LEFT — form ── */}
         <div className="app-work-l">
 
-          <div style={{ padding: '32px 0 34px', borderBottom: '1px solid var(--color-border)' }}>
+          <div style={{ padding: '32px 0 8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 20 }}>
               <span style={{ width: 26, height: 1, background: 'var(--color-secondary)', display: 'block', flexShrink: 0 }} />
               Intake
             </div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 5.6vw, 88px)', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, letterSpacing: '-0.01em', color: 'var(--color-text-primary)', marginBottom: 24 }}>Generate Brief</h1>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.95, color: 'var(--color-text-secondary)', maxWidth: 560, paddingLeft: '1.4em', borderLeft: '1px solid var(--color-secondary)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.95, color: 'var(--color-text-secondary)', maxWidth: 560 }}>
               Tell us your situation. We&apos;ll cross-check official sources, recent policy changes, and real traveler reports. One clear brief with every claim sourced.
             </p>
           </div>
@@ -599,7 +599,7 @@ function AppContent() {
                 </div>
                 <div style={{ border: `1px solid ${submitted && !freeform ? 'var(--color-error)' : textareaFocused ? 'var(--color-secondary)' : 'var(--color-border)'}`, transition: 'border-color 0.15s' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-base)', padding: '0 14px', height: 30, borderBottom: '1px solid var(--color-border)' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Free Text · Normalized on Submit</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-secondary)' }}>Describe Freely</span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', color: freeform.length > 1800 ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}>{freeform.length} / 2000</span>
                   </div>
                   <textarea
@@ -628,7 +628,7 @@ function AppContent() {
               </div>
 
               {/* Group 03 — Depth */}
-              <div className="app-grp">
+              <div className="app-grp" style={{ borderBottom: 'none' }}>
                 <div className="app-grp-head">
                   <span className="app-grp-n">03</span>
                   <span className="app-grp-t">Research Depth</span>
@@ -708,7 +708,7 @@ function AppContent() {
                   )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: 900, paddingTop: 34 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: 900, paddingTop: 16 }}>
                   <button
                     type="submit"
                     disabled={phase === 'redirecting' || isCheckingCap}
@@ -807,9 +807,6 @@ function AppContent() {
                     ) : null
                   )}
 
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-text-tertiary)', lineHeight: 1.65, textAlign: 'left' }}>
-                    For informational purposes only. <a href="/terms" style={{ color: 'var(--color-text-tertiary)', textDecoration: 'underline' }}>See terms.</a>
-                  </p>
                 </div>
               )}
             </form>
