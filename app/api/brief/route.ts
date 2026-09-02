@@ -14,7 +14,7 @@ import { getSupabase } from '@/src/lib/supabase';
 import { withUsageTracking, getUsageLog, calculateReportCost } from '@/src/lib/cost';
 import { checkFreeTierCap, incrementFreeTierCount, logIpAbuse, getFreeDailyLimit, getAdminDailyLimit } from '@/src/lib/freeTier';
 import { isAdminUser } from '@/src/lib/adminAccess';
-import { hasInviteAccess, incrementInviteUsage } from '@/src/lib/inviteAccess';
+import { hasInviteAccess, incrementInviteUsage, checkInviteUsageCap } from '@/src/lib/inviteAccess';
 import { getOrCreateUser } from '@/src/lib/users';
 import { checkRateLimit } from '@/src/lib/rateLimit';
 import { OffTopicError } from '@/src/lib/errors';
@@ -339,6 +339,26 @@ async function briefHandler(req: Request) {
       }
     } catch (capErr) {
       log.error('free tier cap check failed — allowing request', { error: capErr instanceof Error ? capErr.message : String(capErr) });
+    }
+  }
+
+  if (earlyAccess) {
+    try {
+      const inviteCap = await checkInviteUsageCap(userId);
+      if (!inviteCap.allowed) {
+        await trackEvent('invite_cap.reached', {
+          userId,
+          briefsUsed: inviteCap.used,
+          limit: inviteCap.limit,
+          destination: destination ?? null,
+        });
+        return new Response(
+          JSON.stringify({ error: `You've used all ${inviteCap.limit} briefs from your early access invite. Upgrade to Intel or Dossier for unlimited research.`, code: 'invite_cap' }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch (capErr) {
+      log.error('invite tier cap check failed — allowing request', { error: capErr instanceof Error ? capErr.message : String(capErr) });
     }
   }
 
