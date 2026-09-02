@@ -28,6 +28,7 @@ const VALID_EVENTS = [
   'payment.completed',
   'poll.job_claimed',
   'free-cap.reached',
+  'invite-cap.reached',
   'input.oversized',
   'invite.redeemed',
   'invite.invalid-code',
@@ -188,6 +189,19 @@ export async function GET(req: Request) {
       };
       await trackEvent('free_cap.reached', data);
       fired = { event: 'free_cap.reached', ...data };
+      break;
+    }
+
+    case 'invite-cap.reached': {
+      const data = {
+        userId: FAKE_USER_ID,
+        briefsUsed: 5,
+        limit: 5,
+        destination,
+        sim: true,
+      };
+      await trackEvent('invite_cap.reached', data);
+      fired = { event: 'invite_cap.reached', ...data };
       break;
     }
 
