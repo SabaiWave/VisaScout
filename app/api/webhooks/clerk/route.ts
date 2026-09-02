@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       'svix-signature': svixSignature,
     }) as typeof event;
   } catch {
+    await log.warn('clerk.webhook.sig.failed', { svixId: svixId ?? 'missing' });
     return new Response('Invalid signature', { status: 400 });
   }
 
@@ -38,8 +39,11 @@ export async function POST(req: Request) {
   const emailAddresses = event.data.email_addresses as Array<{ email_address: string }> | undefined;
   const email = emailAddresses?.[0]?.email_address ?? null;
 
+  log.info('clerk.webhook.received', { type: event.type, userId: clerkUserId });
+
   if (event.type === 'user.created') {
     await trackEvent('user.signup', { userId: clerkUserId, email });
+    log.info('user.signup.processed', { userId: clerkUserId, hasEmail: !!email });
 
     if (email) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://visascout.io';
