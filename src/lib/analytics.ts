@@ -4,7 +4,7 @@ type EventProperties = Record<string, string | number | boolean | null | undefin
 
 export async function trackEvent(event: string, props: EventProperties = {}): Promise<void> {
   try {
-    log.info(event, {
+    await log.info(event, {
       event,
       ...props,
       ts: new Date().toISOString(),
