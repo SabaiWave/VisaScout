@@ -83,6 +83,21 @@ export async function redeemInviteCode(
   return { ok: true };
 }
 
+export function getInviteBriefLimit(): number {
+  return parseInt(process.env.INVITE_BRIEF_LIMIT ?? '5', 10);
+}
+
+export async function checkInviteUsageCap(clerkUserId: string): Promise<{ allowed: boolean; used: number; limit: number }> {
+  const limit = getInviteBriefLimit();
+  const { data } = await getSupabase()
+    .from('users')
+    .select('briefs_generated')
+    .eq('clerk_user_id', clerkUserId)
+    .single();
+  const used = (data as { briefs_generated: number } | null)?.briefs_generated ?? 0;
+  return { allowed: used < limit, used, limit };
+}
+
 export async function incrementInviteUsage(clerkUserId: string): Promise<void> {
   await getSupabase().rpc('increment_invite_usage', { p_user_id: clerkUserId });
 }

@@ -218,6 +218,7 @@ export default function DevPage() {
             <DevButton label="Main: Error Banner ↗"      sublabel="/app?sim=error"              href="/app?sim=error"              newTab />
             <DevButton label="Main: Off-Topic Rejection ↗" sublabel="/app?sim=off-topic"        href="/app?sim=off-topic"          newTab />
             <DevButton label="Main: Free Cap Reached ↗"  sublabel="/app?sim=free-cap"           href="/app?sim=free-cap"           newTab />
+            <DevButton label="Main: Invite Cap Reached ↗" sublabel="/app?sim=invite-cap"         href="/app?sim=invite-cap"         newTab />
             <DevButton label="Main: Payment Cancelled ↗" sublabel="/app?cancelled=true"      href="/app?cancelled=true"         newTab />
             <DevButton label="Main: Invalid Code ↗"       sublabel="/app?sim=invalid-code"      href="/app?sim=invalid-code"      newTab />
             <DevButton label="Main: Code Already Used ↗"  sublabel="/app?sim=code-already-used" href="/app?sim=code-already-used" newTab />
@@ -290,6 +291,13 @@ export default function DevPage() {
               label="Free Cap Hit ↗"
               sublabel="event:free_cap.reached"
               href="/api/debug/sim?event=free-cap.reached"
+              newTab
+              accent
+            />
+            <DevButton
+              label="Invite Cap Hit ↗"
+              sublabel="event:invite_cap.reached"
+              href="/api/debug/sim?event=invite-cap.reached"
               newTab
               accent
             />

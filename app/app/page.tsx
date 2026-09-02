@@ -157,7 +157,7 @@ function AppContent() {
   const [, startTransition] = useTransition();
 
   const [phase, setPhase] = useState<Phase>(
-    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap' || searchParams.get('sim') === 'off-topic') ? 'error' : 'idle'
+    process.env.NEXT_PUBLIC_ENVIRONMENT === 'development' && (searchParams.get('sim') === 'error' || searchParams.get('sim') === 'free-cap' || searchParams.get('sim') === 'invite-cap' || searchParams.get('sim') === 'off-topic') ? 'error' : 'idle'
   );
   const [nationality, setNationality] = useState(() => searchParams.get('nationality') || '');
   const [destination, setDestination] = useState(() => searchParams.get('destination') || '');
@@ -184,6 +184,7 @@ function AppContent() {
     devSim === 'code-already-used' ? 'already-used' : null
   );
   const [capReached, setCapReached] = useState(devSim === 'free-cap');
+  const [inviteCapReached, setInviteCapReached] = useState(devSim === 'invite-cap');
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingCap, setIsCheckingCap] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
@@ -204,6 +205,7 @@ function AppContent() {
 
     setError(null);
     setCapReached(false);
+    setInviteCapReached(false);
 
     if (depth === 'quick') {
       setPhase('redirecting');
@@ -233,7 +235,13 @@ function AppContent() {
           if (ct.includes('application/json')) {
             try { const err = await res.json() as { error?: string }; if (err.error) errMsg = err.error; } catch { /* fall through */ }
           }
-          if (res.status === 429) setCapReached(true);
+          if (res.status === 429) {
+            const bodyText = res.headers.get('content-type')?.includes('application/json')
+              ? await res.clone().json().catch(() => ({})) as { code?: string }
+              : {};
+            if (bodyText.code === 'invite_cap') setInviteCapReached(true);
+            else setCapReached(true);
+          }
           throw new Error(errMsg);
         }
         const { briefId } = await res.json() as { briefId: string };
@@ -287,6 +295,11 @@ function AppContent() {
   useEffect(() => {
     if (devSim !== 'free-cap') return;
     fetch('/api/debug/sim?event=free-cap.reached').catch(() => {});
+  }, [devSim]);
+
+  useEffect(() => {
+    if (devSim !== 'invite-cap') return;
+    fetch('/api/debug/sim?event=invite-cap.reached').catch(() => {});
   }, [devSim]);
 
   useEffect(() => {
@@ -675,7 +688,24 @@ function AppContent() {
               </div>
 
               {/* Cap reached / submit CTA */}
-              {capReached ? (
+              {inviteCapReached ? (
+                <div style={{ border: '1px solid rgba(var(--color-secondary-rgb),0.3)', background: 'rgba(var(--color-secondary-rgb),0.06)', padding: 20 }}>
+                  <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
+                    Early Access Brief Limit Reached
+                  </div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
+                    You&apos;ve used all the briefs from your early access invite. Upgrade to run Intel or Dossier briefs.
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const }}>
+                    <button type="button" onClick={() => { setDepth('standard'); setInviteCapReached(false); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                      Run Intel · ${(PRICES.standard.amount / 100).toFixed(2)}
+                    </button>
+                    <button type="button" onClick={() => { setDepth('deep'); setInviteCapReached(false); }} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'transparent', color: 'var(--color-secondary)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
+                      Run Dossier · ${(PRICES.deep.amount / 100).toFixed(2)}
+                    </button>
+                  </div>
+                </div>
+              ) : capReached ? (
                 <div style={{ border: '1px solid rgba(var(--color-secondary-rgb),0.3)', background: 'rgba(var(--color-secondary-rgb),0.06)', padding: 20 }}>
                   <div className="flex items-center gap-2" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--color-secondary)', marginBottom: 6 }}>
                     Daily Free Brief Limit Reached
