@@ -13,5 +13,5 @@ export function getStripe(): Stripe {
 
 export const PRICES = {
   standard: { amount: 999,  label: 'Standard Brief' },
-  deep:     { amount: 1999, label: 'Deep Brief' },
+  deep:     { amount: 1499, label: 'Deep Brief' },
 } as const;
