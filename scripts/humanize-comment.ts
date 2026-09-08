@@ -1,17 +1,24 @@
-// Converts a VisaScout brief into a natural Reddit comment.
+// Converts one or two VisaScout briefs into a natural Reddit/Quora comment.
 //
 // Usage:
-//   Full auto (recommended):
-//     bash scripts/run.sh scripts/humanize-comment.ts <brief-url> <reddit-url>
-//     → fetches both brief (Supabase) and Reddit post (Tavily), no manual input needed
+//   Single brief + post URL (recommended):
+//     bash scripts/run.sh scripts/humanize-comment.ts <brief-url> <post-url>
+//
+//   Two briefs (multi-destination question):
+//     bash scripts/run.sh scripts/humanize-comment.ts <brief-url-1> <brief-url-2> [post-url]
+//     → both briefs loaded; post URL optional (prompted if omitted)
 //
 //   Brief URL only:
 //     bash scripts/run.sh scripts/humanize-comment.ts <brief-url>
-//     → fetches brief, then prompts you to paste the Reddit post
+//     → fetches brief, then prompts for post
 //
 //   File mode (fallback):
 //     bash scripts/run.sh scripts/humanize-comment.ts
-//     → picks up .md/.txt files from outputs/briefs/, prompts for Reddit post
+//     → picks up .md/.txt files from outputs/briefs/, prompts for post
+//
+//   After loading, you will always be prompted for an optional focus instruction
+//   (e.g. "only address tourist visa options, skip working holiday").
+//   Press Enter to skip and answer everything.
 
 import 'dotenv/config'
 import Anthropic from '@anthropic-ai/sdk'
@@ -243,6 +250,11 @@ async function promptMultiLine(label: string): Promise<string> {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+// Returns true if a CLI arg looks like a brief URL (contains a UUID) rather than a post URL.
+function isBriefUrl(arg: string): boolean {
+  return /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(arg)
+}
+
 async function main() {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
@@ -250,18 +262,34 @@ async function main() {
     process.exit(1)
   }
 
-  const urlArg = process.argv[2]
-  const redditUrlArg = process.argv[3]
+  const arg2 = process.argv[2]  // first brief URL, or undefined (file mode)
+  const arg3 = process.argv[3]  // second brief URL OR post URL
+  const arg4 = process.argv[4]  // post URL when arg3 is a second brief
+
+  // Determine arg roles
+  const briefUrl1 = arg2 ?? null
+  const briefUrl2 = (arg3 && isBriefUrl(arg3)) ? arg3 : null
+  const postUrlArg = briefUrl2 ? (arg4 ?? null) : (arg3 ?? null)
+
   let briefContent: string
   let briefFileToArchive: string | null = null  // only set in file mode
 
-  if (urlArg) {
-    // ── URL mode ──
-    console.log(`Fetching brief from: ${urlArg}`)
-    const result = await fetchBriefFromUrl(urlArg)
-    if (!result) process.exit(1)
-    console.log(`Using brief: ${result.label}`)
-    briefContent = result.content
+  if (briefUrl1) {
+    // ── URL mode (one or two briefs) ──
+    console.log(`Fetching brief 1: ${briefUrl1}`)
+    const result1 = await fetchBriefFromUrl(briefUrl1)
+    if (!result1) process.exit(1)
+    console.log(`Using brief 1: ${result1.label}`)
+
+    if (briefUrl2) {
+      console.log(`Fetching brief 2: ${briefUrl2}`)
+      const result2 = await fetchBriefFromUrl(briefUrl2)
+      if (!result2) process.exit(1)
+      console.log(`Using brief 2: ${result2.label}`)
+      briefContent = `=== BRIEF 1: ${result1.label} ===\n\n${result1.content}\n\n=== BRIEF 2: ${result2.label} ===\n\n${result2.content}`
+    } else {
+      briefContent = result1.content
+    }
   } else {
     // ── File mode ──
     const briefs = findBriefs()
@@ -306,26 +334,35 @@ async function main() {
     briefFileToArchive = briefPath
   }
 
-  // ── Get Reddit question ──
+  // ── Get post (Reddit / Quora / pasted) ──
   let question = ''
 
-  if (redditUrlArg) {
-    console.log(`Fetching Reddit post: ${redditUrlArg}`)
-    const fetched = await fetchRedditPost(redditUrlArg)
+  if (postUrlArg) {
+    console.log(`Fetching post: ${postUrlArg}`)
+    const fetched = await fetchRedditPost(postUrlArg)
     if (fetched) {
       question = fetched
-      console.log(`Reddit post fetched (${fetched.length} chars)\n`)
+      console.log(`Post fetched (${fetched.length} chars)\n`)
     }
   }
 
   while (!question) {
-    question = await promptMultiLine('Paste the Reddit post or question you\'re answering:')
+    question = await promptMultiLine('Paste the Reddit/Quora post or question you\'re answering:')
     if (!question) console.log('Question cannot be empty. Try again.')
   }
+
+  // ── Optional focus instruction ──
+  const focusInstruction = await prompt(
+    '\nFocus instruction (e.g. "only address tourist visa, skip working holiday" — Enter to skip): '
+  )
 
   // ── Call Anthropic ──
   console.log('\nGenerating comment...\n')
   const client = new Anthropic({ apiKey })
+
+  const focusLine = focusInstruction
+    ? `\n\nFocus instruction: ${focusInstruction}\nOnly address the aspects listed above. Do not attempt to answer other parts of the post.`
+    : ''
 
   let comment: string
   try {
@@ -336,7 +373,7 @@ async function main() {
       messages: [
         {
           role: 'user',
-          content: `Reddit question/post:\n${question}\n\nVisaScout brief:\n${briefContent}\n\nWrite a Reddit comment answering this question based on the brief above.`,
+          content: `Post/question:\n${question}\n\nVisaScout brief:\n${briefContent}${focusLine}\n\nWrite a comment answering this question based on the brief above.`,
         },
       ],
     })
