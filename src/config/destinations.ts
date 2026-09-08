@@ -1,7 +1,7 @@
 // src/config/destinations.ts — single source of truth for all destination logic
 // Agents call getGovDomains(). Never hand-maintain SUPPORTED_DESTINATION_NAMES or SCHENGEN_MEMBERS.
 
-export type Region = 'SEA' | 'East Asia' | 'Schengen' | 'Latin America' | 'Middle East' | 'South Asia' | 'Caucasus';
+export type Region = 'SEA' | 'East Asia' | 'Schengen' | 'Latin America' | 'Middle East' | 'South Asia' | 'Caucasus' | 'Oceania';
 
 export interface DestinationConfig {
   name: string;             // canonical name passed to agents
@@ -21,6 +21,7 @@ export const ENABLED_REGIONS: Region[] = [
   'Middle East',
   'South Asia',
   'Caucasus',
+  'Oceania',
 ];
 
 const ALL_DESTINATIONS: DestinationConfig[] = [
@@ -728,6 +729,50 @@ const ALL_DESTINATIONS: DestinationConfig[] = [
       "Costa Rica is visa-free for most nationalities for up to 90 days — verify current eligibility at rree.go.cr. Rentista Visa requires a certified monthly passive income — verify current minimum threshold from search results before citing a figure. Pensionado Visa requires a qualifying government pension — verify current minimum from search results. An onward ticket (salida) is technically required for visa-free entry and is sometimes enforced — surface this requirement. CAJA (public health insurance) enrollment is required for residency-based visa holders — surface as a procedural step if relevant.",
   },
 
+  // ─── Oceania ───────────────────────────────────────────────────────────────
+  {
+    name: 'Australia',
+    aliases: ['Australia', 'AU', 'AUS', 'Aus'],
+    govDomains: [
+      'immi.homeaffairs.gov.au',
+      'homeaffairs.gov.au',
+      'border.gov.au',
+      'australia.gov.au',
+      'smartraveller.gov.au',
+    ],
+    visaTypes: [
+      'Visitor Visa (subclass 600)',
+      'Working Holiday Visa (subclass 417)',
+      'Work and Holiday Visa (subclass 462)',
+      'Student Visa (subclass 500)',
+      'Temporary Skill Shortage (TSS) Visa (subclass 482)',
+      'Electronic Travel Authority (ETA, subclass 601)',
+    ],
+    region: 'Oceania',
+    notes: "ETA (subclass 601) is available to passport holders from eligible countries (US, UK, Canada, Japan, Singapore, etc.) — verify eligibility at immi.homeaffairs.gov.au before advising. Working Holiday Visa (417) open to 18-30 (or 35 for some nationalities) from eligible countries; Work and Holiday (462) covers additional nationalities — always verify age cap and nationality eligibility. Visitor Visa (600) maximum stay is typically 3 or 6 months; do not state 12 months as a default. Entry is always at the border force officer's discretion.",
+  },
+  {
+    name: 'New Zealand',
+    aliases: ['New Zealand', 'NZ', 'NZL', 'Aotearoa'],
+    govDomains: [
+      'immigration.govt.nz',
+      'govt.nz',
+      'newzealand.com',
+      'customs.govt.nz',
+      'safetravel.govt.nz',
+    ],
+    visaTypes: [
+      'Visitor Visa',
+      'Working Holiday Visa',
+      'Work Visa (Accredited Employer Work Visa)',
+      'Student Visa',
+      'Skilled Migrant Category Resident Visa',
+      'New Zealand Electronic Travel Authority (NZeTA)',
+    ],
+    region: 'Oceania',
+    notes: "NZeTA (Electronic Travel Authority) is required for visa-waiver nationalities — not a visa, but must be obtained before travel. Working Holiday Visa open to 18-30 (some nationalities up to 35); verify eligibility at immigration.govt.nz. Visitor Visa maximum stay is typically 9 months for some nationalities, 3 months for others — always check nationality-specific entitlement. Do not conflate NZeTA with a full visitor visa.",
+  },
+
   // ─── Schengen bloc-level entry ────────────────────────────────────────────
   // Handles users who type "Schengen" without specifying a country.
   {
@@ -773,6 +818,7 @@ export const REGION_LABELS: Record<Region, string> = {
   'Middle East': 'Middle East',
   'South Asia': 'South Asia',
   Caucasus: 'Caucasus',
+  Oceania: 'Oceania',
 };
 
 // User-facing display groups — collapses internal region codes into broad labels for UI copy.
@@ -786,6 +832,7 @@ export const REGION_DISPLAY_GROUPS: Record<Region, string> = {
   'Middle East': 'Middle East',
   'South Asia': 'Asia',
   Caucasus: 'Asia',
+  Oceania: 'Oceania',
 };
 
 // Unique display groups in ENABLED_REGIONS order — deduplicates Asia sub-regions automatically
