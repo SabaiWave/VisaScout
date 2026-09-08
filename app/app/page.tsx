@@ -479,7 +479,7 @@ function AppContent() {
                   Out of Scope
                 </div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
-                  VisaScout covers visa intelligence for the 20 supported destinations. Your query doesn&apos;t appear to be about visa requirements or entry rules.
+                  VisaScout covers visa intelligence for {DESTINATIONS.length} supported destinations. Your query doesn&apos;t appear to be about visa requirements or entry rules.
                 </p>
                 <button type="button" onClick={handleReset} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', background: 'var(--color-secondary)', color: 'var(--color-bg-base)', border: '1px solid var(--color-secondary)', padding: '8px 20px', cursor: 'pointer' }}>
                   Try a Different Query

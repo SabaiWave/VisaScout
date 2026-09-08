@@ -118,6 +118,13 @@ function buildQueries(): string[] {
     `site:reddit.com Brazil digital nomad visa VITEM entry requirements question`,
     `site:reddit.com Peru Lima visa tourist entry requirements question`,
     `site:reddit.com Costa Rica rentista pensionado visa long stay question`,
+    // === Oceania ===
+    `site:reddit.com Australia visa working holiday ETA visitor entry question`,
+    `site:reddit.com New Zealand visa working holiday NZeTA visitor entry question`,
+    `site:reddit.com/r/australia visa working holiday ETA entry requirements`,
+    `site:reddit.com/r/AustralianVisa visa application working holiday ETA question`,
+    `site:reddit.com/r/newzealand visa working holiday NZeTA entry requirements`,
+    `site:reddit.com/r/nzimmigration visa entry requirements question`,
     // === Cross-destination / nomad themes ===
     `site:reddit.com digital nomad visa remote work question help`,
     `site:reddit.com border run visa run overstay question`,

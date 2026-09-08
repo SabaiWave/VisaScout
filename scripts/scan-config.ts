@@ -141,6 +141,21 @@ const OVERRIDES: Partial<Record<string, ScanOverride>> = {
     subreddits: [],
     cityKeywords: ['tbilisi', 'batumi'],
   },
+  // ─── Oceania ──────────────────────────────────────────────────────────────
+  'Australia': {
+    subreddits: [
+      { name: 'australia', mapsToDestination: true },
+      { name: 'australianvisa', mapsToDestination: true },
+    ],
+    cityKeywords: ['sydney', 'melbourne', 'brisbane', 'perth'],
+  },
+  'New Zealand': {
+    subreddits: [
+      { name: 'newzealand', mapsToDestination: true },
+      { name: 'nzimmigration', mapsToDestination: true },
+    ],
+    cityKeywords: ['auckland', 'wellington', 'christchurch'],
+  },
   // ─── Latin America ────────────────────────────────────────────────────────
   'Mexico': {
     subreddits: [],
@@ -218,6 +233,6 @@ export const DESTINATION_KEYWORDS: [string, string][] = [
   // Add here when a popular destination starts generating noise in scan results.
   ['taiwan', 'Taiwan'], ['hong kong', 'Hong Kong'], ['macau', 'Macau'],
   ['united states', 'USA'], [' usa ', 'USA'], ['canada', 'Canada'],
-  ['united kingdom', 'UK'], [' uk ', 'UK'], ['australia', 'Australia'],
+  ['united kingdom', 'UK'], [' uk ', 'UK'],
   ['china', 'China'],
 ]

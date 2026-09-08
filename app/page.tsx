@@ -703,7 +703,7 @@ const WEBSITE_SCHEMA = {
   '@type': 'WebSite',
   name: 'VisaScout',
   url: 'https://visascout.io',
-  description: 'Visa requirements for Thailand, Vietnam, Japan, and 31 more destinations — checked fresh from official sources, with real enforcement data.',
+  description: `Visa requirements for Thailand, Vietnam, Japan, and ${destinationCount - 3} more destinations — checked fresh from official sources, with real enforcement data.`,
   potentialAction: {
     '@type': 'SearchAction',
     target: { '@type': 'EntryPoint', urlTemplate: 'https://visascout.io/app' },
