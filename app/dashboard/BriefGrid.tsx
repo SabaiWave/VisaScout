@@ -156,8 +156,8 @@ export function BriefGrid({ briefs, total, page }: BriefGridProps) {
         <div className="db-list vs-rail" style={{ marginBottom: '2rem' }}>
           {/* Header row */}
           <div className="db-head" role="row">
-            <span className="db-head-label vs-mono-label">Destination</span>
-            <span className="db-head-label vs-mono-label db-head-label-hide-sm">Nationality</span>
+            <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Destination</span>
+            <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Nationality</span>
             <span className="db-head-label vs-mono-label db-head-label-hide-sm" style={{ textAlign: 'center' }}>Depth</span>
             <span className="db-head-label vs-mono-label db-head-label-hide-md" style={{ textAlign: 'center' }}>Date</span>
             <span className="db-head-label vs-mono-label" style={{ textAlign: 'center' }}>Status</span>
