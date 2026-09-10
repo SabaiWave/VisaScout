@@ -75,7 +75,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         aria-label={`View ${brief.destination} brief`}
       >
         {/* Destination */}
-        <div className="db-cell db-cell-dest">
+        <div className="db-cell db-cell-center db-cell-dest">
           <span className="db-dest">{brief.destination}</span>
           {isGenerating && (
             <span className="db-gen-dot" />
@@ -86,7 +86,7 @@ export function BriefCard({ brief, onDelete }: { brief: BriefRow; onDelete?: () 
         </div>
 
         {/* Nationality */}
-        <div className="db-cell db-cell-hide-sm">
+        <div className="db-cell db-cell-center db-cell-hide-sm">
           <span className="db-sub">{brief.nationality}</span>
         </div>
 
