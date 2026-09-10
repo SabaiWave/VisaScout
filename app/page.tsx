@@ -404,7 +404,7 @@ function visaOption(name: string, desc: string, cost: string, recommended?: bool
   );
 }
 
-function checkItem(label: string, note?: string) {
+function checkItem(label: string, note?: React.ReactNode) {
   return (
     <div className="grid vs-row" style={{ gridTemplateColumns: '150px 1fr', alignItems: 'start', padding: '7px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-text-secondary)', paddingTop: '2px' }}>
@@ -497,7 +497,7 @@ function BriefExhibit() {
             {visaOption('TR Visa (Border Run)', 'Exit to nearest consulate. New 60-day TR. Higher friction, 1–2 day turnaround.', '฿2,000 + travel')}
 
             {briefSection('Entry Requirements')}
-            {checkItem('Passport', 'Valid ≥6 months past intended departure')}
+            {checkItem('Passport', <>Valid <span style={{ position: 'relative', top: '1px' }}>≥</span>{' '}6 months past intended departure</>)}
             {checkItem('TM.7 form + photo', 'Download from immigration.go.th · 1x white background')}
             {checkItem('Proof of funds', '฿20,000 cash or bank statement')}
 
